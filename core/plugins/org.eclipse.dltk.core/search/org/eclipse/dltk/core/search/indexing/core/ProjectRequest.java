@@ -84,7 +84,8 @@ public class ProjectRequest extends IndexRequest {
 			} else if (fragment.isExternal()) {
 				indexer.requestIfNotWaiting(new ExternalProjectFragmentRequest(
 						indexer, fragment, toolkit));
-			} else {
+			} else if (fragment.getParent().equals(project)) {
+				// check to skip project dependencies
 				fragment.accept(moduleCollector);
 			}
 		}
