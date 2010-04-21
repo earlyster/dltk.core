@@ -187,7 +187,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 
 	protected abstract String processTypeName(IType method, String token);
 
-	protected abstract String processFieldName(IField field, String token);
+	@Deprecated
+	protected final String processFieldName(IField field, String token) {
+		return field.getElementName();
+	}
 
 	// what about onDemand types? Ignore them since it does not happen!
 	// import p1.p2.A.*;
@@ -421,9 +424,9 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	public void findFields(char[] token, boolean canCompleteEmptyToken,
-			List<IField> fields, String prefix) {
+			List<IField> fields, ICompletionNameProvider<IField> nameProvider) {
 		findFields(token, canCompleteEmptyToken, fields,
-				CompletionProposal.FIELD_REF, prefix);
+				CompletionProposal.FIELD_REF, nameProvider);
 	}
 
 	protected void findMethods(char[] token, boolean canCompleteEmptyToken,
@@ -495,17 +498,18 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 	}
 
-	protected void findFields(char[] token, boolean canCompleteEmptyToken,
-			List<IField> fields, int kind, String prefix) {
+	public void findFields(char[] token, boolean canCompleteEmptyToken,
+			List<IField> fields, int kind,
+			ICompletionNameProvider<IField> nameProvider) {
 		if (fields == null || fields.size() == 0)
 			return;
 
 		int length = token.length;
-		String tok = new String(token);
+		// String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < fields.size(); i++) {
 				IField field = fields.get(i);
-				String qname = processFieldName(field, tok);
+				String qname = nameProvider.getName(field);
 				char[] name = qname.toCharArray();
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
@@ -529,7 +533,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						// proposal.setTypeName(displayName);
 						proposal.setModelElement(field);
 						proposal.setName(name);
-						proposal.setCompletion((prefix + qname).toCharArray());
+						proposal.setCompletion(nameProvider
+								.getCompletion(field).toCharArray());
 						// proposal.setFlags(Flags.AccDefault);
 						proposal.setReplaceRange(this.startPosition
 								- this.offset, this.endPosition - this.offset);
@@ -544,7 +549,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 	}
 
-	public void findFields(char[] token, boolean canCompleteEmptyToken,
+	private void findFields(char[] token, boolean canCompleteEmptyToken,
 			List<IField> fields, int kind, List names) {
 		if (fields == null || fields.size() == 0)
 			return;
