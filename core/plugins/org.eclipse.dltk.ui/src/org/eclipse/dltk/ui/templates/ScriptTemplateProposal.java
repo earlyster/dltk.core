@@ -4,6 +4,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -11,7 +13,8 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 
-public class ScriptTemplateProposal extends TemplateProposal {
+public class ScriptTemplateProposal extends TemplateProposal implements
+		ICompletionProposalExtension4 {
 
 	public ScriptTemplateProposal(Template template, TemplateContext context,
 			IRegion region, Image image, int relevance) {
@@ -65,6 +68,27 @@ public class ScriptTemplateProposal extends TemplateProposal {
 
 	public String getPattern() {
 		return getTemplate().getPattern();
+	}
+
+	public boolean isAutoInsertable() {
+		if (isSelectionTemplate())
+			return false;
+		return getTemplate().isAutoInsertable();
+	}
+
+	/**
+	 * Returns <code>true</code> if the proposal has a selection, e.g. will wrap
+	 * some code.
+	 * 
+	 * @return <code>true</code> if the proposals completion length is non zero
+	 */
+	private boolean isSelectionTemplate() {
+		if (getContext() instanceof DocumentTemplateContext) {
+			DocumentTemplateContext ctx = (DocumentTemplateContext) getContext();
+			if (ctx.getCompletionLength() > 0)
+				return true;
+		}
+		return false;
 	}
 
 }
