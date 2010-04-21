@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
 import org.eclipse.dltk.codeassist.ISelectionEngine;
+import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.core.BufferChangedEvent;
@@ -444,6 +445,46 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		return (IProjectFragment) getAncestor(IModelElement.PROJECT_FRAGMENT);
 	}
 
+	static class CompletionThread extends Thread {
+		final ICompletionEngine engine;
+		final ISourceModule cu;
+		final int position;
+		final NullProgressMonitor monitor = new NullProgressMonitor();
+
+		public CompletionThread(ICompletionEngine engine, ISourceModule cu,
+				int position) {
+			this.engine = engine;
+			this.cu = cu;
+			this.position = position;
+		}
+
+		private boolean done = false;
+
+		@Override
+		public void run() {
+			engine.setProgressMonitor(monitor);
+			engine.complete(cu, position, 0);
+			done = true;
+		}
+
+		boolean execute(long timeout) {
+			start();
+			try {
+				join(timeout);
+				if (!done) {
+					monitor.setCanceled(true);
+					interrupt();
+				}
+				return done;
+			} catch (InterruptedException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+		}
+	}
+
 	/** Code Completion */
 	protected void codeComplete(
 			final org.eclipse.dltk.compiler.env.ISourceModule cu,
@@ -485,27 +526,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		engine.setRequestor(requestor);
 		engine.setOptions(project.getOptions(true));
 		engine.setProject(project);
-		NullProgressMonitor controlMonitor = new NullProgressMonitor();
-		engine.setProgressMonitor(controlMonitor);
 
-		final boolean done[] = { false };
-		Thread completeThread = new Thread() {
-			@Override
-			public void run() {
-				engine.complete(cu, position, 0);
-				done[0] = true;
-			}
-		};
-		completeThread.start();
-		try {
-			completeThread.join(timeout);
-		} catch (InterruptedException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		if (!done[0]) {
-			controlMonitor.setCanceled(true);
+		CompletionThread thread = new CompletionThread(engine, cu, position);
+		if (!thread.execute(timeout)) {
 			Thread.interrupted();
 			requestor.completionFailure(new DefaultProblem(
 					"Compution of proposals is to long. Please try again. ", 0,
