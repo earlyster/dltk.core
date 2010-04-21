@@ -77,7 +77,7 @@ public class CompletionProposalLabelProvider {
 			CompletionProposal methodProposal) {
 		// TODO remove once https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
 		// gets fixed.
-		char[][] parameterNames = methodProposal.findParameterNames(null);
+		String[] parameterNames = methodProposal.findParameterNames(null);
 		char[][] parameterTypes = null;
 		// for (int i= 0; i < parameterTypes.length; i++) {
 		// parameterTypes[i]=
@@ -98,7 +98,7 @@ public class CompletionProposalLabelProvider {
 	 *         arguments
 	 */
 	protected StringBuffer appendParameterSignature(StringBuffer buffer,
-			char[][] parameterTypes, char[][] parameterNames) {
+			char[][] parameterTypes, String[] parameterNames) {
 		if (parameterNames != null) {
 			for (int i = 0; i < parameterNames.length; i++) {
 				if (i > 0) {

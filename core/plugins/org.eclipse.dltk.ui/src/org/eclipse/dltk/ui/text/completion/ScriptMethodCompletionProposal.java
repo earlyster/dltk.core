@@ -64,17 +64,17 @@ public class ScriptMethodCompletionProposal extends
 
 		int[] fArgumentOffsets = null;
 		int[] fArgumentLengths = null;
-		char[][] findParameterNames = fProposal.findParameterNames(null);
+		String[] findParameterNames = fProposal.findParameterNames(null);
 		if (findParameterNames != null && findParameterNames.length > 0) {
 			fArgumentOffsets = new int[findParameterNames.length];
 			fArgumentLengths = new int[findParameterNames.length];
 
 			int argumentOffset = 0;
 			for (int i = 0; i < findParameterNames.length; i++) {
-				fArgumentLengths[i] = findParameterNames[i].length;
+				fArgumentLengths[i] = findParameterNames[i].length();
 				fArgumentOffsets[i] = argumentOffset;
-				argumentOffset += findParameterNames[i].length + 1; // name and
-																	// COMMA
+				argumentOffset += findParameterNames[i].length() + 1;
+				// name and COMMA
 			}
 		}
 
@@ -176,7 +176,7 @@ public class ScriptMethodCompletionProposal extends
 	protected final boolean hasParameters() {
 		if (!fHasParametersComputed) {
 			fHasParametersComputed = true;
-			char[][] findParameterNames = fProposal.findParameterNames(null);
+			String[] findParameterNames = fProposal.findParameterNames(null);
 			fHasParameters = findParameterNames != null
 					&& findParameterNames.length > 0;
 		}
@@ -227,7 +227,7 @@ public class ScriptMethodCompletionProposal extends
 			// if (prefs.afterOpeningParen)
 			// buffer.append(SPACE);
 
-			char[][] findParameterNames = fProposal.findParameterNames(null);
+			String[] findParameterNames = fProposal.findParameterNames(null);
 			for (int i = 0; i < findParameterNames.length;) {
 				buffer.append(findParameterNames[i]);
 

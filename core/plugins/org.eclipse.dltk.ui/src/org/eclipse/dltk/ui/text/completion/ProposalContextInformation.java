@@ -51,7 +51,7 @@ public class ProposalContextInformation implements IContextInformation, IContext
 
 	private String createParametersList(CompletionProposal proposal) {
 		StringBuffer bf=new StringBuffer();
-		char[][] pNames=proposal.findParameterNames(null);
+		String[] pNames = proposal.findParameterNames(null);
 		for (int a=0;a<pNames.length;a++){
 			bf.append(pNames[a]);
 			if (a!=pNames.length-1)bf.append(',');
