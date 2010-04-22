@@ -231,8 +231,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						CompletionProposal proposal = this.createProposal(
 								CompletionProposal.KEYWORD,
 								this.actualCompletionPosition);
-						proposal.setName(new String(choices[i]));
-						proposal.setCompletion(new String(choices[i]));
+						proposal.setName(choices[i]);
+						proposal.setCompletion(choices[i]);
 						proposal.setReplaceRange(this.startPosition
 								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
