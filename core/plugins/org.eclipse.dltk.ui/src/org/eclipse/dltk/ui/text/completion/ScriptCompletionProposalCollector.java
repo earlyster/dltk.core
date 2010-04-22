@@ -657,7 +657,7 @@ public abstract class ScriptCompletionProposalCollector extends
 
 		if (fScriptProject != null) {
 			scriptProposal.setProposalInfo(new ProposalInfo(fScriptProject,
-					new String(proposal.getName())));
+					proposal.getName()));
 		}
 
 		return scriptProposal;
@@ -753,7 +753,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	private IScriptCompletionProposal createTypeProposal(
 			CompletionProposal typeProposal) {
 
-		String completion = new String(typeProposal.getCompletion());
+		String completion = typeProposal.getCompletion();
 		int replaceStart = typeProposal.getReplaceStart();
 		int length = typeProposal.getReplaceEnd()
 				- typeProposal.getReplaceStart() + 1;

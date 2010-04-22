@@ -215,11 +215,11 @@ public class CompletionProposalLabelProvider {
 	}
 
 	protected String createSimpleLabelWithType(CompletionProposal proposal) {
-		return new String(proposal.getName());
+		return proposal.getName();
 	}
 
 	protected String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
-		return new String(proposal.getName());
+		return proposal.getName();
 	}
 
 	public String createSimpleLabel(CompletionProposal proposal) {
