@@ -233,8 +233,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						CompletionProposal proposal = this.createProposal(
 								CompletionProposal.KEYWORD,
 								this.actualCompletionPosition);
-						proposal.setName(choices[i]);
-						proposal.setCompletion(choices[i]);
+						proposal.setName(new String(choices[i]));
+						proposal.setCompletion(new String(choices[i]));
 						proposal.setReplaceRange(this.startPosition
 								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
@@ -262,17 +262,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		int length = token.length;
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < choices.length; i++) {
-				char[] co = choices[i];
-				if (!provideDollar && co.length > 1 && co[0] == '$') {
-					char co2[] = new char[co.length - 1];
-					System.arraycopy(co, 1, co2, 0, co2.length);
-					co = co2;
+				String co = new String(choices[i]);
+				if (!provideDollar && co.length() > 1 && co.charAt(0) == '$') {
+					co = co.substring(1);
 				}
 				if (length <= choices[i].length
-						&& CharOperation.prefixEquals(token, co, false)) {
+						&& CharOperation.prefixEquals(token, co.toCharArray(),
+								false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, co);
+					relevance += computeRelevanceForCaseMatching(token, co
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -315,15 +315,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 				IMethod method = methods.get(i);
 				String qname = (String) methodNames.get(i);
 				// processMethodName(method, tok);
-				char[] name = qname.toCharArray();
+				String name = qname;
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -379,12 +381,14 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < methods.size(); i++) {
 				MethodDeclaration method = (MethodDeclaration) methods.get(i);
-				char[] name = ((String) (methodNames.get(i))).toCharArray();
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				String name = ((String) (methodNames.get(i)));
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -447,15 +451,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			for (int i = 0; i < methods.size(); i++) {
 				IMethod method = methods.get(i);
 				String qname = processMethodName(method, tok);
-				char[] name = qname.toCharArray();
+				String name = qname;
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -519,15 +525,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			for (int i = 0; i < fields.size(); i++) {
 				IField field = fields.get(i);
 				String qname = nameProvider.getName(field);
-				char[] name = qname.toCharArray();
+				String name = qname;
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -543,7 +551,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setModelElement(field);
 						proposal.setName(name);
 						proposal.setCompletion(nameProvider
-								.getCompletion(field).toCharArray());
+								.getCompletion(field));
 						// proposal.setFlags(Flags.AccDefault);
 						proposal.setReplaceRange(this.startPosition
 								- this.offset, this.endPosition - this.offset);
@@ -569,15 +577,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			for (int i = 0; i < fields.size(); i++) {
 				IField field = fields.get(i);
 				String qname = (String) names.get(i);
-				char[] name = qname.toCharArray();
+				String name = qname;
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -589,7 +599,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 										ScriptCompletionEngine.this.actualCompletionPosition);
 						proposal.setModelElement(field);
 						proposal.setName(name);
-						proposal.setCompletion(qname.toCharArray());
+						proposal.setCompletion(qname);
 						proposal.setReplaceRange(this.startPosition
 								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
@@ -614,15 +624,17 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			for (int i = 0; i < types.size(); i++) {
 				IType type = types.get(i);
 				String qname = processTypeName(type, tok);
-				char[] name = qname.toCharArray();
+				String name = qname;
 				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
-				if (length <= name.length
-						&& CharOperation.prefixEquals(token, name, false)) {
+				if (length <= name.length()
+						&& CharOperation.prefixEquals(token,
+								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForCaseMatching(token, name
+							.toCharArray());
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
