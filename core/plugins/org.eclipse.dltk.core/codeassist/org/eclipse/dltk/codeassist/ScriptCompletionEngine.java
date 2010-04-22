@@ -199,9 +199,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		return field.getElementName();
 	}
 
-	// what about onDemand types? Ignore them since it does not happen!
-	// import p1.p2.A.*;
-	public void findKeywords(char[] keyword, char[][] choices,
+	public void findKeywords(char[] keyword, String[] choices,
 			boolean canCompleteEmptyToken) {
 		if (choices == null || choices.length == 0)
 			return;
@@ -209,9 +207,9 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		int length = keyword.length;
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < choices.length; i++) {
-				if (length <= choices[i].length
-						&& CharOperation.prefixEquals(keyword, choices[i],
-								false)) {
+				if (length <= choices[i].length()
+						&& CharOperation.prefixEquals(keyword, choices[i]
+								.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 
 					relevance += computeRelevanceForInterestingProposal();
@@ -271,8 +269,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, co
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, co);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -324,8 +321,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -387,8 +383,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -460,8 +455,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -534,8 +528,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -586,8 +579,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -633,8 +625,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								name.toCharArray(), false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
-					relevance += computeRelevanceForCaseMatching(token, name
-							.toCharArray());
+					relevance += computeRelevanceForCaseMatching(token, name);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 
 					// accept result
@@ -676,7 +667,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	protected int computeRelevanceForCaseMatching(char[] token,
-			char[] proposalName) {
+			String proposalNameStr) {
+		char[] proposalName = proposalNameStr.toCharArray();
 		if (this.options.camelCaseMatch) {
 			if (CharOperation.equals(token, proposalName, true)) {
 				return RelevanceConstants.R_CASE
