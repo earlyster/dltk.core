@@ -42,7 +42,7 @@ public class ProposalContextInformation implements IContextInformation, IContext
 		//	fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
 		//else
 			fImage= null;
-		if (proposal.getCompletion().length == 0)
+		if (proposal.getCompletion().length() == 0)
 			fPosition= proposal.getCompletionLocation() + 1;
 		else
 			fPosition= -1;

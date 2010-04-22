@@ -146,7 +146,7 @@ public class ScriptMethodCompletionProposal extends
 			ProposalContextInformation contextInformation = new ProposalContextInformation(
 					fProposal);
 			if (fContextInformationPosition != 0
-					&& fProposal.getCompletion().length == 0)
+					&& fProposal.getCompletion().length() == 0)
 				contextInformation
 						.setContextInformationPosition(fContextInformationPosition);
 			return contextInformation;
@@ -202,9 +202,9 @@ public class ScriptMethodCompletionProposal extends
 		boolean noOverwrite = preferenceStore
 				.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION)
 				^ isToggleEating();
-		char[] completion = fProposal.getCompletion();
-		return !isInScriptdoc() && completion.length > 0
-				&& (noOverwrite || completion[completion.length - 1] == ')');
+		String completion = fProposal.getCompletion();
+		return !isInScriptdoc() && completion.length() > 0
+				&& (noOverwrite || completion.charAt(completion.length() - 1) == ')');
 	}
 
 	protected String computeReplacementString() {

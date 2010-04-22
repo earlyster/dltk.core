@@ -180,7 +180,7 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given type proposal
 	 */
 	protected String createTypeProposalLabel(CompletionProposal typeProposal) {
-		char[] fullName = typeProposal.getName();
+		String fullName = typeProposal.getName();
 		return createTypeProposalLabel(fullName);
 	}
 
@@ -189,11 +189,11 @@ public class CompletionProposalLabelProvider {
 		return createSimpleLabel(proposal);
 	}
 
-	protected String createTypeProposalLabel(char[] fullName) {
+	protected String createTypeProposalLabel(String fullName) {
 		int qIndex = findSimpleNameStart(fullName);
 
 		StringBuffer buf = new StringBuffer();
-		buf.append(fullName, qIndex, fullName.length - qIndex);
+		buf.append(fullName, qIndex, fullName.length() - qIndex);
 		if (qIndex > 0) {
 			buf.append(ScriptElementLabels.CONCAT_STRING);
 			buf.append(fullName, 0, qIndex - 1);
@@ -201,10 +201,10 @@ public class CompletionProposalLabelProvider {
 		return buf.toString();
 	}
 
-	private int findSimpleNameStart(char[] array) {
+	private int findSimpleNameStart(String array) {
 		int lastDot = 0;
-		for (int i = 0, len = array.length; i < len; i++) {
-			char ch = array[i];
+		for (int i = 0, len = array.length(); i < len; i++) {
+			char ch = array.charAt(i);
 			if (ch == '<') {
 				return lastDot;
 			} else if (ch == '.') {
