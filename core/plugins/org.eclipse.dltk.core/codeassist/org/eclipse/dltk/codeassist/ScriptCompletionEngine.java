@@ -248,13 +248,13 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 	}
 
-	protected void findLocalVariables(char[] token, char[][] choices,
+	protected void findLocalVariables(char[] token, String[] choices,
 			boolean canCompleteEmptyToken, boolean provideDollar) {
 		int kind = CompletionProposal.LOCAL_VARIABLE_REF;
 		findElements(token, choices, canCompleteEmptyToken, provideDollar, kind);
 	}
 
-	protected void findElements(char[] token, char[][] choices,
+	protected void findElements(char[] token, String[] choices,
 			boolean canCompleteEmptyToken, boolean provideDollar, int kind) {
 		if (choices == null || choices.length == 0)
 			return;
@@ -262,11 +262,11 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		int length = token.length;
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < choices.length; i++) {
-				String co = new String(choices[i]);
+				String co = choices[i];
 				if (!provideDollar && co.length() > 1 && co.charAt(0) == '$') {
 					co = co.substring(1);
 				}
-				if (length <= choices[i].length
+				if (length <= co.length()
 						&& CharOperation.prefixEquals(token, co.toCharArray(),
 								false)) {
 					int relevance = computeBaseRelevance();

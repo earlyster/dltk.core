@@ -206,7 +206,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * Unique key of the relevant package or type declaration in the context, or
 	 * <code>null</code> if none. Defaults to null.
 	 */
-	private char[] declarationKey = null;
+	private String declarationKey = null;
 
 	/**
 	 * Simple name of the method, field, member, or variable relevant in the
@@ -218,7 +218,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * Unique of the method, field type, member type, relevant in the context,
 	 * or <code>null</code> if none. Defaults to null.
 	 */
-	private char[] key = null;
+	private String key = null;
 
 	/**
 	 * Modifier flags relevant in the context, or <code>Flags.AccDefault</code>
@@ -583,7 +583,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * @return a key, or <code>null</code> if none
 	 * 
 	 */
-	public char[] getDeclarationKey() {
+	public String getDeclarationKey() {
 		return this.declarationKey;
 	}
 
@@ -602,7 +602,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 *            the type or package key, or <code>null</code> if none
 	 * 
 	 */
-	public void setDeclarationKey(char[] key) {
+	public void setDeclarationKey(String key) {
 		this.declarationKey = key;
 	}
 
@@ -673,7 +673,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * @return the key, or <code>null</code> if none
 	 * 
 	 */
-	public char[] getKey() {
+	public String getKey() {
 		return this.key;
 	}
 
@@ -692,7 +692,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 *            the key, or <code>null</code> if none
 	 * 
 	 */
-	public void setKey(char[] key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
 
@@ -792,6 +792,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 		// this.parameterNamesComputed = true;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('[');
