@@ -17,16 +17,16 @@ import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
 
-
 public class CompletionTestsRequestor extends CompletionRequestor {
-	private Vector fElements = new Vector();
-	private Vector fCompletions = new Vector();
-	private Vector fRelevances = new Vector();
-	private Vector fCompletionStart = new Vector();
-	private Vector fCompletionEnd = new Vector();
-	
+	private Vector<String> fElements = new Vector<String>();
+	private Vector<String> fCompletions = new Vector<String>();
+	private Vector<String> fRelevances = new Vector<String>();
+	private Vector<String> fCompletionStart = new Vector<String>();
+	private Vector<String> fCompletionEnd = new Vector<String>();
+
 	public boolean fDebug = false;
 
+	@Override
 	public void completionFailure(IProblem problem) {
 		Assert.fail("completionFailure("
 				+ (problem != null ? problem.getMessage() : "Unknown problem")
@@ -34,83 +34,86 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 	}
 
 	private void acceptCommon(CompletionProposal proposal) {
-		fCompletions.addElement(new String(proposal.getCompletion()));
+		fCompletions.addElement(proposal.getCompletion());
 		fRelevances.addElement(String.valueOf(proposal.getRelevance()));
 		fCompletionStart.addElement(String.valueOf(proposal.getReplaceStart()));
 		fCompletionEnd.addElement(String.valueOf(proposal.getReplaceEnd()));
 	}
+
+	@Override
 	public void accept(CompletionProposal proposal) {
 		String typeName = null;
-		switch(proposal.getKind()) {			
-				
-			case CompletionProposal.TYPE_REF :			
-					//typeName = Signature.getSignatureSimpleName(proposal.getSignature());
-					typeName = proposal.getName();
-					fElements.addElement(new String(typeName));
-					this.acceptCommon(proposal);
-				break;
-				
-			case CompletionProposal.FIELD_REF :
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("Field " + new String(proposal.getName()));
-				break;
-				
-			case CompletionProposal.KEYWORD:
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("Keyword " + new String(proposal.getName()));
-				break;
-				
-			case CompletionProposal.LABEL_REF:
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("Label " + new String(proposal.getName()));
-				break;
-				
-			case CompletionProposal.LOCAL_VARIABLE_REF:
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("Local variable " + new String(proposal.getName()));
-				break;
-				
-			case CompletionProposal.METHOD_REF:
-				String resultString = new String(proposal.getName())+"(";
-				
-				String[] parameterNames = proposal.findParameterNames(null);
-				if ( parameterNames != null ) {
-					for ( int i = 0; i < parameterNames.length; i++ ){
-						if ( i > 0 )
-							resultString += ",";
-						resultString += parameterNames[i];
-					}
-				}
-				resultString += ")";
-				fElements.addElement(resultString);
+		switch (proposal.getKind()) {
 
-				this.acceptCommon(proposal);
-				if (fDebug){
-					System.out.println("method " + new String(proposal.getName()));
+		case CompletionProposal.TYPE_REF:
+			// typeName =
+			// Signature.getSignatureSimpleName(proposal.getSignature());
+			typeName = proposal.getName();
+			fElements.addElement(typeName);
+			this.acceptCommon(proposal);
+			break;
+
+		case CompletionProposal.FIELD_REF:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("Field " + proposal.getName());
+			break;
+
+		case CompletionProposal.KEYWORD:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("Keyword " + proposal.getName());
+			break;
+
+		case CompletionProposal.LABEL_REF:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("Label " + proposal.getName());
+			break;
+
+		case CompletionProposal.LOCAL_VARIABLE_REF:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("Local variable " + proposal.getName());
+			break;
+
+		case CompletionProposal.METHOD_REF:
+			String resultString = proposal.getName() + "(";
+
+			String[] parameterNames = proposal.findParameterNames(null);
+			if (parameterNames != null) {
+				for (int i = 0; i < parameterNames.length; i++) {
+					if (i > 0)
+						resultString += ",";
+					resultString += parameterNames[i];
 				}
-				break;
-				
-			case CompletionProposal.METHOD_DECLARATION:
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("method declaration " + new String(proposal.getName()));
-				break;
-								
-			case CompletionProposal.VARIABLE_DECLARATION:
-				fElements.addElement(new String(proposal.getName()));
-				this.acceptCommon(proposal);
-				if (fDebug)
-					System.out.println("variable name " + new String(proposal.getName()));
-				break;
+			}
+			resultString += ")";
+			fElements.addElement(resultString);
+
+			this.acceptCommon(proposal);
+			if (fDebug) {
+				System.out.println("method " + proposal.getName());
+			}
+			break;
+
+		case CompletionProposal.METHOD_DECLARATION:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("method declaration " + proposal.getName());
+			break;
+
+		case CompletionProposal.VARIABLE_DECLARATION:
+			fElements.addElement(proposal.getName());
+			this.acceptCommon(proposal);
+			if (fDebug)
+				System.out.println("variable name " + proposal.getName());
+			break;
 		}
 
 	}
@@ -119,14 +122,14 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 		return getResults(true, false);
 	}
 
-	public String getResultsWithPosition(){
+	public String getResultsWithPosition() {
 		return getResults(true, true);
 	}
 
 	public String getResults(boolean relevance, boolean position) {
 		StringBuffer result = new StringBuffer();
 		int size = fElements.size();
-		
+
 		if (size == 1) {
 			result.append(getResult(0, relevance, position));
 		} else if (size > 1) {
@@ -136,7 +139,8 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 			}
 			quickSort(sortedBucket, 0, size - 1);
 			for (int j = 0; j < sortedBucket.length; j++) {
-				if (result.length() > 0) result.append("\n");
+				if (result.length() > 0)
+					result.append("\n");
 				result.append(sortedBucket[j]);
 			}
 		}
@@ -145,22 +149,22 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 	}
 
 	private String getResult(int i, boolean relevance, boolean position) {
-		if(i < 0 || i >= fElements.size())
+		if (i < 0 || i >= fElements.size())
 			return "";
-		
-		StringBuffer buffer =  new StringBuffer();
+
+		StringBuffer buffer = new StringBuffer();
 		buffer.append("element:");
 		buffer.append(fElements.elementAt(i));
 		buffer.append("    completion:");
 		buffer.append(fCompletions.elementAt(i));
-		if(position) {
+		if (position) {
 			buffer.append("    position:[");
 			buffer.append(fCompletionStart.elementAt(i));
 			buffer.append(",");
 			buffer.append(fCompletionEnd.elementAt(i));
 			buffer.append("]");
 		}
-		if(relevance) {
+		if (relevance) {
 			buffer.append("    relevance:");
 			buffer.append(fRelevances.elementAt(i));
 		}
@@ -170,7 +174,7 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 	protected String[] quickSort(String[] collection, int left, int right) {
 		int original_left = left;
 		int original_right = right;
-		String mid = collection[ (left + right) / 2];
+		String mid = collection[(left + right) / 2];
 		do {
 			while (mid.compareTo(collection[left]) > 0)
 				// s[left] >= mid
@@ -192,6 +196,8 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 			collection = quickSort(collection, left, original_right);
 		return collection;
 	}
+
+	@Override
 	public String toString() {
 		return getResults();
 	}

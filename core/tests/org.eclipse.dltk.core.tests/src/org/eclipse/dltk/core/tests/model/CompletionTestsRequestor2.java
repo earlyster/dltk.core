@@ -51,9 +51,11 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		this.showPositions = showPositions;
 		this.shortContext = shortContext;
 	}
+	@Override
 	public void acceptContext(CompletionContext cc) {
 		this.context = cc;
 	}
+	@Override
 	public void accept(CompletionProposal proposal) {
 		int length = this.proposals.length;
 		if (++this.proposalsPtr== length) {
@@ -62,6 +64,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		this.proposals[this.proposalsPtr] = proposal;
 	}
 
+	@Override
 	public void completionFailure(IProblem p) {
 		this.problem = p;
 	}
@@ -156,18 +159,13 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 	 */
 	public String getReversedResults() {
 		if(this.proposalsPtr < 0) return "";
-		Arrays.sort(this.proposals, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				if (o1 instanceof CompletionProposal && o2 instanceof CompletionProposal) {
-					CompletionProposal p1 = (CompletionProposal) o1;
-					CompletionProposal p2 = (CompletionProposal) o2;
-					int relDif = p2.getRelevance() - p1.getRelevance();
-					if(relDif != 0)  return relDif;
-					String name1 = getElementName(p1);
-					String name2 = getElementName(p2);
-					return name1.compareTo(name2);
-				}
-				return -1;
+		Arrays.sort(this.proposals, new Comparator<CompletionProposal>() {
+			public int compare(CompletionProposal p1, CompletionProposal p2) {
+				int relDif = p2.getRelevance() - p1.getRelevance();
+				if(relDif != 0)  return relDif;
+				String name1 = getElementName(p1);
+				String name2 = getElementName(p2);
+				return name1.compareTo(name2);
 			}
 		});
 		return getResultsWithoutSorting();
@@ -321,8 +319,8 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				if(kindDif != 0) {
 					return kindDif;
 				} else {
-					String completion1 = new String(proposal1.getCompletion());
-					String completion2 = new String(proposal2.getCompletion());
+					String completion1 = proposal1.getCompletion();
+					String completion2 = proposal2.getCompletion();
 					return completion1.compareTo(completion2);
 				}
 			}
@@ -342,10 +340,11 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			
-				return new String(proposal.getName());	
+				return proposal.getName();	
 		}
 		return "";
 	}
+	@Override
 	public String toString() {
 		return getResults();
 	}
