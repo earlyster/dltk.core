@@ -40,7 +40,7 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 		fCompletionEnd.addElement(String.valueOf(proposal.getReplaceEnd()));
 	}
 	public void accept(CompletionProposal proposal) {
-		char[] typeName = null;
+		String typeName = null;
 		switch(proposal.getKind()) {			
 				
 			case CompletionProposal.TYPE_REF :			
