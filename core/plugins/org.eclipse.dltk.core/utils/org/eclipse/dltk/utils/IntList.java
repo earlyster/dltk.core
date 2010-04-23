@@ -76,6 +76,8 @@ public class IntList {
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');
 		for (int i = 0; i < length; ++i) {
+			if (i != 0)
+				sb.append(',');
 			sb.append(values[i]);
 		}
 		sb.append(']');
