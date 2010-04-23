@@ -16,7 +16,6 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.ast.DLTKToken;
 import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.ast.expressions.NumericLiteral;
 import org.eclipse.dltk.ast.references.SimpleReference;
@@ -134,7 +133,7 @@ public class CoreDDPTests extends SuiteOfTestCases {
 		// y = 2; x = y; x?
 		final Expression x = new SimpleReference(0, 0, "x");
 		final Expression y = new SimpleReference(0, 0, "y");
-		final Expression num = new NumericLiteral(new DLTKToken());
+		final Expression num = new NumericLiteral(0, 0, 0);
 
 		IGoalEvaluatorFactory factory = new IGoalEvaluatorFactory() {
 
@@ -168,7 +167,7 @@ public class CoreDDPTests extends SuiteOfTestCases {
 		final Expression x = new SimpleReference(0, 0, "x");
 		final Expression y = new SimpleReference(0, 0, "y");
 		final Expression z = new SimpleReference(0, 0, "z");
-		final Expression num = new NumericLiteral(new DLTKToken());
+		final Expression num = new NumericLiteral(0,0,0);
 		
 		final Collection evaluators = new ArrayList();
 		IGoalEvaluatorFactory factory = new IGoalEvaluatorFactory() {
