@@ -208,8 +208,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < choices.length; i++) {
 				if (length <= choices[i].length()
-						&& CharOperation.prefixEquals(keyword, choices[i]
-								.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(keyword, choices[i],
+								false)) {
 					int relevance = computeBaseRelevance();
 
 					relevance += computeRelevanceForInterestingProposal();
@@ -265,8 +265,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					co = co.substring(1);
 				}
 				if (length <= co.length()
-						&& CharOperation.prefixEquals(token, co.toCharArray(),
-								false)) {
+						&& CharOperation.prefixEquals(token, co, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, co);
@@ -317,8 +316,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
@@ -379,8 +377,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 				MethodDeclaration method = (MethodDeclaration) methods.get(i);
 				String name = ((String) (methodNames.get(i)));
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
@@ -451,8 +448,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
@@ -524,8 +520,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
@@ -575,8 +570,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
@@ -621,8 +615,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length()
-						&& CharOperation.prefixEquals(token,
-								name.toCharArray(), false)) {
+						&& CharOperation.prefixEquals(token, name, false)) {
 					int relevance = computeBaseRelevance();
 					relevance += computeRelevanceForInterestingProposal();
 					relevance += computeRelevanceForCaseMatching(token, name);
