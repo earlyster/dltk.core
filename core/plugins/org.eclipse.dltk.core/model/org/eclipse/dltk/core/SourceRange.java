@@ -7,13 +7,28 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.internal.core;
+package org.eclipse.dltk.core;
 
-@Deprecated
-public class SourceRange extends org.eclipse.dltk.core.SourceRange {
+public class SourceRange implements ISourceRange {
+
+	private final int offset, length;
 
 	public SourceRange(int offset, int length) {
-		super(offset, length);
+		this.offset = offset;
+		this.length = length;
 	}
 
+	public int getLength() {
+		return length;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	@Override
+	public String toString() {
+		int end = getOffset() + getLength() - 1;
+		return "[" + getOffset() + "," + end + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 }
