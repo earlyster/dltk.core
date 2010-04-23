@@ -116,35 +116,6 @@ public abstract class SearchParticipant {
 			IProject project);
 
 	/**
-	 * Indexes the given document in the given index. A search participant asked
-	 * to index a document should parse it and call
-	 * {@link SearchDocument#addIndexEntry(char[], char[])} as many times as
-	 * needed to add index entries to the index. If delegating to another
-	 * participant, it should use the original index location (and not the
-	 * delegatee's one). In the particular case of delegating to the default
-	 * search participant (see
-	 * {@link SearchEngine#getDefaultSearchParticipant()}), the provided
-	 * document's path must be a path ending with one of the
-	 * {@link org.eclipse.dltk.core.DLTKCore#getScriptLikeExtensions()
-	 * Script-like extensions} or with '.class'.
-	 * <p>
-	 * The given index location must represent a path in the file system to a
-	 * file that either already exists or is going to be created. If it exists,
-	 * it must be an index file, otherwise its data might be overwritten.
-	 * </p>
-	 * <p>
-	 * Clients are not expected to call this method.
-	 * </p>
-	 * 
-	 * @param document
-	 *            the document to index
-	 * @param indexLocation
-	 *            the location in the file system to the index
-	 */
-	public abstract void indexDocument(SearchDocument document,
-			IPath indexLocation);
-
-	/**
 	 * Locates the matches in the given documents using the given search pattern
 	 * and search scope, and reports them to the givenn search requestor. This
 	 * method is called by the search engine once it has search documents

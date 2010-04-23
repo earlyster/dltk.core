@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.structure;
 
-import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 public class StructureProjectIndexer extends AbstractProjectIndexer {
-	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
-		new StructureIndexer(document, module).indexDocument();
+	@Override
+	public void doIndexing(IndexDocument document) {
+		new StructureIndexer(document).indexDocument();
 	}
 }

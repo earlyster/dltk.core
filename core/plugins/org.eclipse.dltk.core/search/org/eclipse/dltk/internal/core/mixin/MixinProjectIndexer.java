@@ -16,40 +16,43 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.MixinModelRegistry;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.core.RemoveIndexRequest;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 public class MixinProjectIndexer extends AbstractProjectIndexer {
 
-	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
-		new MixinIndexer(document, module).indexDocument();
+	@Override
+	public void doIndexing(IndexDocument document) {
+		new MixinIndexer(document).indexDocument();
 		MixinModelRegistry.clearKeysCache(DLTKLanguageManager
-				.getLanguageToolkit(module));
+				.getLanguageToolkit(document.getSourceModule()));
 	}
 
-	public Index getProjectIndex(IPath path) {
-		final String containerPath = path.getDevice() == null ? path.toString()
-				: path.toOSString();
+	@Override
+	public Index getProjectIndex(IScriptProject project) {
+		final String path = project.getProject().getFullPath().toString();
 		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
-				path.toString(), containerPath);
+				path, path);
 	}
 
+	@Override
 	public Index getProjectFragmentIndex(IProjectFragment fragment) {
 		final String path = fragment.getPath().toString();
 		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
 				path, path);
 	}
 
+	@Override
 	public void removeProject(IPath projectPath) {
 		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(
 				IndexManager.SPECIAL_MIXIN + projectPath.toString())));
 	}
 
+	@Override
 	public void removeLibrary(IScriptProject project, IPath path) {
 		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(
 				IndexManager.SPECIAL_MIXIN + path.toString())));

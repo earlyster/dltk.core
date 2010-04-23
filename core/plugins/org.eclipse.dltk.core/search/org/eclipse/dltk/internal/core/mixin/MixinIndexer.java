@@ -13,43 +13,35 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.caching.MixinModelProcessor;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.mixin.IMixinRequestor;
-import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
+import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class MixinIndexer extends AbstractIndexer {
 
-	private final ISourceModule sourceModule;
-
-	public MixinIndexer(SearchDocument document, ISourceModule module) {
+	public MixinIndexer(IndexDocument document) {
 		super(document);
-		this.sourceModule = module;
 	}
 
+	@Override
 	public void indexDocument() {
 		IDLTKLanguageToolkit toolkit = this.document.getToolkit();
-		if (toolkit == null) {
-			toolkit = DLTKLanguageManager.findToolkit(new Path(this.document
-					.getPath()));
-		}
 		if (toolkit == null) {
 			return;
 		}
 		boolean performed = false;
 		// Try to restore index from persistent index
-		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+		IFileHandle handle = EnvironmentPathUtils.getFile(document
+				.getSourceModule());
 		if (handle != null) {
 			// handle is null for built-in modules.
 			IContentCache coreCache = ModelManager.getModelManager()
@@ -86,7 +78,9 @@ public class MixinIndexer extends AbstractIndexer {
 				if (parser != null) {
 					final MixinIndexRequestor requestor = new MixinIndexRequestor();
 					parser.setRequirestor(requestor);
-					parser.parserSourceModule(false, this.sourceModule);
+					parser
+							.parserSourceModule(false, document
+									.getSourceModule());
 					if (requestor.count == 0) {
 						((MixinIndex) document.getIndex())
 								.addDocumentName(document

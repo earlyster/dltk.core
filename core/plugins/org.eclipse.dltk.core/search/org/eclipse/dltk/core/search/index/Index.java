@@ -17,7 +17,6 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
@@ -118,18 +117,6 @@ public class Index {
 			System.out.println("DEBUG INDEX: Add Index Entry:" + new String( category ) + " " + new String( key ) + " path:" + containerRelativePath ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		this.memoryIndex.addIndexEntry(category, key, containerRelativePath);
-	}
-
-	public String containerRelativePath(String documentPath) {
-		int index = documentPath
-				.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
-		if (index == -1) {
-			index = this.containerPath.length();
-			if (documentPath.length() <= index)
-				throw new IllegalArgumentException(
-						"Document path " + documentPath + " must be relative to " + this.containerPath); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return documentPath.substring(index + 1);
 	}
 
 	public File getIndexFile() {

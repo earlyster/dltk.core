@@ -10,7 +10,6 @@
 package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
@@ -19,9 +18,9 @@ import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 
 public abstract class AbstractIndexer implements IIndexConstants {
 
-	protected SearchDocument document;
+	protected final IndexDocument document;
 
-	public AbstractIndexer(SearchDocument document) {
+	public AbstractIndexer(IndexDocument document) {
 		this.document = document;
 	}
 

@@ -15,19 +15,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
+import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
-import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.processing.IJob;
 import org.eclipse.osgi.util.NLS;
 
@@ -137,41 +133,17 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 
 	public void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,
 			ISourceModule module, IPath containerPath) {
-		final SearchParticipant participant = SearchEngine
-				.getDefaultSearchParticipant();
-		final IPath path = module.getPath();
-		final DLTKSearchDocument document = new LazyDLTKSearchDocument(path
-				.toString(), containerPath, null, participant,
-				module instanceof IExternalSourceModule, module
-						.getScriptProject().getProject());
-		document.toolkit = toolkit;
-		// try {
-		// document.setCharContents(module.getSourceAsCharArray());
-		// } catch (ModelException e) {
-		// if (DLTKCore.DEBUG) {
-		// e.printStackTrace();
-		// }
-		// }
-		final String relativePath = SourceIndexUtil.containerRelativePath(
-				containerPath, module, path);
-		document.setContainerRelativePath(relativePath);
-
-		index.remove(relativePath);
-		document.setIndex(index);
-		// new MixinIndexer(document, module).indexDocument();
-		doIndexing(document, module);
-
+		final IndexDocument document = new IndexDocument(toolkit, module,
+				containerPath, index);
+		index.remove(document.getContainerRelativePath());
+		doIndexing(document);
 	}
 
-	public abstract void doIndexing(DLTKSearchDocument document,
-			ISourceModule module);
+	public abstract void doIndexing(IndexDocument document);
 
 	public Index getProjectIndex(IScriptProject project) {
-		return getProjectIndex(project.getProject().getFullPath());
-	}
-
-	public Index getProjectIndex(IPath path) {
-		return getIndexManager().getIndex(path, true, true);
+		return getIndexManager().getIndex(project.getProject().getFullPath(),
+				true, true);
 	}
 
 	public Index getProjectFragmentIndex(IProjectFragment fragment) {

@@ -87,14 +87,6 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	}
 
 	@Override
-	public void indexDocument(SearchDocument document, IPath indexPath) {
-		// TODO must verify that the document + indexPath match, when this is
-		// not called from scheduleDocumentIndexing
-		document.removeAllIndexEntries(); // in case the document was already
-		// indexed
-	}
-
-	@Override
 	public void locateMatches(SearchDocument[] indexMatches,
 			SearchPattern pattern, IDLTKSearchScope scope,
 			SearchRequestor requestor, IProgressMonitor monitor)

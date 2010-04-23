@@ -12,8 +12,10 @@ package org.eclipse.dltk.internal.core.structure;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.compiler.env.IModuleSource;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -29,21 +31,18 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
 import org.eclipse.dltk.core.model.binary.IBinaryModule;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
-import org.eclipse.dltk.core.search.indexing.InternalSearchDocument;
+import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class StructureIndexer extends AbstractIndexer {
 	private static class ParserInput implements
-			org.eclipse.dltk.compiler.env.ISourceModule {
+			org.eclipse.dltk.compiler.env.IModuleSource {
 
-		private final SearchDocument document;
 		private ISourceModule module;
 
-		public ParserInput(SearchDocument document, ISourceModule module) {
-			this.document = document;
+		public ParserInput(ISourceModule module) {
 			this.module = module;
 		}
 
@@ -55,7 +54,7 @@ public class StructureIndexer extends AbstractIndexer {
 					e.printStackTrace();
 				}
 			}
-			return null;
+			return CharOperation.NO_CHAR;
 		}
 
 		public IModelElement getModelElement() {
@@ -72,21 +71,19 @@ public class StructureIndexer extends AbstractIndexer {
 					}
 				}
 			}
-			return document.getContents();
+			return Util.EMPTY_STRING;
 		}
 
 		public String getFileName() {
-			return document.getPath();
+			return module.getElementName();
 		}
 
 	}
 
-	private final ISourceModule sourceModule;
 	static long maxWorkTime = 0;
 
-	public StructureIndexer(SearchDocument document, ISourceModule module) {
+	public StructureIndexer(IndexDocument document) {
 		super(document);
-		this.sourceModule = module;
 	}
 
 	@Override
@@ -94,26 +91,17 @@ public class StructureIndexer extends AbstractIndexer {
 		long started = System.currentTimeMillis();
 		IDLTKLanguageToolkit toolkit = this.document.getToolkit();
 		if (toolkit == null) {
-			toolkit = DLTKLanguageManager.findToolkit(new Path(this.document
-					.getPath()));
-		}
-		if (toolkit == null) {
 			return;
 		}
-		SourceIndexerRequestor requestor = ((InternalSearchDocument) this.document).requestor;
-		if (requestor == null) {
-			requestor = ModelManager.getModelManager().indexManager
-					.getSourceRequestor(sourceModule.getScriptProject());
-		}
+		final ISourceModule sourceModule = document.getSourceModule();
+		SourceIndexerRequestor requestor = ModelManager.getModelManager().indexManager
+				.getSourceRequestor(sourceModule.getScriptProject());
 		requestor.setIndexer(this);
 		if (!this.document.isExternal()) {
-			String pkgName = ""; //$NON-NLS-1$
 			IScriptFolder folder = (IScriptFolder) sourceModule.getParent();
-			pkgName = folder.getElementName();
-			requestor.setPackageName(pkgName);
+			requestor.setPackageName(folder.getElementName());
 		} else {
-			IPath path = new Path(this.document.getPath());
-			String ppath = path.toString();
+			String ppath = this.document.getPath().toString();
 			String pkgName = (new Path(ppath.substring(ppath
 					.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1))
 					.removeLastSegments(1)).toString();
@@ -160,9 +148,11 @@ public class StructureIndexer extends AbstractIndexer {
 				if (parser == null)
 					return;
 				parser.setRequestor(requestor);
-				parser
-						.parseSourceModule(new ParserInput(document,
-								sourceModule));
+				if (sourceModule instanceof IModuleSource) {
+					parser.parseSourceModule((IModuleSource) sourceModule);
+				} else {
+					parser.parseSourceModule(new ParserInput(sourceModule));
+				}
 			} else {
 				IBinaryElementParser parser = DLTKLanguageManager
 						.getBinaryElementParser(sourceModule);
