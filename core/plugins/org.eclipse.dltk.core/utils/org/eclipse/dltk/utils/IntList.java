@@ -12,6 +12,18 @@
 package org.eclipse.dltk.utils;
 
 public class IntList {
+	public static final IntList EMPTY_LIST = new IntList(0) {
+		@Override
+		public void add(int value) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setSize(int newSize) {
+			throw new UnsupportedOperationException();
+		}
+	};
+
 	private int[] values;
 	private int length = 0;
 
@@ -53,6 +65,21 @@ public class IntList {
 			System.arraycopy(values, 0, result, 0, length);
 			return result;
 		}
+	}
+
+	public boolean isEmpty() {
+		return length == 0;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('[');
+		for (int i = 0; i < length; ++i) {
+			sb.append(values[i]);
+		}
+		sb.append(']');
+		return sb.toString();
 	}
 
 }
