@@ -171,10 +171,11 @@ public class ExternalProjectFragment extends ProjectFragment implements
 
 	public IScriptFolder getScriptFolder(IPath path) {
 		try {
+			final String pathStr = path.toPortableString();
 			List childs = getChildrenOfType(SCRIPT_FOLDER);
 			for (int i = 0; i < childs.size(); ++i) {
 				IScriptFolder folder = (IScriptFolder) childs.get(i);
-				if (folder.getElementName().equals(path.toPortableString())) {
+				if (folder.getElementName().equals(pathStr)) {
 					return folder;
 				}
 			}
