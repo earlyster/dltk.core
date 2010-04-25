@@ -216,7 +216,9 @@ public abstract class ScriptCompletionProposalCollector extends
 			if (isFiltered(proposal))
 				return;
 			fRawCompletionProposals.add(proposal);
-			fUnprosessedCompletionProposals.add(proposal);
+			synchronized (fUnprosessedCompletionProposals) {
+				fUnprosessedCompletionProposals.add(proposal);
+			}
 		} catch (IllegalArgumentException e) {
 			// all signature processing method may throw IAEs
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
@@ -322,7 +324,15 @@ public abstract class ScriptCompletionProposalCollector extends
 	}
 
 	private void processUnprocessedProposals() {
-		for (CompletionProposal proposal : fUnprosessedCompletionProposals) {
+		final List<CompletionProposal> copy;
+		synchronized (fUnprosessedCompletionProposals) {
+			if (fUnprosessedCompletionProposals.isEmpty())
+				return;
+			copy = new ArrayList<CompletionProposal>(
+					fUnprosessedCompletionProposals);
+			fUnprosessedCompletionProposals.clear();
+		}
+		for (CompletionProposal proposal : copy) {
 			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 				acceptPotentialMethodDeclaration(proposal);
 			} else {
@@ -334,7 +344,6 @@ public abstract class ScriptCompletionProposalCollector extends
 				}
 			}
 		}
-		fUnprosessedCompletionProposals.clear();
 	}
 
 	/**
