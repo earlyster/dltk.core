@@ -651,11 +651,11 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	// Relevance
-	private int computeBaseRelevance() {
+	protected int computeBaseRelevance() {
 		return RelevanceConstants.R_DEFAULT;
 	}
 
-	private int computeRelevanceForInterestingProposal() {
+	protected int computeRelevanceForInterestingProposal() {
 		return RelevanceConstants.R_INTERESTING;
 	}
 
