@@ -14,9 +14,10 @@ package org.eclipse.dltk.internal.mylyn.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
+import org.eclipse.debug.ui.IDebugView;
 import org.eclipse.dltk.internal.mylyn.BreakpointsInterestFilter;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.mylyn.ide.ui.AbstractFocusMarkerViewAction;
 import org.eclipse.ui.IViewPart;
 
@@ -33,10 +34,13 @@ public class FocusBreakpointsViewAction extends AbstractFocusMarkerViewAction {
 	public final List<StructuredViewer> getViewers() {
 		List<StructuredViewer> viewers = new ArrayList<StructuredViewer>();
 		IViewPart viewPart = super.getPartForAction();
-		if (viewPart instanceof BreakpointsView) {
-			BreakpointsView view = (BreakpointsView) viewPart;
-			updateMarkerViewLabelProvider(view.getCheckboxViewer());
-			viewers.add(view.getCheckboxViewer());
+		if (viewPart instanceof IDebugView) {
+			IDebugView view = (IDebugView) viewPart;
+			Viewer viewer = view.getViewer();
+			if (viewer instanceof StructuredViewer) {
+				updateMarkerViewLabelProvider((StructuredViewer) viewer);
+				viewers.add((StructuredViewer) viewer);
+			}
 		}
 		return viewers;
 	}
