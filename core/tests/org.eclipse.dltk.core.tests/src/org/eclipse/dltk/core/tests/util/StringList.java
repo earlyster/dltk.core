@@ -12,9 +12,27 @@
 package org.eclipse.dltk.core.tests.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 @SuppressWarnings("serial")
 public class StringList extends ArrayList<String> {
+
+	public StringList() {
+		super();
+	}
+
+	public StringList(int initialCapacity) {
+		super(initialCapacity);
+	}
+
+	public StringList(Collection<? extends String> c) {
+		super(c);
+	}
+
+	public StringList(String... strings) {
+		Collections.addAll(this, strings);
+	}
 
 	@Override
 	public String toString() {
@@ -28,6 +46,12 @@ public class StringList extends ArrayList<String> {
 	@Override
 	public String[] toArray() {
 		return toArray(new String[size()]);
+	}
+
+	public StringList sort() {
+		StringList copy = new StringList(this);
+		Collections.sort(copy);
+		return copy;
 	}
 
 	/**
