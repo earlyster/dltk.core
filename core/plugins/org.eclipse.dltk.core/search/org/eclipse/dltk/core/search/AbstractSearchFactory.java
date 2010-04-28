@@ -6,6 +6,7 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
+import org.eclipse.dltk.core.search.matching.MatchLocatorParser;
 
 public abstract class AbstractSearchFactory implements ISearchFactory {
 	public SourceIndexerRequestor createSourceRequestor() {
@@ -29,5 +30,10 @@ public abstract class AbstractSearchFactory implements ISearchFactory {
 
 	public String getNormalizedTypeName(IType type) {
 		return type.getElementName();
+	}
+
+	public IMatchLocatorParser createMatchParser(MatchLocator locator) {
+		return new MatchLocatorParser(locator) {
+		};
 	}
 }
