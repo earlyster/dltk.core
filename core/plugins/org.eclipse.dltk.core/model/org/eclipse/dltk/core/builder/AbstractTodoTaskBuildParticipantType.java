@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IScriptProject;
 public abstract class AbstractTodoTaskBuildParticipantType extends
 		AbstractBuildParticipantType {
 
+	@Override
 	public final IBuildParticipant createBuildParticipant(IScriptProject project) {
 		final ITodoTaskPreferences prefs = getPreferences(project);
 		if (prefs.isEnabled()) {
@@ -35,13 +36,6 @@ public abstract class AbstractTodoTaskBuildParticipantType extends
 		}
 
 		return null;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	protected final void getPreferences() {
-		//
 	}
 
 	/**
