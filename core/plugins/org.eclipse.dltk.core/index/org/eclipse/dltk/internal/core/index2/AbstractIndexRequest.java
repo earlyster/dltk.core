@@ -130,7 +130,8 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 		for (ISourceModule sourceModule : sourceModules) {
 			String relativePath = Util.relativePath(sourceModule.getPath(),
 					containerPath.segmentCount());
-			IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+			IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule,
+					false);
 
 			if (toRemove.remove(relativePath)) {
 				if (documentNames.get(relativePath) < handle.lastModified()) {

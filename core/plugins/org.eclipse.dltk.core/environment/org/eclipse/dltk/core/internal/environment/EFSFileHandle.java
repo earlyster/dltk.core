@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.internal.environment;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -101,6 +102,15 @@ public class EFSFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	public IPath getPath() {
+		// Try to get the path from the existing java.io.File object, which is
+		// twice faster than the file.toURI()
+		try {
+			File localFile = file.toLocalFile(EFS.NONE, null);
+			if (localFile != null) {
+				return new Path(localFile.getPath());
+			}
+		} catch (CoreException e) {
+		}
 		return new Path(file.toURI().getPath());
 	}
 
