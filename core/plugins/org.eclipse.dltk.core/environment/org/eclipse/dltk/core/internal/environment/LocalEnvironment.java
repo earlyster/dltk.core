@@ -18,8 +18,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.URIUtil;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
@@ -52,15 +50,15 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 		}
 		IFileStore store = fs.getStore(path);
 		EFSFileHandle fileHandle = new EFSFileHandle(this, store);
-		if (!fileHandle.exists()) {
-			// Try to resolve file from resources
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocation(path);
-			if (files.length == 1) {
-				store = fs.getStore(files[0].getLocation());
-				fileHandle = new EFSFileHandle(this, store);
-			}
-		}
+		// if (!fileHandle.exists()) {
+		// // Try to resolve file from resources
+		// IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+		// .findFilesForLocation(path);
+		// if (files.length == 1) {
+		// store = fs.getStore(files[0].getLocation());
+		// fileHandle = new EFSFileHandle(this, store);
+		// }
+		// }
 		return fileHandle;
 	}
 

@@ -15,10 +15,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +32,7 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -101,7 +107,32 @@ public final class EnvironmentManager {
 
 	private static ListenerList listeners = new ListenerList();
 
+	private static Map<IProject, IEnvironment> environmentCache = new HashMap<IProject, IEnvironment>();
+
+	private static IResourceChangeListener resourceListener = new IResourceChangeListener() {
+
+		public void resourceChanged(IResourceChangeEvent event) {
+			int eventType = event.getType();
+			IResource resource = event.getResource();
+
+			switch (eventType) {
+			case IResourceChangeEvent.PRE_DELETE:
+				if (resource.getType() == IResource.PROJECT
+						&& DLTKLanguageManager
+								.hasScriptNature((IProject) resource)) {
+
+					synchronized (environmentCache) {
+						environmentCache.remove(resource);
+					}
+				}
+				return;
+			}
+		}
+	};
+
 	private EnvironmentManager() {
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(
+				resourceListener);
 	}
 
 	/**
@@ -175,24 +206,30 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironment(IProject project) {
-		if (!ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
-				.getName())) {
-			try {
-				final String environmentId = project
-						.getPersistentProperty(PROJECT_ENVIRONMENT);
-				if (environmentId != null) {
-					final IEnvironment environment = getEnvironmentById(environmentId);
-					if (environment != null) {
-						return environment;
+		synchronized (environmentCache) {
+			IEnvironment environment = environmentCache.get(project);
+			if (environment == null) {
+				if (!ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
+						.getName())) {
+					try {
+						final String environmentId = project
+								.getPersistentProperty(PROJECT_ENVIRONMENT);
+						if (environmentId != null) {
+							environment = getEnvironmentById(environmentId);
+						}
+					} catch (CoreException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+				if (environment == null) {
+					environment = detectEnvironment(project);
 				}
+				environmentCache.put(project, environment);
 			}
+			return environment;
 		}
-		return detectEnvironment(project);
 	}
 
 	/**

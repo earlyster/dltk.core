@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.core;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
@@ -152,11 +151,14 @@ public class BuiltinProjectFragment extends ProjectFragment {
 
 	public IScriptFolder getScriptFolder(IPath path) {
 		try {
-			List childs = getChildrenOfType(SCRIPT_FOLDER);
-			for (int i = 0; i < childs.size(); ++i) {
-				IScriptFolder folder = (IScriptFolder) childs.get(i);
-				if (folder.getElementName().equals(path.toPortableString())) {
-					return folder;
+			String portablePath = path.toPortableString();
+			IModelElement[] children = getChildren();
+			for (int i = 0; i < children.length; ++i) {
+				IModelElement child = children[i];
+				if (child.getElementType() == SCRIPT_FOLDER
+						&& ((IScriptFolder) child).getElementName().equals(
+								portablePath)) {
+					return ((IScriptFolder) child);
 				}
 			}
 		} catch (ModelException e) {

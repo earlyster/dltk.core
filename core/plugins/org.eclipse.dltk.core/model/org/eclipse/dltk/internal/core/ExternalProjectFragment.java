@@ -171,12 +171,14 @@ public class ExternalProjectFragment extends ProjectFragment implements
 
 	public IScriptFolder getScriptFolder(IPath path) {
 		try {
-			final String pathStr = path.toPortableString();
-			List childs = getChildrenOfType(SCRIPT_FOLDER);
-			for (int i = 0; i < childs.size(); ++i) {
-				IScriptFolder folder = (IScriptFolder) childs.get(i);
-				if (folder.getElementName().equals(pathStr)) {
-					return folder;
+			String portablePath = path.toPortableString();
+			IModelElement[] children = getChildren();
+			for (int i = 0; i < children.length; ++i) {
+				IModelElement child = children[i];
+				if (child.getElementType() == SCRIPT_FOLDER
+						&& ((IScriptFolder) child).getElementName().equals(
+								portablePath)) {
+					return ((IScriptFolder) child);
 				}
 			}
 		} catch (ModelException e) {
@@ -248,15 +250,18 @@ public class ExternalProjectFragment extends ProjectFragment implements
 		}
 		if (o instanceof ExternalProjectFragment) {
 			ExternalProjectFragment other = (ExternalProjectFragment) o;
-			IEnvironment environment = EnvironmentManager.getEnvironment(this);
-			if (environment != null) {
-				IEnvironment environmento = EnvironmentManager
-						.getEnvironment((IModelElement) other);
-				if (!environment.equals(environmento)) {
-					return false;
+			if (this.fPath.equals(other.fPath)) {
+				IEnvironment environment = EnvironmentManager
+						.getEnvironment(this);
+				if (environment != null) {
+					IEnvironment environmento = EnvironmentManager
+							.getEnvironment(other);
+					if (!environment.equals(environmento)) {
+						return false;
+					}
 				}
+				return true;
 			}
-			return this.fPath.equals(other.fPath);
 		}
 		return false;
 	}
