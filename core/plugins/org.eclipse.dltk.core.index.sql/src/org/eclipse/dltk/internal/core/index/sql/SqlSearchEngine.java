@@ -38,6 +38,10 @@ import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index2.search.ISearchEngine;
 import org.eclipse.dltk.core.index2.search.ISearchRequestor;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.internal.core.ArchiveFolder;
+import org.eclipse.dltk.internal.core.BuiltinScriptFolder;
+import org.eclipse.dltk.internal.core.ExternalScriptFolder;
+import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
 
@@ -239,10 +243,21 @@ public class SqlSearchEngine implements ISearchEngine {
 				ISourceModule sourceModule = sourceModuleCache
 						.get(resourcePath);
 				if (sourceModule == null) {
-					if (projectFragment.isExternal()
-							|| projectFragment.isArchive()) {
-						IScriptFolder scriptFolder = projectFragment
-								.getScriptFolder(relativePath
+					if (projectFragment.isExternal()) {
+						IScriptFolder scriptFolder = new ExternalScriptFolder(
+								(ProjectFragment) projectFragment, relativePath
+										.removeLastSegments(1));
+						sourceModule = scriptFolder
+								.getSourceModule(relativePath.lastSegment());
+					} else if (projectFragment.isArchive()) {
+						IScriptFolder scriptFolder = new ArchiveFolder(
+								(ProjectFragment) projectFragment, relativePath
+										.removeLastSegments(1));
+						sourceModule = scriptFolder
+								.getSourceModule(relativePath.lastSegment());
+					} else if (projectFragment.isBuiltin()) {
+						IScriptFolder scriptFolder = new BuiltinScriptFolder(
+								(ProjectFragment) projectFragment, relativePath
 										.removeLastSegments(1));
 						sourceModule = scriptFolder
 								.getSourceModule(relativePath.lastSegment());
