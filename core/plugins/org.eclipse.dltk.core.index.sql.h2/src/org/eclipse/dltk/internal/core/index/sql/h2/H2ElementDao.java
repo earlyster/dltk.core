@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ import org.eclipse.dltk.core.index.sql.IElementDao;
 import org.eclipse.dltk.core.index.sql.IElementHandler;
 import org.eclipse.dltk.core.index.sql.h2.H2Index;
 import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
+import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -48,6 +50,12 @@ public class H2ElementDao implements IElementDao {
 
 	/** Cache for insert element reference queries */
 	private static final Map<String, String> D_INSERT_QUERY_CACHE = new HashMap<String, String>();
+
+	private ModelManager modelManager;
+
+	public H2ElementDao() {
+		modelManager = ModelManager.getModelManager();
+	}
 
 	private String getTableName(Connection connection, int elementType,
 			String natureId, boolean isReference) throws SQLException {
@@ -133,10 +141,16 @@ public class H2ElementDao implements IElementDao {
 			ResultSet result = statement.getGeneratedKeys();
 			try {
 				if (result.next()) {
-					return new Element(result.getInt(1), type, flags, offset,
-							length, nameOffset, nameLength, name,
-							camelCaseName, metadata, qualifier, parent, fileId,
-							isReference);
+					Element element = new Element(result.getInt(1), type,
+							flags, offset, length, nameOffset, nameLength,
+							modelManager.intern(name), camelCaseName, metadata,
+							qualifier, parent, fileId, isReference);
+
+					if (!isReference) {
+						H2Cache.addElement(element);
+					}
+
+					return element;
 				}
 			} finally {
 				result.close();
@@ -160,6 +174,18 @@ public class H2ElementDao implements IElementDao {
 
 		long timeStamp = System.currentTimeMillis();
 		int count = 0;
+
+		if (!isReference && H2Cache.isLoaded()) {
+			Collection<Element> elements = H2Cache.searchElements(pattern,
+					matchRule, elementType, trueFlags, falseFlags, qualifier,
+					parent, filesId, containersId, natureId, limit);
+			if (elements != null && elements.size() > 0) {
+				for (Element element : elements) {
+					handler.handle(element);
+				}
+			}
+			return;
+		}
 
 		String tableName = getTableName(connection, elementType, natureId,
 				isReference);
@@ -307,10 +333,16 @@ public class H2ElementDao implements IElementDao {
 
 					int fileId = result.getInt(++columnIndex);
 
-					handler.handle(new Element(id, elementType, f, offset,
-							length, nameOffset, nameLength, name,
-							camelCaseName, metadata, qualifier, parent, fileId,
-							isReference));
+					Element element = new Element(id, elementType, f, offset,
+							length, nameOffset, nameLength, modelManager
+									.intern(name), camelCaseName, metadata,
+							qualifier, parent, fileId, isReference);
+
+					if (!isReference) {
+						H2Cache.addElement(element);
+					}
+
+					handler.handle(element);
 				}
 			} finally {
 				result.close();

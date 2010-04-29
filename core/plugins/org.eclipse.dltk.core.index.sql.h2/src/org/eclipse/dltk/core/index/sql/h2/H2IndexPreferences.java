@@ -49,7 +49,7 @@ public class H2IndexPreferences extends AbstractPreferenceInitializer {
 		IEclipsePreferences p = ((IScopeContext) new DefaultScope())
 				.getNode(H2Index.PLUGIN_ID);
 
-		p.putInt(DB_CACHE_SIZE, 64000); // 64Mb
+		p.putInt(DB_CACHE_SIZE, 32000); // 32Mb
 		p.put(DB_CACHE_TYPE, "LRU");
 		p.putInt(DB_LOCK_MODE, 0); // no transaction isolation
 	}

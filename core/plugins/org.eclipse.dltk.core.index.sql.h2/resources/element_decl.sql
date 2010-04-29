@@ -2,7 +2,7 @@
 -- This is a table for element declarations. Table name
 -- is substituted in a runtime.
 
-CREATE MEMORY TABLE IF NOT EXISTS {0}(
+CREATE TABLE IF NOT EXISTS {0}(
 	ID INT AUTO_INCREMENT PRIMARY KEY,
 	FLAGS INT NOT NULL,
 	OFFSET INT NOT NULL,
