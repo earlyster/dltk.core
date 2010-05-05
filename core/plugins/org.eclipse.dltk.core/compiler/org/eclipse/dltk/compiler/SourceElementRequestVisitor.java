@@ -85,14 +85,14 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Called then end of class are visted. Class are added to model before this
-	 * call is done.
+	 * Called then end of class are visited. Class are added to model before
+	 * this call is done.
 	 */
 	protected void onEndVisitClass(TypeDeclaration type) {
 	}
 
 	/**
-	 * Called before method info is propogated to the source element requestor.
+	 * Called before method info is propagated to the source element requestor.
 	 * This is a last chance to modify the method info
 	 * 
 	 * @since 2.0
@@ -102,8 +102,8 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Called before method info is propogated to the source element requestor.
-	 * This is a last chance to modify the method info
+	 * Called before method info is propagated to the source element requestor.
+	 * This is a last chance to modify the class info
 	 * 
 	 * @since 2.0
 	 */
