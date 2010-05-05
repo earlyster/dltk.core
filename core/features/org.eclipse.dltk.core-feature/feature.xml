@@ -24,7 +24,7 @@ http://www.eclipse.org/legal/epl-v10.html
    </license>
 
    <requires>
-      <import feature="org.eclipse.platform" version="3.3.0" match="compatible"/>
+      <import feature="org.eclipse.platform" version="3.4.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.emf.ecore" version="2.4.0" match="greaterOrEqual"/>
    </requires>
 
