@@ -51,7 +51,7 @@ public class H2Cache {
 	private static final Map<Integer, File> fileById = new HashMap<Integer, File>();
 
 	private static final ILock elementLock = Job.getJobManager().newLock();
-	private static final Map<Integer, Map<Integer, Set<Element>>> elementsMap = new HashMap<Integer, Map<Integer, Set<Element>>>();
+	private static final Map<Integer, Map<Integer, List<Element>>> elementsMap = new HashMap<Integer, Map<Integer, List<Element>>>();
 
 	private static final ILock loadedLock = Job.getJobManager().newLock();
 	private static boolean isLoaded;
@@ -69,16 +69,16 @@ public class H2Cache {
 		elementLock.acquire();
 		try {
 			int elementType = element.getType();
-			Map<Integer, Set<Element>> elementsByFile = elementsMap
+			Map<Integer, List<Element>> elementsByFile = elementsMap
 					.get(elementType);
 			if (elementsByFile == null) {
-				elementsByFile = new HashMap<Integer, Set<Element>>();
+				elementsByFile = new HashMap<Integer, List<Element>>();
 				elementsMap.put(elementType, elementsByFile);
 			}
 			int fileId = element.getFileId();
-			Set<Element> elementsSet = elementsByFile.get(fileId);
+			List<Element> elementsSet = elementsByFile.get(fileId);
 			if (elementsSet == null) {
-				elementsSet = new HashSet<Element>();
+				elementsSet = new LinkedList<Element>();
 				elementsByFile.put(fileId, elementsSet);
 			}
 			elementsSet.add(element);
@@ -121,10 +121,10 @@ public class H2Cache {
 	public static void deleteElementsByFileId(int id) {
 		elementLock.acquire();
 		try {
-			Iterator<Map<Integer, Set<Element>>> i = elementsMap.values()
+			Iterator<Map<Integer, List<Element>>> i = elementsMap.values()
 					.iterator();
 			while (i.hasNext()) {
-				Map<Integer, Set<Element>> elementsByFile = i.next();
+				Map<Integer, List<Element>> elementsByFile = i.next();
 				elementsByFile.remove(id);
 			}
 		} finally {
@@ -196,13 +196,13 @@ public class H2Cache {
 		elementLock.acquire();
 		try {
 			List<Element> elements = new LinkedList<Element>();
-			Iterator<Map<Integer, Set<Element>>> i = elementsMap.values()
+			Iterator<Map<Integer, List<Element>>> i = elementsMap.values()
 					.iterator();
 			while (i.hasNext()) {
-				Map<Integer, Set<Element>> elementsByFile = i.next();
-				Set<Element> elementsSet = elementsByFile.get(id);
-				if (elementsSet != null) {
-					elements.addAll(elementsSet);
+				Map<Integer, List<Element>> elementsByFile = i.next();
+				List<Element> l = elementsByFile.get(id);
+				if (l != null) {
+					elements.addAll(l);
 				}
 			}
 			return elements;
@@ -301,15 +301,15 @@ public class H2Cache {
 			}
 
 			List<Element> elements = new LinkedList<Element>();
-			Map<Integer, Set<Element>> elementsByFile = elementsMap
+			Map<Integer, List<Element>> elementsByFile = elementsMap
 					.get(elementType);
 			if (elementsByFile != null) {
 
-				Iterator<Entry<Integer, Set<Element>>> i = elementsByFile
+				Iterator<Entry<Integer, List<Element>>> i = elementsByFile
 						.entrySet().iterator();
-
 				while (i.hasNext()) {
-					Entry<Integer, Set<Element>> elementEntry = i.next();
+
+					Entry<Integer, List<Element>> elementEntry = i.next();
 
 					if (filesIds.size() == 0
 							|| filesIds.contains(elementEntry.getKey())) {

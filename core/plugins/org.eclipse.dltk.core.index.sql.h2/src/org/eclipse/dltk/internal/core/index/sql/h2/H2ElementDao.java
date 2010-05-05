@@ -31,7 +31,7 @@ import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Data access object for model element
+ * Data access object for model element.
  * 
  * @author michael
  */
@@ -51,10 +51,12 @@ public class H2ElementDao implements IElementDao {
 	/** Cache for insert element reference queries */
 	private static final Map<String, String> D_INSERT_QUERY_CACHE = new HashMap<String, String>();
 
-	private ModelManager modelManager;
+	private final ModelManager modelManager;
+	private final Map<String, PreparedStatement> batchStatements;
 
 	public H2ElementDao() {
-		modelManager = ModelManager.getModelManager();
+		this.modelManager = ModelManager.getModelManager();
+		this.batchStatements = new HashMap<String, PreparedStatement>();
 	}
 
 	private String getTableName(Connection connection, int elementType,
@@ -68,11 +70,66 @@ public class H2ElementDao implements IElementDao {
 		return tableName;
 	}
 
-	public Element insert(Connection connection, int type, int flags,
-			int offset, int length, int nameOffset, int nameLength,
-			String name, String metadata, String qualifier, String parent,
-			int fileId, String natureId, boolean isReference)
-			throws SQLException {
+	private void insertBatch(Connection connection,
+			PreparedStatement statement, int type, int flags, int offset,
+			int length, int nameOffset, int nameLength, String name,
+			String metadata, String qualifier, String parent, int fileId,
+			String natureId, boolean isReference) throws SQLException {
+
+		int param = 0;
+
+		if (!isReference) {
+			statement.setInt(++param, flags);
+		}
+
+		statement.setInt(++param, offset);
+		statement.setInt(++param, length);
+
+		if (!isReference) {
+			statement.setInt(++param, nameOffset);
+			statement.setInt(++param, nameLength);
+		}
+
+		statement.setString(++param, name);
+
+		String camelCaseName = null;
+		if (!isReference) {
+			StringBuilder camelCaseNameBuf = new StringBuilder();
+			for (int i = 0; i < name.length(); ++i) {
+				char ch = name.charAt(i);
+				if (Character.isUpperCase(ch)) {
+					camelCaseNameBuf.append(ch);
+				} else if (i == 0) {
+					// not applicable for camel case search
+					break;
+				}
+			}
+			camelCaseName = camelCaseNameBuf.length() > 0 ? camelCaseNameBuf
+					.toString() : null;
+			statement.setString(++param, camelCaseName);
+		}
+
+		statement.setString(++param, metadata);
+		statement.setString(++param, qualifier);
+
+		if (!isReference) {
+			statement.setString(++param, parent);
+		}
+
+		statement.setInt(++param, fileId);
+		statement.addBatch();
+
+		if (!isReference) {
+			H2Cache.addElement(new Element(type, flags, offset, length,
+					nameOffset, nameLength, name, camelCaseName, metadata,
+					qualifier, parent, fileId, isReference));
+		}
+	}
+
+	public void insert(Connection connection, int type, int flags, int offset,
+			int length, int nameOffset, int nameLength, String name,
+			String metadata, String qualifier, String parent, int fileId,
+			String natureId, boolean isReference) throws SQLException {
 
 		String tableName = getTableName(connection, type, natureId, isReference);
 
@@ -91,74 +148,32 @@ public class H2ElementDao implements IElementDao {
 			}
 		}
 
-		PreparedStatement statement = connection.prepareStatement(query,
-				Statement.RETURN_GENERATED_KEYS);
-		try {
-			int param = 0;
-
-			if (!isReference) {
-				statement.setInt(++param, flags);
+		synchronized (batchStatements) {
+			PreparedStatement statement = batchStatements.get(query);
+			if (statement == null) {
+				statement = connection.prepareStatement(query);
+				batchStatements.put(query, statement);
 			}
+			insertBatch(connection, statement, type, flags, offset, length,
+					nameOffset, nameLength, name, metadata, qualifier, parent,
+					fileId, natureId, isReference);
+		}
+	}
 
-			statement.setInt(++param, offset);
-			statement.setInt(++param, length);
-
-			if (!isReference) {
-				statement.setInt(++param, nameOffset);
-				statement.setInt(++param, nameLength);
-			}
-
-			statement.setString(++param, name);
-
-			String camelCaseName = null;
-			if (!isReference) {
-				StringBuilder camelCaseNameBuf = new StringBuilder();
-				for (int i = 0; i < name.length(); ++i) {
-					char ch = name.charAt(i);
-					if (Character.isUpperCase(ch)) {
-						camelCaseNameBuf.append(ch);
-					} else if (i == 0) {
-						// not applicable for camel case search
-						break;
-					}
-				}
-				camelCaseName = camelCaseNameBuf.length() > 0 ? camelCaseNameBuf
-						.toString()
-						: null;
-				statement.setString(++param, camelCaseName);
-			}
-
-			statement.setString(++param, metadata);
-			statement.setString(++param, qualifier);
-
-			if (!isReference) {
-				statement.setString(++param, parent);
-			}
-
-			statement.setInt(++param, fileId);
-
-			statement.executeUpdate();
-			ResultSet result = statement.getGeneratedKeys();
+	public void commitInsertions() throws SQLException {
+		synchronized (batchStatements) {
 			try {
-				if (result.next()) {
-					Element element = new Element(result.getInt(1), type,
-							flags, offset, length, nameOffset, nameLength,
-							modelManager.intern(name), camelCaseName, metadata,
-							qualifier, parent, fileId, isReference);
-
-					if (!isReference) {
-						H2Cache.addElement(element);
+				for (PreparedStatement statement : batchStatements.values()) {
+					try {
+						statement.executeBatch();
+					} finally {
+						statement.close();
 					}
-
-					return element;
 				}
 			} finally {
-				result.close();
+				batchStatements.clear();
 			}
-		} finally {
-			statement.close();
 		}
-		return null;
 	}
 
 	private String escapeBackslash(String pattern) {
@@ -333,11 +348,10 @@ public class H2ElementDao implements IElementDao {
 
 					int fileId = result.getInt(++columnIndex);
 
-					Element element = new Element(id, elementType, f, offset,
+					Element element = new Element(elementType, f, offset,
 							length, nameOffset, nameLength, modelManager
 									.intern(name), camelCaseName, metadata,
 							qualifier, parent, fileId, isReference);
-
 					if (!isReference) {
 						H2Cache.addElement(element);
 					}
