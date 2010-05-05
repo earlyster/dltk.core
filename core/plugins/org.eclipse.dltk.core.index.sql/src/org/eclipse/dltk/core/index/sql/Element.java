@@ -21,7 +21,6 @@ import java.io.Serializable;
 public class Element implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private int id;
 	private int type;
 	private int flags;
 	private int offset;
@@ -36,12 +35,10 @@ public class Element implements Serializable {
 	private int fileId;
 	private boolean isReference;
 
-	public Element(int id, int type, int flags, int offset, int length,
-			int nameOffset, int nameLength, String name, String camelCaseName,
-			String metadata, String qualifier, String parent, int fileId,
-			boolean isReference) {
+	public Element(int type, int flags, int offset, int length, int nameOffset,
+			int nameLength, String name, String camelCaseName, String metadata,
+			String qualifier, String parent, int fileId, boolean isReference) {
 		super();
-		this.id = id;
 		this.type = type;
 		this.flags = flags;
 		this.offset = offset;
@@ -55,10 +52,6 @@ public class Element implements Serializable {
 		this.parent = parent;
 		this.fileId = fileId;
 		this.isReference = isReference;
-	}
-
-	public int getId() {
-		return id;
 	}
 
 	public int getType() {
@@ -111,29 +104,6 @@ public class Element implements Serializable {
 
 	public boolean isReference() {
 		return isReference;
-	}
-
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + type;
-		return result;
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Element other = (Element) obj;
-		if (id != other.id)
-			return false;
-		if (type != other.type)
-			return false;
-		return true;
 	}
 
 	public String toString() {

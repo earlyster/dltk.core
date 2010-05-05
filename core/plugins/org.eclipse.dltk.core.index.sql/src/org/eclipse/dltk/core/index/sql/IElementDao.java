@@ -25,7 +25,8 @@ import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 public interface IElementDao {
 
 	/**
-	 * Inserts new element into database.
+	 * Adds new element entry to the batch insert procedure. You have to call
+	 * {@link #commit()} after all elements are inserted.
 	 * 
 	 * @param connection
 	 *            Database connection
@@ -58,11 +59,17 @@ public interface IElementDao {
 	 * @return Element DAO or <code>null</code> if insert was not successful
 	 * @throws SQLException
 	 */
-	public abstract Element insert(Connection connection, int type, int flags,
-			int offset, int length, int nameOffset, int nameLength,
-			String name, String metadata, String qualifier, String parent,
-			int fileId, String natureId, boolean isReference)
-			throws SQLException;
+	void insert(Connection connection, int type, int flags, int offset,
+			int length, int nameOffset, int nameLength, String name,
+			String metadata, String qualifier, String parent, int fileId,
+			String natureId, boolean isReference) throws SQLException;
+
+	/**
+	 * Commits previously inserted entries
+	 * 
+	 * @throws SQLException
+	 */
+	void commitInsertions() throws SQLException;
 
 	/**
 	 * Search elements in index.
@@ -110,11 +117,10 @@ public interface IElementDao {
 	 *            Progress monitor (can be set to <code>null</code>)
 	 * @throws SQLException
 	 */
-	public abstract void search(Connection connection, String pattern,
-			MatchRule matchRule, int elementType, int trueFlags,
-			int falseFlags, String qualifier, String parent, int[] filesId,
-			int containersId[], String natureId, int limit,
-			boolean isReference, IElementHandler handler,
+	void search(Connection connection, String pattern, MatchRule matchRule,
+			int elementType, int trueFlags, int falseFlags, String qualifier,
+			String parent, int[] filesId, int containersId[], String natureId,
+			int limit, boolean isReference, IElementHandler handler,
 			IProgressMonitor monitor) throws SQLException;
 
 }
