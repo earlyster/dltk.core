@@ -156,6 +156,8 @@ public class StructureIndexer extends AbstractIndexer {
 			} else {
 				IBinaryElementParser parser = DLTKLanguageManager
 						.getBinaryElementParser(sourceModule);
+				if (parser == null)
+					return;
 				parser.setRequestor(requestor);
 				parser.parseBinaryModule((IBinaryModule) sourceModule);
 			}
