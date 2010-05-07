@@ -2970,6 +2970,30 @@ public final class CharOperation {
 		return true;
 	}
 
+	public static final boolean prefixEquals(String prefix, String name) {
+		return prefixEquals(prefix, name, false);
+	}
+
+	public static final boolean prefixEquals(String prefix, String name,
+			boolean isCaseSensitive) {
+		int max = prefix.length();
+		if (name.length() < max)
+			return false;
+		if (isCaseSensitive) {
+			for (int i = max; --i >= 0;)
+				// assumes the prefix is not larger than the name
+				if (prefix.charAt(i) != name.charAt(i))
+					return false;
+			return true;
+		}
+		for (int i = max; --i >= 0;)
+			// assumes the prefix is not larger than the name
+			if (Character.toLowerCase(prefix.charAt(i)) != Character
+					.toLowerCase(name.charAt(i)))
+				return false;
+		return true;
+	}
+
 	/**
 	 * Replace all occurrence of the character to be replaced with the
 	 * remplacement character in the given array. <br>
