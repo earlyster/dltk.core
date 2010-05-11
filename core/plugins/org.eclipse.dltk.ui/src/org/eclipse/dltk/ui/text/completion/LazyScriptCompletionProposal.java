@@ -11,6 +11,7 @@
 package org.eclipse.dltk.ui.text.completion;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -68,7 +69,7 @@ public abstract class LazyScriptCompletionProposal extends
 	}
 
 	protected char[] computeTriggerCharacters() {
-		return new char[0];
+		return CharOperation.NO_CHAR;
 	}
 
 	/**
