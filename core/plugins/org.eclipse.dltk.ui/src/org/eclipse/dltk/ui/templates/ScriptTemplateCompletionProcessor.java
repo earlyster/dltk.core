@@ -12,7 +12,6 @@ package org.eclipse.dltk.ui.templates;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -47,14 +46,14 @@ import org.eclipse.ui.part.IWorkbenchPartOrientation;
 public abstract class ScriptTemplateCompletionProcessor extends
 		TemplateCompletionProcessor {
 
-	private static final class ProposalComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			return ((TemplateProposal) o2).getRelevance()
-					- ((TemplateProposal) o1).getRelevance();
+	private static final class ProposalComparator implements
+			Comparator<TemplateProposal> {
+		public int compare(TemplateProposal o1, TemplateProposal o2) {
+			return o2.getRelevance() - o1.getRelevance();
 		}
 	}
 
-	private static final Comparator comparator = new ProposalComparator();
+	private static final Comparator<TemplateProposal> comparator = new ProposalComparator();
 
 	private final ScriptContentAssistInvocationContext context;
 
@@ -68,6 +67,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return this.context;
 	}
 
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
 			int offset) {
 
@@ -82,7 +82,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		if (!isValidPrefix(prefix)) {
 			return new ICompletionProposal[0];
 		}
-		Region region = new Region(offset - prefix.length(), prefix.length());
+		IRegion region = new Region(offset - prefix.length(), prefix.length());
 		TemplateContext context = createContext(viewer, region);
 		if (context == null)
 			return new ICompletionProposal[0];
@@ -90,7 +90,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		// name of the selection variables {line, word}_selection
 		context.setVariable("selection", selection.getText()); //$NON-NLS-1$
 
-		List matches = new ArrayList();
+		List<TemplateProposal> matches = new ArrayList<TemplateProposal>();
 
 		Template[] templates = getTemplates(context.getContextType().getId());
 		for (int i = 0; i < templates.length; i++) {
@@ -101,20 +101,18 @@ public abstract class ScriptTemplateCompletionProcessor extends
 				continue;
 			}
 			if (isMatchingTemplate(template, prefix, context))
-				matches.add(createProposal(template, context, (IRegion) region,
-						getRelevance(template, prefix)));
+				matches.add((TemplateProposal) createProposal(template,
+						context, region, getRelevance(template, prefix)));
 		}
 
 		Collections.sort(matches, comparator);
 
 		final IInformationControlCreator controlCreator = getInformationControlCreator();
-		for (Iterator i = matches.iterator(); i.hasNext();) {
-			TemplateProposal proposal = (TemplateProposal) i.next();
+		for (TemplateProposal proposal : matches) {
 			proposal.setInformationControlCreator(controlCreator);
 		}
 
-		return (ICompletionProposal[]) matches
-				.toArray(new ICompletionProposal[matches.size()]);
+		return matches.toArray(new ICompletionProposal[matches.size()]);
 	}
 
 	protected boolean isValidPrefix(String prefix) {
@@ -127,6 +125,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 				&& template.matches(prefix, context.getContextType().getId());
 	}
 
+	@Override
 	protected TemplateContext createContext(ITextViewer viewer, IRegion region) {
 		TemplateContextType contextType = getContextType(viewer, region);
 		if (contextType instanceof ScriptTemplateContextType) {
@@ -143,6 +142,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return null;
 	}
 
+	@Override
 	protected ICompletionProposal createProposal(Template template,
 			TemplateContext context, IRegion region, int relevance) {
 		return new ScriptTemplateProposal(template, context, region,
@@ -168,6 +168,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 
 	protected abstract ScriptTemplateAccess getTemplateAccess();
 
+	@Override
 	protected Template[] getTemplates(String contextTypeId) {
 		if (contextTypeId.equals(getContextTypeId())) {
 			return getTemplateAccess().getTemplateStore().getTemplates();
@@ -180,6 +181,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return CharOperation.NO_CHAR;
 	}
 
+	@Override
 	protected TemplateContextType getContextType(ITextViewer viewer,
 			IRegion region) {
 		if (isValidLocation(viewer, region)) {
@@ -215,6 +217,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return true;
 	}
 
+	@Override
 	protected Image getImage(Template template) {
 		return DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE);
 	}
