@@ -45,7 +45,7 @@ import org.eclipse.dltk.internal.codeassist.InternalCompletionProposal;
  * @see ICodeAssist#codeComplete(int, CompletionRequestor)
  * 
  */
-public final class CompletionProposal extends InternalCompletionProposal {
+public class CompletionProposal {
 	/**
 	 * Completion is a reference to a field. This kind of completion might occur
 	 * in a context like <code>"this.ref^ = 0;"</code> and complete it to
@@ -139,9 +139,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	public static final int METHOD_NAME_REFERENCE = 10;
 
 	public static final int PACKAGE_REF = 11;
-	/**
-	 * Private method declarations.
-	 */
+
 	public static final int USER = 15;
 
 	/**
@@ -183,7 +181,6 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 */
 	private String completion = Util.EMPTY_STRING;
 
-	public Object extraInfo;
 	/**
 	 * Start position (inclusive) of source range in original buffer to be
 	 * replaced by completion string; defaults to empty subrange at [0,0).
@@ -232,13 +229,13 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 */
 	private String[] parameterNames = null;
 
-	/**
-	 * Indicates whether parameter names have been computed.
-	 */
-	// private boolean parameterNamesComputed = false;
 	private IModelElement modelElement;
 
-	// private String proposalInfo;
+	private Object extraInfo;
+
+	private int accessibility = IAccessRule.K_ACCESSIBLE;
+
+	private boolean isConstructor = false;
 
 	/**
 	 * Creates a basic completion proposal. All instance field have plausible
@@ -256,7 +253,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * @return a new completion proposal
 	 */
 	public static CompletionProposal create(int kind, int completionOffset) {
-		return new CompletionProposal(kind, completionOffset);
+		return new InternalCompletionProposal(kind, completionOffset);
 	}
 
 	/**
@@ -789,7 +786,6 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 */
 	public void setParameterNames(String[] parameterNames) {
 		this.parameterNames = parameterNames;
-		// this.parameterNamesComputed = true;
 	}
 
 	@Override
@@ -867,5 +863,64 @@ public final class CompletionProposal extends InternalCompletionProposal {
 
 	public void setModelElement(IModelElement modelElement) {
 		this.modelElement = modelElement;
+	}
+
+	public Object getExtraInfo() {
+		return extraInfo;
+	}
+
+	public void setExtraInfo(Object extraInfo) {
+		this.extraInfo = extraInfo;
+	}
+
+	/**
+	 * Returns the accessibility of the proposal.
+	 * <p>
+	 * This field is available for the following kinds of completion proposals:
+	 * <ul>
+	 * <li><code>TYPE_REF</code> - accessibility of the type</li>
+	 * </ul>
+	 * For these kinds of completion proposals, this method returns
+	 * {@link IAccessRule#K_ACCESSIBLE} or {@link IAccessRule#K_DISCOURAGED} or
+	 * {@link IAccessRule#K_NON_ACCESSIBLE}. By default this method return
+	 * {@link IAccessRule#K_ACCESSIBLE}.
+	 * </p>
+	 * 
+	 * @see IAccessRule
+	 * 
+	 * @return the accessibility of the proposal
+	 * 
+	 */
+	public int getAccessibility() {
+		return this.accessibility;
+	}
+
+	public void setAccessibility(int accessiblility) {
+		this.accessibility = accessiblility;
+	}
+
+	/**
+	 * Returns whether this proposal is a constructor.
+	 * <p>
+	 * This field is available for the following kinds of completion proposals:
+	 * <ul>
+	 * <li><code>METHOD_REF</code> - return <code>true</code> if the referenced
+	 * method is a constructor</li>
+	 * <li><code>METHOD_DECLARATION</code> - return <code>true</code> if the
+	 * declared method is a constructor</li>
+	 * </ul>
+	 * For kinds of completion proposals, this method returns <code>false</code>
+	 * .
+	 * </p>
+	 * 
+	 * @return <code>true</code> if the proposal is a constructor.
+	 * 
+	 */
+	public boolean isConstructor() {
+		return this.isConstructor;
+	}
+
+	public void setIsConstructor(boolean isConstructor) {
+		this.isConstructor = isConstructor;
 	}
 }
