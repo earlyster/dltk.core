@@ -207,8 +207,7 @@ public class CompletionProposalLabelProvider {
 		return proposal.getName();
 	}
 
-	protected String createLabelWithTypeAndDeclaration(
-			CompletionProposal proposal) {
+	protected String createFieldProposalLabel(CompletionProposal proposal) {
 		return proposal.getName();
 	}
 
@@ -248,7 +247,7 @@ public class CompletionProposalLabelProvider {
 			// case CompletionProposal.JAVADOC_METHOD_REF:
 			// return createJavadocMethodProposalLabel(proposal);
 		case CompletionProposal.FIELD_REF:
-			return createLabelWithTypeAndDeclaration(proposal);
+			return createFieldProposalLabel(proposal);
 		case CompletionProposal.LOCAL_VARIABLE_REF:
 		case CompletionProposal.VARIABLE_DECLARATION:
 			return createSimpleLabelWithType(proposal);

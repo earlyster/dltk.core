@@ -629,8 +629,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		String completion = String.valueOf(proposal.getCompletion());
 		int start = proposal.getReplaceStart();
 		int length = getLength(proposal);
-		String label = getLabelProvider().createLabelWithTypeAndDeclaration(
-				proposal);
+		String label = getLabelProvider().createFieldProposalLabel(proposal);
 		Image image = getImage(getLabelProvider().createFieldImageDescriptor(
 				proposal));
 		int relevance = computeRelevance(proposal);
