@@ -27,6 +27,7 @@ public class ScriptTemplateProposal extends TemplateProposal implements
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateProposal#getRelevance()
 	 */
+	@Override
 	public int getRelevance() {
 		return isRelevanceOverriden ? relevanceOverride : super.getRelevance();
 	}
@@ -36,6 +37,7 @@ public class ScriptTemplateProposal extends TemplateProposal implements
 		this.isRelevanceOverriden = true;
 	}
 
+	@Override
 	public String getAdditionalProposalInfo() {
 		TemplateContext context = getContext();
 		if (context instanceof ScriptTemplateContext) {
