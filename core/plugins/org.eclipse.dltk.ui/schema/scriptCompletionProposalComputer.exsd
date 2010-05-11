@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.dltk.ui">
+<schema targetNamespace="org.eclipse.dltk.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.dltk.ui" id="scriptCompletionProposalComputer" name="Script Completion Proposal Computer"/>
@@ -13,7 +13,7 @@
    <element name="extension">
       <annotation>
          <appInfo>
-            <meta.element labelAttribute="name"/>
+            <meta.element labelAttribute="name" />
          </appInfo>
       </annotation>
       <complexType>
@@ -63,11 +63,11 @@
                <documentation>
                   The name of the class that implements the contributed computer. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer&lt;/samp&gt;
+&lt;samp&gt;org.eclipse.dltk.ui.text.completion.IScriptCompletionProposalComputer&lt;/samp&gt;
 and must have a public 0-argument constructor.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.text.completion.IScriptCompletionProposalComputer"/>
                </appInfo>
             </annotation>
          </attribute>
