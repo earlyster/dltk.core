@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
@@ -713,11 +714,9 @@ public abstract class ScriptCompletionProposalCollector extends
 			return null;
 		}
 
-		String name = String.valueOf(proposal.getName());
+		String name = proposal.getName();
 
-		String[] paramTypes;
-
-		paramTypes = new String[0];
+		String[] paramTypes = CharOperation.NO_STRINGS;
 
 		int start = proposal.getReplaceStart();
 		int length = getLength(proposal);
@@ -730,7 +729,6 @@ public abstract class ScriptCompletionProposalCollector extends
 				.createMethodImageDescriptor(proposal)));
 
 		ProposalInfo info = new MethodProposalInfo(fScriptProject, proposal);
-		// info.setHackMessage("<h1></h1>");
 		scriptProposal.setProposalInfo(info);
 
 		scriptProposal.setRelevance(computeRelevance(proposal));
