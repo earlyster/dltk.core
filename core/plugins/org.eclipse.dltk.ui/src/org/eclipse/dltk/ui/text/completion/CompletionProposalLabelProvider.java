@@ -59,7 +59,7 @@ public class CompletionProposalLabelProvider {
 	public String createParameterList(CompletionProposal methodProposal) {
 		Assert
 				.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
-		return appendUnboundedParameterList(new StringBuffer(), methodProposal)
+		return appendParameterList(new StringBuffer(), methodProposal)
 				.toString();
 	}
 
@@ -73,16 +73,10 @@ public class CompletionProposalLabelProvider {
 	 *            the method proposal
 	 * @return the modified <code>buffer</code>
 	 */
-	protected StringBuffer appendUnboundedParameterList(StringBuffer buffer,
+	protected StringBuffer appendParameterList(StringBuffer buffer,
 			CompletionProposal methodProposal) {
-		// TODO remove once https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
-		// gets fixed.
 		String[] parameterNames = methodProposal.findParameterNames(null);
-		char[][] parameterTypes = null;
-		// for (int i= 0; i < parameterTypes.length; i++) {
-		// parameterTypes[i]=
-		//createTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
-		// }
+		String[] parameterTypes = null;
 		return appendParameterSignature(buffer, parameterTypes, parameterNames);
 	}
 
@@ -98,7 +92,7 @@ public class CompletionProposalLabelProvider {
 	 *         arguments
 	 */
 	protected StringBuffer appendParameterSignature(StringBuffer buffer,
-			char[][] parameterTypes, String[] parameterNames) {
+			String[] parameterTypes, String[] parameterNames) {
 		if (parameterNames != null) {
 			for (int i = 0; i < parameterNames.length; i++) {
 				if (i > 0) {
@@ -141,7 +135,7 @@ public class CompletionProposalLabelProvider {
 
 		// parameters
 		nameBuffer.append('(');
-		appendUnboundedParameterList(nameBuffer, methodProposal);
+		appendParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(')');
 
 		return nameBuffer.toString();
@@ -156,7 +150,7 @@ public class CompletionProposalLabelProvider {
 
 		// parameters
 		nameBuffer.append('(');
-		appendUnboundedParameterList(nameBuffer, methodProposal);
+		appendParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(")  "); //$NON-NLS-1$
 
 		return nameBuffer.toString();
@@ -182,11 +176,6 @@ public class CompletionProposalLabelProvider {
 	protected String createTypeProposalLabel(CompletionProposal typeProposal) {
 		String fullName = typeProposal.getName();
 		return createTypeProposalLabel(fullName);
-	}
-
-	protected String createScriptdocSimpleProposalLabel(CompletionProposal proposal) {
-		// TODO get rid of this
-		return createSimpleLabel(proposal);
 	}
 
 	protected String createTypeProposalLabel(String fullName) {
@@ -218,7 +207,8 @@ public class CompletionProposalLabelProvider {
 		return proposal.getName();
 	}
 
-	protected String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
+	protected String createLabelWithTypeAndDeclaration(
+			CompletionProposal proposal) {
 		return proposal.getName();
 	}
 

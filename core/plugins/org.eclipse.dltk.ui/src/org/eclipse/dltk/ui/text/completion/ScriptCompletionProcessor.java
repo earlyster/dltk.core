@@ -14,6 +14,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -26,9 +30,9 @@ import org.eclipse.ui.IEditorPart;
  * Script completion processor.
  */
 public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
-	
+
 	private final static String VISIBILITY = DLTKCore.CODEASSIST_VISIBILITY_CHECK;
-	
+
 	private final static String ENABLED = "enabled"; //$NON-NLS-1$
 
 	private final static String DISABLED = "disabled"; //$NON-NLS-1$
@@ -74,11 +78,12 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
+	 * @seeorg.eclipse.jface.text.contentassist.IContentAssistProcessor#
+	 * getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
 		if (fValidator == null) {
-			fValidator= new ScriptParameterListValidator();
+			fValidator = new ScriptParameterListValidator();
 		}
 		return fValidator;
 	}
@@ -92,26 +97,37 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 
 	protected abstract String getNatureId();
 
-	protected abstract CompletionProposalLabelProvider getProposalLabelProvider();
+	@Deprecated
+	protected final CompletionProposalLabelProvider getProposalLabelProvider() {
+		return null;
+	}
 
+	@Override
+	protected final IPreferenceStore getPreferenceStore() {
+		final IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
+				.getLanguageToolkit(getNatureId());
+		if (toolkit != null) {
+			return toolkit.getPreferenceStore();
+		}
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
+
+	@Override
 	protected void setContextInformationMode(
 			ContentAssistInvocationContext context) {
 		((ScriptContentAssistInvocationContext) context)
 				.setContextInformationMode(true);
 	}
 
+	@Override
 	protected ContentAssistInvocationContext createContext(ITextViewer viewer,
 			int offset) {
 		return new ScriptContentAssistInvocationContext(viewer, offset,
-				fEditor, getNatureId()) {
-			protected CompletionProposalLabelProvider createLabelProvider() {
-				return getProposalLabelProvider();
-			}
-		};
+				fEditor, getNatureId());
 	}
 
-	protected static class ScriptParameterListValidator implements IContextInformationValidator,
-			IContextInformationPresenter {
+	protected static class ScriptParameterListValidator implements
+			IContextInformationValidator, IContextInformationPresenter {
 
 		private int initialOffset;
 

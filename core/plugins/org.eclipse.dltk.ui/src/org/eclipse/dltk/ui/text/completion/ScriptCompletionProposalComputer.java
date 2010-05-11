@@ -219,7 +219,7 @@ public abstract class ScriptCompletionProposalComputer implements
 		// Checking proposals
 		if (proposals.length == 0) {
 			String error = collector.getErrorMessage();
-			if (error.length() > 0) {
+			if (error != null && error.length() > 0) {
 				fErrorMessage = error;
 			}
 
@@ -333,8 +333,6 @@ public abstract class ScriptCompletionProposalComputer implements
 	protected abstract TemplateCompletionProcessor createTemplateProposalComputer(
 			ScriptContentAssistInvocationContext context);
 
-	protected ScriptCompletionProposalCollector createCollector(
-			ScriptContentAssistInvocationContext context) {
-		return null;
-	}
+	protected abstract ScriptCompletionProposalCollector createCollector(
+			ScriptContentAssistInvocationContext context);
 }

@@ -10,8 +10,8 @@
 package org.eclipse.dltk.ui.text.completion;
 
 import org.eclipse.dltk.core.CompletionContext;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
@@ -23,7 +23,7 @@ import org.eclipse.ui.IEditorPart;
 /**
  * Describes the context of a content assist invocation in a Script editor.
  */
-public abstract class ScriptContentAssistInvocationContext extends
+public class ScriptContentAssistInvocationContext extends
 		ContentAssistInvocationContext {
 	private final IEditorPart fEditor;
 
@@ -35,8 +35,8 @@ public abstract class ScriptContentAssistInvocationContext extends
 	private RHSHistory fRHSHistory;
 	private IType fType;
 
-	private String fLanguageNatureID;
-	private boolean isContextInformationMode; 
+	private final String fLanguageNatureID;
+	private boolean isContextInformationMode;
 
 	/**
 	 * Creates a new context.
@@ -51,7 +51,7 @@ public abstract class ScriptContentAssistInvocationContext extends
 	public ScriptContentAssistInvocationContext(ITextViewer viewer, int offset,
 			IEditorPart editor, String natureId) {
 		super(viewer, offset);
-		
+
 		fEditor = editor;
 		fLanguageNatureID = natureId;
 	}
@@ -62,15 +62,17 @@ public abstract class ScriptContentAssistInvocationContext extends
 	 * @param unit
 	 *            the compilation unit in <code>document</code>
 	 */
-	public ScriptContentAssistInvocationContext(ISourceModule unit) {
+	public ScriptContentAssistInvocationContext(ISourceModule unit,
+			String natureId) {
 		super();
 		fSourceModule = unit;
 		fSourceModuleComputed = true;
 		fEditor = null;
+		fLanguageNatureID = natureId;
 	}
 
 	public IEditorPart getEditor() {
-	  return fEditor;
+		return fEditor;
 	}
 
 	public String getLanguageNatureID() {
@@ -149,10 +151,9 @@ public abstract class ScriptContentAssistInvocationContext extends
 	/**
 	 * Returns an float in [0.0,&nbsp;1.0] based on whether the type has been
 	 * recently used as a right hand side for the type expected in the current
-	 * context. 0 signals that the <code>qualifiedTypeName</code> does not
-	 * match the expected type, while 1.0 signals that
-	 * <code>qualifiedTypeName</code> has most recently been used in a similar
-	 * context.
+	 * context. 0 signals that the <code>qualifiedTypeName</code> does not match
+	 * the expected type, while 1.0 signals that <code>qualifiedTypeName</code>
+	 * has most recently been used in a similar context.
 	 * 
 	 * @param qualifiedTypeName
 	 *            the type name of the type of interest
@@ -172,13 +173,14 @@ public abstract class ScriptContentAssistInvocationContext extends
 		if (fRHSHistory == null) {
 			CompletionContext context = getCoreContext();
 			if (context != null) {
-//				char[][] expectedTypes = context.getExpectedTypesSignatures();
-//				if (expectedTypes != null && expectedTypes.length > 0) {
-//					String expected = SignatureUtil.stripSignatureToFQN(String
-//							.valueOf(expectedTypes[0]));
-//					fRHSHistory = DLTKUIPlugin.getDefault()
-//							.getContentAssistHistory().getHistory(expected);
-//				}
+				// char[][] expectedTypes =
+				// context.getExpectedTypesSignatures();
+				// if (expectedTypes != null && expectedTypes.length > 0) {
+				// String expected = SignatureUtil.stripSignatureToFQN(String
+				// .valueOf(expectedTypes[0]));
+				// fRHSHistory = DLTKUIPlugin.getDefault()
+				// .getContentAssistHistory().getHistory(expected);
+				// }
 			}
 			if (fRHSHistory == null)
 				fRHSHistory = DLTKUIPlugin.getDefault()
@@ -193,24 +195,24 @@ public abstract class ScriptContentAssistInvocationContext extends
 	 * @return the expected type if any, <code>null</code> otherwise
 	 */
 	public IType getExpectedType() {
-//		if (fType == null && getSourceModule() != null) {
-//			CompletionContext context = getCoreContext();
-//			if (context != null) {
-//				char[][] expectedTypes = context.getExpectedTypesSignatures();
-//				if (expectedTypes != null && expectedTypes.length > 0) {
-//					IScriptProject project = getSourceModule().getScriptProject();
-//					if (project != null) {
-//						try {
-//							fType = project.findType(SignatureUtil
-//									.stripSignatureToFQN(String
-//											.valueOf(expectedTypes[0])));
-//						} catch (ModelException x) {
-//							DLTKUIPlugin.log(x);
-//						}
-//					}
-//				}
-//			}
-//		}
+		// if (fType == null && getSourceModule() != null) {
+		// CompletionContext context = getCoreContext();
+		// if (context != null) {
+		// char[][] expectedTypes = context.getExpectedTypesSignatures();
+		// if (expectedTypes != null && expectedTypes.length > 0) {
+		// IScriptProject project = getSourceModule().getScriptProject();
+		// if (project != null) {
+		// try {
+		// fType = project.findType(SignatureUtil
+		// .stripSignatureToFQN(String
+		// .valueOf(expectedTypes[0])));
+		// } catch (ModelException x) {
+		// DLTKUIPlugin.log(x);
+		// }
+		// }
+		// }
+		// }
+		// }
 		return fType;
 	}
 
@@ -230,15 +232,18 @@ public abstract class ScriptContentAssistInvocationContext extends
 		return fLabelProvider;
 	}
 
-	protected abstract CompletionProposalLabelProvider createLabelProvider();
+	protected final CompletionProposalLabelProvider createLabelProvider() {
+		return CompletionProposalLabelProviderRegistry
+				.create(getLanguageNatureID());
+	}
 
 	/**
 	 * @param value
 	 */
 	public void setContextInformationMode(boolean value) {
-		isContextInformationMode = value;		
+		isContextInformationMode = value;
 	}
-	
+
 	public boolean isContextInformationMode() {
 		return isContextInformationMode;
 	}

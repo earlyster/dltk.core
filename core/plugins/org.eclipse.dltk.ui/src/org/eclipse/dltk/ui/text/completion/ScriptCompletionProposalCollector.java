@@ -78,8 +78,7 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	private final List<IScriptCompletionProposal> fScriptProposals = new ArrayList<IScriptCompletionProposal>();
 
-	private final List<CompletionProposal> fRawCompletionProposals = new ArrayList<CompletionProposal>();
-	private final List<CompletionProposal> fUnprosessedCompletionProposals = new ArrayList<CompletionProposal>();
+	private final List<CompletionProposal> fUnprocessedCompletionProposals = new ArrayList<CompletionProposal>();
 
 	private final List<IScriptCompletionProposal> fKeywords = new ArrayList<IScriptCompletionProposal>();
 
@@ -95,7 +94,7 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	private IProblem fLastProblem;
 
-	/* performance instrumentation */
+	/* performance measurement */
 	private long fStartTime;
 
 	private long fUITime;
@@ -183,22 +182,10 @@ public abstract class ScriptCompletionProposalCollector extends
 		return fInvocationContext;
 	}
 
-	// protected abstract ScriptContentAssistInvocationContext
-	// createScriptContentAssistInvocationContext(
-	// ISourceModule sourceModule);
-	// Invocation context
 	protected ScriptContentAssistInvocationContext createScriptContentAssistInvocationContext(
 			ISourceModule sourceModule) {
-		return new ScriptContentAssistInvocationContext(sourceModule) {
-			protected CompletionProposalLabelProvider createLabelProvider() {
-				return new CompletionProposalLabelProvider();
-			}
-		};
-	}
-
-	protected CompletionProposal[] getRawCompletionProposals() {
-		return fRawCompletionProposals
-				.toArray(new CompletionProposal[fRawCompletionProposals.size()]);
+		return new ScriptContentAssistInvocationContext(sourceModule,
+				getNatureId());
 	}
 
 	/**
@@ -210,15 +197,13 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * createJavaCompletionProposal} instead.
 	 * </p>
 	 */
+	@Override
 	public void accept(CompletionProposal proposal) {
 		long start = DEBUG ? System.currentTimeMillis() : 0;
 		try {
 			if (isFiltered(proposal))
 				return;
-			fRawCompletionProposals.add(proposal);
-			synchronized (fUnprosessedCompletionProposals) {
-				fUnprosessedCompletionProposals.add(proposal);
-			}
+			doAccept(proposal);
 		} catch (IllegalArgumentException e) {
 			// all signature processing method may throw IAEs
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
@@ -234,6 +219,12 @@ public abstract class ScriptCompletionProposalCollector extends
 			fUITime += System.currentTimeMillis() - start;
 	}
 
+	protected void doAccept(CompletionProposal proposal) {
+		synchronized (fUnprocessedCompletionProposals) {
+			fUnprocessedCompletionProposals.add(proposal);
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -242,21 +233,22 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * 
 	 * @see #getContext()
 	 */
+	@Override
 	public void acceptContext(CompletionContext context) {
 		fContext = context;
-		this.getLabelProvider().setContext(context);
+		getLabelProvider().setContext(context);
 	}
 
 	// Label provider
-	protected CompletionProposalLabelProvider createLabelProvider() {
-		return new CompletionProposalLabelProvider();
+	protected final CompletionProposalLabelProvider createLabelProvider() {
+		return CompletionProposalLabelProviderRegistry.create(getNatureId());
 	}
 
 	protected CompletionProposalLabelProvider getLabelProvider() {
 		if (fLabelProvider == null) {
 			fLabelProvider = createLabelProvider();
 		}
-		return this.fLabelProvider;
+		return fLabelProvider;
 	}
 
 	/**
@@ -264,6 +256,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void beginReporting() {
 		if (DEBUG) {
 			fStartTime = System.currentTimeMillis();
@@ -280,6 +273,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void completionFailure(IProblem problem) {
 		fLastProblem = problem;
 	}
@@ -289,6 +283,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
+	@Override
 	public void endReporting() {
 		if (DEBUG) {
 			long total = System.currentTimeMillis() - fStartTime;
@@ -324,13 +319,14 @@ public abstract class ScriptCompletionProposalCollector extends
 	}
 
 	private void processUnprocessedProposals() {
-		final List<CompletionProposal> copy;
-		synchronized (fUnprosessedCompletionProposals) {
-			if (fUnprosessedCompletionProposals.isEmpty())
+		final CompletionProposal[] copy;
+		synchronized (fUnprocessedCompletionProposals) {
+			final int size = fUnprocessedCompletionProposals.size();
+			if (size == 0)
 				return;
-			copy = new ArrayList<CompletionProposal>(
-					fUnprosessedCompletionProposals);
-			fUnprosessedCompletionProposals.clear();
+			copy = fUnprocessedCompletionProposals
+					.toArray(new CompletionProposal[size]);
+			fUnprocessedCompletionProposals.clear();
 		}
 		for (CompletionProposal proposal : copy) {
 			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
@@ -566,9 +562,6 @@ public abstract class ScriptCompletionProposalCollector extends
 		if (isIgnored(proposal.getKind())) {
 			return true;
 		}
-
-		// TODO: possible add code to check completion preferences for filtering
-
 		return false;
 	}
 
@@ -615,6 +608,8 @@ public abstract class ScriptCompletionProposalCollector extends
 	// .getReplaceStart(), getLength(proposal), getImage(descriptor),
 	// displayString, computeRelevance(proposal));
 	// }
+
+	protected abstract String getNatureId();
 
 	protected abstract ScriptCompletionProposal createScriptCompletionProposal(
 			String completion, int replaceStart, int length, Image image,
@@ -779,14 +774,9 @@ public abstract class ScriptCompletionProposalCollector extends
 		scriptProposal.setProposalInfo(new TypeProposalInfo(fScriptProject,
 				typeProposal));
 		return scriptProposal;
-
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.core.CompletionRequestor#isContextInformationMode()
-	 */
+	@Override
 	public boolean isContextInformationMode() {
 		return fInvocationContext != null
 				&& fInvocationContext.isContextInformationMode();
@@ -794,6 +784,11 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	@Override
 	public void clear() {
-		this.fScriptProposals.clear();
+		synchronized (fUnprocessedCompletionProposals) {
+			fUnprocessedCompletionProposals.clear();
+		}
+		fScriptProposals.clear();
+		fKeywords.clear();
+		fSuggestedMethodNames.clear();
 	}
 }
