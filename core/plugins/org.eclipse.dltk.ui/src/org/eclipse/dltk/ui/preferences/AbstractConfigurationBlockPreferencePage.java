@@ -127,7 +127,9 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 	/**
 	 * Returns the help id for the preference page
 	 */
-	protected abstract String getHelpId();
+	protected String getHelpId() {
+		return null;
+	}
 
 	/**
 	 * Set the preference page description.
@@ -137,7 +139,8 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 	 * description.
 	 * </p>
 	 */
-	protected abstract void setDescription();
+	protected void setDescription() {
+	}
 
 	/**
 	 * Set the preference store that will hold the preference settings.
