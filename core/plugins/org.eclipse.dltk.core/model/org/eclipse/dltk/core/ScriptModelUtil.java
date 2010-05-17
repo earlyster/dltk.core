@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.SearchRequestor;
 import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
+import org.eclipse.dltk.internal.core.util.ElementTypeDescriber;
 
 public class ScriptModelUtil {
 	/**
@@ -241,6 +242,15 @@ public class ScriptModelUtil {
 			}
 			return path;
 		}
+	}
+
+	private static ElementTypeDescriber elementTypeDescriber = null;
+
+	public static String describeElementType(int elementType) {
+		if (elementTypeDescriber == null) {
+			elementTypeDescriber = new ElementTypeDescriber();
+		}
+		return elementTypeDescriber.describe(elementType);
 	}
 
 }
