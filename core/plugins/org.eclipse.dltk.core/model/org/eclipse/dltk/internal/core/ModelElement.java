@@ -34,6 +34,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -77,7 +78,7 @@ public abstract class ModelElement extends PlatformObject implements
 	 * This element's parent, or <code>null</code> if this element does not have
 	 * a parent.
 	 */
-	protected ModelElement parent;
+	protected final ModelElement parent;
 
 	protected static final ModelElement[] NO_ELEMENTS = new ModelElement[0];
 	protected static final Object NO_INFO = new Object();
@@ -616,13 +617,39 @@ public abstract class ModelElement extends PlatformObject implements
 	}
 
 	/**
-	 * Only for testing.
+	 * Returns element type and name. called from
+	 * {@link #printNode(CorePrinter)} only.
 	 * 
-	 * Used to print this node with all sub childs.
+	 * @return
+	 */
+	protected String describeElement() {
+		return ScriptModelUtil.describeElementType(getElementType()) + ':'
+				+ getElementName();
+	}
+
+	/**
+	 * Only for testing. Used to print this node with all sub childs.
 	 * 
 	 * @param output
 	 */
-	public abstract void printNode(CorePrinter output);
+	public void printNode(CorePrinter output) {
+		output.formatPrint(describeElement());
+		output.indent();
+		try {
+			IModelElement modelElements[] = this.getChildren();
+			for (int i = 0; i < modelElements.length; ++i) {
+				IModelElement element = modelElements[i];
+				if (element instanceof ModelElement) {
+					((ModelElement) element).printNode(output);
+				} else {
+					output.print("Unknown element:" + element); //$NON-NLS-1$
+				}
+			}
+		} catch (ModelException ex) {
+			output.formatPrint(ex.getLocalizedMessage());
+		}
+		output.dedent();
+	}
 
 	/*
 	 * @see IModelElement#getPrimaryElement()
