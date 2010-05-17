@@ -112,6 +112,14 @@ public interface IModelElement extends IAdaptable {
 	int IMPORT_DECLARATION = 12;
 
 	/**
+	 * Constant representing a local variable declaration. A model element with
+	 * this type can be safely cast to {@link ILocalVariable}.
+	 * 
+	 * @since 2.0
+	 */
+	int LOCAL_VARIABLE = 13;
+
+	/**
 	 * Starting point for any kind of user elements.
 	 */
 	int USER_ELEMENT = 15;
