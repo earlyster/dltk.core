@@ -116,15 +116,18 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	private void processMethod(MethodInfo methodInfo,
 			ModelElement parentHandle, ModelElementInfo parentInfo) {
-		String nameString = methodInfo.name;
 		ModelManager manager = ModelManager.getModelManager();
 		BinaryMethod handle = new BinaryMethod(parentHandle, manager
-				.intern(nameString));
+				.intern(methodInfo.name));
 		resolveDuplicates(handle);
+
+		BinaryMethodElementInfo handleInfo = new BinaryMethodElementInfo();
+		handleInfo.setIsConstructor(methodInfo.isConstructor);
+		handleInfo.setFlags(methodInfo.modifiers);
+		handleInfo.setReturnType(methodInfo.returnType);
 
 		String[] parameterNames = methodInfo.parameterNames == null ? EMPTY
 				: methodInfo.parameterNames;
-		BinaryMethodElementInfo handleInfo = new BinaryMethodElementInfo();
 		if (parameterNames.length == 0) {
 			handleInfo.setArguments(SourceMethodUtils.NO_PARAMETERS);
 		} else {
@@ -151,9 +154,6 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 			}
 			handleInfo.setArguments(params);
 		}
-		handleInfo.setIsConstructor(methodInfo.isConstructor);
-		handleInfo.setFlags(methodInfo.modifiers);
-		handleInfo.setReturnType(methodInfo.returnType);
 
 		addChild(parentInfo, handle);
 		newElements.put(handle, handleInfo);
