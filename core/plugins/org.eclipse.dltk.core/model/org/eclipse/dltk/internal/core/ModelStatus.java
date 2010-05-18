@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.core.util.Messages;
 
 public class ModelStatus extends Status implements IModelStatus,
@@ -29,7 +30,7 @@ public class ModelStatus extends Status implements IModelStatus,
 	 * The elements related to the failure, or <code>null</code> if no elements
 	 * are involved.
 	 */
-	protected IModelElement[] elements = new IModelElement[0];
+	protected IModelElement[] elements = ScriptModelUtil.NO_ELEMENTS;
 
 	/**
 	 * The path related to the failure, or <code>null</code> if no path is
