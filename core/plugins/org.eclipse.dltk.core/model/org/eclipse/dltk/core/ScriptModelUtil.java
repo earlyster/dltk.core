@@ -25,6 +25,9 @@ import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
 import org.eclipse.dltk.internal.core.util.ElementTypeDescriber;
 
 public class ScriptModelUtil {
+
+	public static final IModelElement[] NO_ELEMENTS = new IModelElement[0];
+
 	/**
 	 * Force a reconcile of a compilation unit.
 	 * 

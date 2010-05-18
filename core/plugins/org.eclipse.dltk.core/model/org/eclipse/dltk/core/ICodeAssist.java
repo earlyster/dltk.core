@@ -112,7 +112,8 @@ public interface ICodeAssist {
 	 *            the given offset position
 	 * @param length
 	 *            the number of selected characters
-	 * @return the model elements corresponding to the given selected text
+	 * @return the model elements corresponding to the given selected text, not
+	 *         <code>null</code>
 	 * 
 	 * @exception ModelException
 	 *                if code resolve could not be performed. Reasons include:
@@ -150,7 +151,8 @@ public interface ICodeAssist {
 	 * @param owner
 	 *            the owner of working copies that take precedence over their
 	 *            original compilation units
-	 * @return the model elements corresponding to the given selected text
+	 * @return the model elements corresponding to the given selected text, not
+	 *         <code>null</code>
 	 * 
 	 * @exception ModelException
 	 *                if code resolve could not be performed. Reasons include:

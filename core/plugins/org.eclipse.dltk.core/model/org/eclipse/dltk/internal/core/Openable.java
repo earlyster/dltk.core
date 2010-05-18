@@ -38,6 +38,7 @@ import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 
 /**
@@ -556,7 +557,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 						.println("DLTK.Openable.VERBOSE: Failed to detect language toolkit... for module:" //$NON-NLS-1$
 								+ this.getResource().getName());
 			}
-			return new IModelElement[0];
+			return ScriptModelUtil.NO_ELEMENTS;
 		}
 
 		if (offset < 0 || length < 0 || (end != -1 && (offset + length > end))) {
@@ -567,7 +568,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		ISelectionEngine engine = DLTKLanguageManager
 				.getSelectionEngine(toolkit.getNatureId());
 		if (engine == null) {
-			return new IModelElement[0];
+			return ScriptModelUtil.NO_ELEMENTS;
 		}
 		// engine.setEnvironment(environment);
 		engine.setOptions(project.getOptions(true));
@@ -576,6 +577,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		IModelElement[] elements = engine.select(cu, offset, offset + length
 				- 1);
+		if (elements == null) {
+			elements = ScriptModelUtil.NO_ELEMENTS;
+		}
 		return elements;
 	}
 }
