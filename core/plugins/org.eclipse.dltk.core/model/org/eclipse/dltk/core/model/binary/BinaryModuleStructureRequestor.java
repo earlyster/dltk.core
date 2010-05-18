@@ -150,10 +150,10 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 						.intern(parameterNames[i]), type, defaultValue);
 			}
 			handleInfo.setArguments(params);
-			handleInfo.setIsConstructor(methodInfo.isConstructor);
-			handleInfo.setFlags(methodInfo.modifiers);
-			handleInfo.setReturnType(methodInfo.returnType);
 		}
+		handleInfo.setIsConstructor(methodInfo.isConstructor);
+		handleInfo.setFlags(methodInfo.modifiers);
+		handleInfo.setReturnType(methodInfo.returnType);
 
 		addChild(parentInfo, handle);
 		newElements.put(handle, handleInfo);
