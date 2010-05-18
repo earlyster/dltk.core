@@ -27,9 +27,6 @@ import org.eclipse.ui.IEditorPart;
  */
 class TextSelectionConverter {
 
-	/** Empty result. */
-	private static final IModelElement[] EMPTY_RESULT = new IModelElement[0];
-
 	/** Prevent instance creation. */
 	private TextSelectionConverter() {
 	}
@@ -89,7 +86,7 @@ class TextSelectionConverter {
 			if (elements != null && elements.length > 0)
 				return elements;
 		}
-		return EMPTY_RESULT;
+		return ScriptModelUtil.NO_ELEMENTS;
 	}
 
 	private static IModelElement getElementAtOffset(IModelElement input,

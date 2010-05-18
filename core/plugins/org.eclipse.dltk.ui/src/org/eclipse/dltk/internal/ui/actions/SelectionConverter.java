@@ -40,8 +40,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 public class SelectionConverter {
 
-	private static final IModelElement[] EMPTY_RESULT = new IModelElement[0];
-
 	private SelectionConverter() {
 		// no instance
 	}
@@ -82,12 +80,12 @@ public class SelectionConverter {
 			for (Iterator<?> iter = selection.iterator(); iter.hasNext(); i++) {
 				Object element = iter.next();
 				if (!(element instanceof IModelElement))
-					return EMPTY_RESULT;
+					return ScriptModelUtil.NO_ELEMENTS;
 				result[i] = (IModelElement) element;
 			}
 			return result;
 		}
-		return EMPTY_RESULT;
+		return ScriptModelUtil.NO_ELEMENTS;
 	}
 
 	public static boolean canOperateOn(IEditorPart editor) {
@@ -227,7 +225,7 @@ public class SelectionConverter {
 			if (elements != null && elements.length > 0)
 				return elements;
 		}
-		return EMPTY_RESULT;
+		return ScriptModelUtil.NO_ELEMENTS;
 	}
 
 	public static IModelElement getElementAtOffset(IModelElement input,
