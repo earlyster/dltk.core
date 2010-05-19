@@ -29,6 +29,12 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 	/** Flag to render the 'constructor' adornment. */
 	public final static int CONSTRUCTOR= 	0x200;
 	
+	/** Flag to render the 'override' adornment. */
+	public final static int OVERRIDES = 0x080;
+
+	/** Flag to render the 'implements' adornment. */
+	public final static int IMPLEMENTS = 0x100;
+
 	/** Flag to render the warning adornment. */
 	public final static int WARNING=			0x020;
 	
@@ -129,6 +135,7 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 			drawImage(bg, 0, 0);
 		}
 		drawTopRight();
+		drawBottomRight();
 		drawBottomLeft();
 	}
 	
@@ -165,6 +172,20 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 
 	}
 
+	private void drawBottomRight() {
+		Point size = getSize();
+		Point pos = new Point(size.x, size.y);
+
+		int flags = fFlags;
+
+		if ((flags & OVERRIDES) != 0) {
+			addBottomRightImage(DLTKPluginImages.DESC_OVR_OVERRIDES, pos);
+		}
+		if ((flags & IMPLEMENTS) != 0) {
+			addBottomRightImage(DLTKPluginImages.DESC_OVR_IMPLEMENTS, pos);
+		}
+	}
+
 	private void addTopRightImage(ImageDescriptor desc, Point pos) {
 		ImageData data = getImageData(desc);
 		int x = pos.x - data.width;
@@ -173,4 +194,15 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 			pos.x = x;
 		}
 	}
+
+	private void addBottomRightImage(ImageDescriptor desc, Point pos) {
+		ImageData data = getImageData(desc);
+		int x = pos.x - data.width;
+		int y = pos.y - data.height;
+		if (x >= 0 && y >= 0) {
+			drawImage(data, x, y);
+			pos.x = x;
+		}
+	}
+
 }

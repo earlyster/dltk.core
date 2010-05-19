@@ -175,6 +175,8 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR = createUnManaged(T_OVR, "constr_ovr.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = createUnManaged(T_OVR, "abstract_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FINAL = createUnManaged(T_OVR, "final_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_OVERRIDES = createUnManaged(T_OVR, "over_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_IMPLEMENTS = createUnManaged(T_OVR, "implm_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_STATIC = createUnManaged(T_OVR, "static_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RECURSIVE = createUnManaged(T_OVR, "recursive_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CALLER = createUnManaged(T_OVR, "read.gif"); //$NON-NLS-1$
