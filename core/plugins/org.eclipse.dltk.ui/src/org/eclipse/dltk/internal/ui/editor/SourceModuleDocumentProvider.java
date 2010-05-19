@@ -608,7 +608,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			int length = end - start;
 			if (length < 0)
 				return null;
-
+			int documentLength = fDocument.getLength();
+			if(start + length > documentLength){
+				length = documentLength - start;
+			}
 			return new Position(start, length);
 		}
 
