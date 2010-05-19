@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -42,6 +43,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -227,20 +229,30 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 						.getSelection();
 				if (selection instanceof ITextSelection) {
 					String text = ((ITextSelection) selection).getText();
-					if (text != null) {
-						text = text.trim();
-						if (text.length() > 0 /*
-											 * TODO: Add validate source type
-											 * call
-											 */) {
-							fInitialFilter = text;
-							fSelectionMode = FULL_SELECTION;
-						}
+					setInitialFilter(text);
+				}else if (selection instanceof IStructuredSelection) {
+					Object object = ((IStructuredSelection) selection).getFirstElement();
+					if (object instanceof IModelElement) {
+						IModelElement element = (IModelElement) object;
+						String text = element.getElementName();
+						setInitialFilter(text);
 					}
 				}
 			}
 		}
 		return super.open();
+	}
+
+	private void setInitialFilter(String text) {
+		if (text != null) {
+			text = text.trim();
+			if (text.length() > 0 /*
+								 * TODO: Add validate source type
+								 * call
+								 */) {
+				setFilter(text);
+			}
+		}
 	}
 
 	public boolean close() {
