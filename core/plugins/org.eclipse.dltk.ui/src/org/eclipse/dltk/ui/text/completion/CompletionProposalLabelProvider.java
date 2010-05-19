@@ -13,6 +13,10 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.Flags;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.ScriptElementImageDescriptor;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
@@ -128,17 +132,34 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given method proposal
 	 */
 	protected String createMethodProposalLabel(CompletionProposal methodProposal) {
-		StringBuffer nameBuffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 
 		// method name
-		nameBuffer.append(methodProposal.getName());
+		buffer.append(methodProposal.getName());
 
 		// parameters
-		nameBuffer.append('(');
-		appendParameterList(nameBuffer, methodProposal);
-		nameBuffer.append(')');
+		buffer.append('(');
+		appendParameterList(buffer, methodProposal);
+		buffer.append(')');
+		IModelElement element = methodProposal.getModelElement();
+		if (element != null && element.getElementType() == IModelElement.METHOD
+				&& element.exists()) {
+			final IMethod method = (IMethod) element;
+			try {
+				String type = method.getType();
+				if (type != null) {
+					buffer.append(": ").append(type);
+				}
+			} catch (ModelException e) {
+				// ignore
+			}
+			IType declaringType = method.getDeclaringType();
+			if (declaringType != null) {
+				buffer.append(" - ").append(declaringType.getElementName());
+			}
+		}
 
-		return nameBuffer.toString();
+		return buffer.toString();
 	}
 
 	protected String createOverrideMethodProposalLabel(
