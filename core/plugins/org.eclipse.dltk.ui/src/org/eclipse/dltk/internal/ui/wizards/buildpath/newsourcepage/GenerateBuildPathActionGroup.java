@@ -262,7 +262,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 					IProjectFragment ProjectFragment = ((IProjectFragment) element);
 					IScriptProject project = ProjectFragment.getScriptProject();
 					if (ProjectFragment.getKind() == IProjectFragment.K_SOURCE
-							&& project != null) {
+							&& project != null && findElement((IModelElement)element, BPListElement
+					.createFromExisting(project)) != null) {
 						fSelectedProject = project;
 						fSelectedElement = (IModelElement) element;
 						return true;
