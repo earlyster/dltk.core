@@ -124,6 +124,10 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			fMode= EMPTY_SELECTION;
 			return;
 		}
+		if (!hasCloseProjects()) {
+			setEnabled(false);
+			return;
+		}
 		fWorkbenchAction.selectionChanged(selection);
 		setEnabled(fWorkbenchAction.isEnabled());
 		fMode= ELEMENT_SELECTION;

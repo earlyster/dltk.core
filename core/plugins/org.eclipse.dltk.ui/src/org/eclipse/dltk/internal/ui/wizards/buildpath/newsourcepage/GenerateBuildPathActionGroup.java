@@ -262,8 +262,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 					IProjectFragment ProjectFragment = ((IProjectFragment) element);
 					IScriptProject project = ProjectFragment.getScriptProject();
 					if (ProjectFragment.getKind() == IProjectFragment.K_SOURCE
-							&& project != null && findElement((IModelElement)element, BPListElement
-					.createFromExisting(project)) != null) {
+							&& project != null
+							&& findElement((IModelElement) element,
+									BPListElement.createFromExisting(project)) != null) {
 						fSelectedProject = project;
 						fSelectedElement = (IModelElement) element;
 						return true;
@@ -375,8 +376,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		for (Iterator iter = fActions.iterator(); iter.hasNext();) {
 			Action action = (Action) iter.next();
 			if (action instanceof ISelectionChangedListener) {
-				provider
-						.addSelectionChangedListener((ISelectionChangedListener) action);
+				provider.addSelectionChangedListener((ISelectionChangedListener) action);
 			}
 		}
 
@@ -450,6 +450,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			return false;
 		IStructuredSelection selection = (IStructuredSelection) sel;
 
+		if (selection == null || selection.isEmpty()) {
+			return false;
+		}
+
 		if (selection.isEmpty()) {
 			return false;
 		}
@@ -479,8 +483,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			for (Iterator<Action> iter = fActions.iterator(); iter.hasNext();) {
 				Action action = iter.next();
 				if (action instanceof ISelectionChangedListener)
-					provider
-							.removeSelectionChangedListener((ISelectionChangedListener) action);
+					provider.removeSelectionChangedListener((ISelectionChangedListener) action);
 			}
 		}
 		fActions = null;
