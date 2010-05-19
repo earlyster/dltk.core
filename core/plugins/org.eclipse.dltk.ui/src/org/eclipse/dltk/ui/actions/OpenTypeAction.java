@@ -22,6 +22,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -82,7 +83,8 @@ public abstract class OpenTypeAction extends Action implements
 	}
 
 	protected String getOpenTypeDialogTitle() {
-		return DLTKUIMessages.OpenTypeAction_dialogTitle;
+		return NLS.bind(DLTKUIMessages.OpenTypeAction_dialogTitle,
+				getUILanguageToolkit().getCoreToolkit().getLanguageName());
 	}
 
 	// ---- IWorkbenchWindowActionDelegate
