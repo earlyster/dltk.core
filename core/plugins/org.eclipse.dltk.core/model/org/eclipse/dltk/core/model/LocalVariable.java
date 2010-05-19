@@ -193,7 +193,7 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 	protected void toStringInfo(int tab, StringBuffer buffer, Object info,
 			boolean showResolvedInfo) {
 		buffer.append(tabString(tab));
-		if (info != NO_INFO) {
+		if (info != NO_INFO && getType() != null) {
 			buffer.append(getType());
 			buffer.append(" "); //$NON-NLS-1$
 		}
