@@ -168,7 +168,12 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		for (int a = 0; a < args.size(); a++) {
 			Argument arg = (Argument) args.get(a);
 			parameter[a] = arg.getName();
-			initializers[a] = null;
+			if(arg.getInitialization() != null){
+				if (arg.getInitialization() instanceof Literal) {
+					Literal scalar = (Literal) arg.getInitialization();
+					initializers[a] = scalar.getValue();
+				}
+			}
 		}
 
 		ISourceElementRequestor.MethodInfo mi = new ISourceElementRequestor.MethodInfo();
