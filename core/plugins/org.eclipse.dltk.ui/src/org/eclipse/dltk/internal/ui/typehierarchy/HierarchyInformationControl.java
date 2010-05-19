@@ -120,7 +120,7 @@ public abstract class HierarchyInformationControl extends AbstractInformationCon
 		TreeViewer treeViewer= new TreeViewer(tree);
 		treeViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return element instanceof IType;
+				return element instanceof IType || element instanceof CumulativeType;
 			}
 		});		
 		
