@@ -36,6 +36,7 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IImportDeclaration;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IPackageDeclaration;
@@ -1470,6 +1471,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				length = -1;
 				if (reference instanceof IMember) {
 					range = ((IMember) reference).getNameRange();
+					if (range != null) {
+						offset = range.getOffset();
+						length = range.getLength();
+					}
+				} else if (reference instanceof ILocalVariable) {
+					range = ((ILocalVariable) reference).getNameRange();
 					if (range != null) {
 						offset = range.getOffset();
 						length = range.getLength();
