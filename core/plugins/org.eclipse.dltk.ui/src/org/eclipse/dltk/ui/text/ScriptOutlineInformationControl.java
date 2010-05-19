@@ -78,7 +78,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	// private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
-	private Map fTypeHierarchies = new HashMap();
+	protected Map fTypeHierarchies = new HashMap();
 	private final IPreferenceStore fPreferenceStore;
 
 	/**
@@ -215,21 +215,6 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 			super.internalExpandToLevel(node, level);
 		}
 
-		private boolean isInnerType(IModelElement element) {
-			if (element != null
-					&& element.getElementType() == IModelElement.TYPE) {
-				IType type = (IType) element;
-				// try {
-				return type.getDeclaringType() != null;
-				/*
-				 * } catch (ModelException e) { IModelElement parent=
-				 * type.getParent(); if (parent != null) { int
-				 * parentElementType= parent.getElementType(); return
-				 * (parentElementType != IModelElement.SOURCE_MODULE); } }
-				 */
-			}
-			return false;
-		}
 	}
 
 	private class OutlineContentProvider extends
@@ -275,7 +260,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 			if (fShowInheritedMembers && element instanceof IType) {
 				IType type = (IType) element;
-				if (type.getDeclaringType() == null) {
+				if (!isInnerType(type)) {
 					ITypeHierarchy th = getSuperTypeHierarchy(type);
 					if (th != null) {
 						List children = new ArrayList();
@@ -674,7 +659,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 	}
 
-	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
+	protected ITypeHierarchy getSuperTypeHierarchy(IType type) {
 		/*
 		 * ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type); if (th
 		 * == null) { try { th= SuperTypeHierarchyCache.getTypeHierarchy(type,
@@ -685,7 +670,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		return null;
 	}
 
-	private IProgressMonitor getProgressMonitor() {
+	protected IProgressMonitor getProgressMonitor() {
 		IWorkbenchPage wbPage = DLTKUIPlugin.getActivePage();
 		if (wbPage == null)
 			return null;
@@ -696,5 +681,21 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 		return editor.getEditorSite().getActionBars().getStatusLineManager()
 				.getProgressMonitor();
+	}
+	
+	protected boolean isInnerType(IModelElement element) {
+		if (element != null
+				&& element.getElementType() == IModelElement.TYPE) {
+			IType type = (IType) element;
+			// try {
+			return type.getDeclaringType() != null;
+			/*
+			 * } catch (ModelException e) { IModelElement parent=
+			 * type.getParent(); if (parent != null) { int
+			 * parentElementType= parent.getElementType(); return
+			 * (parentElementType != IModelElement.SOURCE_MODULE); } }
+			 */
+		}
+		return false;
 	}
 }
