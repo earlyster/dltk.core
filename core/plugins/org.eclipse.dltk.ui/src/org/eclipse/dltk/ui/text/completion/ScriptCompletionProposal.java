@@ -13,7 +13,6 @@ package org.eclipse.dltk.ui.text.completion;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.swt.graphics.Image;
 
 public abstract class ScriptCompletionProposal extends
@@ -82,10 +81,6 @@ public abstract class ScriptCompletionProposal extends
 		setCursorPosition(replacementString.length());
 		setInDoc(indoc);
 		setSortString(displayString == null ? replacementString : displayString);
-
-		// TODO: temporary solution - should be removed
-		setContextInformation(new ContextInformation(getDisplayString(),
-				getDisplayString()));
 	}
 
 	protected boolean isValidPrefix(String prefix) {
