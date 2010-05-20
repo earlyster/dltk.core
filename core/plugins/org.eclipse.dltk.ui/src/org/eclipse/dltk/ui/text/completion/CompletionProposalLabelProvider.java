@@ -147,16 +147,19 @@ public class CompletionProposalLabelProvider {
 				&& element.exists()) {
 			final IMethod method = (IMethod) element;
 			try {
-				String type = method.getType();
-				if (type != null) {
-					buffer.append(": ").append(type);
+				if (!method.isConstructor()) {
+					String type = method.getType();
+					if (type != null) {
+						buffer.append(": ").append(type);
+					}
+					IType declaringType = method.getDeclaringType();
+					if (declaringType != null) {
+						buffer.append(" - ").append(
+								declaringType.getElementName());
+					}
 				}
 			} catch (ModelException e) {
 				// ignore
-			}
-			IType declaringType = method.getDeclaringType();
-			if (declaringType != null) {
-				buffer.append(" - ").append(declaringType.getElementName());
 			}
 		}
 

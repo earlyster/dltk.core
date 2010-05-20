@@ -827,11 +827,13 @@ public class ScriptElementLabels {
 
 			if (getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
 					&& method.exists() && !method.isConstructor()) {
-				String type = method.getType();
-				if (type != null) {
-					// int offset = buf.length();
-					buf.append(ScriptElementLabels.DECL_STRING);
-					buf.append(type);
+				if (!method.isConstructor()) {
+					String type = method.getType();
+					if (type != null) {
+						// int offset = buf.length();
+						buf.append(ScriptElementLabels.DECL_STRING);
+						buf.append(type);
+					}
 				}
 			}
 
