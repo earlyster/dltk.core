@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.Flags;
+import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IType;
@@ -229,6 +230,19 @@ public class CompletionProposalLabelProvider {
 	}
 
 	protected String createFieldProposalLabel(CompletionProposal proposal) {
+		IModelElement element = proposal.getModelElement();
+		if (element != null && element.getElementType() == IModelElement.FIELD
+				&& element.exists()) {
+			final IField field = (IField) element;
+			try {
+				String type = field.getType();
+				if (type != null) {
+					return proposal.getName() + ": " + type;
+				}
+			} catch (ModelException e) {
+				// ignore
+			}
+		}
 		return proposal.getName();
 	}
 
