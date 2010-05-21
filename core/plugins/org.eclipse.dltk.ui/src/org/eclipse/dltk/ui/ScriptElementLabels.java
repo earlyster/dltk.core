@@ -878,9 +878,8 @@ public class ScriptElementLabels {
 						}
 					}
 					if (bInitializers && params[i].getDefaultValue() != null) {
-						buf.append("=\"");
+						buf.append("=");
 						buf.append(params[i].getDefaultValue());
-						buf.append("\"");
 					}
 				}
 			}
