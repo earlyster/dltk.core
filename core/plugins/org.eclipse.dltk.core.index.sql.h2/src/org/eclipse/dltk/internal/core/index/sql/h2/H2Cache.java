@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -300,78 +299,93 @@ public class H2Cache {
 				posixPattern = createPosixPattern(pattern);
 			}
 
-			List<Element> elements = new LinkedList<Element>();
+			List<Element> result = new LinkedList<Element>();
 			Map<Integer, List<Element>> elementsByFile = elementsMap
 					.get(elementType);
 			if (elementsByFile != null) {
 
-				Iterator<Entry<Integer, List<Element>>> i = elementsByFile
-						.entrySet().iterator();
-				while (i.hasNext()) {
-
-					Entry<Integer, List<Element>> elementEntry = i.next();
-
-					if (filesIds.size() == 0
-							|| filesIds.contains(elementEntry.getKey())) {
-
-						Iterator<Element> i2 = elementEntry.getValue()
-								.iterator();
-						while (i2.hasNext()) {
-
-							Element element = i2.next();
-							if ((trueFlags == 0 || (element.getFlags() & trueFlags) != 0)
-									&& (falseFlags == 0 || (element.getFlags() & falseFlags) == 0)) {
-
-								if (qualifier == null
-										|| qualifier.length() == 0
-										|| qualifier.equals(element
-												.getQualifier())) {
-
-									if (parent == null
-											|| parent.length() == 0
-											|| parent.equals(element
-													.getParent())) {
-
-										String elementName = element.getName();
-										if (pattern == null
-												|| pattern.length() == 0
-												|| (matchRule == MatchRule.EXACT && pattern
-														.equalsIgnoreCase(elementName))
-												|| (matchRule == MatchRule.PREFIX && elementName
-														.toLowerCase()
-														.startsWith(patternLC))
-												|| (matchRule == MatchRule.CAMEL_CASE
-														&& element
-																.getCamelCaseName() != null && element
-														.getCamelCaseName()
-														.startsWith(
-																pattern
-																		.toUpperCase()))
-												|| (matchRule == MatchRule.SET && patternSet
-														.contains(elementName
-																.toLowerCase()))
-												|| (matchRule == MatchRule.PATTERN && posixPattern
-														.matcher(elementName)
-														.matches())) {
-
-											elements.add(element);
-
-											if (--limit == 0) {
-												break;
-											}
-										}
-									}
-								}
-							}
-						}
+				if (filesIds.size() == 0) {
+					Iterator<List<Element>> i = elementsByFile.values()
+							.iterator();
+					while (i.hasNext()) {
+						searchInElements(i.next(), result, pattern, matchRule,
+								trueFlags, falseFlags, qualifier, parent,
+								patternSet, posixPattern, patternLC, limit);
+					}
+				} else {
+					for (Integer fileId : filesIds) {
+						searchInElements(elementsByFile.get(fileId), result,
+								pattern, matchRule, trueFlags, falseFlags,
+								qualifier, parent, patternSet, posixPattern,
+								patternLC, limit);
 					}
 				}
 			}
-			return elements;
+			return result;
 
 		} finally {
 			elementLock.release();
 		}
+	}
+
+	private static void searchInElements(List<Element> elements,
+			List<Element> result, String pattern, MatchRule matchRule,
+			int trueFlags, int falseFlags, String qualifier, String parent,
+			Set<String> patternSet, Pattern posixPattern, String patternLC,
+			int limit) {
+
+		if (elements != null) {
+			Iterator<Element> i = elements.iterator();
+			while (i.hasNext()) {
+				Element element = i.next();
+				if (elementMatches(element, pattern, matchRule, trueFlags,
+						falseFlags, qualifier, parent, patternSet,
+						posixPattern, patternLC)) {
+
+					result.add(element);
+					if (--limit == 0) {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	private static boolean elementMatches(Element element, String pattern,
+			MatchRule matchRule, int trueFlags, int falseFlags,
+			String qualifier, String parent, Set<String> patternSet,
+			Pattern posixPattern, String patternLC) {
+
+		if ((trueFlags == 0 || (element.getFlags() & trueFlags) != 0)
+				&& (falseFlags == 0 || (element.getFlags() & falseFlags) == 0)) {
+
+			if (qualifier == null || qualifier.length() == 0
+					|| qualifier.equals(element.getQualifier())) {
+
+				if (parent == null || parent.length() == 0
+						|| parent.equals(element.getParent())) {
+
+					String elementName = element.getName();
+					if (pattern == null
+							|| pattern.length() == 0
+							|| (matchRule == MatchRule.EXACT && pattern
+									.equalsIgnoreCase(elementName))
+							|| (matchRule == MatchRule.PREFIX && elementName
+									.toLowerCase().startsWith(patternLC))
+							|| (matchRule == MatchRule.CAMEL_CASE
+									&& element.getCamelCaseName() != null && element
+									.getCamelCaseName().startsWith(
+											pattern.toUpperCase()))
+							|| (matchRule == MatchRule.SET && patternSet
+									.contains(elementName.toLowerCase()))
+							|| (matchRule == MatchRule.PATTERN && posixPattern
+									.matcher(elementName).matches())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private static Pattern createPosixPattern(String pattern) {
