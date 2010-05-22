@@ -33,6 +33,7 @@ import org.eclipse.dltk.internal.core.ModelProviderManager;
 import org.eclipse.dltk.internal.core.OpenableElementInfo;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * @since 2.0
@@ -77,7 +78,8 @@ public class BinaryModule extends AbstractSourceModule implements
 		IBinaryElementParser binaryParser = DLTKLanguageManager
 				.getBinaryElementParser(this);
 		if (binaryParser == null) {
-			DLTKCore.error("Binary parser for binary module are not found:");
+			DLTKCore.error(NLS.bind("Binary parser for {0} not found",
+					getPath()));
 			return false;
 		}
 		BinaryModuleStructureRequestor requestor = new BinaryModuleStructureRequestor(
