@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-public interface IValidatorPredicate {
+import org.eclipse.dltk.core.Predicate;
 
-	boolean evaluate(IValidator validator);
+public interface IValidatorPredicate extends Predicate<IValidator> {
 
 }
