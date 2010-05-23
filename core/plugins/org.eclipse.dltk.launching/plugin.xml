@@ -56,4 +56,10 @@
         name="Catch &amp; save output of the launched processes">
    </loggingOption>
 </extension>
+<extension point="org.eclipse.emf.ecore.generated_package">
+   <package
+         class="org.eclipse.dltk.launching.model.LaunchingModelPackage"
+         uri="http://www.eclipse.org/dltk/launching.ecore">
+   </package>
+</extension>
 </plugin>

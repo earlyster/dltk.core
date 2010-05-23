@@ -21,6 +21,9 @@ Export-Package: org.eclipse.dltk.internal.launching,
  org.eclipse.dltk.internal.launching.execution,
  org.eclipse.dltk.launching,
  org.eclipse.dltk.launching.debug,
+ org.eclipse.dltk.launching.model,
+ org.eclipse.dltk.launching.model.util,
  org.eclipse.dltk.launching.process,
  org.eclipse.dltk.launching.sourcelookup
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
