@@ -14,6 +14,7 @@ package org.eclipse.dltk.internal.core.index.sql.h2;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,7 +48,7 @@ public class H2Cache {
 	private static final Map<Integer, Container> containerById = new HashMap<Integer, Container>();
 
 	private static final ILock fileLock = Job.getJobManager().newLock();
-	private static final Map<Integer, File> fileById = new HashMap<Integer, File>();
+	private static final Map<Integer, Map<Integer, File>> filesByContainer = new HashMap<Integer, Map<Integer, File>>();
 
 	private static final ILock elementLock = Job.getJobManager().newLock();
 	private static final Map<Integer, Map<Integer, List<Element>>> elementsMap = new HashMap<Integer, Map<Integer, List<Element>>>();
@@ -58,7 +59,8 @@ public class H2Cache {
 	public static void addContainer(Container container) {
 		containerLock.acquire();
 		try {
-			containerById.put(container.getId(), container);
+			int containerId = container.getId();
+			containerById.put(containerId, container);
 		} finally {
 			containerLock.release();
 		}
@@ -89,7 +91,13 @@ public class H2Cache {
 	public static void addFile(File file) {
 		fileLock.acquire();
 		try {
-			fileById.put(file.getId(), file);
+			int containerId = file.getContainerId();
+			Map<Integer, File> files = filesByContainer.get(containerId);
+			if (files == null) {
+				files = new HashMap<Integer, File>();
+				filesByContainer.put(containerId, files);
+			}
+			files.put(file.getId(), file);
 		} finally {
 			fileLock.release();
 		}
@@ -147,7 +155,11 @@ public class H2Cache {
 	public static void deleteFileById(int id) {
 		fileLock.acquire();
 		try {
-			fileById.remove(id);
+			Iterator<Map<Integer, File>> i = filesByContainer.values()
+					.iterator();
+			while (i.hasNext()) {
+				i.next().remove(id);
+			}
 			deleteElementsByFileId(id);
 		} finally {
 			fileLock.release();
@@ -157,9 +169,12 @@ public class H2Cache {
 	public static void deleteFilesByContainerId(int id) {
 		fileLock.acquire();
 		try {
-			Collection<File> files = selectFilesByContainerId(id);
-			for (File file : files) {
-				deleteFileById(file.getId());
+			Map<Integer, File> files = filesByContainer.remove(id);
+			if (files != null) {
+				Iterator<Integer> i = files.keySet().iterator();
+				while (i.hasNext()) {
+					deleteElementsByFileId(i.next());
+				}
 			}
 		} finally {
 			fileLock.release();
@@ -214,12 +229,14 @@ public class H2Cache {
 			String path) {
 		fileLock.acquire();
 		try {
-			Iterator<File> i = fileById.values().iterator();
-			while (i.hasNext()) {
-				File file = i.next();
-				if (file.getContainerId() == containerId
-						&& file.getPath().equals(path)) {
-					return file;
+			Map<Integer, File> files = filesByContainer.get(containerId);
+			if (files != null) {
+				Iterator<File> i = files.values().iterator();
+				while (i.hasNext()) {
+					File file = i.next();
+					if (file.getPath().equals(path)) {
+						return file;
+					}
 				}
 			}
 		} finally {
@@ -231,7 +248,15 @@ public class H2Cache {
 	public static File selectFileById(int id) {
 		fileLock.acquire();
 		try {
-			return fileById.get(id);
+			Iterator<Map<Integer, File>> i = filesByContainer.values()
+					.iterator();
+			while (i.hasNext()) {
+				File file = i.next().get(id);
+				if (file != null) {
+					return file;
+				}
+			}
+			return null;
 		} finally {
 			fileLock.release();
 		}
@@ -240,15 +265,11 @@ public class H2Cache {
 	public static Collection<File> selectFilesByContainerId(int id) {
 		fileLock.acquire();
 		try {
-			List<File> files = new LinkedList<File>();
-			Iterator<File> i = fileById.values().iterator();
-			while (i.hasNext()) {
-				File file = i.next();
-				if (file.getContainerId() == id) {
-					files.add(file);
-				}
+			Map<Integer, File> files = filesByContainer.get(id);
+			if (files != null) {
+				return files.values();
 			}
-			return files;
+			return Collections.emptyList();
 		} finally {
 			fileLock.release();
 		}
@@ -282,9 +303,13 @@ public class H2Cache {
 		try {
 			Set<String> patternSet = null;
 			Pattern posixPattern = null;
+
+			// Pre-cache pattern's lower and upper case variants:
 			String patternLC = null;
+			String patternUC = null;
 			if (pattern != null) {
 				patternLC = pattern.toLowerCase();
+				patternUC = pattern.toUpperCase();
 			}
 
 			if (matchRule == MatchRule.SET) {
@@ -310,14 +335,15 @@ public class H2Cache {
 					while (i.hasNext()) {
 						searchInElements(i.next(), result, pattern, matchRule,
 								trueFlags, falseFlags, qualifier, parent,
-								patternSet, posixPattern, patternLC, limit);
+								patternSet, posixPattern, patternLC, patternUC,
+								limit);
 					}
 				} else {
 					for (Integer fileId : filesIds) {
 						searchInElements(elementsByFile.get(fileId), result,
 								pattern, matchRule, trueFlags, falseFlags,
 								qualifier, parent, patternSet, posixPattern,
-								patternLC, limit);
+								patternLC, patternUC, limit);
 					}
 				}
 			}
@@ -332,7 +358,7 @@ public class H2Cache {
 			List<Element> result, String pattern, MatchRule matchRule,
 			int trueFlags, int falseFlags, String qualifier, String parent,
 			Set<String> patternSet, Pattern posixPattern, String patternLC,
-			int limit) {
+			String patternUC, int limit) {
 
 		if (elements != null) {
 			Iterator<Element> i = elements.iterator();
@@ -340,7 +366,7 @@ public class H2Cache {
 				Element element = i.next();
 				if (elementMatches(element, pattern, matchRule, trueFlags,
 						falseFlags, qualifier, parent, patternSet,
-						posixPattern, patternLC)) {
+						posixPattern, patternLC, patternUC)) {
 
 					result.add(element);
 					if (--limit == 0) {
@@ -354,7 +380,7 @@ public class H2Cache {
 	private static boolean elementMatches(Element element, String pattern,
 			MatchRule matchRule, int trueFlags, int falseFlags,
 			String qualifier, String parent, Set<String> patternSet,
-			Pattern posixPattern, String patternLC) {
+			Pattern posixPattern, String patternLC, String patternUC) {
 
 		if ((trueFlags == 0 || (element.getFlags() & trueFlags) != 0)
 				&& (falseFlags == 0 || (element.getFlags() & falseFlags) == 0)) {
@@ -370,12 +396,11 @@ public class H2Cache {
 							|| pattern.length() == 0
 							|| (matchRule == MatchRule.EXACT && pattern
 									.equalsIgnoreCase(elementName))
-							|| (matchRule == MatchRule.PREFIX && elementName
-									.toLowerCase().startsWith(patternLC))
+							|| (matchRule == MatchRule.PREFIX && startsWithIgnoreCase(
+									elementName, patternLC))
 							|| (matchRule == MatchRule.CAMEL_CASE
 									&& element.getCamelCaseName() != null && element
-									.getCamelCaseName().startsWith(
-											pattern.toUpperCase()))
+									.getCamelCaseName().startsWith(patternUC))
 							|| (matchRule == MatchRule.SET && patternSet
 									.contains(elementName.toLowerCase()))
 							|| (matchRule == MatchRule.PATTERN && posixPattern
@@ -414,6 +439,21 @@ public class H2Cache {
 			}
 		}
 		return Pattern.compile(buf.toString(), Pattern.CASE_INSENSITIVE);
+	}
+
+	private static boolean startsWithIgnoreCase(String str, String prefix) {
+		return startsWith(str, prefix, true);
+	}
+
+	private static boolean startsWith(String str, String prefix,
+			boolean ignoreCase) {
+		if (str == null || prefix == null) {
+			return (str == null && prefix == null);
+		}
+		if (prefix.length() > str.length()) {
+			return false;
+		}
+		return str.regionMatches(ignoreCase, 0, prefix, 0, prefix.length());
 	}
 
 	public static boolean isLoaded() {
