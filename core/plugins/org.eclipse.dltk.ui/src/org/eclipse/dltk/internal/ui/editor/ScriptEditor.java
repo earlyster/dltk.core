@@ -757,11 +757,21 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				.getPluginPreferences()));
 		stores.add(EditorsUI.getPreferenceStore());
 		stores.add(PlatformUI.getPreferenceStore());
-		return new ChainedPreferenceStore(stores
-				.toArray(new IPreferenceStore[stores.size()]));
+		return new ChainedPreferenceStore(
+				stores.toArray(new IPreferenceStore[stores.size()]));
 	}
 
-	protected abstract IPreferenceStore getScriptPreferenceStore();
+	protected IPreferenceStore getScriptPreferenceStore() {
+		IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		if (toolkit != null) {
+			IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
+					.getLanguageToolkit(toolkit.getNatureId());
+			if (uiToolkit != null) {
+				return uiToolkit.getPreferenceStore();
+			}
+		}
+		return null;
+	}
 
 	public ScriptTextTools getTextTools() {
 		return null;
@@ -1088,29 +1098,28 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		// setAction("ShowDocumentation", resAction);
 
 		Action action = new GotoMatchingBracketAction(this);
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
 
-		Action outlineAction = new TextOperationAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "ShowOutline.", this, //$NON-NLS-1$
+		Action outlineAction = new TextOperationAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"ShowOutline.", this, //$NON-NLS-1$
 				ScriptSourceViewer.SHOW_OUTLINE, true);
 		outlineAction
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.SHOW_OUTLINE);
 		setAction(IScriptEditorActionDefinitionIds.SHOW_OUTLINE, outlineAction);
 
-		action = new TextOperationAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(),
+		action = new TextOperationAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"OpenHierarchy.", this, ScriptSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY);
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 
 		// ContentAssistProposal
-		action = new ContentAssistAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
-		action
-				.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		action = new ContentAssistAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"ContentAssistProposal.", this); //$NON-NLS-1$
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 
@@ -1118,8 +1127,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		action = new TextOperationAction(
 				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION); //$NON-NLS-1$
-		action
-				.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 
@@ -1131,36 +1139,33 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		// GoToNextMember
 		action = GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 		setAction(GoToNextPreviousMemberAction.NEXT_MEMBER, action);
 
 		// GoToPreviousMember
 		action = GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 
 		// Source menu actions
-		action = new TextOperationAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(),
+		action = new TextOperationAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.COMMENT);
 		setAction(DLTKActionConstants.COMMENT, action);
 		markAsStateDependentAction(DLTKActionConstants.COMMENT, true);
 
-		action = new TextOperationAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(),
+		action = new TextOperationAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.UNCOMMENT);
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.UNCOMMENT);
 		setAction(DLTKActionConstants.UNCOMMENT, action);
 		markAsStateDependentAction(DLTKActionConstants.UNCOMMENT, true);
 
-		action = new ToggleCommentAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "ToggleComment.", this); //$NON-NLS-1$
-		action
-				.setActionDefinitionId(IScriptEditorActionDefinitionIds.TOGGLE_COMMENT);
+		action = new ToggleCommentAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"ToggleComment.", this); //$NON-NLS-1$
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.TOGGLE_COMMENT);
 		setAction(DLTKActionConstants.TOGGLE_COMMENT, action);
 		markAsStateDependentAction(DLTKActionConstants.TOGGLE_COMMENT, true);
 
@@ -1190,8 +1195,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 						fContextMenuGroup.addGroup((ActionGroup) actionGroup);
 					} else {
 						DLTKUIPlugin.logErrorMessage(actionGroup.getClass()
-								.getName()
-								+ " should extend ActionGroup"); //$NON-NLS-1$
+								.getName() + " should extend ActionGroup"); //$NON-NLS-1$
 					}
 				} catch (CoreException e) {
 					DLTKUIPlugin.log(e);
@@ -1830,8 +1834,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	protected void updateStatusLine() {
 		ITextSelection selection = (ITextSelection) getSelectionProvider()
 				.getSelection();
-		Annotation annotation = getAnnotation(selection.getOffset(), selection
-				.getLength());
+		Annotation annotation = getAnnotation(selection.getOffset(),
+				selection.getLength());
 		setStatusLineErrorMessage(null);
 		setStatusLineMessage(null);
 		if (annotation != null) {
@@ -2100,8 +2104,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 							ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
 				}
 			} else
-				sourceViewer.setTextHover(configuration.getTextHover(
-						sourceViewer, t), t);
+				sourceViewer.setTextHover(
+						configuration.getTextHover(sourceViewer, t), t);
 		}
 	}
 
@@ -2569,8 +2573,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		super.createNavigationActions();
 		final StyledText textWidget = getSourceViewer().getTextWidget();
 		IAction action = new NavigatePreviousSubWordAction();
-		action
-				.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_PREVIOUS);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.WORD_PREVIOUS, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_LEFT, SWT.NULL);
 		action = new NavigateNextSubWordAction();
@@ -2578,14 +2581,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		setAction(ITextEditorActionDefinitionIds.WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_RIGHT, SWT.NULL);
 		action = new SelectPreviousSubWordAction();
-		action
-				.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_LEFT,
 				SWT.NULL);
 		action = new SelectNextSubWordAction();
-		action
-				.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_RIGHT,
 				SWT.NULL);
@@ -2715,9 +2716,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		super.rulerContextMenuAboutToShow(menu);
 		IMenuManager foldingMenu = new MenuManager(
 				DLTKEditorMessages.Editor_FoldingMenu_name, "projection"); //$NON-NLS-1$
-		menu
-				.appendToGroup(ITextEditorActionConstants.GROUP_RULERS,
-						foldingMenu);
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
 
 		IAction action = getAction("FoldingToggle"); //$NON-NLS-1$
 		if (action != null) {
@@ -3008,8 +3007,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			IRegion visibleRegion = sourceViewer.getVisibleRegion();
 			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
 			visible = (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion
-					.getOffset()
-					+ visibleRegion.getLength());
+					.getOffset() + visibleRegion.getLength());
 		}
 
 		if (!visible) {
@@ -3110,8 +3108,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		if (fSemanticManager == null && textTools != null) {
 			fSemanticManager = new SemanticHighlightingManager();
 			fSemanticManager.install(this,
-					(ScriptSourceViewer) getSourceViewer(), textTools
-							.getColorManager(), getPreferenceStore());
+					(ScriptSourceViewer) getSourceViewer(),
+					textTools.getColorManager(), getPreferenceStore());
 		}
 	}
 
