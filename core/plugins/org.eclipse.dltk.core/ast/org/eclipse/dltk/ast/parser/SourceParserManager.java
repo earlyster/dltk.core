@@ -77,7 +77,12 @@ public class SourceParserManager extends DLTKContributionExtensionManager {
 	}
 
 	public ISourceParser getSourceParser(IProject project, String natureId) {
-		return ((SourceParserContribution) getSelectedContribution(project, natureId)).getSourceParser();
+		SourceParserContribution contribution = (SourceParserContribution) getSelectedContribution(
+				project, natureId);
+		if (contribution != null) {
+			return contribution.getSourceParser();
+		}
+		return null;
 	}
 	
 	static class SourceParserContribution extends DLTKContributedExtension {		
