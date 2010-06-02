@@ -150,12 +150,12 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Persistent state -----------------------------------------------------------------------
 
-	/* package */ void restoreFilterAndSorterState(IMemento memento) {
+	protected void restoreFilterAndSorterState(IMemento memento) {
 		fViewActionGroup.restoreState(memento);
 		fCustomFiltersActionGroup.restoreState(memento);
 	}
 	
-	/* package */ void saveFilterAndSorterState(IMemento memento) {
+	protected void saveFilterAndSorterState(IMemento memento) {
 		fViewActionGroup.saveState(memento);
 		fCustomFiltersActionGroup.saveState(memento);
 	}
@@ -318,7 +318,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		}
 	}
 	
-	private void doWorkingSetChanged(PropertyChangeEvent event) {
+	protected void doWorkingSetChanged(PropertyChangeEvent event) {
 		if (ViewActionGroup.MODE_CHANGED.equals(event.getProperty())) {
 			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
 			Object oldInput= null;

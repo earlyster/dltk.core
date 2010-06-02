@@ -1770,13 +1770,17 @@ public class ScriptExplorerPart extends ViewPart implements
 		if (isRootInputChange
 				&& getRootMode() == ScriptExplorerPart.WORKING_SETS_AS_ROOTS
 				&& fWorkingSetModel.needsConfiguration()) {
-			ConfigureWorkingSetAction action = new ConfigureWorkingSetAction(
-					getSite());
-			action.setWorkingSetModel(fWorkingSetModel);
-			action.run();
+			configWorkingSet();
 			fWorkingSetModel.configured();
 		}
 		setTitleToolTip(getTitleToolTip());
+	}
+
+	protected void configWorkingSet() {
+		ConfigureWorkingSetAction action = new ConfigureWorkingSetAction(
+				getSite());
+		action.setWorkingSetModel(fWorkingSetModel);
+		action.run();
 	}
 
 	private void createWorkingSetModel() {
