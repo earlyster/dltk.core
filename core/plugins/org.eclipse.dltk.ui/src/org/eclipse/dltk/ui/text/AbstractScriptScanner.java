@@ -185,9 +185,13 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
 	@Override
 	public IToken nextToken() {
+		doResolveProxyAttributes();
+		return super.nextToken();
+	}
+
+	protected final void doResolveProxyAttributes() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
-		return super.nextToken();
 	}
 
 	private void resolveProxyAttributes() {
@@ -204,8 +208,10 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
 	private void addTokenWithProxyAttribute(String colorKey, String boldKey,
 			String italicKey, String strikethroughKey, String underlineKey) {
-		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey,
-				italicKey, strikethroughKey, underlineKey)));
+		fTokenMap.put(
+				colorKey,
+				new Token(createTextAttribute(null, boldKey, italicKey,
+						strikethroughKey, underlineKey)));
 	}
 
 	private void addToken(String colorKey, String boldKey, String italicKey,
@@ -220,8 +226,10 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 		}
 
 		if (!fNeedsLazyColorLoading)
-			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey,
-					boldKey, italicKey, strikethroughKey, underlineKey)));
+			fTokenMap.put(
+					colorKey,
+					new Token(createTextAttribute(colorKey, boldKey, italicKey,
+							strikethroughKey, underlineKey)));
 		else {
 			Token token = fTokenMap.get(colorKey);
 			if (token != null)
@@ -268,8 +276,7 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	}
 
 	protected Token getToken(String key) {
-		if (fNeedsLazyColorLoading)
-			resolveProxyAttributes();
+		doResolveProxyAttributes();
 		return fTokenMap.get(key);
 	}
 
@@ -357,9 +364,8 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 			if (activeValue != eventValue)
 				token.setData(new TextAttribute(oldAttr.getForeground(),
 						oldAttr.getBackground(), eventValue ? oldAttr
-								.getStyle()
-								| styleAttribute : oldAttr.getStyle()
-								& ~styleAttribute));
+								.getStyle() | styleAttribute : oldAttr
+								.getStyle() & ~styleAttribute));
 		}
 	}
 
