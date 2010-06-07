@@ -165,6 +165,7 @@ public class SqlSearchEngine implements ISearchEngine {
 
 	class ElementHandler implements IElementHandler, ISearchRequestor {
 
+		private static final String EMPTY = ""; //$NON-NLS-1$
 		private Map<Integer, File> fileCache = new HashMap<Integer, File>();
 		private Map<Integer, Container> containerCache = new HashMap<Integer, Container>();
 		private Map<String, IProjectFragment> projectFragmentCache = new HashMap<String, IProjectFragment>();
@@ -217,8 +218,9 @@ public class SqlSearchEngine implements ISearchEngine {
 							+ IDLTKSearchScope.FILE_ENTRY_SEPARATOR;
 				}
 
-				String resourcePath = new Path(containerPath).append(
-						file.getPath()).toString();
+				String filePath = file.getPath();
+				String resourcePath = new StringBuilder(containerPath).append(
+						IPath.SEPARATOR).append(filePath).toString();
 
 				IProjectFragment projectFragment = projectFragmentCache
 						.get(containerPath);
@@ -236,7 +238,17 @@ public class SqlSearchEngine implements ISearchEngine {
 					return;
 				}
 
-				Path relativePath = new Path(file.getPath());
+				String folderPath = EMPTY;
+				String fileName = filePath;
+				int i = filePath.lastIndexOf('/');
+				if (i == -1) {
+					i = filePath.lastIndexOf('\\');
+				}
+				if (i != -1) {
+					folderPath = filePath.substring(0, i);
+					fileName = filePath.substring(i + 1);
+				}
+
 				if (!scope.encloses(resourcePath)) {
 					return;
 				}
@@ -245,27 +257,24 @@ public class SqlSearchEngine implements ISearchEngine {
 				if (sourceModule == null) {
 					if (projectFragment.isExternal()) {
 						IScriptFolder scriptFolder = new ExternalScriptFolder(
-								(ProjectFragment) projectFragment, relativePath
-										.removeLastSegments(1));
-						sourceModule = scriptFolder
-								.getSourceModule(relativePath.lastSegment());
+								(ProjectFragment) projectFragment, new Path(
+										folderPath));
+						sourceModule = scriptFolder.getSourceModule(fileName);
 					} else if (projectFragment.isArchive()) {
 						IScriptFolder scriptFolder = new ArchiveFolder(
-								(ProjectFragment) projectFragment, relativePath
-										.removeLastSegments(1));
-						sourceModule = scriptFolder
-								.getSourceModule(relativePath.lastSegment());
+								(ProjectFragment) projectFragment, new Path(
+										folderPath));
+						sourceModule = scriptFolder.getSourceModule(fileName);
 					} else if (projectFragment.isBuiltin()) {
 						IScriptFolder scriptFolder = new BuiltinScriptFolder(
-								(ProjectFragment) projectFragment, relativePath
-										.removeLastSegments(1));
-						sourceModule = scriptFolder
-								.getSourceModule(relativePath.lastSegment());
+								(ProjectFragment) projectFragment, new Path(
+										folderPath));
+						sourceModule = scriptFolder.getSourceModule(fileName);
 					} else {
 						IProject project = projectFragment.getScriptProject()
 								.getProject();
 						sourceModule = DLTKCore.createSourceModuleFrom(project
-								.getFile(relativePath));
+								.getFile(filePath));
 					}
 					sourceModuleCache.put(resourcePath, sourceModule);
 				}
