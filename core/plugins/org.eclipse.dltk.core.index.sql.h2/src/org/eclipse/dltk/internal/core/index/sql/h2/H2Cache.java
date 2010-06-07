@@ -289,9 +289,15 @@ public class H2Cache {
 			containerLock.acquire();
 			try {
 				for (int containerId : containersId) {
-					Collection<File> files = selectFilesByContainerId(containerId);
-					for (File file : files) {
-						filesIds.add(file.getId());
+					fileLock.acquire();
+					try {
+						Map<Integer, File> files = filesByContainer
+								.get(containerId);
+						if (files != null) {
+							filesIds.addAll(files.keySet());
+						}
+					} finally {
+						fileLock.release();
 					}
 				}
 			} finally {
