@@ -74,14 +74,15 @@ public abstract class ForeignElement extends ModelElement implements
 	@Override
 	public IModelElement getHandleFromMemento(String token,
 			MementoTokenizer memento, WorkingCopyOwner owner) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected char getHandleMementoDelimiter() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	public int getElementType() {
+		return IModelElement.USER_ELEMENT;
+	}
 }
