@@ -36,7 +36,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
-import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -771,9 +770,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 						IPath absPath = t.getFullPath();
 						for (int i = 0; i < fragments.length; ++i) {
 							IProjectFragment f = fragments[i];
-							if (f instanceof ExternalProjectFragment) {
-								ExternalProjectFragment ep = (ExternalProjectFragment) f;
-								IPath pPath = ep.getPath();
+							if (f.isExternal()) {
+								IPath pPath = f.getPath();
 								if (absPath.equals(pPath)) {
 									return f;
 								}
