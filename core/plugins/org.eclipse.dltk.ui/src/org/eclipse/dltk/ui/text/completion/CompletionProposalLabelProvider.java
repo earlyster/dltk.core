@@ -14,6 +14,7 @@ import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.Flags;
 import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IType;
@@ -229,6 +230,16 @@ public class CompletionProposalLabelProvider {
 	}
 
 	protected String createSimpleLabelWithType(CompletionProposal proposal) {
+		IModelElement element = proposal.getModelElement();
+		if (element != null
+				&& element.getElementType() == IModelElement.LOCAL_VARIABLE
+				&& element.exists()) {
+			final ILocalVariable var = (ILocalVariable) element;
+			String type = var.getType();
+			if (type != null) {
+				return proposal.getName() + ": " + type;
+			}
+		}
 		return proposal.getName();
 	}
 
