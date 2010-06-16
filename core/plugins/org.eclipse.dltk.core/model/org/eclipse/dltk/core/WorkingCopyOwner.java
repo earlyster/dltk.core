@@ -9,8 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
@@ -146,6 +149,97 @@ public abstract class WorkingCopyOwner {
 				this);
 		result.becomeWorkingCopy(problemRequestor, monitor);
 		return result;
+	}
+
+	/**
+	 * Returns a new working copy with the given name using this working copy
+	 * owner to create its buffer.
+	 * <p>
+	 * This working copy always belongs to the default package in a package
+	 * fragment root that corresponds to its DLTK project, and this DLTK project
+	 * never exists. However this DLTK project has the given buildpath that is
+	 * used when resolving names in this working copy.
+	 * </p>
+	 * <p>
+	 * A DOM AST created using this working copy will have bindings resolved
+	 * using the given buildpath, and problem are reported to the given problem
+	 * requestor.
+	 * <p>
+	 * </p>
+	 * <code>DLTKCore#getOptions()</code> is used to create the DOM AST as it is
+	 * not possible to set the options on the non-existing DLTK project. </p>
+	 * <p>
+	 * When the working copy instance is created, an
+	 * {@link IModelElementDelta#ADDED added delta} is reported on this working
+	 * copy.
+	 * </p>
+	 * <p>
+	 * Once done with the working copy, users of this method must discard it
+	 * using {@link ISourceModule#discardWorkingCopy()}.
+	 * </p>
+	 * <p>
+	 * Note that when such working copy is committed, only its buffer is saved
+	 * (see {@link IBuffer#save(IProgressMonitor, boolean)}) but no resource is
+	 * created.
+	 * </p>
+	 * <p>
+	 * This method is not intended to be overriden by clients.
+	 * </p>
+	 * 
+	 * @param path
+	 *            the name of the working copy (e.g. "/home/user/X.java")
+	 * @param buildpath
+	 *            the buildpath used to resolve names in this working copy
+	 * @param problemRequestor
+	 *            a requestor which will get notified of problems detected
+	 *            during reconciling as they are discovered. The requestor can
+	 *            be set to <code>null</code> indicating that the client is not
+	 *            interested in problems.
+	 * @param monitor
+	 *            a progress monitor used to report progress while opening the
+	 *            working copy or <code>null</code> if no progress should be
+	 *            reported
+	 * @throws ModelException
+	 *             if the contents of this working copy can not be determined.
+	 * @return a new working copy
+	 * @see ISourceModule#becomeWorkingCopy(IProblemRequestor, IProgressMonitor)
+	 * 
+	 */
+	public final ISourceModule newWorkingCopy(IPath path,
+			IBuildpathEntry[] buildpath, IProblemRequestor problemRequestor,
+			IProgressMonitor monitor) throws ModelException {
+		ExternalScriptProject project = new ExternalScriptProject(buildpath);
+		IProjectFragment fragment = project.getProjectFragment(Path.EMPTY);
+		IScriptFolder parent = fragment
+				.getScriptFolder(IProjectFragment.DEFAULT_SCRIPT_FOLDER_NAME);
+		SourceModule result = new ExternalProjectSourceModule(
+				(ModelElement) parent, EnvironmentPathUtils.getFullPath(
+						EnvironmentManager.getLocalEnvironment(), path), this);
+		result.becomeWorkingCopy(problemRequestor, monitor);
+		return result;
+	}
+
+	private static class ExternalProjectSourceModule extends SourceModule {
+
+		private final IPath path;
+
+		public ExternalProjectSourceModule(ModelElement parent, IPath path,
+				WorkingCopyOwner owner) {
+			super(parent, path.lastSegment(), owner);
+			this.path = path;
+		}
+
+		@Override
+		public IPath getPath() {
+			return path;
+		}
+
+		@Override
+		protected ISourceModule getOriginalSourceModule() {
+			return new ExternalProjectSourceModule((ModelElement) getParent(),
+					path, DefaultWorkingCopyOwner.PRIMARY);
+		}
+
 	}
 
 }
