@@ -1028,12 +1028,28 @@
             targetId="org.eclipse.dltk.ui.ScriptOutlinePage">
       </filter>
       <filter
+            targetId="org.eclipse.dltk.ui.ScriptOutlinePage"
+            name="%HideImportDeclaration.label"
+            enabled="false"
+            description="%HideImportDeclaration.description"
+            class="org.eclipse.dltk.internal.ui.filters.ImportDeclarationFilter"
+            id="org.eclipse.dltk.ui.outline.ImportDeclarationFilter">
+      </filter>
+      <filter
             class="org.eclipse.dltk.internal.ui.filters.SyntheticMembersFilter"
             description="%HideSyntheticMembers.description"
             enabled="true"
             id="org.eclipse.dltk.ui.QuickOutline.SyntheticMembersFilter"
             name="%HideSyntheticMembers.label"
             targetId="org.eclipse.dltk.internal.ui.text.QuickOutline">
+      </filter>
+      <filter
+            targetId="org.eclipse.dltk.internal.ui.text.QuickOutline"
+            name="%HideImportDeclaration.label"
+            enabled="true"
+            description="%HideImportDeclaration.description"
+            class="org.eclipse.dltk.internal.ui.filters.ImportDeclarationFilter"
+            id="org.eclipse.dltk.ui.QuickOutline.ImportDeclarationFilter">
       </filter>
     </extension>
    
