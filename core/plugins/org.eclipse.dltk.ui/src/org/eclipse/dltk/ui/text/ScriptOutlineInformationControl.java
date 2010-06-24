@@ -27,6 +27,7 @@ import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
 import org.eclipse.dltk.internal.ui.text.AbstractInformationControl;
 import org.eclipse.dltk.internal.ui.text.TextMessages;
+import org.eclipse.dltk.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.dltk.internal.ui.util.StringMatcher;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -42,7 +43,6 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
@@ -293,16 +293,18 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		}
 	}
 
-	private class OutlineSorter extends ViewerSorter {
+	private class OutlineSorter extends AbstractHierarchyViewerSorter {
 
 		protected ITypeHierarchy getHierarchy(IType type) {
 			return getSuperTypeHierarchy(type);
 		}
 
+		@Override
 		public boolean isSortByDefiningType() {
 			return fSortByDefiningTypeAction.isChecked();
 		}
 
+		@Override
 		public boolean isSortAlphabetically() {
 			return fLexicalSortingAction.isChecked();
 		}
