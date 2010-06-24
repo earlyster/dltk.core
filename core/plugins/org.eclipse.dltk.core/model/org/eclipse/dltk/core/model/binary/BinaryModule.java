@@ -262,8 +262,7 @@ public class BinaryModule extends AbstractSourceModule implements
 
 	@Override
 	public IPath getPath() {
-		return super.getPath();
-		// this.getParent().getPath().append(this.getElementName());
+		return this.getParent().getPath().append(this.getElementName());
 	}
 
 	public InputStream getContents() throws CoreException {
