@@ -11,7 +11,7 @@ package org.eclipse.dltk.ui;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -33,7 +33,7 @@ public class DLTKPluginImages {
 	// The plug-in registry
 	private static ImageRegistry fgImageRegistry = null;
 	
-	private static HashMap fgAvoidSWTErrorMap = null;
+	private static HashMap<String, ImageDescriptor> fgAvoidSWTErrorMap = null;
 	private static final String T_OBJ = "obj16"; //$NON-NLS-1$
 	private static final String T_OVR = "ovr16"; //$NON-NLS-1$
 	private static final String T_WIZBAN = "wizban"; //$NON-NLS-1$
@@ -47,6 +47,7 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_GHOST = NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSALT = NAME_PREFIX + "classfo_obj.gif"; //$NON-NLS-1$	
 	public static final String IMG_OBJS_CLASS = NAME_PREFIX + "class_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM = NAME_PREFIX + "enum_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_NAMESPACE = NAME_PREFIX + "namespace_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ERROROBJ = NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_TEST = NAME_PREFIX + "test_obj.gif"; //$NON-NLS-1$
@@ -165,6 +166,8 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB = createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
+	public static final ImageDescriptor DESC_OBJS_ENUM = createManagedFromKey(
+			T_OBJ, IMG_OBJS_ENUM);
 	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManagedFromKey(T_OBJ, IMG_OBJS_INTERFACE);
 	public static final ImageDescriptor DESC_OBJS_NAMESPACE= createManagedFromKey(T_OBJ, IMG_OBJS_NAMESPACE);
 	public static final ImageDescriptor DESC_OBJS_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_ERROROBJ);
@@ -378,7 +381,7 @@ public class DLTKPluginImages {
 	 */
 	public static ImageDescriptor getDescriptor(String key) {
 		if (fgImageRegistry == null) {
-			return (ImageDescriptor) fgAvoidSWTErrorMap.get(key);
+			return fgAvoidSWTErrorMap.get(key);
 		}
 		return getImageRegistry().getDescriptor(key);
 	}
@@ -415,9 +418,9 @@ public class DLTKPluginImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (fgImageRegistry == null) {
 			fgImageRegistry = new ImageRegistry();
-			for (Iterator iter = fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
-				String key = (String) iter.next();
-				fgImageRegistry.put(key, (ImageDescriptor) fgAvoidSWTErrorMap.get(key));
+			for (Map.Entry<String, ImageDescriptor> entry : fgAvoidSWTErrorMap
+					.entrySet()) {
+				fgImageRegistry.put(entry.getKey(), entry.getValue());
 			}
 			fgAvoidSWTErrorMap = null;
 		}
@@ -443,21 +446,21 @@ public class DLTKPluginImages {
 		return createManaged(prefix, key.substring(NAME_PREFIX_LENGTH), key);
 	}
 
-	private static ImageDescriptor createManaged(String prefix, String name, String key) {
+	private static ImageDescriptor createManaged(String prefix, String name,
+			String key) {
 		try {
-		ImageDescriptor result = create(prefix, name, true);
-		if (fgAvoidSWTErrorMap == null) {
-			fgAvoidSWTErrorMap = new HashMap();
-		}
-		fgAvoidSWTErrorMap.put(key, result);
-		if (fgImageRegistry != null) {
-			// Plugin.logErrorMessage("Image registry already defined");
-			// //$NON-NLS-1$
-			System.err.println("Image registry already defined"); //$NON-NLS-1$
-		}		
-		return result;
-		}
-		catch(Throwable ex ) {
+			ImageDescriptor result = create(prefix, name, true);
+			if (fgAvoidSWTErrorMap == null) {
+				fgAvoidSWTErrorMap = new HashMap<String, ImageDescriptor>();
+			}
+			fgAvoidSWTErrorMap.put(key, result);
+			if (fgImageRegistry != null) {
+				// Plugin.logErrorMessage("Image registry already defined");
+				// //$NON-NLS-1$
+				System.err.println("Image registry already defined"); //$NON-NLS-1$
+			}
+			return result;
+		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
 		return null;
