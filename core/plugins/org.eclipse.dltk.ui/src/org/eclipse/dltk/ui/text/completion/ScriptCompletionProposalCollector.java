@@ -622,9 +622,12 @@ public abstract class ScriptCompletionProposalCollector extends
 				image, displayString, relevance, false);
 	}
 
-	protected abstract ScriptCompletionProposal createScriptCompletionProposal(
+	protected ScriptCompletionProposal createScriptCompletionProposal(
 			String completion, int replaceStart, int length, Image image,
-			String displayString, int relevance, boolean isInDoc);
+			String displayString, int relevance, boolean isInDoc) {
+		return new ScriptCompletionProposal(completion, replaceStart, length,
+				image, displayString, relevance, isInDoc);
+	}
 
 	protected ScriptCompletionProposal createOverrideCompletionProposal(
 			IScriptProject scriptProject, ISourceModule compilationUnit,
