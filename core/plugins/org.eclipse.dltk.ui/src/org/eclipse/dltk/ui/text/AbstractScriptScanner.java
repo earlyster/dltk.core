@@ -309,6 +309,8 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
 		String p = event.getProperty();
 		int index = indexOf(p);
+		if (index < 0)
+			return;
 		Token token = getToken(fPropertyNamesColor[index]);
 		if (fPropertyNamesColor[index].equals(p))
 			adaptToColorChange(token, event);
