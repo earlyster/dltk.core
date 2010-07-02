@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.List;
+
 import org.eclipse.dltk.core.IImportContainer;
 import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.IModelElement;
@@ -96,6 +98,11 @@ public class ImportContainer extends SourceRefElement implements
 	 */
 	public IImportDeclaration getImport(String importName, String version) {
 		return new ImportDeclaration(this, importName, version);
+	}
+
+	public IImportDeclaration[] getImports() throws ModelException {
+		List<IModelElement> list = getChildrenOfType(IMPORT_DECLARATION);
+		return list.toArray(new IImportDeclaration[list.size()]);
 	}
 
 	/*
