@@ -715,7 +715,12 @@ public abstract class ScriptCompletionProposalCollector extends
 		return javaProposal;
 	}
 
-	protected abstract char[] getVarTrigger();
+	protected static final char[] VAR_TRIGGER = new char[] { '\t', ' ', '=',
+			';', '.' };
+
+	protected char[] getVarTrigger() {
+		return VAR_TRIGGER;
+	}
 
 	private IScriptCompletionProposal createMethodDeclarationProposal(
 			CompletionProposal proposal) {
