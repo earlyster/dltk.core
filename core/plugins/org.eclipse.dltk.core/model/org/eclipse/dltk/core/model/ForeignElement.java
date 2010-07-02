@@ -13,6 +13,9 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
+/**
+ * @since 3.0
+ */
 public abstract class ForeignElement extends ModelElement implements
 		IForeignElement {
 
