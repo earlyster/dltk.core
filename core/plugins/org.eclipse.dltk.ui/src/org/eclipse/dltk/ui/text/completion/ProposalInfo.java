@@ -99,23 +99,28 @@ public class ProposalInfo {
 
 	private String extractScriptdoc(String content) throws ModelException,
 			IOException {
-		if (content != null && fElement != null) {
-			IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
-					.getLanguageToolkit(fElement);
-			Reader reader = ScriptDocumentationAccess.getKeywordDocumentation(
-					languageToolkit.getNatureId(), fElement, content);
-			if (reader != null) {
-				StringBuffer buffer = new StringBuffer();
-				HTMLPrinter.addParagraph(buffer, reader);
-				if (buffer.length() > 0) {
-					if (!HTMLPrinter.hasEpilog(buffer)) {
-						HTMLPrinter.addPageEpilog(buffer);
-					}
-					return buffer.toString();
-				}
-			}
+		if (content == null || fElement == null) {
+			return null;
 		}
-
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(fElement);
+		if (toolkit == null) {
+			return null;
+		}
+		final Reader reader = ScriptDocumentationAccess
+				.getKeywordDocumentation(toolkit.getNatureId(), fElement,
+						content);
+		if (reader == null) {
+			return null;
+		}
+		final StringBuffer buffer = new StringBuffer();
+		HTMLPrinter.addParagraph(buffer, reader);
+		if (buffer.length() == 0) {
+			if (!HTMLPrinter.hasEpilog(buffer)) {
+				HTMLPrinter.addPageEpilog(buffer);
+			}
+			return buffer.toString();
+		}
 		return null;
 	}
 
