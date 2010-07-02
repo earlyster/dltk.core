@@ -315,10 +315,19 @@ public abstract class AbstractScriptCompletionProposal implements
 		}
 	}
 
-	protected abstract boolean isSmartTrigger(char trigger);
+	protected boolean isSmartTrigger(char trigger) {
+		return false;
+	}
 
-	protected abstract void handleSmartTrigger(IDocument document,
-			char trigger, int referenceOffset) throws BadLocationException;
+	/**
+	 * @param document
+	 * @param trigger
+	 * @param referenceOffset
+	 * @throws BadLocationException
+	 */
+	protected void handleSmartTrigger(IDocument document, char trigger,
+			int referenceOffset) throws BadLocationException {
+	}
 
 	protected final void replace(IDocument document, int offset, int length,
 			String string) throws BadLocationException {
@@ -954,6 +963,7 @@ public abstract class AbstractScriptCompletionProposal implements
 		fDisplayString = string;
 	}
 
+	@Override
 	public String toString() {
 		return getDisplayString();
 	}

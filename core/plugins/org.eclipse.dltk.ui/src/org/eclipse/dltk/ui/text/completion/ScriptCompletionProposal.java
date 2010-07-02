@@ -11,11 +11,10 @@
 package org.eclipse.dltk.ui.text.completion;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Image;
 
-public abstract class ScriptCompletionProposal extends
+public class ScriptCompletionProposal extends
 		AbstractScriptCompletionProposal {
 
 	/**
@@ -109,8 +108,4 @@ public abstract class ScriptCompletionProposal extends
 			return string;
 	}
 
-	protected void handleSmartTrigger(IDocument document, char trigger,
-			int referenceOffset) throws BadLocationException {
-		// TODO Auto-generated method stub
-	}
 }
