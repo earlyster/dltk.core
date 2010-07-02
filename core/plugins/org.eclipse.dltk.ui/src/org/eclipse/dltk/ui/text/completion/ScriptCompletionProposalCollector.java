@@ -718,6 +718,9 @@ public abstract class ScriptCompletionProposalCollector extends
 		return javaProposal;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected static final char[] VAR_TRIGGER = new char[] { '\t', ' ', '=',
 			';', '.' };
 
