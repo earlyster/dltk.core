@@ -13,6 +13,9 @@ package org.eclipse.dltk.ui.coloring;
 
 import org.eclipse.swt.graphics.RGB;
 
+/**
+ * @since 3.0
+ */
 public interface IColoringPreferenceRequestor {
 
 	void enterCategory(String category);

@@ -13,6 +13,9 @@ package org.eclipse.dltk.ui.coloring;
 
 import org.eclipse.dltk.ui.PreferenceConstants;
 
+/**
+ * @since 3.0
+ */
 public class ColoringPreferenceKey implements IColoringPreferenceKey {
 
 	public static IColoringPreferenceKey create(String baseKey) {

@@ -189,6 +189,9 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 		return super.nextToken();
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected final void doResolveProxyAttributes() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();

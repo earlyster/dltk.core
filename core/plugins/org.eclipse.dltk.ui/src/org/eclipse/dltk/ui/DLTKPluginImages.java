@@ -47,6 +47,9 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_GHOST = NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSALT = NAME_PREFIX + "classfo_obj.gif"; //$NON-NLS-1$	
 	public static final String IMG_OBJS_CLASS = NAME_PREFIX + "class_obj.gif"; //$NON-NLS-1$
+	/**
+	 * @since 3.0
+	 */
 	public static final String IMG_OBJS_ENUM = NAME_PREFIX + "enum_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_NAMESPACE = NAME_PREFIX + "namespace_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ERROROBJ = NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
@@ -166,6 +169,9 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB = createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
+	/**
+	 * @since 3.0
+	 */
 	public static final ImageDescriptor DESC_OBJS_ENUM = createManagedFromKey(
 			T_OBJ, IMG_OBJS_ENUM);
 	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManagedFromKey(T_OBJ, IMG_OBJS_INTERFACE);

@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.coloring;
 
+/**
+ * @since 3.0
+ */
 public enum EnablementStyle {
 
 	ALWAYS_ON, ON, OFF
