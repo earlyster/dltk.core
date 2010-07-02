@@ -888,7 +888,24 @@
             commandId="org.eclipse.dltk.ui.navigate.open.type"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>-->        
-	</extension>  
+      <key
+            sequence="M1+M2+F"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.script.format"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- alternative for some gtk input modes -->
+      <key
+            platform="gtk"
+            sequence="ESC CTRL+F"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.script.format"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+I"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.script.indent"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	</extension>
 
 	<extension
 		point="org.eclipse.dltk.ui.scriptCompletionProposalComputer"
