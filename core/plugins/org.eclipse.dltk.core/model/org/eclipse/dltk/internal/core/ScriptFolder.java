@@ -323,9 +323,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 
 	public ISourceModule[] getSourceModules() throws ModelException {
 		List<IModelElement> list = getChildrenOfType(SOURCE_MODULE);
-		ISourceModule[] array = new ISourceModule[list.size()];
-		list.toArray(array);
-		return array;
+		return list.toArray(new ISourceModule[list.size()]);
 	}
 
 	public Object[] getForeignResources() throws ModelException {
