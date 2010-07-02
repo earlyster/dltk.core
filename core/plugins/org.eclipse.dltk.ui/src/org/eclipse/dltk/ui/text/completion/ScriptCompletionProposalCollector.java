@@ -477,8 +477,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 */
 	protected final IContextInformation createMethodContextInformation(
 			CompletionProposal methodProposal) {
-		Assert
-				.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
+		Assert.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
 		return new ProposalContextInformation(methodProposal);
 	}
 
@@ -612,18 +611,28 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	protected abstract String getNatureId();
 
-	protected abstract ScriptCompletionProposal createScriptCompletionProposal(
+	/**
+	 * It is recommended to override only the next method.
+	 */
+	@Deprecated
+	protected ScriptCompletionProposal createScriptCompletionProposal(
 			String completion, int replaceStart, int length, Image image,
-			String displayString, int i);
+			String displayString, int relevance) {
+		return createScriptCompletionProposal(completion, replaceStart, length,
+				image, displayString, relevance, false);
+	}
 
 	protected abstract ScriptCompletionProposal createScriptCompletionProposal(
 			String completion, int replaceStart, int length, Image image,
-			String displayString, int i, boolean isInDoc);
+			String displayString, int relevance, boolean isInDoc);
 
-	protected abstract ScriptCompletionProposal createOverrideCompletionProposal(
+	protected ScriptCompletionProposal createOverrideCompletionProposal(
 			IScriptProject scriptProject, ISourceModule compilationUnit,
 			String name, String[] paramTypes, int start, int length,
-			String label, String string);
+			String label, String string) {
+		// default implementation return null, as this functionality is optional
+		return null;
+	}
 
 	private IScriptCompletionProposal createFieldProposal(
 			CompletionProposal proposal) {
@@ -725,6 +734,8 @@ public abstract class ScriptCompletionProposalCollector extends
 		ScriptCompletionProposal scriptProposal = createOverrideCompletionProposal(
 				fScriptProject, fSourceModule, name, paramTypes, start, length,
 				label, String.valueOf(proposal.getCompletion()));
+		if (scriptProposal == null)
+			return null;
 		scriptProposal.setImage(getImage(getLabelProvider()
 				.createMethodImageDescriptor(proposal)));
 
