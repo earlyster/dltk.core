@@ -60,7 +60,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.language/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.language/language/@nature"/>
                </appInfo>
             </annotation>
          </attribute>
