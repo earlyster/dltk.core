@@ -11,11 +11,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.coloring;
 
-/**
- * @since 3.0
- */
-public interface IColoringPreferenceProvider extends IColoringCategoryConstants {
+import org.eclipse.dltk.ui.preferences.PreferencesMessages;
 
-	void providePreferences(IColoringPreferenceRequestor requestor);
+public interface IColoringCategoryConstants {
+
+	String sCoreCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_DLTK;
+
+	String sDocumentationCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_DLTKdoc;
+
+	String sCommentsCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_comments;
 
 }

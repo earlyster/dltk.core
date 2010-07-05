@@ -20,15 +20,19 @@ public class ColoringPreferences {
 
 	public static void initializeDefaults(IPreferenceStore store,
 			String natureId) {
-		final IColoringPreferenceProvider[] providers = (IColoringPreferenceProvider[]) new NatureExtensionManager(
-				DLTKUIPlugin.PLUGIN_ID + ".coloring",
-				IColoringPreferenceProvider.class).getInstances(natureId);
+		final IColoringPreferenceProvider[] providers = getProviders(natureId);
 		if (providers != null) {
 			final IColoringPreferenceRequestor requestor = new DefaultPreferenceRequestor(
-					store);
+					store, natureId);
 			for (IColoringPreferenceProvider provider : providers) {
 				provider.providePreferences(requestor);
 			}
 		}
+	}
+
+	public static IColoringPreferenceProvider[] getProviders(String natureId) {
+		return (IColoringPreferenceProvider[]) new NatureExtensionManager(
+				DLTKUIPlugin.PLUGIN_ID + ".coloring",
+				IColoringPreferenceProvider.class).getInstances(natureId);
 	}
 }

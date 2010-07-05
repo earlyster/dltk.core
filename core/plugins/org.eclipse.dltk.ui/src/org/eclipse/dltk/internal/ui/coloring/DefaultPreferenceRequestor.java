@@ -13,7 +13,10 @@ package org.eclipse.dltk.internal.ui.coloring;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.coloring.EnablementStyle;
 import org.eclipse.dltk.ui.coloring.FontStyle;
 import org.eclipse.dltk.ui.coloring.IColoringPreferenceKey;
@@ -25,29 +28,37 @@ public class DefaultPreferenceRequestor extends
 		AbstractColoringPreferenceRequestor {
 
 	private final IPreferenceStore store;
+	private final String natureId;
 
-	public DefaultPreferenceRequestor(IPreferenceStore store) {
+	public DefaultPreferenceRequestor(IPreferenceStore store, String natureId) {
 		this.store = store;
+		this.natureId = natureId;
 	}
+
+	private Set<String> processedKeys = new HashSet<String>();
 
 	public void addPreference(IColoringPreferenceKey key, String name,
 			RGB color, EnablementStyle enablementStyle, FontStyle... fontStyles) {
+		if (!processedKeys.add(key.getColorKey())) {
+			DLTKUIPlugin.warn("Duplicate color preference " + key.getColorKey()
+					+ " in " + natureId);
+			return;
+		}
 		PreferenceConverter.setDefault(store, key.getColorKey(), color);
 		final EnumSet<FontStyle> fontStyleSet = EnumSet.noneOf(FontStyle.class);
 		Collections.addAll(fontStyleSet, fontStyles);
-		store.setDefault(key.getBoldKey(), fontStyleSet
-				.contains(FontStyle.BOLD));
-		store.setDefault(key.getItalicKey(), fontStyleSet
-				.contains(FontStyle.ITALIC));
-		store.setDefault(key.getUnderlineKey(), fontStyleSet
-				.contains(FontStyle.UNDERLINE));
-		store.setDefault(key.getStrikethroughKey(), fontStyleSet
-				.contains(FontStyle.STRIKETHROUGH));
+		store.setDefault(key.getBoldKey(),
+				fontStyleSet.contains(FontStyle.BOLD));
+		store.setDefault(key.getItalicKey(),
+				fontStyleSet.contains(FontStyle.ITALIC));
+		store.setDefault(key.getUnderlineKey(),
+				fontStyleSet.contains(FontStyle.UNDERLINE));
+		store.setDefault(key.getStrikethroughKey(),
+				fontStyleSet.contains(FontStyle.STRIKETHROUGH));
 		if (key.getEnableKey() != null
 				&& enablementStyle != EnablementStyle.ALWAYS_ON) {
 			store.setDefault(key.getEnableKey(),
 					enablementStyle == EnablementStyle.ON);
 		}
 	}
-
 }

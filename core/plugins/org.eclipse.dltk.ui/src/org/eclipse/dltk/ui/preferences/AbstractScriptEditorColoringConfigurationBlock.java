@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.compiler.task.TaskTagUtils;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.internal.ui.coloring.ColoringConfigurationModelCollector;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.preferences.ScriptSourcePreviewerUpdater;
@@ -30,6 +31,9 @@ import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.PreferencesAdapter;
+import org.eclipse.dltk.ui.coloring.ColoringPreferences;
+import org.eclipse.dltk.ui.coloring.IColoringCategoryConstants;
+import org.eclipse.dltk.ui.coloring.IColoringPreferenceProvider;
 import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
@@ -79,7 +83,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * categories here...
  */
 public abstract class AbstractScriptEditorColoringConfigurationBlock extends
-		AbstractConfigurationBlock {
+		AbstractConfigurationBlock implements IColoringCategoryConstants {
 
 	/**
 	 * Item in the highlighting color list.
@@ -328,12 +332,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	 */
 	private static final String UNDERLINE = PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 
-	protected final static String sCoreCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_DLTK;
-
-	protected final static String sDocumentationCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_DLTKdoc;
-
-	protected final static String sCommentsCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_comments;
-
 	private ColorSelector fSyntaxForegroundColorEditor;
 
 	private Label fColorEditorLabel;
@@ -380,7 +378,23 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	 */
 	private IColorManager fColorManager;
 
-	protected abstract String[][] getSyntaxColorListModel();
+	protected String[][] getSyntaxColorListModel() {
+		final ColoringConfigurationModelCollector collector = new ColoringConfigurationModelCollector();
+		final String natureId = getNatureId();
+		Assert.isNotNull(natureId);
+		final IColoringPreferenceProvider[] providers = ColoringPreferences
+				.getProviders(natureId);
+		if (providers != null) {
+			for (IColoringPreferenceProvider provider : providers) {
+				provider.providePreferences(collector);
+			}
+		}
+		return collector.getColorListModel();
+	}
+
+	protected String getNatureId() {
+		return null;
+	}
 
 	protected abstract ProjectionViewer createPreviewViewer(Composite parent,
 			IVerticalRuler verticalRuler, IOverviewRuler overviewRuler,
@@ -526,8 +540,8 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 			fUnderlineCheckBox.setEnabled(false);
 			return;
 		}
-		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(), item
-				.getColorKey());
+		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(),
+				item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);
 		fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(
 				item.getBoldKey()));
@@ -569,8 +583,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		colorComposite.setLayout(layout);
 
 		Link link = new Link(colorComposite, SWT.NONE);
-		link
-				.setText(PreferencesMessages.DLTKEditorColoringConfigurationBlock_link);
+		link.setText(PreferencesMessages.DLTKEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -593,8 +606,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 		Label label;
 		label = new Label(colorComposite, SWT.LEFT);
-		label
-				.setText(PreferencesMessages.DLTKEditorPreferencePage_coloring_element);
+		label.setText(PreferencesMessages.DLTKEditorPreferencePage_coloring_element);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite = new Composite(colorComposite, SWT.NONE);
@@ -728,9 +740,9 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item = getHighlightingColorListItem();
-				PreferenceConverter.setValue(getPreferenceStore(), item
-						.getColorKey(), fSyntaxForegroundColorEditor
-						.getColorValue());
+				PreferenceConverter.setValue(getPreferenceStore(),
+						item.getColorKey(),
+						fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
 
