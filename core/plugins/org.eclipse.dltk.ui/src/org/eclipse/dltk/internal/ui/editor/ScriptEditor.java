@@ -71,6 +71,7 @@ import org.eclipse.dltk.ui.IWorkingCopyManager;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.PreferencesAdapter;
 import org.eclipse.dltk.ui.actions.DLTKActionConstants;
+import org.eclipse.dltk.ui.actions.GenerateActionGroup;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.actions.OpenEditorActionGroup;
 import org.eclipse.dltk.ui.actions.OpenViewActionGroup;
@@ -1172,6 +1173,17 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		ISourceViewer sourceViewer = getSourceViewer();
 		SourceViewerConfiguration configuration = getSourceViewerConfiguration();
 		((ToggleCommentAction) action).configure(sourceViewer, configuration);
+
+		final ActionGroup generateActions = createGenerateActionGroup();
+		if (generateActions != null) {
+			fActionGroups.addGroup(generateActions);
+			fContextMenuGroup.addGroup(generateActions);
+		}
+	}
+
+	protected ActionGroup createGenerateActionGroup() {
+		return new GenerateActionGroup(this,
+				ITextEditorActionConstants.GROUP_EDIT);
 	}
 
 	private static final String EXTENSION_EDITOR_CONTEXT_ACTION_GROUPS = "editorContextActionGroup"; //$NON-NLS-1$
