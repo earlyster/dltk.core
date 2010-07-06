@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.dltk.internal.ui.editor.selectionaction.GoToNextPreviousMemberAction;
 import org.eclipse.dltk.ui.actions.DLTKActionConstants;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
@@ -28,6 +27,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -80,13 +80,15 @@ public class BasicScriptEditorActionContributor extends
 		fGotoMatchingBracket
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 
-		fShowOutline = new RetargetTextEditorAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "ShowOutline."); //$NON-NLS-1$
+		fShowOutline = new RetargetTextEditorAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"ShowOutline."); //$NON-NLS-1$
 		fShowOutline
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.SHOW_OUTLINE);
 
-		fOpenHierarchy = new RetargetTextEditorAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "OpenHierarchy."); //$NON-NLS-1$
+		fOpenHierarchy = new RetargetTextEditorAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"OpenHierarchy."); //$NON-NLS-1$
 		fOpenHierarchy
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY);
 
@@ -119,9 +121,7 @@ public class BasicScriptEditorActionContributor extends
 				fShowScriptDoc);
 	}
 
-	/*
-	 * @see org.eclipse.ui.part.EditorActionBarContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
-	 */
+	@Override
 	public void contributeToMenu(IMenuManager menu) {
 		super.contributeToMenu(menu);
 
@@ -193,7 +193,7 @@ public class BasicScriptEditorActionContributor extends
 		if (part instanceof ScriptEditor) {
 			ScriptEditor editor = (ScriptEditor) part;
 			editor.getActionGroup().fillActionBars(getActionBars());
-			FoldingActionGroup foldingActions = editor.getFoldingActionGroup();
+			final ActionGroup foldingActions = editor.getFoldingActionGroup();
 			if (foldingActions != null)
 				foldingActions.updateActionBars();
 		}

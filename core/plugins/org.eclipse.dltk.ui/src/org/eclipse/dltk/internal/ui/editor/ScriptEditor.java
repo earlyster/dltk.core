@@ -628,16 +628,16 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	/**
 	 * The action group for folding.
 	 */
-	private FoldingActionGroup fFoldingGroup;
+	private ActionGroup fFoldingGroup;
 
 	/** The information presenter. */
 	private InformationPresenter fInformationPresenter;
 
-	protected CompositeActionGroup fContextMenuGroup;
+	private CompositeActionGroup fContextMenuGroup;
 
 	// private SelectionHistory fSelectionHistory;
 
-	protected CompositeActionGroup fActionGroups;
+	private CompositeActionGroup fActionGroups;
 
 	private AbstractSelectionChangedListener fOutlineSelectionChangedListener = new OutlineSelectionChangedListener();
 
@@ -836,7 +836,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * 
 	 * @return returns this editor's standard action group
 	 */
-	protected ActionGroup getActionGroup() {
+	ActionGroup getActionGroup() {
 		return fActionGroups;
 	}
 
@@ -1067,6 +1067,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	@Override
 	protected void createActions() {
 		super.createActions();
 
@@ -1221,14 +1222,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * 
 	 * @return
 	 */
-	protected FoldingActionGroup createFoldingActionGroup() {
-		return null;
+	protected ActionGroup createFoldingActionGroup() {
+		return new FoldingActionGroup(this, getViewer(),
+				getScriptPreferenceStore());
 	}
 
-	/*
-	 * @seeorg.eclipse.ui.texteditor.AbstractDecoratedTextEditor#
-	 * createAnnotationRulerColumn(org.eclipse.jface.text.source.CompositeRuler)
-	 */
+	@Override
 	protected IVerticalRulerColumn createAnnotationRulerColumn(
 			CompositeRuler ruler) {
 		if (!getPreferenceStore().getBoolean(
@@ -1271,7 +1270,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * @return the folding action group, or <code>null</code> if there is none
 	 * 
 	 */
-	protected FoldingActionGroup getFoldingActionGroup() {
+	ActionGroup getFoldingActionGroup() {
 		return fFoldingGroup;
 	}
 
