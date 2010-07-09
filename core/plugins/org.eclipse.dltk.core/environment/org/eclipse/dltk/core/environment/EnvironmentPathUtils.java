@@ -190,8 +190,10 @@ public class EnvironmentPathUtils {
 
 				if (loc != null) {
 					return environment.getFile(loc);
-				} else {
+				} else if (uri != null) {
 					return environment.getFile(uri);
+				} else {
+					return null;
 				}
 			}
 			IFileHandle file = environment.getFile(path);

@@ -96,8 +96,9 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(URI locationURI) {
-		if (LocalEnvironmentProvider.FILE_SCHEME
-				.equals(locationURI.getScheme())) {
+		if (locationURI != null
+				&& LocalEnvironmentProvider.FILE_SCHEME.equals(locationURI
+						.getScheme())) {
 			return new EFSFileHandle(this, fs.getStore(locationURI));
 		} else {
 			return null;
