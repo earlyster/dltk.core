@@ -1279,7 +1279,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	protected void doSetInput(IEditorInput input) throws CoreException {
-		// input = transformEditorInput(input);
 		ISourceViewer sourceViewer = getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
 			setPreferenceStore(createCombinedPreferenceStore(input));
@@ -1289,21 +1288,21 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				DLTKUIPlugin.log(e);
 				this.close(false);
 			}
-			return;
-		}
-		// uninstall & unregister preference store listener
-		getSourceViewerDecorationSupport(sourceViewer).uninstall();
-		((ISourceViewerExtension2) sourceViewer).unconfigure();
-		setPreferenceStore(createCombinedPreferenceStore(input));
-		// install & register preference store listener
-		sourceViewer.configure(getSourceViewerConfiguration());
-		getSourceViewerDecorationSupport(sourceViewer).install(
-				getPreferenceStore());
-		try {
-			internalDoSetInput(input);
-		} catch (ModelException e) {
-			DLTKUIPlugin.log(e);
-			this.close(false);
+		} else {
+			// uninstall & unregister preference store listener
+			getSourceViewerDecorationSupport(sourceViewer).uninstall();
+			((ISourceViewerExtension2) sourceViewer).unconfigure();
+			setPreferenceStore(createCombinedPreferenceStore(input));
+			// install & register preference store listener
+			sourceViewer.configure(getSourceViewerConfiguration());
+			getSourceViewerDecorationSupport(sourceViewer).install(
+					getPreferenceStore());
+			try {
+				internalDoSetInput(input);
+			} catch (ModelException e) {
+				DLTKUIPlugin.log(e);
+				this.close(false);
+			}
 		}
 
 		if (fScriptEditorErrorTickUpdater != null)
