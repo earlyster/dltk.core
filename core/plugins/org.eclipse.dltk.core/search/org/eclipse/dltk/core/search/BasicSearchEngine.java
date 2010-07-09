@@ -63,6 +63,7 @@ import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPa
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Search basic engine. Public search engine now uses basic engine
@@ -279,29 +280,23 @@ public class BasicSearchEngine {
 
 				try {
 					if (monitor != null)
-						monitor.subTask(Messages.bind(
+						monitor.subTask(NLS.bind(
 								Messages.engine_searching_indexing,
-								new String[] { participant.getDescription() }));
+								participant.getDescription()));
 					participant.beginSearching();
 					requestor.enterParticipant(participant);
-					PathCollector pathCollector = new PathCollector();
-					indexManager.performConcurrentJob(new PatternSearchJob(
-							pattern, participant, scope, pathCollector),
-							IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+					final String[] indexMatchPaths = collectMatchingPaths(
+							indexManager, pattern, participant, scope,
 							monitor == null ? null : new SubProgressMonitor(
 									monitor, 50));
-					if (monitor != null && monitor.isCanceled())
-						throw new OperationCanceledException();
 
 					// locate index matches if any (note that all search matches
 					// could have been issued during index querying)
 					if (monitor != null)
-						monitor.subTask(Messages.bind(
+						monitor.subTask(NLS.bind(
 								Messages.engine_searching_matching,
-								new String[] { participant.getDescription() }));
-					String[] indexMatchPaths = pathCollector.getPaths();
+								participant.getDescription()));
 					if (indexMatchPaths != null) {
-						pathCollector = null; // release
 						int indexMatchLength = indexMatchPaths.length;
 						SearchDocument[] indexMatches = new SearchDocument[indexMatchLength];
 						for (int j = 0; j < indexMatchLength; j++) {
@@ -343,6 +338,18 @@ public class BasicSearchEngine {
 		}
 	}
 
+	private String[] collectMatchingPaths(IndexManager indexManager,
+			SearchPattern pattern, SearchParticipant participant,
+			IDLTKSearchScope scope, IProgressMonitor monitor) {
+		final PathCollector pathCollector = new PathCollector();
+		indexManager.performConcurrentJob(new PatternSearchJob(pattern,
+				participant, scope, pathCollector),
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+		if (monitor != null && monitor.isCanceled())
+			throw new OperationCanceledException();
+		return pathCollector.getPaths();
+	}
+
 	List findMatchesSourceOnly(SearchPattern pattern,
 			SearchParticipant[] participants, IDLTKSearchScope scope,
 			IProgressMonitor monitor) throws CoreException {
@@ -382,30 +389,24 @@ public class BasicSearchEngine {
 				}
 				try {
 					if (subMonitor != null) {
-						subMonitor.subTask(Messages.bind(
+						subMonitor.subTask(NLS.bind(
 								Messages.engine_searching_indexing,
-								new String[] { participant.getDescription() }));
+								participant.getDescription()));
 					}
 					participant.beginSearching();
-					PathCollector pathCollector = new PathCollector();
-					indexManager.performConcurrentJob(new PatternSearchJob(
-							pattern, participant, scope, pathCollector),
-							IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+					final String[] indexMatchPaths = collectMatchingPaths(
+							indexManager, pattern, participant, scope,
 							subMonitor);
-					if (monitor != null && monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
 
-					// locate index matches if any (note that all search matches
-					// could have been issued during index querying)
-					if (subMonitor != null) {
-						subMonitor.subTask(Messages.bind(
-								Messages.engine_searching_matching,
-								new String[] { participant.getDescription() }));
-					}
-					String[] indexMatchPaths = pathCollector.getPaths();
 					if (indexMatchPaths != null) {
-						pathCollector = null; // release
+						// locate index matches if any (note that all search
+						// matches
+						// could have been issued during index querying)
+						if (subMonitor != null) {
+							subMonitor.subTask(NLS.bind(
+									Messages.engine_searching_matching,
+									participant.getDescription()));
+						}
 						int indexMatchLength = indexMatchPaths.length;
 						SearchDocument[] indexMatches = new SearchDocument[indexMatchLength];
 						for (int j = 0; j < indexMatchLength; j++) {
@@ -693,8 +694,7 @@ public class BasicSearchEngine {
 			IDLTKSearchScope scope, SearchRequestor requestor,
 			IProgressMonitor monitor) throws CoreException {
 		if (VERBOSE) {
-			Util
-					.verbose("BasicSearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope, SearchRequestor, IProgressMonitor)"); //$NON-NLS-1$
+			Util.verbose("BasicSearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope, SearchRequestor, IProgressMonitor)"); //$NON-NLS-1$
 		}
 		findMatches(pattern, participants, scope, requestor, monitor);
 	}
@@ -713,8 +713,7 @@ public class BasicSearchEngine {
 			SearchParticipant[] participants, IDLTKSearchScope scope,
 			IProgressMonitor monitor) throws CoreException {
 		if (VERBOSE) {
-			Util
-					.verbose("BasicSearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope, SearchRequestor, IProgressMonitor)"); //$NON-NLS-1$
+			Util.verbose("BasicSearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope, SearchRequestor, IProgressMonitor)"); //$NON-NLS-1$
 		}
 		return findMatchesSourceOnly(pattern, participants, scope, monitor);
 	}
@@ -871,14 +870,10 @@ public class BasicSearchEngine {
 			throws ModelException {
 
 		if (VERBOSE) {
-			Util
-					.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
-			Util
-					.verbose("	- package name: " + (packageName == null ? "null" : new String(packageName))); //$NON-NLS-1$ //$NON-NLS-2$
-			Util
-					.verbose("	- match rule: " + getMatchRuleString(packageMatchRule)); //$NON-NLS-1$
-			Util
-					.verbose("	- type name: " + (typeName == null ? "null" : new String(typeName))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
+			Util.verbose("	- package name: " + (packageName == null ? "null" : new String(packageName))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose("	- match rule: " + getMatchRuleString(packageMatchRule)); //$NON-NLS-1$
+			Util.verbose("	- type name: " + (typeName == null ? "null" : new String(typeName))); //$NON-NLS-1$ //$NON-NLS-2$
 			Util.verbose("	- match rule: " + getMatchRuleString(typeMatchRule)); //$NON-NLS-1$
 			Util.verbose("	- search for: " + searchFor); //$NON-NLS-1$
 			Util.verbose("	- scope: " + scope); //$NON-NLS-1$
@@ -889,8 +884,7 @@ public class BasicSearchEngine {
 			if (typeName != null && typeName.length == 0) {
 				// TODO (frederic) Throw a JME instead?
 				if (VERBOSE) {
-					Util
-							.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
+					Util.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
 				}
 				return;
 			}
@@ -1099,12 +1093,9 @@ public class BasicSearchEngine {
 			throws ModelException {
 
 		if (VERBOSE) {
-			Util
-					.verbose("BasicSearchEngine.searchAllTypeNames(char[][], char[][], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
-			Util
-					.verbose("	- package name: " + (qualifications == null ? "null" : new String(CharOperation.concatWith(qualifications, ',')))); //$NON-NLS-1$ //$NON-NLS-2$
-			Util
-					.verbose("	- type name: " + (typeNames == null ? "null" : new String(CharOperation.concatWith(typeNames, ',')))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose("BasicSearchEngine.searchAllTypeNames(char[][], char[][], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
+			Util.verbose("	- package name: " + (qualifications == null ? "null" : new String(CharOperation.concatWith(qualifications, ',')))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose("	- type name: " + (typeNames == null ? "null" : new String(CharOperation.concatWith(typeNames, ',')))); //$NON-NLS-1$ //$NON-NLS-2$
 			Util.verbose("	- match rule: " + matchRule); //$NON-NLS-1$
 			Util.verbose("	- search for: " + searchFor); //$NON-NLS-1$
 			Util.verbose("	- scope: " + scope); //$NON-NLS-1$
@@ -1433,8 +1424,8 @@ public class BasicSearchEngine {
 			Util.verbose("	- script element: " + enclosingElement); //$NON-NLS-1$
 		}
 		IDLTKSearchScope scope = createSearchScope(
-				new IModelElement[] { enclosingElement }, DLTKLanguageManager
-						.getLanguageToolkit(enclosingElement));
+				new IModelElement[] { enclosingElement },
+				DLTKLanguageManager.getLanguageToolkit(enclosingElement));
 		IResource resource = enclosingElement.getResource();
 		if (enclosingElement instanceof IMember) {
 			IMember member = (IMember) enclosingElement;
@@ -1453,8 +1444,7 @@ public class BasicSearchEngine {
 				try {
 					requestor.beginReporting();
 					if (VERBOSE) {
-						Util
-								.verbose("Searching for " + pattern + " in " + resource.getFullPath()); //$NON-NLS-1$//$NON-NLS-2$
+						Util.verbose("Searching for " + pattern + " in " + resource.getFullPath()); //$NON-NLS-1$//$NON-NLS-2$
 					}
 					SearchParticipant participant = getSearchParticipant(enclosingElement);
 					boolean external = false;
@@ -1465,22 +1455,24 @@ public class BasicSearchEngine {
 					}
 					char[] contents = Util
 							.getResourceContentsAsCharArray((IFile) resource);
-					SearchDocument[] documents = ModuleFactory.addWorkingCopies(
-							pattern,
-							new SearchDocument[] { new DLTKSearchDocument(
-									enclosingElement.getPath().toString(),
-									contents, participant, external,
-									enclosingElement.getScriptProject()
-											.getProject()) },
-							getWorkingCopies(enclosingElement), participant);
+					SearchDocument[] documents = ModuleFactory
+							.addWorkingCopies(
+									pattern,
+									new SearchDocument[] { new DLTKSearchDocument(
+											enclosingElement.getPath()
+													.toString(), contents,
+											participant, external,
+											enclosingElement.getScriptProject()
+													.getProject()) },
+									getWorkingCopies(enclosingElement),
+									participant);
 					participant.locateMatches(documents, pattern, scope,
 							requestor, monitor);
 				} finally {
 					requestor.endReporting();
 				}
 			} else {
-				search(
-						pattern,
+				search(pattern,
 						new SearchParticipant[] { getDefaultSearchParticipant() },
 						scope, requestor, monitor);
 			}
@@ -1581,12 +1573,9 @@ public class BasicSearchEngine {
 			throws ModelException {
 
 		if (VERBOSE) {
-			Util
-					.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
-			Util
-					.verbose("	- method name: " + (methodName == null ? "null" : new String(methodName))); //$NON-NLS-1$ //$NON-NLS-2$
-			Util
-					.verbose("	- match rule: " + getMatchRuleString(methodMatchRule)); //$NON-NLS-1$
+			Util.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
+			Util.verbose("	- method name: " + (methodName == null ? "null" : new String(methodName))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose("	- match rule: " + getMatchRuleString(methodMatchRule)); //$NON-NLS-1$
 			Util.verbose("	- search for: " + searchFor); //$NON-NLS-1$
 			Util.verbose("	- scope: " + scope); //$NON-NLS-1$
 		}
@@ -1595,8 +1584,7 @@ public class BasicSearchEngine {
 		if (methodName != null && methodName.length == 0) {
 			// TODO (frederic) Throw a JME instead?
 			if (VERBOSE) {
-				Util
-						.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
+				Util.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
 			}
 			return;
 		}

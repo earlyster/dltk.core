@@ -10,38 +10,35 @@
 package org.eclipse.dltk.internal.core.search;
 
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 
-
 /**
  * Collects the resource paths reported by a client to this search requestor.
  */
 public class PathCollector extends IndexQueryRequestor {
-	
+
 	/* a set of resource paths */
-	public HashSet paths = new HashSet(5);
-	
-	/* (non-Javadoc)
-	 * @seeIndexQueryRequestor#acceptIndexMatch(IndexRecord, SearchParticipant, SearchPattern)
-	 */
-	public boolean acceptIndexMatch(String documentPath, SearchPattern indexRecord, SearchParticipant participant, AccessRuleSet access) {
+	private final Set<String> paths = new HashSet<String>(5);
+
+	public boolean acceptIndexMatch(String documentPath,
+			SearchPattern indexRecord, SearchParticipant participant,
+			AccessRuleSet access) {
 		paths.add(documentPath);
 		return true;
 	}
 
 	/**
-	 * Returns the paths that have been collected.
+	 * Returns the paths that have been collected or <code>null</code> if there
+	 * are no paths
 	 */
 	public String[] getPaths() {
-		String[] result = new String[this.paths.size()];
-		int i = 0;
-		for (Iterator iter = this.paths.iterator(); iter.hasNext();) {
-			result[i++] = (String)iter.next();
-		}
-		return result;
+		if (paths.isEmpty())
+			return null;
+		else
+			return paths.toArray(new String[paths.size()]);
 	}
 }
