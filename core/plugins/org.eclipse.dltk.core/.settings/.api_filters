@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.dltk.core" version="2">
-    <resource path="model/org/eclipse/dltk/internal/core/ResourceChangeToNonScriptDelta.java" type="org.eclipse.dltk.internal.core.ResourceChangeToNonScriptDelta">
-        <filter id="574619656">
+    <resource path="utils/org/eclipse/dltk/core/Predicate.java" type="org.eclipse.dltk.core.Predicate">
+        <filter id="305365105">
             <message_arguments>
-                <message_argument value="IResourceDelta"/>
-                <message_argument value="ResourceChangeToNonScriptDelta"/>
+                <message_argument value="org.eclipse.dltk.core.Predicate"/>
+                <message_argument value="org.eclipse.dltk.core_2.0.0"/>
             </message_arguments>
         </filter>
     </resource>
