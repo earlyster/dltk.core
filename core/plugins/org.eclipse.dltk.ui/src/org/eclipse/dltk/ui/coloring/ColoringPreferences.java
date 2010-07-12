@@ -16,6 +16,9 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+/**
+ * @since 3.0
+ */
 public class ColoringPreferences {
 
 	public static void initializeDefaults(IPreferenceStore store,

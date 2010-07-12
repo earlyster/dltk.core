@@ -1182,6 +1182,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected ActionGroup createGenerateActionGroup() {
 		return new GenerateActionGroup(this,
 				ITextEditorActionConstants.GROUP_EDIT);
@@ -1221,6 +1224,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * Creates action group for folding.
 	 * 
 	 * @return
+	 * @since 3.0
 	 */
 	protected ActionGroup createFoldingActionGroup() {
 		return new FoldingActionGroup(this, getViewer(),

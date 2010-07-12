@@ -392,6 +392,9 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		return collector.getColorListModel();
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected String getNatureId() {
 		return null;
 	}

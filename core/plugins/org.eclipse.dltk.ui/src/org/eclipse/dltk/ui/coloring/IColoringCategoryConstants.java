@@ -13,6 +13,9 @@ package org.eclipse.dltk.ui.coloring;
 
 import org.eclipse.dltk.ui.preferences.PreferencesMessages;
 
+/**
+ * @since 3.0
+ */
 public interface IColoringCategoryConstants {
 
 	String sCoreCategory = PreferencesMessages.DLTKEditorPreferencePage_coloring_category_DLTK;
