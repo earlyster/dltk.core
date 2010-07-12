@@ -33,6 +33,9 @@ public interface IImportContainer extends IModelElement, IParent,
 	 */
 	IImportDeclaration getImport(String name, String version);
 
+	/**
+	 * @since 3.0
+	 */
 	IImportDeclaration[] getImports() throws ModelException;
 
 	String getContainerName();
