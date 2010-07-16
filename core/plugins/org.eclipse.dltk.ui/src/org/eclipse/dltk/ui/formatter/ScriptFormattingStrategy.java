@@ -34,6 +34,7 @@ import org.eclipse.ui.internal.WorkbenchWindow;
  * 
  * @since 3.0
  */
+@SuppressWarnings("restriction")
 public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 
 	private final String natureId;
@@ -92,6 +93,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition partition = job.partition;
 
 		if (document != null && partition != null) {
+			@SuppressWarnings("rawtypes")
 			Map partitioners = null;
 			try {
 				int offset = partition.getOffset();
@@ -100,7 +102,8 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 				if (formatterFactory != null) {
 					final String lineDelimiter = TextUtilities
 							.getDefaultLineDelimiter(document);
-					final Map prefs = getPreferences();
+					@SuppressWarnings("unchecked")
+					final Map<String, String> prefs = getPreferences();
 					final IScriptFormatter formatter = formatterFactory
 							.createFormatter(lineDelimiter, prefs);
 					if (formatter instanceof IScriptFormatterExtension) {
@@ -119,34 +122,25 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					}
 				}
 			} catch (FormatterSyntaxProblemException e) {
-				final IWorkbench workbench = PlatformUI.getWorkbench();
-				WorkbenchWindow window = (WorkbenchWindow) workbench
-						.getActiveWorkbenchWindow();
-				if (window != null && window.getStatusLineManager() != null) {
-					window
-							.getStatusLineManager()
-							.setErrorMessage(
-									NLS
-											.bind(
-													FormatterMessages.ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError,
-													e.getMessage()));
-				}
-				workbench.getDisplay().beep();
+				reportFormatError(NLS
+						.bind(FormatterMessages.ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError,
+								e.getMessage()));
+			} catch (FormatterException e) {
+				reportFormatError(NLS
+						.bind(FormatterMessages.ScriptFormattingStrategy_unableToFormat,
+								e.getMessage()));
 			} catch (MalformedTreeException e) {
 				DLTKUIPlugin
-						.warn(
-								FormatterMessages.ScriptFormattingStrategy_formattingError,
+						.warn(FormatterMessages.ScriptFormattingStrategy_formattingError,
 								e);
 			} catch (BadLocationException e) {
 				// Can only happen on concurrent document modification
 				DLTKUIPlugin
-						.warn(
-								FormatterMessages.ScriptFormattingStrategy_formattingError,
+						.warn(FormatterMessages.ScriptFormattingStrategy_formattingError,
 								e);
 			} catch (Exception e) {
 				final String msg = NLS
-						.bind(
-								FormatterMessages.ScriptFormattingStrategy_unexpectedFormatterError,
+						.bind(FormatterMessages.ScriptFormattingStrategy_unexpectedFormatterError,
 								e.toString());
 				DLTKUIPlugin.logErrorMessage(msg, e);
 			} finally {
@@ -155,6 +149,16 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 							partitioners);
 			}
 		}
+	}
+
+	private void reportFormatError(String message) {
+		final IWorkbench workbench = PlatformUI.getWorkbench();
+		WorkbenchWindow window = (WorkbenchWindow) workbench
+				.getActiveWorkbenchWindow();
+		if (window != null && window.getStatusLineManager() != null) {
+			window.getStatusLineManager().setErrorMessage(message);
+		}
+		workbench.getDisplay().beep();
 	}
 
 	protected IScriptFormatterFactory selectFormatterFactory(FormatJob job) {
