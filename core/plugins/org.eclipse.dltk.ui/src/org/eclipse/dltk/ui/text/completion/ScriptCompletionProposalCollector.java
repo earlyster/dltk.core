@@ -445,7 +445,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		case CompletionProposal.METHOD_REF:
 		case CompletionProposal.METHOD_NAME_REFERENCE:
 			// case CompletionProposal.JAVADOC_METHOD_REF:
-			return createMethodReferenceProposal(proposal);
+			return createMethodReferenceProposal0(proposal);
 		case CompletionProposal.METHOD_DECLARATION:
 			return createMethodDeclarationProposal(proposal);
 		case CompletionProposal.LABEL_REF:
@@ -758,15 +758,23 @@ public abstract class ScriptCompletionProposalCollector extends
 		return scriptProposal;
 	}
 
-	private IScriptCompletionProposal createMethodReferenceProposal(
+	private IScriptCompletionProposal createMethodReferenceProposal0(
 			CompletionProposal methodProposal) {
-		LazyScriptCompletionProposal proposal = new ScriptMethodCompletionProposal(
-				methodProposal, getInvocationContext());
-		adaptLength(proposal, methodProposal);
+		IScriptCompletionProposal proposal = createMethodReferenceProposal(methodProposal);
+		if (proposal instanceof AbstractScriptCompletionProposal) {
+			adaptLength((AbstractScriptCompletionProposal) proposal,
+					methodProposal);
+		}
 		return proposal;
 	}
 
-	private void adaptLength(LazyScriptCompletionProposal proposal,
+	protected IScriptCompletionProposal createMethodReferenceProposal(
+			CompletionProposal methodProposal) {
+		return new ScriptMethodCompletionProposal(methodProposal,
+				getInvocationContext());
+	}
+
+	private void adaptLength(AbstractScriptCompletionProposal proposal,
 			CompletionProposal coreProposal) {
 		if (fUserReplacementLength != -1) {
 			proposal.setReplacementLength(getLength(coreProposal));
