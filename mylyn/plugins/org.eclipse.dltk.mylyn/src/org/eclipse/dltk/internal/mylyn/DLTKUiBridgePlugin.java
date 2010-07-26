@@ -74,8 +74,7 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 		super.start(context);
 		INSTANCE = this;
 
-		IPreferenceStore dltkPrefs = DLTKUIPlugin.getDefault()
-				.getPreferenceStore();
+		IPreferenceStore dltkPrefs = DLTKUIPlugin.getDefault().getPreferenceStore();
 		// NOTE: moved out of wizard and first task activation to avoid bug
 		// 194766
 		int count = getPreferenceStore().getInt(MYLYN_RUN_COUNT);
@@ -86,11 +85,9 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 			// to avoid prevent JDT from displaying a warning dialog
 			if (count == 0 && getPreferenceStore().contains(MYLYN_PREVIOUS_RUN)) {
 				if (dltkPrefs.contains(NUM_COMPUTERS_PREF_KEY)) {
-					int lastNumberOfComputers = dltkPrefs
-							.getInt(NUM_COMPUTERS_PREF_KEY);
+					int lastNumberOfComputers = dltkPrefs.getInt(NUM_COMPUTERS_PREF_KEY);
 					if (lastNumberOfComputers > 0) {
-						dltkPrefs.putValue(NUM_COMPUTERS_PREF_KEY, Integer
-								.toString(lastNumberOfComputers - 2));
+						dltkPrefs.putValue(NUM_COMPUTERS_PREF_KEY, Integer.toString(lastNumberOfComputers - 2));
 					}
 				}
 			}
@@ -99,9 +96,8 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 			new UIJob("Initialize Content Assist") { //$NON-NLS-1$
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IPreferenceStore store = DLTKUIPlugin.getDefault()
-							.getPreferenceStore();
-					DLTKUiUtil.installContentAssist(store, true);
+					IPreferenceStore store = DLTKUIPlugin.getDefault().getPreferenceStore();
+					DLTKUiUtil.installContentAssist(store, false);
 					return Status.OK_STATUS;
 				}
 			}.schedule();
@@ -109,12 +105,9 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 
 		// the Task-Focused category should be disabled if the user reverts to
 		// the default
-		String defaultValue = dltkPrefs
-				.getDefaultString(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
-		dltkPrefs.setDefault(
-				PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES,
-				defaultValue + DLTKUiUtil.ASSIST_MYLYN_ALL
-						+ DLTKUiUtil.SEPARATOR_CODEASSIST);
+		String defaultValue = dltkPrefs.getDefaultString(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
+		dltkPrefs.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, defaultValue
+				+ DLTKUiUtil.ASSIST_MYLYN_ALL + DLTKUiUtil.SEPARATOR_CODEASSIST);
 	}
 
 	private void lazyStart() {
@@ -133,11 +126,8 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 			ContextCore.getContextManager().addListener(typeHistoryManager);
 		} catch (Throwable t) {
 			// FIXME review error message
-			StatusHandler
-					.log(new Status(
-							IStatus.ERROR,
-							DLTKUiBridgePlugin.ID_PLUGIN,
-							"Could not install type history manager: incompatible Eclipse version", t)); //$NON-NLS-1$
+			StatusHandler.log(new Status(IStatus.ERROR, DLTKUiBridgePlugin.ID_PLUGIN,
+					"Could not install type history manager: incompatible Eclipse version", t)); //$NON-NLS-1$
 		}
 	}
 
@@ -146,8 +136,7 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 			ContextCore.getContextManager().removeListener(typeHistoryManager);
 		}
 		if (landmarkMarkerManager != null) {
-			ContextCore.getContextManager().removeListener(
-					landmarkMarkerManager);
+			ContextCore.getContextManager().removeListener(landmarkMarkerManager);
 		}
 		if (dltkEditingMonitor != null) {
 			MonitorUi.getSelectionMonitors().remove(dltkEditingMonitor);
@@ -180,8 +169,7 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 		// }
 
 		// update editors that are already opened
-		for (IWorkbenchWindow w : PlatformUI.getWorkbench()
-				.getWorkbenchWindows()) {
+		for (IWorkbenchWindow w : PlatformUI.getWorkbench().getWorkbenchWindows()) {
 			IWorkbenchPage page = w.getActivePage();
 			if (page != null) {
 				IEditorReference[] references = page.getEditorReferences();
@@ -205,8 +193,7 @@ public class DLTKUiBridgePlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given plug-in
-	 * relative path.
+	 * Returns an image descriptor for the image file at the given plug-in relative path.
 	 * 
 	 * @param path
 	 *            the path
