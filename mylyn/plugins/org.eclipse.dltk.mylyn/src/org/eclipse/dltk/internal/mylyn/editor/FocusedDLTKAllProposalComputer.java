@@ -92,9 +92,13 @@ public class FocusedDLTKAllProposalComputer extends ScriptCompletionProposalComp
 	 */
 	@Override
 	protected ScriptCompletionProposalCollector createCollector(ScriptContentAssistInvocationContext context) {
-		ScriptCompletionProposalCollector collector = super.createCollector(context);
-//		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
-//		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, false);
+		ScriptCompletionProposalCollector collector = null;
+		// FIXME super.createCollector(context);
+		if (collector == null) {
+			return null;
+		}
+		//		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
+		//		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, false);
 		try {
 			collector.setIgnored(ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, false);
 		} catch (IllegalArgumentException e) {
