@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
@@ -151,11 +152,21 @@ public class ScriptDocumentationAccess {
 	 *             is thrown when the elements documentation can not be accessed
 	 */
 	public static Reader getHTMLContentReader(String nature,
-			final IMember member, final boolean allowInherited,
+			final IDocumentableElement member, final boolean allowInherited,
 			final boolean allowExternal) throws ModelException {
 		return merge(nature, new Operation() {
 			public Reader getInfo(IScriptDocumentationProvider provider) {
-				return provider.getInfo(member, allowInherited, allowExternal);
+				if (provider instanceof IScriptDocumentationProviderExtension2) {
+					final IScriptDocumentationProviderExtension2 ext = (IScriptDocumentationProviderExtension2) provider;
+					final IDocumentationResponse response = ext
+							.getDocumentationFor(member);
+					return DocumentationUtils.getReader(response);
+				} else if (member instanceof IMember) {
+					return provider.getInfo((IMember) member, allowInherited,
+							allowExternal);
+				} else {
+					return null;
+				}
 			}
 		});
 	}

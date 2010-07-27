@@ -12,7 +12,7 @@ package org.eclipse.dltk.internal.ui.text.hover;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.eclipse.dltk.core.IMember;
+import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.BrowserInformationControl;
@@ -131,8 +131,8 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 			for (int i = 0; i < result.length; i++) {
 				// HTMLPrinter.startBulletList(buffer);
 				IModelElement curr = result[i];
-				if (curr instanceof IMember) {
-					IMember member = (IMember) curr;
+				if (curr instanceof IDocumentableElement) {
+					IDocumentableElement member = (IDocumentableElement) curr;
 
 					Reader reader;
 					try {
@@ -167,8 +167,8 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		} else {
 
 			IModelElement curr = result[0];
-			if (curr instanceof IMember) {
-				IMember member = (IMember) curr;
+			if (curr instanceof IDocumentableElement) {
+				IDocumentableElement member = (IDocumentableElement) curr;
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {

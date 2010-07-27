@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
@@ -406,7 +407,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 				case IModelElement.SOURCE_MODULE:
 					try {
 						final ISourceModule module = (ISourceModule) je;
-						return getScriptdocHtmlList(module.getTypes());
+						return getScriptdocHtmlList(module.getChildren());
 					} catch (ModelException ex) {
 						return null;
 					}
@@ -490,8 +491,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		final List<String> nodocs = new ArrayList<String>();
 		for (int i = 0; i < result.length; i++) {
 			final IModelElement curr = result[i];
-			if (curr instanceof IMember) {
-				final IMember member = (IMember) curr;
+			if (curr instanceof IDocumentableElement) {
+				final IDocumentableElement member = (IDocumentableElement) curr;
 				try {
 					Reader reader = ScriptDocumentationAccess
 							.getHTMLContentReader(getNature(), member, true,
@@ -559,8 +560,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 */
 	private String getScriptdocHtml(IModelElement curr) {
 		StringBuffer buffer = new StringBuffer();
-		if (curr instanceof IMember) {
-			IMember member = (IMember) curr;
+		if (curr instanceof IDocumentableElement) {
+			IDocumentableElement member = (IDocumentableElement) curr;
 			// HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 			try {
 				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
@@ -625,7 +626,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 *            the Script member
 	 * @return a string containing the member's label
 	 */
-	private String getInfoText(IMember member) {
+	private String getInfoText(IDocumentableElement member) {
 		return ScriptElementLabels.getDefault().getElementLabel(member,
 				LABEL_FLAGS);
 	}
