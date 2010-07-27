@@ -16,9 +16,11 @@ import java.io.Reader;
 import java.net.URL;
 
 /**
- * Value object to return script documentation
+ * Value object to return script documentation. All implementations should
+ * extend {@link AbstractDocumentationResponse}
  * 
  * @since 2.0
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IDocumentationResponse {
 
