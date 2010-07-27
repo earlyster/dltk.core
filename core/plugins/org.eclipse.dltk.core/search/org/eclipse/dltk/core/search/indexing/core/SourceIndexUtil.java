@@ -21,7 +21,7 @@ public class SourceIndexUtil {
 				.getAncestor(IModelElement.PROJECT_FRAGMENT);
 		if (fragment.isArchive()) {
 			if (module instanceof IExternalSourceModule) {
-				ExternalSourceModule ext = (ExternalSourceModule) module;
+				IExternalSourceModule ext = (IExternalSourceModule) module;
 				IPath fullPath = ext.getFullPath();
 				return fullPath.toString();
 			}
