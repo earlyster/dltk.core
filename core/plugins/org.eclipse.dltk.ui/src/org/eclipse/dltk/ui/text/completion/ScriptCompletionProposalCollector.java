@@ -330,17 +330,26 @@ public abstract class ScriptCompletionProposalCollector extends
 			fUnprocessedCompletionProposals.clear();
 		}
 		for (CompletionProposal proposal : copy) {
-			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
-				acceptPotentialMethodDeclaration(proposal);
-			} else {
-				IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(proposal);
-				if (scriptProposal != null) {
-					fScriptProposals.add(scriptProposal);
-					if (proposal.getKind() == CompletionProposal.KEYWORD)
-						fKeywords.add(scriptProposal);
-				}
+			processUnprocessedProposal(proposal);
+		}
+	}
+
+	protected void processUnprocessedProposal(CompletionProposal proposal) {
+		if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
+			acceptPotentialMethodDeclaration(proposal);
+		} else {
+			final IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(proposal);
+			if (scriptProposal != null) {
+				addProposal(scriptProposal, proposal);
 			}
 		}
+	}
+
+	protected void addProposal(IScriptCompletionProposal scriptProposal,
+			CompletionProposal proposal) {
+		fScriptProposals.add(scriptProposal);
+		if (proposal.getKind() == CompletionProposal.KEYWORD)
+			fKeywords.add(scriptProposal);
 	}
 
 	/**
