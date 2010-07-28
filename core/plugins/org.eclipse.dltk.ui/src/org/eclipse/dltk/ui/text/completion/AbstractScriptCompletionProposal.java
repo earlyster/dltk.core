@@ -54,10 +54,10 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -275,23 +275,10 @@ public abstract class AbstractScriptCompletionProposal implements
 
 			boolean isSmartTrigger = isSmartTrigger(trigger);
 
-			String replacement;
-			if (isSmartTrigger || trigger == (char) 0) {
-				replacement = getReplacementString();
-			} else {
-				StringBuffer buffer = new StringBuffer(getReplacementString());
-
-				// fix for PR #5533. Assumes that no eating takes place.
-				if ((getCursorPosition() > 0
-						&& getCursorPosition() <= buffer.length() && buffer
-						.charAt(getCursorPosition() - 1) != trigger)) {
-					buffer.insert(getCursorPosition(), trigger);
-					setCursorPosition(getCursorPosition() + 1);
-				}
-
-				replacement = buffer.toString();
-				setReplacementString(replacement);
+			if (!isSmartTrigger && trigger != (char) 0) {
+				ensureTriggerAtCursorLocation(trigger);
 			}
+			String replacement = getReplacementString();
 
 			// reference position just at the end of the document change.
 			int referenceOffset = getReplacementOffset()
@@ -312,6 +299,20 @@ public abstract class AbstractScriptCompletionProposal implements
 
 		} catch (BadLocationException x) {
 			// ignore
+		}
+	}
+
+	protected void ensureTriggerAtCursorLocation(char trigger) {
+		String replacement = getReplacementString();
+
+		// fix for PR #5533. Assumes that no eating takes place.
+		if (getCursorPosition() > 0
+				&& getCursorPosition() <= replacement.length()
+				&& replacement.charAt(getCursorPosition() - 1) != trigger) {
+			StringBuilder buffer = new StringBuilder(replacement);
+			buffer.insert(getCursorPosition(), trigger);
+			setReplacementString(buffer.toString());
+			setCursorPosition(getCursorPosition() + 1);
 		}
 	}
 
@@ -690,8 +691,8 @@ public abstract class AbstractScriptCompletionProposal implements
 		String start = string.substring(0, prefix.length());
 		return start.equalsIgnoreCase(prefix)
 				|| isCamelCaseMatching()
-				&& CharOperation.camelCaseMatch(prefix.toCharArray(), string
-						.toCharArray());
+				&& CharOperation.camelCaseMatch(prefix.toCharArray(),
+						string.toCharArray());
 	}
 
 	/**
@@ -808,8 +809,8 @@ public abstract class AbstractScriptCompletionProposal implements
 									fRememberedStyleRange.start,
 									fRememberedStyleRange.length));
 					if (modelRange != null)
-						viewer2.invalidateTextPresentation(modelRange
-								.getOffset(), modelRange.getLength());
+						viewer2.invalidateTextPresentation(
+								modelRange.getOffset(), modelRange.getLength());
 
 				} else {
 					viewer2.invalidateTextPresentation(

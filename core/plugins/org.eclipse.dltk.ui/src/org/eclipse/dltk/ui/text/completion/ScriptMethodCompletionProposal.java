@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.completion;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -54,37 +57,59 @@ public class ScriptMethodCompletionProposal extends
 		super(proposal, context);
 	}
 
+	public static interface IReplacementBuffer {
+		void addArgument(int offset, int length);
+
+		void append(String text);
+
+		String toString();
+
+		int length();
+	}
+
+	private static class ReplacementBuffer implements IReplacementBuffer {
+		private final List<IRegion> arguments = new ArrayList<IRegion>();
+
+		public void addArgument(int offset, int length) {
+			arguments.add(new Region(offset, length));
+		}
+
+		private final StringBuilder buffer = new StringBuilder();
+
+		public void append(String text) {
+			buffer.append(text);
+		}
+
+		public int length() {
+			return buffer.length();
+		}
+
+		@Override
+		public String toString() {
+			return buffer.toString();
+		}
+
+	}
+
+	private ReplacementBuffer replacementBuffer;
+
+	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		if (trigger == ' ' || trigger == '(')
 			trigger = '\0';
 		super.apply(document, trigger, offset);
 
-		int baseOffset = getReplacementOffset() + getCursorPosition();
 		int exit = getReplacementOffset() + getReplacementString().length();
 
-		int[] fArgumentOffsets = null;
-		int[] fArgumentLengths = null;
-		String[] findParameterNames = fProposal.findParameterNames(null);
-		if (findParameterNames != null && findParameterNames.length > 0) {
-			fArgumentOffsets = new int[findParameterNames.length];
-			fArgumentLengths = new int[findParameterNames.length];
-
-			int argumentOffset = 0;
-			for (int i = 0; i < findParameterNames.length; i++) {
-				fArgumentLengths[i] = findParameterNames[i].length();
-				fArgumentOffsets[i] = argumentOffset;
-				argumentOffset += findParameterNames[i].length() + 1;
-				// name and COMMA
-			}
-		}
-
-		if (fArgumentOffsets != null && getTextViewer() != null) {
+		if (replacementBuffer != null && !replacementBuffer.arguments.isEmpty()
+				&& getTextViewer() != null) {
+			int baseOffset = getReplacementOffset() + getCursorPosition();
 			try {
 				LinkedModeModel model = new LinkedModeModel();
-				for (int i = 0; i != fArgumentOffsets.length; i++) {
+				for (IRegion region : replacementBuffer.arguments) {
 					LinkedPositionGroup group = new LinkedPositionGroup();
 					group.addPosition(new LinkedPosition(document, baseOffset
-							+ fArgumentOffsets[i], fArgumentLengths[i],
+							+ region.getOffset(), region.getLength(),
 							LinkedPositionGroup.NO_STOP));
 					model.addGroup(group);
 				}
@@ -113,14 +138,16 @@ public class ScriptMethodCompletionProposal extends
 	/**
 	 * @see org.eclipse.dltk.ui.text.completion.AbstractScriptCompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
 			return new Point(getReplacementOffset(), 0);
 
-		return new Point(fSelectedRegion.getOffset(), fSelectedRegion
-				.getLength());
+		return new Point(fSelectedRegion.getOffset(),
+				fSelectedRegion.getLength());
 	}
 
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document,
 			int completionOffset) {
 		if (hasArgumentList()) {
@@ -135,6 +162,7 @@ public class ScriptMethodCompletionProposal extends
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
 
+	@Override
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static
 		// imports)
@@ -154,6 +182,7 @@ public class ScriptMethodCompletionProposal extends
 		return super.computeContextInformation();
 	}
 
+	@Override
 	protected char[] computeTriggerCharacters() {
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE)
 			return METHOD_NAME_TRIGGERS;
@@ -188,11 +217,11 @@ public class ScriptMethodCompletionProposal extends
 	// }
 
 	/**
-	 * Returns <code>true</code> if the argument list should be inserted by
-	 * the proposal, <code>false</code> if not.
+	 * Returns <code>true</code> if the argument list should be inserted by the
+	 * proposal, <code>false</code> if not.
 	 * 
-	 * @return <code>true</code> when the proposal is not in javadoc nor
-	 *         within an import and comprises the parameter list
+	 * @return <code>true</code> when the proposal is not in javadoc nor within
+	 *         an import and comprises the parameter list
 	 */
 	protected boolean hasArgumentList() {
 		if (CompletionProposal.METHOD_NAME_REFERENCE == fProposal.getKind())
@@ -203,17 +232,29 @@ public class ScriptMethodCompletionProposal extends
 				.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION)
 				^ isToggleEating();
 		String completion = fProposal.getCompletion();
-		return !isInScriptdoc() && completion.length() > 0
+		return !isInScriptdoc()
+				&& completion.length() > 0
 				&& (noOverwrite || completion.charAt(completion.length() - 1) == ')');
 	}
 
-	protected String computeReplacementString() {
-		if (!hasArgumentList())
-			return super.computeReplacementString();
+	/**
+	 * Override {@link #computeReplacement(IReplacementBuffer)}
+	 */
+	@Override
+	protected final String computeReplacementString() {
+		replacementBuffer = new ReplacementBuffer();
+		computeReplacement(replacementBuffer);
+		return replacementBuffer.toString();
+	}
+
+	protected void computeReplacement(IReplacementBuffer buffer) {
+		if (!hasArgumentList()) {
+			buffer.append(super.computeReplacementString());
+			return;
+		}
 
 		// we're inserting a method plus the argument list - respect formatter
 		// preferences
-		StringBuffer buffer = new StringBuffer();
 		buffer.append(fProposal.getName());
 
 		// FormatterPrefs prefs= getFormatterPrefs();
@@ -227,14 +268,16 @@ public class ScriptMethodCompletionProposal extends
 			// if (prefs.afterOpeningParen)
 			// buffer.append(SPACE);
 
-			String[] findParameterNames = fProposal.findParameterNames(null);
-			for (int i = 0; i < findParameterNames.length;) {
-				buffer.append(findParameterNames[i]);
-
-				i++;
-				if (i < findParameterNames.length) {
+			String[] parameterNames = fProposal.findParameterNames(null);
+			int argumentOffset = 0;
+			for (int i = 0; i < parameterNames.length; ++i) {
+				if (i != 0) {
 					buffer.append(COMMA);
+					argumentOffset += 1;
 				}
+				buffer.append(parameterNames[i]);
+				buffer.addArgument(argumentOffset, parameterNames[i].length());
+				argumentOffset += parameterNames[i].length();
 			}
 
 			// don't add the trailing space, but let the user type it in himself
@@ -247,11 +290,9 @@ public class ScriptMethodCompletionProposal extends
 		}
 
 		buffer.append(RPAREN);
-
-		return buffer.toString();
-
 	}
 
+	@Override
 	protected ProposalInfo computeProposalInfo() {
 		IScriptProject project = fInvocationContext.getProject();
 		if (project != null)
@@ -270,6 +311,7 @@ public class ScriptMethodCompletionProposal extends
 		fContextInformationPosition = contextInformationPosition;
 	}
 
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
@@ -289,13 +331,4 @@ public class ScriptMethodCompletionProposal extends
 		return isPrefix(prefix, word);
 	}
 
-	protected void handleSmartTrigger(IDocument document, char trigger,
-			int referenceOffset) throws BadLocationException {
-		// TODO Auto-generated method stub
-
-	}
-
-	protected boolean isSmartTrigger(char trigger) {
-		return false;
-	}
 }
