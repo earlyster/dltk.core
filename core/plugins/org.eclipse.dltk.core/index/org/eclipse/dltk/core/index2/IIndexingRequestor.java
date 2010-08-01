@@ -76,9 +76,12 @@ public interface IIndexingRequestor {
 		/** Element parent information */
 		public String parent;
 
+		/** DOC information */
+		public String doc;
+
 		public DeclarationInfo(int elementType, int flags, int offset,
 				int length, int nameOffset, int nameLength, String elementName,
-				String metadata, String qualifier, String parent) {
+				String metadata, String doc, String qualifier, String parent) {
 
 			super(elementType, offset, length, elementName, metadata, qualifier);
 
@@ -86,6 +89,7 @@ public interface IIndexingRequestor {
 			this.nameOffset = nameOffset;
 			this.nameLength = nameLength;
 			this.parent = parent;
+			this.doc = doc;
 		}
 	}
 

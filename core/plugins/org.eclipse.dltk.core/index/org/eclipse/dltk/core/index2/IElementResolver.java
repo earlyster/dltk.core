@@ -42,6 +42,8 @@ public interface IElementResolver {
 	 *            Element name
 	 * @param metadata
 	 *            Various metadata attached to the element
+	 * @param doc
+	 *            DOC information (for declarations)
 	 * @param qualifier
 	 *            Element qualifier (package name, for example)
 	 * @param parent
@@ -51,6 +53,6 @@ public interface IElementResolver {
 	 */
 	public IModelElement resolve(int elementType, int flags, int offset,
 			int length, int nameOffset, int nameLength, String elementName,
-			String metadata, String qualifier, String parent,
+			String metadata, String doc, String qualifier, String parent,
 			ISourceModule sourceModule);
 }
