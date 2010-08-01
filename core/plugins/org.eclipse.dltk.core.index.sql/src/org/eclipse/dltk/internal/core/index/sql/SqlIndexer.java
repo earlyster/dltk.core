@@ -58,14 +58,13 @@ public class SqlIndexer extends AbstractIndexer {
 		try {
 			elementDao.insert(connection, info.elementType, info.flags,
 					info.offset, info.length, info.nameOffset, info.nameLength,
-					info.elementName, info.metadata, info.qualifier,
+					info.elementName, info.metadata, info.doc, info.qualifier,
 					info.parent, file.getId(), natureId, false);
 
 		} catch (SQLException e) {
-			SqlIndex
-					.error(
-							"An exception was thrown while inserting model element declaration",
-							e);
+			SqlIndex.error(
+					"An exception was thrown while inserting model element declaration",
+					e);
 		}
 	}
 
@@ -73,14 +72,13 @@ public class SqlIndexer extends AbstractIndexer {
 
 		try {
 			elementDao.insert(connection, info.elementType, 0, info.offset,
-					info.length, 0, 0, info.elementName, info.metadata,
+					info.length, 0, 0, info.elementName, info.metadata, null,
 					info.qualifier, null, file.getId(), natureId, true);
 
 		} catch (SQLException e) {
-			SqlIndex
-					.error(
-							"An exception was thrown while inserting model element reference",
-							e);
+			SqlIndex.error(
+					"An exception was thrown while inserting model element reference",
+					e);
 		}
 	}
 
@@ -150,8 +148,7 @@ public class SqlIndexer extends AbstractIndexer {
 				connection.close();
 			}
 		} catch (Exception e) {
-			SqlIndex
-					.error("An exception was thrown while indexing document", e);
+			SqlIndex.error("An exception was thrown while indexing document", e);
 		}
 	}
 
@@ -176,10 +173,9 @@ public class SqlIndexer extends AbstractIndexer {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			SqlIndex
-					.error(
-							"An exception thrown while analyzing source module changes",
-							e);
+			SqlIndex.error(
+					"An exception thrown while analyzing source module changes",
+					e);
 		}
 		return null;
 	}
@@ -195,12 +191,10 @@ public class SqlIndexer extends AbstractIndexer {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			SqlIndex
-					.error(
-							NLS
-									.bind(
-											"An exception thrown while removing container ''{0}'' from index",
-											containerPath.toString()), e);
+			SqlIndex.error(
+					NLS.bind(
+							"An exception thrown while removing container ''{0}'' from index",
+							containerPath.toString()), e);
 		}
 	}
 
@@ -219,13 +213,10 @@ public class SqlIndexer extends AbstractIndexer {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			SqlIndex
-					.error(
-							NLS
-									.bind(
-											"An exception thrown while removing file ''{0}'' from index",
-											containerPath.append(relativePath)
-													.toString()), e);
+			SqlIndex.error(
+					NLS.bind(
+							"An exception thrown while removing file ''{0}'' from index",
+							containerPath.append(relativePath).toString()), e);
 		}
 	}
 
