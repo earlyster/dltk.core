@@ -30,6 +30,7 @@ public class Element implements Serializable {
 	private String name;
 	private String camelCaseName;
 	private String metadata;
+	private String doc;
 	private String qualifier;
 	private String parent;
 	private int fileId;
@@ -37,7 +38,8 @@ public class Element implements Serializable {
 
 	public Element(int type, int flags, int offset, int length, int nameOffset,
 			int nameLength, String name, String camelCaseName, String metadata,
-			String qualifier, String parent, int fileId, boolean isReference) {
+			String doc, String qualifier, String parent, int fileId,
+			boolean isReference) {
 		super();
 		this.type = type;
 		this.flags = flags;
@@ -48,6 +50,7 @@ public class Element implements Serializable {
 		this.name = name;
 		this.camelCaseName = camelCaseName;
 		this.metadata = metadata;
+		this.doc = doc;
 		this.qualifier = qualifier;
 		this.parent = parent;
 		this.fileId = fileId;
@@ -88,6 +91,10 @@ public class Element implements Serializable {
 
 	public String getMetadata() {
 		return metadata;
+	}
+
+	public String getDoc() {
+		return doc;
 	}
 
 	public String getQualifier() {

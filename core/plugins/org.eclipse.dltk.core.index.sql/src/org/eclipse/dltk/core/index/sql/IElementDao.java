@@ -46,6 +46,8 @@ public interface IElementDao {
 	 *            Element name
 	 * @param metadata
 	 *            Element metadata
+	 * @param doc
+	 *            DOC information (for declarations only)
 	 * @param qualifier
 	 *            Element qualifier (package)
 	 * @param parent
@@ -61,8 +63,9 @@ public interface IElementDao {
 	 */
 	void insert(Connection connection, int type, int flags, int offset,
 			int length, int nameOffset, int nameLength, String name,
-			String metadata, String qualifier, String parent, int fileId,
-			String natureId, boolean isReference) throws SQLException;
+			String metadata, String doc, String qualifier, String parent,
+			int fileId, String natureId, boolean isReference)
+			throws SQLException;
 
 	/**
 	 * Commits previously inserted entries

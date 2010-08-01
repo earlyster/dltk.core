@@ -282,9 +282,9 @@ public class SqlSearchEngine implements ISearchEngine {
 				match(element.getType(), element.getFlags(), element
 						.getOffset(), element.getLength(), element
 						.getNameOffset(), element.getNameLength(), element
-						.getName(), element.getMetadata(), element
-						.getQualifier(), element.getParent(), sourceModule,
-						element.isReference());
+						.getName(), element.getMetadata(), element.getDoc(),
+						element.getQualifier(), element.getParent(),
+						sourceModule, element.isReference());
 
 			} catch (SQLException e) {
 				SqlIndex.error(
@@ -294,12 +294,12 @@ public class SqlSearchEngine implements ISearchEngine {
 
 		public void match(int elementType, int flags, int offset, int length,
 				int nameOffset, int nameLength, String elementName,
-				String metadata, String qualifier, String parent,
+				String metadata, String doc, String qualifier, String parent,
 				ISourceModule sourceModule, boolean isReference) {
 
 			searchRequestor.match(elementType, flags, offset, length,
-					nameOffset, nameLength, elementName, metadata, qualifier,
-					parent, sourceModule, isReference);
+					nameOffset, nameLength, elementName, metadata, doc,
+					qualifier, parent, sourceModule, isReference);
 		}
 	}
 }
