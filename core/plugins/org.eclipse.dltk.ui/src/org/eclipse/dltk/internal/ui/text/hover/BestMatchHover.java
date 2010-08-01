@@ -32,8 +32,8 @@ import org.eclipse.ui.IEditorPart;
 public class BestMatchHover extends AbstractScriptEditorTextHover implements
 		ITextHoverExtension, IInformationProviderExtension2 {
 
-	private List fTextHoverSpecifications = null;
-	private List fInstantiatedTextHovers;
+	private List<EditorTextHoverDescriptor> fTextHoverSpecifications = null;
+	private List<ITextHover> fInstantiatedTextHovers;
 	private ITextHover fBestHover;
 
 	public BestMatchHover() {
@@ -50,8 +50,8 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 	private void installTextHovers() {
 
 		// initialize lists - indicates that the initialization happened
-		fTextHoverSpecifications = new ArrayList(2);
-		fInstantiatedTextHovers = new ArrayList(2);
+		fTextHoverSpecifications = new ArrayList<EditorTextHoverDescriptor>(8);
+		fInstantiatedTextHovers = new ArrayList<ITextHover>(8);
 
 		// populate list
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
@@ -80,11 +80,9 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 		if (fTextHoverSpecifications.isEmpty())
 			return;
 
-		for (Iterator iterator = new ArrayList(fTextHoverSpecifications)
-				.iterator(); iterator.hasNext();) {
-			EditorTextHoverDescriptor spec = (EditorTextHoverDescriptor) iterator
-					.next();
-
+		for (EditorTextHoverDescriptor spec : fTextHoverSpecifications
+				.toArray(new EditorTextHoverDescriptor[fTextHoverSpecifications
+						.size()])) {
 			IScriptEditorTextHover hover = spec.createTextHover();
 			if (hover != null) {
 				hover.setEditor(getEditor());
@@ -111,9 +109,9 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator iterator = fInstantiatedTextHovers.iterator(); iterator
+		for (Iterator<ITextHover> iterator = fInstantiatedTextHovers.iterator(); iterator
 				.hasNext();) {
-			ITextHover hover = (ITextHover) iterator.next();
+			ITextHover hover = iterator.next();
 
 			String s = hover.getHoverInfo(textViewer, hoverRegion);
 			if (s != null && s.trim().length() > 0) {
@@ -136,8 +134,8 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 	}
 
 	/*
-	 * @seeorg.eclipse.jface.text.information.IInformationProviderExtension2#
-	 * getInformationPresenterControlCreator()
+	 * @see
+	 * IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fBestHover instanceof IInformationProviderExtension2)
