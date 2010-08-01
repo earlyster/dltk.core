@@ -273,7 +273,7 @@ public class NewSearchEngine {
 				ISearchRequestor requestor = new ISearchRequestor() {
 					public void match(int elementType, int flags, int offset,
 							int length, int nameOffset, int nameLength,
-							String elementName, String metadata,
+							String elementName, String metadata, String doc,
 							String qualifier, String parent,
 							ISourceModule sourceModule, boolean isReference) {
 
