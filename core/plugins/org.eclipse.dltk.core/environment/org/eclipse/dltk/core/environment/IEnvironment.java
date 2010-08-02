@@ -114,7 +114,7 @@ public interface IEnvironment extends IAdaptable {
 	String getCanonicalPath(IPath path);
 
 	/**
-	 * For remote environments enqures what connection is available. If
+	 * For remote environments enquires if connection is available. If
 	 * connection is not available then indexing/building and some other stuff
 	 * for projects with this environment will not be performed.
 	 * 
