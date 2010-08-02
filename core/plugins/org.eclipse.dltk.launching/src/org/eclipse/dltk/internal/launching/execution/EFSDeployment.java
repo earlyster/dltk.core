@@ -28,7 +28,7 @@ public class EFSDeployment implements IDeployment {
 	public EFSDeployment(IEnvironment env, URI rootURI) throws CoreException {
 		this.environment = env;
 		this.root = EFS.getStore(rootURI);
-		this.root.mkdir(0, null);
+		this.root.mkdir(EFS.NONE, null);
 		DeploymentManager.getInstance().addDeployment(this);
 	}
 
@@ -143,9 +143,9 @@ public class EFSDeployment implements IDeployment {
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
-			throw new IOException(NLS
-					.bind(Messages.EFSDeployment_failedToDeployStream, e
-							.getMessage()));
+			throw new IOException(
+					NLS.bind(Messages.EFSDeployment_failedToDeployStream,
+							e.getMessage()));
 		}
 		return new Path(filename);
 	}
