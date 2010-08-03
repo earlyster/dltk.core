@@ -480,26 +480,26 @@ public abstract class JobManager implements Runnable {
 			}
 		} catch (RuntimeException e) {
 			if (this.processingThread != null) { // if not shutting down
-				// log exception
-				Util.log(e, "Background Indexer Crash Recovery"); //$NON-NLS-1$
-
 				// keep job manager alive
 				this.discardJobs(null);
 				this.processingThread = null;
 				this.reset(); // this will fork a new thread with no waiting
 				// jobs, some indexes will be inconsistent
+
+				// log exception
+				Util.log(e, "Background Indexer Crash Recovery"); //$NON-NLS-1$
 			}
 			throw e;
 		} catch (Error e) {
 			if (this.processingThread != null && !(e instanceof ThreadDeath)) {
-				// log exception
-				Util.log(e, "Background Indexer Crash Recovery"); //$NON-NLS-1$
-
 				// keep job manager alive
 				this.discardJobs(null);
 				this.processingThread = null;
 				this.reset(); // this will fork a new thread with no waiting
 				// jobs, some indexes will be inconsistent
+
+				// log exception
+				Util.log(e, "Background Indexer Crash Recovery"); //$NON-NLS-1$
 			}
 			throw e;
 		}
