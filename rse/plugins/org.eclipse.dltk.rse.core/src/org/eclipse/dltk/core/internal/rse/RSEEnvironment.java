@@ -98,22 +98,24 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(URI locationURI) {
-		if (RSEEnvironmentProvider.RSE_SCHEME.equalsIgnoreCase(locationURI
-				.getScheme())
-				&& locationURI.getHost().equals(host.getAliasName())) {
+		if (hostMatches(locationURI)) {
 			return new RSEFileHandle(this, locationURI);
 		} else {
 			final URI[] resolved = EnvironmentManager.resolve(locationURI);
 			for (int i = 0; i < resolved.length; ++i) {
 				final URI newLocation = resolved[i];
-				if (RSEEnvironmentProvider.RSE_SCHEME
-						.equalsIgnoreCase(newLocation.getScheme())
-						&& newLocation.getHost().equals(host.getAliasName())) {
+				if (hostMatches(newLocation)) {
 					return new RSEFileHandle(this, newLocation);
 				}
 			}
 			return null;
 		}
+	}
+
+	private boolean hostMatches(URI locationURI) {
+		return RSEEnvironmentProvider.RSE_SCHEME.equalsIgnoreCase(locationURI
+				.getScheme())
+				&& locationURI.getHost().equalsIgnoreCase(host.getAliasName());
 	}
 
 	public String getPathsSeparator() {
