@@ -71,7 +71,8 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public String getName() {
-		return host.getName() + Messages.RSEEnvironment_EnvironmentNameSuffix;
+		return host.getAliasName()
+				+ Messages.RSEEnvironment_EnvironmentNameSuffix;
 	}
 
 	public IHost getHost() {
@@ -99,7 +100,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	public IFileHandle getFile(URI locationURI) {
 		if (RSEEnvironmentProvider.RSE_SCHEME.equalsIgnoreCase(locationURI
 				.getScheme())
-				&& locationURI.getHost().equals(host.getHostName())) {
+				&& locationURI.getHost().equals(host.getAliasName())) {
 			return new RSEFileHandle(this, locationURI);
 		} else {
 			final URI[] resolved = EnvironmentManager.resolve(locationURI);
@@ -107,7 +108,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 				final URI newLocation = resolved[i];
 				if (RSEEnvironmentProvider.RSE_SCHEME
 						.equalsIgnoreCase(newLocation.getScheme())
-						&& newLocation.getHost().equals(host.getHostName())) {
+						&& newLocation.getHost().equals(host.getAliasName())) {
 					return new RSEFileHandle(this, newLocation);
 				}
 			}
