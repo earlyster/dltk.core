@@ -39,7 +39,7 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public class Schema {
 
-	public static final String VERSION = "0.6z"; //$NON-NLS-1$
+	public static final String VERSION = "0.7"; //$NON-NLS-1$
 
 	/** Contains already created tables names */
 	private static final Set<String> TABLES_CACHE = new HashSet<String>();
@@ -124,10 +124,9 @@ public class Schema {
 						statement.close();
 					}
 				} catch (SQLException e) {
-					H2Index
-							.error(
-									"An exception was thrown while creating elements table", //$NON-NLS-1$
-									e);
+					H2Index.error(
+							"An exception was thrown while creating elements table", //$NON-NLS-1$
+							e);
 					throw e;
 				}
 			}

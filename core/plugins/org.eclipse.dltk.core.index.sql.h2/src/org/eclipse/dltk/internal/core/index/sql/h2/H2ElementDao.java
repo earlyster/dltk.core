@@ -73,8 +73,9 @@ public class H2ElementDao implements IElementDao {
 	private void insertBatch(Connection connection,
 			PreparedStatement statement, int type, int flags, int offset,
 			int length, int nameOffset, int nameLength, String name,
-			String metadata, String qualifier, String parent, int fileId,
-			String natureId, boolean isReference) throws SQLException {
+			String metadata, String doc, String qualifier, String parent,
+			int fileId, String natureId, boolean isReference)
+			throws SQLException {
 
 		int param = 0;
 
@@ -110,6 +111,9 @@ public class H2ElementDao implements IElementDao {
 		}
 
 		statement.setString(++param, metadata);
+		if (!isReference) {
+			statement.setString(++param, doc);
+		}
 		statement.setString(++param, qualifier);
 
 		if (!isReference) {
@@ -121,15 +125,16 @@ public class H2ElementDao implements IElementDao {
 
 		if (!isReference) {
 			H2Cache.addElement(new Element(type, flags, offset, length,
-					nameOffset, nameLength, name, camelCaseName, metadata,
+					nameOffset, nameLength, name, camelCaseName, metadata, doc,
 					qualifier, parent, fileId, isReference));
 		}
 	}
 
 	public void insert(Connection connection, int type, int flags, int offset,
 			int length, int nameOffset, int nameLength, String name,
-			String metadata, String qualifier, String parent, int fileId,
-			String natureId, boolean isReference) throws SQLException {
+			String metadata, String doc, String qualifier, String parent,
+			int fileId, String natureId, boolean isReference)
+			throws SQLException {
 
 		String tableName = getTableName(connection, type, natureId, isReference);
 
@@ -155,8 +160,8 @@ public class H2ElementDao implements IElementDao {
 				batchStatements.put(query, statement);
 			}
 			insertBatch(connection, statement, type, flags, offset, length,
-					nameOffset, nameLength, name, metadata, qualifier, parent,
-					fileId, natureId, isReference);
+					nameOffset, nameLength, name, metadata, doc, qualifier,
+					parent, fileId, natureId, isReference);
 		}
 	}
 
@@ -216,8 +221,7 @@ public class H2ElementDao implements IElementDao {
 			// Name patterns
 			if (pattern != null && pattern.length() > 0) {
 				if (isReference && matchRule == MatchRule.CAMEL_CASE) {
-					H2Index
-							.warn("MatchRule.CAMEL_CASE is not supported by element references search."); //$NON-NLS-1$
+					H2Index.warn("MatchRule.CAMEL_CASE is not supported by element references search."); //$NON-NLS-1$
 					matchRule = MatchRule.EXACT;
 				}
 
@@ -286,8 +290,7 @@ public class H2ElementDao implements IElementDao {
 				query.append(")");
 
 			} else if (containersId != null) {
-				query
-						.append(" AND FILE_ID IN(SELECT ID FROM FILES WHERE CONTAINER_ID IN(");
+				query.append(" AND FILE_ID IN(SELECT ID FROM FILES WHERE CONTAINER_ID IN(");
 				for (int i = 0; i < containersId.length; ++i) {
 					if (i > 0) {
 						query.append(",");
@@ -340,6 +343,10 @@ public class H2ElementDao implements IElementDao {
 					}
 
 					String metadata = result.getString(++columnIndex);
+					String doc = null;
+					if (!isReference) {
+						doc = result.getString(++columnIndex);
+					}
 					qualifier = result.getString(++columnIndex);
 
 					if (!isReference) {
@@ -351,7 +358,7 @@ public class H2ElementDao implements IElementDao {
 					Element element = new Element(elementType, f, offset,
 							length, nameOffset, nameLength, modelManager
 									.intern(name), camelCaseName, metadata,
-							qualifier, parent, fileId, isReference);
+							doc, qualifier, parent, fileId, isReference);
 					if (!isReference) {
 						H2Cache.addElement(element);
 					}
