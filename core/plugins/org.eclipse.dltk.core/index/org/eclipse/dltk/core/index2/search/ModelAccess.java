@@ -289,13 +289,14 @@ public class ModelAccess {
 					@SuppressWarnings("unchecked")
 					public void match(int elementType, int flags, int offset,
 							int length, int nameOffset, int nameLength,
-							String elementName, String metadata,
+							String elementName, String metadata, String doc,
 							String qualifier, String parent,
 							ISourceModule sourceModule, boolean isReference) {
 
 						IModelElement element = elementResolver.resolve(
 								elementType, flags, offset, length, nameOffset,
-								nameLength, elementName, metadata, qualifier,
+								nameLength, elementName, metadata, doc,
+								qualifier,
 								parent, sourceModule);
 						if (element != null) {
 							result.add((T) element);
