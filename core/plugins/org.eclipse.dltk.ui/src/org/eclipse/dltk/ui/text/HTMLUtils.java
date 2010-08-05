@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Display;
 public class HTMLUtils {
 
 	private static RGB BG_COLOR_RGB = null;
-
+	private static RGB FG_COLOR_RGB= new RGB(0, 0, 0); // RGB value of info fg color on WindowsXP
 	static {
 		final Display display = Display.getDefault();
 		if (display != null && !display.isDisposed()) {
@@ -31,6 +31,8 @@ public class HTMLUtils {
 					public void run() {
 						BG_COLOR_RGB = display.getSystemColor(
 								SWT.COLOR_INFO_BACKGROUND).getRGB();
+						FG_COLOR_RGB = display.getSystemColor(
+								SWT.COLOR_INFO_FOREGROUND).getRGB();
 					}
 				});
 			} catch (SWTError err) {
@@ -50,4 +52,7 @@ public class HTMLUtils {
 		}
 	}
 
+	public static RGB getFgColor() {
+		return FG_COLOR_RGB;
+	}
 }
