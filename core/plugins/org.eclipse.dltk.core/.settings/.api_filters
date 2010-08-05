@@ -1,10 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.dltk.core" version="2">
-    <resource path="utils/org/eclipse/dltk/core/Predicate.java" type="org.eclipse.dltk.core.Predicate">
-        <filter id="305365105">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="924844039">
             <message_arguments>
-                <message_argument value="org.eclipse.dltk.core.Predicate"/>
-                <message_argument value="org.eclipse.dltk.core_2.0.0"/>
+                <message_argument value="2.0.1.qualifier"/>
+                <message_argument value="2.0.0.v20100603-0936"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="index/org/eclipse/dltk/core/index2/IElementResolver.java" type="org.eclipse.dltk.core.index2.IElementResolver">
+        <filter id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.dltk.core.index2.IElementResolver"/>
+                <message_argument value="resolve(int, int, int, int, int, int, String, String, String, String, String, ISourceModule)"/>
+            </message_arguments>
+        </filter>
+        <filter id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.dltk.core.index2.IElementResolver"/>
+                <message_argument value="resolve(int, int, int, int, int, int, String, String, String, String, ISourceModule)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="resolve(int, int, int, int, int, int, String, String, String, String, String, ISourceModule)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="index/org/eclipse/dltk/core/index2/IIndexingRequestor.java" type="org.eclipse.dltk.core.index2.IIndexingRequestor$DeclarationInfo">
+        <filter id="338722907">
+            <message_arguments>
+                <message_argument value="org.eclipse.dltk.core.index2.IIndexingRequestor.DeclarationInfo"/>
+                <message_argument value="DeclarationInfo(int, int, int, int, int, int, String, String, String, String)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="DeclarationInfo(int, int, int, int, int, int, String, String, String, String, String)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="doc"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="index/org/eclipse/dltk/core/index2/search/ISearchRequestor.java" type="org.eclipse.dltk.core.index2.search.ISearchRequestor">
+        <filter id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.dltk.core.index2.search.ISearchRequestor"/>
+                <message_argument value="match(int, int, int, int, int, int, String, String, String, String, String, ISourceModule, boolean)"/>
+            </message_arguments>
+        </filter>
+        <filter id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.dltk.core.index2.search.ISearchRequestor"/>
+                <message_argument value="match(int, int, int, int, int, int, String, String, String, String, ISourceModule, boolean)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="match(int, int, int, int, int, int, String, String, String, String, String, ISourceModule, boolean)"/>
             </message_arguments>
         </filter>
     </resource>
