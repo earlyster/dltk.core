@@ -331,6 +331,7 @@ public class InterpreterConfig implements Cloneable {
 		return (Map<String, Object>) properties.clone();
 	}
 
+	@Override
 	public Object clone() {
 		final InterpreterConfig config = new InterpreterConfig(environment,
 				scriptFile, workingDirectory);
@@ -379,6 +380,7 @@ public class InterpreterConfig implements Cloneable {
 	}
 
 	// TODO: make more real implementation
+	@Override
 	public String toString() {
 		final List<String> items = new ArrayList<String>();
 		items.add("<interpreter>"); //$NON-NLS-1$

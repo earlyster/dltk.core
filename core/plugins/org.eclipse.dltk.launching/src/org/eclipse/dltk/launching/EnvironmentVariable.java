@@ -33,6 +33,7 @@ public class EnvironmentVariable {
 		this.value = value;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -40,6 +41,7 @@ public class EnvironmentVariable {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -90,6 +92,7 @@ public class EnvironmentVariable {
 		return Status.OK_STATUS;
 	}
 
+	@Override
 	public String toString() {
 		return this.name + "=" + this.value; //$NON-NLS-1$
 	}

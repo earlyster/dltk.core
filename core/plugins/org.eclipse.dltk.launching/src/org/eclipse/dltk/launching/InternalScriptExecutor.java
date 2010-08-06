@@ -2,6 +2,7 @@ package org.eclipse.dltk.launching;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -31,10 +32,9 @@ public class InternalScriptExecutor {
 
 	public InternalScriptExecutor(IInterpreterInstall install,
 			IScriptProcessHandler handler) {
-		Assert
-				.isNotNull(
-						install,
-						Messages.InternalScriptExecutor_iInterpreterInstallMustNotBeNull);
+		Assert.isNotNull(
+				install,
+				Messages.InternalScriptExecutor_iInterpreterInstallMustNotBeNull);
 		Assert.isNotNull(handler,
 				Messages.InternalScriptExecutor_iProcessHandlerMustNotBeNull);
 
@@ -118,7 +118,7 @@ public class InternalScriptExecutor {
 		return handler.handle(process, stdin);
 	}
 
-	private void addArgs(ArrayList list, String[] args) {
+	private void addArgs(List<String> list, String[] args) {
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
 				list.add(args[i]);
@@ -128,7 +128,7 @@ public class InternalScriptExecutor {
 
 	private String[] buildCommandLine(IFileHandle interpreter,
 			String[] interpreterArgs, IFileHandle script, String[] scriptArgs) {
-		ArrayList cmdLine = new ArrayList();
+		List<String> cmdLine = new ArrayList<String>();
 
 		cmdLine.add(interpreter.getCanonicalPath());
 		addArgs(cmdLine, interpreterArgs);
@@ -139,6 +139,6 @@ public class InternalScriptExecutor {
 
 		addArgs(cmdLine, scriptArgs);
 
-		return (String[]) cmdLine.toArray(new String[cmdLine.size()]);
+		return cmdLine.toArray(new String[cmdLine.size()]);
 	}
 }
