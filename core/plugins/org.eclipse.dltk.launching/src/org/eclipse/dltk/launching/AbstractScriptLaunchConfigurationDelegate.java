@@ -54,6 +54,7 @@ import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
+import org.eclipse.dltk.utils.DLTKLoggingOption;
 import org.eclipse.osgi.util.NLS;
 
 import com.ibm.icu.text.MessageFormat;
@@ -737,15 +738,22 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			IEnvironment scriptEnvironment) throws CoreException {
 		final String mainScriptName = verifyMainScriptName(configuration);
 		if (mainScriptName.length() != 0) {
+			log("mainScriptName={0}", mainScriptName);
 			final IProject project = getProject(configuration);
+			log("project={0}", project);
 			final IFile mainScript = project.getFile(new Path(mainScriptName));
+			log("mainScript={0}", mainScript);
 			final URI scriptURI = mainScript.getLocationURI();
+			log("scriptURI={0}", scriptURI);
 			if (scriptURI != null) {
 				final IEnvironment environment = EnvironmentManager
 						.getEnvironment(project);
 				if (environment != null) {
+					log("environment={0} [{1}]", environment.getName(),
+							environment.getId());
 					final IFileHandle file = environment.getFile(scriptURI);
 					if (file != null) {
+						log("file={0}", file);
 						if (!file.exists()) {
 							abort(
 									NLS
@@ -1224,5 +1232,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		ISourceModule module = (ISourceModule) DLTKCore.create(script);
 		return module;
+	}
+
+	private static final DLTKLoggingOption SCRIPT_PATH_RESOLVE = new DLTKLoggingOption(
+			DLTKLaunchingPlugin.PLUGIN_ID, "scriptPathResolve"); //$NON-NLS-1$
+
+	private static void log(String message, Object... params) {
+		if (SCRIPT_PATH_RESOLVE.isEnabled()) {
+			DLTKLaunchingPlugin.log(new Status(IStatus.INFO,
+					DLTKLaunchingPlugin.getUniqueIdentifier(), NLS.bind(
+							message, params)));
+		}
 	}
 }
