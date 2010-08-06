@@ -62,4 +62,11 @@
          uri="http://www.eclipse.org/dltk/launching.ecore">
    </package>
 </extension>
+<extension point="org.eclipse.dltk.core.loggingOptions">
+   <loggingOption
+         category="Launching"
+         id="scriptPathResolve"
+         name="Script Path Resolve">
+   </loggingOption>
+</extension>
 </plugin>
