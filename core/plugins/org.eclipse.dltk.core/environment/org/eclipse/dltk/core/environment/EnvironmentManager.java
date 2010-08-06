@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -107,7 +106,7 @@ public final class EnvironmentManager {
 
 	private static ListenerList listeners = new ListenerList();
 
-	private static Map<IProject, IEnvironment> environmentCache = new HashMap<IProject, IEnvironment>();
+	private static final Map<IProject, IEnvironment> environmentCache = new HashMap<IProject, IEnvironment>();
 
 	private static IResourceChangeListener resourceListener = new IResourceChangeListener() {
 
@@ -117,10 +116,7 @@ public final class EnvironmentManager {
 
 			switch (eventType) {
 			case IResourceChangeEvent.PRE_DELETE:
-				if (resource.getType() == IResource.PROJECT
-						&& DLTKLanguageManager
-								.hasScriptNature((IProject) resource)) {
-
+				if (resource.getType() == IResource.PROJECT) {
 					synchronized (environmentCache) {
 						environmentCache.remove(resource);
 					}
@@ -256,6 +252,7 @@ public final class EnvironmentManager {
 			final String environmentId = project
 					.getPersistentProperty(PROJECT_ENVIRONMENT);
 			if (environmentId != null) {
+				verifyEnvironmentCache(project, environmentId);
 				return environmentId;
 			}
 		} catch (CoreException e) {
@@ -270,6 +267,23 @@ public final class EnvironmentManager {
 		return null;
 	}
 
+	/**
+	 * @param project
+	 * @param environmentId
+	 */
+	private static void verifyEnvironmentCache(IProject project,
+			String environmentId) {
+		if (environmentId != null) {
+			synchronized (environmentCache) {
+				final IEnvironment environment = environmentCache.get(project);
+				if (environment != null
+						&& !environmentId.equals(environment.getId())) {
+					environmentCache.remove(project);
+				}
+			}
+		}
+	}
+
 	public static void setEnvironmentId(IProject project, String environmentId)
 			throws CoreException {
 		setEnvironmentId(project, environmentId, true);
@@ -277,6 +291,9 @@ public final class EnvironmentManager {
 
 	public static void setEnvironmentId(IProject project, String environmentId,
 			boolean refresh) throws CoreException {
+		synchronized (environmentCache) {
+			environmentCache.remove(project);
+		}
 		// TODO check project.getDescription.getLocationURI() scheme ?
 		project.setPersistentProperty(PROJECT_ENVIRONMENT, environmentId);
 		if (refresh) {
@@ -307,9 +324,10 @@ public final class EnvironmentManager {
 				projectMonitor.beginTask(NLS.bind(
 						Messages.EnvironmentManager_RefreshProjectInterpreter,
 						project.getName()), 2);
-				final String property = project
+				final String environmentId = project
 						.getPersistentProperty(PROJECT_ENVIRONMENT);
-				if (property != null) {
+				if (environmentId != null) {
+					verifyEnvironmentCache(project, environmentId);
 					DLTKCore.refreshBuildpathContainers(projects[i]);
 					projectMonitor.worked(1);
 					new BuildpathValidation((ScriptProject) projects[i])
@@ -438,11 +456,9 @@ public final class EnvironmentManager {
 						Messages.EnvironmentManager_initializingOperationName) {
 					public void execute(IProgressMonitor monitor) {
 						monitor.beginTask(Util.EMPTY_STRING, 1);
-						monitor
-								.setTaskName(NLS
-										.bind(
-												Messages.EnvironmentManager_initializingTaskName,
-												provider.getProviderName()));
+						monitor.setTaskName(NLS
+								.bind(Messages.EnvironmentManager_initializingTaskName,
+										provider.getProviderName()));
 						provider.waitInitialized();
 						monitor.worked(1);
 						monitor.done();
