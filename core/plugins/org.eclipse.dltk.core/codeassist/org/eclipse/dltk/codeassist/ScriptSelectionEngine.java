@@ -9,8 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.codeassist;
 
+import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.codeassist.impl.AssistOptions;
 import org.eclipse.dltk.internal.codeassist.impl.Engine;
 import org.eclipse.dltk.internal.compiler.lookup.LookupEnvironment;
@@ -18,6 +20,8 @@ import org.eclipse.dltk.internal.core.SearchableEnvironment;
 
 public abstract class ScriptSelectionEngine extends Engine implements
 		ISelectionEngine {
+
+	protected ISelectionRequestor requestor;
 
 	public ScriptSelectionEngine() {
 		super(null);
@@ -28,7 +32,28 @@ public abstract class ScriptSelectionEngine extends Engine implements
 		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
 	}
 
+	public void setRequestor(ISelectionRequestor requestor) {
+		this.requestor = requestor;
+	}
+
+	protected void reportModelElement(IModelElement element) {
+		requestor.acceptModelElement(element);
+	}
+
+	protected void reportModelElements(IModelElement[] elements) {
+		for (IModelElement element : elements) {
+			requestor.acceptModelElement(element);
+		}
+	}
+
+	protected void reportModelElements(Collection<IModelElement> elements) {
+		for (IModelElement element : elements) {
+			requestor.acceptModelElement(element);
+		}
+	}
+
 	public void setOptions(Map options) {
 		this.options = new AssistOptions(options);
 	}
+
 }

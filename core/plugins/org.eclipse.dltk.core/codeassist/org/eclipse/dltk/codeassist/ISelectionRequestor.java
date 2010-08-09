@@ -1,22 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2010 xored software, Inc.  
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * http://www.eclipse.org/legal/epl-v10.html  
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
 package org.eclipse.dltk.codeassist;
 
-import java.util.Map;
+import org.eclipse.dltk.core.IModelElement;
 
-import org.eclipse.dltk.compiler.env.IModuleSource;
+public interface ISelectionRequestor {
 
-public interface ISelectionEngine {
-	void setRequestor(ISelectionRequestor requestor);
+	void acceptModelElement(IModelElement element);
 
-	void select(IModuleSource module, int offset, int i);
+	void acceptForeignElement(Object object);
 
-	void setOptions(Map options);
 }

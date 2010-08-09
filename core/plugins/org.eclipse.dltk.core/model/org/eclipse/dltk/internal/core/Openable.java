@@ -9,8 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -22,6 +24,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
 import org.eclipse.dltk.codeassist.ISelectionEngine;
+import org.eclipse.dltk.codeassist.ISelectionRequestor;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
@@ -538,6 +541,18 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 	}
 
+	private static class ModelElementSelectionRequestor implements
+			ISelectionRequestor {
+		final List<IModelElement> elements = new ArrayList<IModelElement>();
+
+		public void acceptForeignElement(Object object) {
+		}
+
+		public void acceptModelElement(IModelElement element) {
+			elements.add(element);
+		}
+	}
+
 	protected IModelElement[] codeSelect(
 			org.eclipse.dltk.compiler.env.ISourceModule cu, int offset,
 			int length, WorkingCopyOwner owner) throws ModelException {
@@ -575,11 +590,10 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		// createSelectionEngine(environment,
 		// project.getOptions(true));
 
-		IModelElement[] elements = engine.select(cu, offset, offset + length
-				- 1);
-		if (elements == null) {
-			elements = ScriptModelUtil.NO_ELEMENTS;
-		}
-		return elements;
+		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
+		engine.setRequestor(requestor);
+		engine.select(cu, offset, offset + length - 1);
+		return requestor.elements.toArray(new IModelElement[requestor.elements
+				.size()]);
 	}
 }
