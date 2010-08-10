@@ -101,6 +101,7 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 
 		checkTextHovers();
@@ -126,6 +127,7 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fBestHover instanceof ITextHoverExtension)
 			return ((ITextHoverExtension) fBestHover).getHoverControlCreator();

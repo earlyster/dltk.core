@@ -27,11 +27,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 		super(false);
 	}
 
+	@Override
 	protected String postUpdateMessage(String message) {
 		return super.postUpdateMessage(TextUtils.replace(message, '\n',
 				"<br/>\n")); //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getMessageFromAnnotation(Annotation a) {
 		if (a instanceof MarkerAnnotation) {
 			MarkerAnnotation ma = (MarkerAnnotation) a;

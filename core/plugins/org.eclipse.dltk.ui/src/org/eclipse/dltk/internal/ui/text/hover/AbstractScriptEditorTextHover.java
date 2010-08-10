@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
@@ -138,8 +140,8 @@ public abstract class AbstractScriptEditorTextHover implements
 				} catch (BadLocationException e) {
 				}
 
-				IModelElement[] result = resolve.codeSelect(hoverRegion
-						.getOffset(), hoverRegion.getLength());
+				Object[] result = resolve.codeSelectAll(
+						hoverRegion.getOffset(), hoverRegion.getLength());
 
 				if (result == null) {
 					return null;
@@ -155,13 +157,17 @@ public abstract class AbstractScriptEditorTextHover implements
 				}
 				if (nResults > 1) {
 					for (int i = 1; i < result.length; i++) {
-						String elementName = result[i].getElementName();
-						if (content.equals(elementName)) {
-							// exact match is found swap this with the first
-							IModelElement first = result[0];
-							result[0] = result[i];
-							result[i] = first;
-							break;
+						final Object ith = result[i];
+						if (ith instanceof IModelElement) {
+							final String elementName = ((IModelElement) ith)
+									.getElementName();
+							if (content.equals(elementName)) {
+								// exact match is found swap this with the first
+								Object first = result[0];
+								result[0] = ith;
+								result[i] = first;
+								break;
+							}
 						}
 					}
 				}
@@ -178,16 +184,28 @@ public abstract class AbstractScriptEditorTextHover implements
 		return EditorUtility.getEditorInputModelElement(this.fEditor, false);
 	}
 
+	@Deprecated
+	protected String getHoverInfo(String nature, IModelElement[] modelElements) {
+		return null;
+	}
+
 	/**
-	 * Provides hover information for the given Script elements.
+	 * Provides hover information for the given elements.
 	 * 
-	 * @param modelElements
+	 * @param elements
 	 *            the Script elements for which to provide hover information
 	 * @return the hover information string
 	 * 
 	 */
-	protected String getHoverInfo(String nature, IModelElement[] modelElements) {
-		return null;
+	protected String getHoverInfo(String nature, Object[] elements) {
+		final List<IModelElement> modelElements = new ArrayList<IModelElement>();
+		for (Object element : elements) {
+			if (element instanceof IModelElement) {
+				modelElements.add((IModelElement) element);
+			}
+		}
+		return getHoverInfo(nature,
+				modelElements.toArray(new IModelElement[modelElements.size()]));
 	}
 
 	/**
@@ -206,8 +224,8 @@ public abstract class AbstractScriptEditorTextHover implements
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, SWT.NONE,
-						new HTMLTextPresenter(true), EditorsUI
-								.getTooltipAffordanceString());
+						new HTMLTextPresenter(true),
+						EditorsUI.getTooltipAffordanceString());
 			}
 		};
 	}

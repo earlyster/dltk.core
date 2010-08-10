@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.ui.text.hover;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.BrowserInformationControl;
@@ -94,12 +93,12 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 						Shell parent) {
 					if (BrowserInformationControl.isAvailable(parent))
 						return new BrowserInformationControl(parent, SWT.TOOL
-								| SWT.NO_TRIM, SWT.NONE, EditorsUI
-								.getTooltipAffordanceString());
+								| SWT.NO_TRIM, SWT.NONE,
+								EditorsUI.getTooltipAffordanceString());
 					else
 						return new DefaultInformationControl(parent, SWT.NONE,
-								new HTMLTextPresenter(true), EditorsUI
-										.getTooltipAffordanceString());
+								new HTMLTextPresenter(true),
+								EditorsUI.getTooltipAffordanceString());
 				}
 
 				public boolean canReuse(IInformationControl control) {
@@ -118,7 +117,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 	}
 
 	@Override
-	protected String getHoverInfo(String nature, IModelElement[] result) {
+	protected String getHoverInfo(String nature, Object[] result) {
 		StringBuffer buffer = new StringBuffer();
 		int nResults = result.length;
 		if (nResults == 0)
@@ -129,83 +128,54 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 			HTMLPrinter.addSmallHeader(buffer, getInfoText(result[0]));
 			HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
 			for (int i = 0; i < result.length; i++) {
-				// HTMLPrinter.startBulletList(buffer);
-				IModelElement curr = result[i];
-				if (curr instanceof IDocumentableElement) {
-					IDocumentableElement member = (IDocumentableElement) curr;
-
-					Reader reader;
-					try {
-						reader = ScriptDocumentationAccess
-								.getHTMLContentReader(nature, member, true,
-										true);
-
-						// Provide hint why there's no doc
-						if (reader == null) {
-							// reader= new
-							// StringReader(DLTKHoverMessages.ScriptdocHover_noAttachedInformation);
-							continue;
-						}
-
-					} catch (ModelException ex) {
-						return null;
-					}
-
-					if (reader != null) {
-						// HTMLPrinter.addBullet(buffer, getInfoText(curr));
-						// HTMLPrinter.addParagraph(buffer, "<br>");
-						if (hasContents) {
-							HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
-						}
-						HTMLPrinter.addParagraph(buffer, reader);
-					}
-					hasContents = true;
-				}
-				// HTMLPrinter.endBulletList(buffer);
-			}
-
-		} else {
-
-			IModelElement curr = result[0];
-			if (curr instanceof IDocumentableElement) {
-				IDocumentableElement member = (IDocumentableElement) curr;
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
+				Object element = result[i];
 				Reader reader;
 				try {
 					reader = ScriptDocumentationAccess.getHTMLContentReader(
-							nature, member, true, true);
-
-					// Provide hint why there's no doc
-					if (reader == null) {
-						reader = new StringReader(
-								ScriptHoverMessages.ScriptdocHover_noAttachedInformation);
-					}
-
+							nature, element, true, true);
 				} catch (ModelException ex) {
 					return null;
 				}
-
-				if (reader != null) {
-					HTMLPrinter.addParagraph(buffer, reader);
+				if (reader == null) {
+					continue;
 				}
+				if (hasContents) {
+					HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
+				}
+				HTMLPrinter.addParagraph(buffer, reader);
 				hasContents = true;
-			}/*
+			}
+		} else {
+			Object element = result[0];
+			HTMLPrinter.addSmallHeader(buffer, getInfoText(element));
+			Reader reader;
+			try {
+				reader = ScriptDocumentationAccess.getHTMLContentReader(nature,
+						element, true, true);
+			} catch (ModelException ex) {
+				return null;
+			}
+			// Provide hint why there's no doc
+			if (reader == null) {
+				reader = new StringReader(
+						ScriptHoverMessages.ScriptdocHover_noAttachedInformation);
+			}
+			HTMLPrinter.addParagraph(buffer, reader);
+			hasContents = true;
+			/*
 			 * else if (curr.getElementType() == IModelElement.LOCAL_VARIABLE ||
 			 * curr.getElementType() == IModelElement.TYPE_PARAMETER) {
 			 * HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
 			 * hasContents= true; }
 			 */
 		}
-
 		if (!hasContents)
 			return null;
-
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
-
 		return null;
 	}
 
@@ -229,11 +199,16 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		return null;
 	}
 
-	private String getInfoText(IModelElement member) {
-		long flags = member.getElementType() == IModelElement.FIELD ? LOCAL_VARIABLE_FLAGS
-				: LABEL_FLAGS;
-		String label = ScriptElementLabels.getDefault().getElementLabel(member,
-				flags);
-		return TextUtils.escapeHTML(label);
+	private String getInfoText(Object element) {
+		if (element instanceof IModelElement) {
+			IModelElement member = (IModelElement) element;
+			long flags = member.getElementType() == IModelElement.FIELD ? LOCAL_VARIABLE_FLAGS
+					: LABEL_FLAGS;
+			String label = ScriptElementLabels.getDefault().getElementLabel(
+					member, flags);
+			return TextUtils.escapeHTML(label);
+		} else {
+			return null;
+		}
 	}
 }

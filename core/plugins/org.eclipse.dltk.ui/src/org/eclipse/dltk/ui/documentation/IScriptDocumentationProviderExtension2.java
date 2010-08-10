@@ -11,10 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.documentation;
 
-import org.eclipse.dltk.core.IDocumentableElement;
-
 public interface IScriptDocumentationProviderExtension2 {
 
-	IDocumentationResponse getDocumentationFor(IDocumentableElement element);
+	IDocumentationResponse getDocumentationFor(Object element);
 
 }

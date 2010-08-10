@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
@@ -139,8 +138,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			setText(InfoViewMessages.SelectAllAction_label);
 			setToolTipText(InfoViewMessages.SelectAllAction_tooltip);
 			setDescription(InfoViewMessages.SelectAllAction_description);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
-					IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
+			PlatformUI
+					.getWorkbench()
+					.getHelpSystem()
+					.setHelp(this,
+							IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
 
 		/**
@@ -221,8 +223,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		 */
 		public ISelection getSelection() {
 			if (fControl instanceof StyledText) {
-				IDocument document = new Document(((StyledText) fControl)
-						.getSelectionText());
+				IDocument document = new Document(
+						((StyledText) fControl).getSelectionText());
 				return new TextSelection(document, 0, document.getLength());
 			} else {
 				// FIXME: see
@@ -267,8 +269,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 						.openError(parent.getShell(), title, message,
 								toggleMessage, false, null, null);
 				if (dialog.getReturnCode() == Window.OK)
-					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog
-							.getToggleState());
+					store.setValue(DO_NOT_WARN_PREFERENCE_KEY,
+							dialog.getToggleState());
 			}
 			fIsUsingBrowserWidget = false;
 		}
@@ -491,8 +493,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		final List<String> nodocs = new ArrayList<String>();
 		for (int i = 0; i < result.length; i++) {
 			final IModelElement curr = result[i];
-			if (curr instanceof IDocumentableElement) {
-				final IDocumentableElement member = (IDocumentableElement) curr;
+			if (curr instanceof IMember) {
+				final IMember member = (IMember) curr;
 				try {
 					Reader reader = ScriptDocumentationAccess
 							.getHTMLContentReader(getNature(), member, true,
@@ -503,13 +505,12 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 						buffer.append("</b>"); //$NON-NLS-1$
 						HTMLPrinter.addParagraph(buffer, reader);
 					} else {
-						nodocs
-								.add(ScriptElementLabels
-										.getDefault()
-										.getElementLabel(
-												member,
-												LABEL_FLAGS
-														| ScriptElementLabels.APPEND_FILE));
+						nodocs.add(ScriptElementLabels
+								.getDefault()
+								.getElementLabel(
+										member,
+										LABEL_FLAGS
+												| ScriptElementLabels.APPEND_FILE));
 					}
 				} catch (ModelException ex) {
 					DLTKUIPlugin.log(ex);
@@ -560,8 +561,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 */
 	private String getScriptdocHtml(IModelElement curr) {
 		StringBuffer buffer = new StringBuffer();
-		if (curr instanceof IDocumentableElement) {
-			IDocumentableElement member = (IDocumentableElement) curr;
+		if (curr instanceof IMember) {
+			IMember member = (IMember) curr;
 			// HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 			try {
 				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
@@ -626,7 +627,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 *            the Script member
 	 * @return a string containing the member's label
 	 */
-	private String getInfoText(IDocumentableElement member) {
+	private String getInfoText(IMember member) {
 		return ScriptElementLabels.getDefault().getElementLabel(member,
 				LABEL_FLAGS);
 	}

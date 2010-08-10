@@ -19,27 +19,26 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.ui.IEditorPart;
 
-
-
 /**
- * Proxy for JavaEditorTextHovers.
- *
-	 *
+ * Proxy for ScriptEditorTextHovers.
  */
-public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
+public class EditorTextHoverProxy extends AbstractScriptEditorTextHover
+		implements ITextHoverExtension, IInformationProviderExtension2 {
 
 	private EditorTextHoverDescriptor fHoverDescriptor;
 	private IScriptEditorTextHover fHover;
 
-	public EditorTextHoverProxy(EditorTextHoverDescriptor descriptor, IEditorPart editor, IPreferenceStore store) {
-		fHoverDescriptor= descriptor;
+	public EditorTextHoverProxy(EditorTextHoverDescriptor descriptor,
+			IEditorPart editor, IPreferenceStore store) {
+		fHoverDescriptor = descriptor;
 		setEditor(editor);
 		setPreferenceStore(store);
 	}
-	
+
+	@Override
 	public void setPreferenceStore(IPreferenceStore store) {
 		super.setPreferenceStore(store);
-		
+
 		if (fHover != null)
 			fHover.setPreferenceStore(getPreferenceStore());
 	}
@@ -47,6 +46,7 @@ public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implemen
 	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
+	@Override
 	public void setEditor(IEditorPart editor) {
 		super.setEditor(editor);
 
@@ -61,6 +61,7 @@ public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implemen
 	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		if (ensureHoverCreated())
 			return fHover.getHoverRegion(textViewer, offset);
@@ -71,6 +72,7 @@ public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implemen
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		if (ensureHoverCreated())
 			return fHover.getHoverInfo(textViewer, hoverRegion);
@@ -89,7 +91,7 @@ public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implemen
 	}
 
 	private boolean createHover() {
-		fHover= fHoverDescriptor.createTextHover();
+		fHover = fHoverDescriptor.createTextHover();
 		if (fHover != null) {
 			fHover.setEditor(getEditor());
 			fHover.setPreferenceStore(getPreferenceStore());
@@ -99,24 +101,26 @@ public class EditorTextHoverProxy extends AbstractScriptEditorTextHover implemen
 
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
-	 *
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (ensureHoverCreated() && (fHover instanceof ITextHoverExtension))
-			return ((ITextHoverExtension)fHover).getHoverControlCreator();
+			return ((ITextHoverExtension) fHover).getHoverControlCreator();
 
 		return null;
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#
+	 * getInformationPresenterControlCreator()
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (ensureHoverCreated() && (fHover instanceof IInformationProviderExtension2))
-			return ((IInformationProviderExtension2)fHover).getInformationPresenterControlCreator();
+		if (ensureHoverCreated()
+				&& (fHover instanceof IInformationProviderExtension2))
+			return ((IInformationProviderExtension2) fHover)
+					.getInformationPresenterControlCreator();
 
 		return null;
 	}
 
-	
 }

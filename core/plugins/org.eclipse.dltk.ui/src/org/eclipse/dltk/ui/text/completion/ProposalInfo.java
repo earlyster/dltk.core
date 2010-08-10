@@ -15,7 +15,7 @@ import java.io.Reader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IDocumentableElement;
+import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -85,8 +85,8 @@ public class ProposalInfo {
 			}
 
 			final IModelElement modelElement = getModelElement();
-			if (modelElement instanceof IDocumentableElement) {
-				IDocumentableElement member = (IDocumentableElement) modelElement;
+			if (modelElement instanceof IMember) {
+				IMember member = (IMember) modelElement;
 				return extractScriptdoc(member, monitor);
 			}
 		} catch (ModelException e) {
@@ -139,7 +139,7 @@ public class ProposalInfo {
 	 * @throws IOException
 	 *             if reading the javadoc fails
 	 */
-	private String extractScriptdoc(IDocumentableElement member, IProgressMonitor monitor)
+	private String extractScriptdoc(IMember member, IProgressMonitor monitor)
 			throws ModelException, IOException {
 		if (member != null) {
 			Reader reader = getHTMLContentReader(member, monitor);
@@ -149,7 +149,7 @@ public class ProposalInfo {
 		return null;
 	}
 
-	private Reader getHTMLContentReader(IDocumentableElement member, IProgressMonitor monitor)
+	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor)
 			throws ModelException {
 		String nature = null;
 		IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
