@@ -542,21 +542,38 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 	}
 
-	private static class ModelElementSelectionRequestor implements
-			ISelectionRequestor {
+	static class ModelElementSelectionRequestor implements ISelectionRequestor {
 		final List<IModelElement> elements = new ArrayList<IModelElement>();
+		final List<Object> foreignElements = new ArrayList<Object>();
 
 		public void acceptForeignElement(Object object) {
+			foreignElements.add(object);
 		}
 
 		public void acceptModelElement(IModelElement element) {
 			elements.add(element);
 		}
+
+		void addModelElements(IModelElement[] elements) {
+			Collections.addAll(this.elements, elements);
+		}
+
+		IModelElement[] toModelElementArray() {
+			return elements.toArray(new IModelElement[elements.size()]);
+		}
+
+		Object[] toArray() {
+			final List<Object> result = new ArrayList<Object>(elements.size()
+					+ foreignElements.size());
+			result.addAll(elements);
+			result.addAll(foreignElements);
+			return result.toArray(new Object[result.size()]);
+		}
 	}
 
-	protected IModelElement[] codeSelect(
-			org.eclipse.dltk.compiler.env.ISourceModule cu, int offset,
-			int length, WorkingCopyOwner owner) throws ModelException {
+	private boolean codeSelect(org.eclipse.dltk.compiler.env.IModuleSource cu,
+			int offset, int length, WorkingCopyOwner owner,
+			ModelElementSelectionRequestor requestor) throws ModelException {
 
 		ScriptProject project = (ScriptProject) getScriptProject();
 
@@ -573,7 +590,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 						.println("DLTK.Openable.VERBOSE: Failed to detect language toolkit... for module:" //$NON-NLS-1$
 								+ this.getResource().getName());
 			}
-			return ScriptModelUtil.NO_ELEMENTS;
+			return false;
 		}
 
 		if (offset < 0 || length < 0 || (end != -1 && (offset + length > end))) {
@@ -581,24 +598,41 @@ public abstract class Openable extends ModelElement implements IOpenable,
 					IModelStatusConstants.INDEX_OUT_OF_BOUNDS));
 		}
 
-		ISelectionEngine engine = DLTKLanguageManager
+		final ISelectionEngine engine = DLTKLanguageManager
 				.getSelectionEngine(toolkit.getNatureId());
 		if (engine == null) {
-			return ScriptModelUtil.NO_ELEMENTS;
+			return false;
 		}
-		// engine.setEnvironment(environment);
 		engine.setOptions(project.getOptions(true));
-		// createSelectionEngine(environment,
-		// project.getOptions(true));
-
-		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
 		engine.setRequestor(requestor);
 		final IModelElement[] result = engine.select(cu, offset, offset
 				+ length - 1);
 		if (result != null) {
-			Collections.addAll(requestor.elements, result);
+			requestor.addModelElements(result);
 		}
-		return requestor.elements.toArray(new IModelElement[requestor.elements
-				.size()]);
+		return true;
 	}
+
+	protected IModelElement[] codeSelect(
+			org.eclipse.dltk.compiler.env.IModuleSource cu, int offset,
+			int length, WorkingCopyOwner owner) throws ModelException {
+		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
+		if (codeSelect(cu, offset, length, owner, requestor)) {
+			return requestor.toModelElementArray();
+		} else {
+			return ScriptModelUtil.NO_ELEMENTS;
+		}
+	}
+
+	protected Object[] codeSelectAll(
+			org.eclipse.dltk.compiler.env.IModuleSource cu, int offset,
+			int length, WorkingCopyOwner owner) throws ModelException {
+		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
+		if (codeSelect(cu, offset, length, owner, requestor)) {
+			return requestor.toArray();
+		} else {
+			return ScriptModelUtil.NO_ELEMENTS;
+		}
+	}
+
 }

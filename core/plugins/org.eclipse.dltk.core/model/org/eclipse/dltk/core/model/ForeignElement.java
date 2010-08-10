@@ -6,7 +6,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.IDocumentableElement;
 import org.eclipse.dltk.core.IForeignElement;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
@@ -17,8 +16,9 @@ import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 /**
  * @since 3.0
  */
+@Deprecated
 public abstract class ForeignElement extends ModelElement implements
-		IForeignElement, IDocumentableElement {
+		IForeignElement {
 
 	protected ForeignElement(IModelElement parent)
 			throws IllegalArgumentException {

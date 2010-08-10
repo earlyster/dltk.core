@@ -12,8 +12,7 @@ package org.eclipse.dltk.core;
 /**
  *  Common protocol for model elements that can be members of modules.
  */
-public interface IMember extends IModelElement, ISourceReference, IParent,
-		IDocumentableElement {
+public interface IMember extends IModelElement, ISourceReference, IParent {
 	/**
 	 * Returns the source range of this member's simple name,
 	 * or <code>null</code> if this member does not have a name

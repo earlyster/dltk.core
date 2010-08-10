@@ -34,8 +34,8 @@ import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
-import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
+import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelManager.PerWorkingCopyInfo;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -83,6 +83,15 @@ public abstract class AbstractSourceModule extends Openable implements
 	public IModelElement[] codeSelect(int offset, int length,
 			WorkingCopyOwner owner) throws ModelException {
 		return super.codeSelect(this, offset, length, owner);
+	}
+
+	public Object[] codeSelectAll(int offset, int length) throws ModelException {
+		return codeSelectAll(offset, length, DefaultWorkingCopyOwner.PRIMARY);
+	}
+
+	public Object[] codeSelectAll(int offset, int length, WorkingCopyOwner owner)
+			throws ModelException {
+		return super.codeSelectAll(this, offset, length, owner);
 	}
 
 	public void copy(IModelElement container, IModelElement sibling,

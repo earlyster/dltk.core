@@ -166,4 +166,10 @@ public interface ICodeAssist {
 	 */
 	IModelElement[] codeSelect(int offset, int length, WorkingCopyOwner owner)
 			throws ModelException;
+
+	Object[] codeSelectAll(int offset, int length) throws ModelException;
+
+	Object[] codeSelectAll(int offset, int length, WorkingCopyOwner owner)
+			throws ModelException;
+
 }
