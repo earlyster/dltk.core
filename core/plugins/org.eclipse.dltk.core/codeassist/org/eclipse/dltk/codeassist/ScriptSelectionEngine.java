@@ -52,6 +52,10 @@ public abstract class ScriptSelectionEngine extends Engine implements
 		}
 	}
 
+	protected void reportForeignElement(Object object) {
+		requestor.acceptForeignElement(object);
+	}
+
 	public void setOptions(Map options) {
 		this.options = new AssistOptions(options);
 	}
