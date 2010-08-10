@@ -16,59 +16,65 @@ import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-
 /**
  * Filters problems based on their types.
  */
-public class ScriptAnnotationIterator implements Iterator {
+public class ScriptAnnotationIterator implements Iterator<Annotation> {
 
-	private Iterator fIterator;
+	private Iterator<?> fIterator;
 	private Annotation fNext;
 	private boolean fSkipIrrelevants;
 	private boolean fReturnAllAnnotations;
 
 	/**
-	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
+	 * Equivalent to
+	 * <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
 	 */
-	public ScriptAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
+	public ScriptAnnotationIterator(IAnnotationModel model,
+			boolean skipIrrelevants) {
 		this(model, skipIrrelevants, false);
 	}
 
 	/**
 	 * Returns a new JavaAnnotationIterator.
-	 * @param model the annotation model
-	 * @param skipIrrelevants whether to skip irrelevant annotations
-	 * @param returnAllAnnotations Whether to return non IJavaAnnotations as well
+	 * 
+	 * @param model
+	 *            the annotation model
+	 * @param skipIrrelevants
+	 *            whether to skip irrelevant annotations
+	 * @param returnAllAnnotations
+	 *            Whether to return non IJavaAnnotations as well
 	 */
-	public ScriptAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants, boolean returnAllAnnotations) {
-		fReturnAllAnnotations= returnAllAnnotations;
+	public ScriptAnnotationIterator(IAnnotationModel model,
+			boolean skipIrrelevants, boolean returnAllAnnotations) {
+		fReturnAllAnnotations = returnAllAnnotations;
 		if (model != null)
-			fIterator= model.getAnnotationIterator();
+			fIterator = model.getAnnotationIterator();
 		else
-			fIterator= Collections.EMPTY_LIST.iterator();
-		fSkipIrrelevants= skipIrrelevants;
+			fIterator = Collections.EMPTY_LIST.iterator();
+		fSkipIrrelevants = skipIrrelevants;
 		skip();
 	}
 
 	private void skip() {
 		while (fIterator.hasNext()) {
-			Annotation next= (Annotation) fIterator.next();
+			Annotation next = (Annotation) fIterator.next();
 			if (next instanceof IScriptAnnotation) {
 				if (fSkipIrrelevants) {
 					if (!next.isMarkedDeleted()) {
-						fNext= next;
+						fNext = next;
 						return;
 					}
 				} else {
-					fNext= next;
+					fNext = next;
 					return;
 				}
 			} else if (fReturnAllAnnotations) {
-				fNext= next;
+				fNext = next;
 				return;
 			}
 		}
-		fNext= null;
+		fNext = null;
 	}
 
 	/*
@@ -81,7 +87,7 @@ public class ScriptAnnotationIterator implements Iterator {
 	/*
 	 * @see Iterator#next()
 	 */
-	public Object next() {
+	public Annotation next() {
 		try {
 			return fNext;
 		} finally {
