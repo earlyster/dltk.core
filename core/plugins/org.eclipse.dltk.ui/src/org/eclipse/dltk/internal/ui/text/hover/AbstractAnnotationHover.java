@@ -67,6 +67,7 @@ public abstract class AbstractAnnotationHover extends
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		IPath path;
 		IAnnotationModel model;
@@ -86,20 +87,20 @@ public abstract class AbstractAnnotationHover extends
 
 		try {
 			final IPreferenceStore store = getCombinedPreferenceStore();
-			Iterator e = new ScriptAnnotationIterator(model, true,
+			Iterator<Annotation> e = new ScriptAnnotationIterator(model, true,
 					fAllAnnotations);
 			int layer = -1;
 			String message = null;
 			while (e.hasNext()) {
-				Annotation a = (Annotation) e.next();
+				Annotation a = e.next();
 
 				AnnotationPreference preference = getAnnotationPreference(a);
 				if (preference == null) {
 					continue;
 				}
 				if (!isActive(store, preference.getTextPreferenceKey())
-						&& !isActive(store, preference
-								.getHighlightPreferenceKey())) {
+						&& !isActive(store,
+								preference.getHighlightPreferenceKey())) {
 					continue;
 				}
 
@@ -109,8 +110,8 @@ public abstract class AbstractAnnotationHover extends
 
 				if (l > layer
 						&& p != null
-						&& p.overlapsWith(hoverRegion.getOffset(), hoverRegion
-								.getLength())) {
+						&& p.overlapsWith(hoverRegion.getOffset(),
+								hoverRegion.getLength())) {
 					String msg = getMessageFromAnnotation(a);
 					if (msg != null && msg.trim().length() > 0) {
 						message = msg;
