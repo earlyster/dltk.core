@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -592,7 +593,11 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
 		engine.setRequestor(requestor);
-		engine.select(cu, offset, offset + length - 1);
+		final IModelElement[] result = engine.select(cu, offset, offset
+				+ length - 1);
+		if (result != null) {
+			Collections.addAll(requestor.elements, result);
+		}
 		return requestor.elements.toArray(new IModelElement[requestor.elements
 				.size()]);
 	}

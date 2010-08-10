@@ -12,11 +12,12 @@ package org.eclipse.dltk.codeassist;
 import java.util.Map;
 
 import org.eclipse.dltk.compiler.env.IModuleSource;
+import org.eclipse.dltk.core.IModelElement;
 
 public interface ISelectionEngine {
 	void setRequestor(ISelectionRequestor requestor);
 
-	void select(IModuleSource module, int offset, int i);
+	IModelElement[] select(IModuleSource module, int offset, int i);
 
 	void setOptions(Map options);
 }
