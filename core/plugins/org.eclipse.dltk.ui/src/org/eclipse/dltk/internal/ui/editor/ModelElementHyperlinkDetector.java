@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.ICodeAssist;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.actions.SelectionConverter;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
 import org.eclipse.dltk.ui.actions.OpenAction;
 import org.eclipse.dltk.ui.infoviews.ModelElementArray;
@@ -37,7 +38,7 @@ public class ModelElementHyperlinkDetector implements IHyperlinkDetector {
 	 * Creates a new Script element hyperlink detector.
 	 * 
 	 * @param editor
-	 * 		the editor in which to detect the hyperlink
+	 *            the editor in which to detect the hyperlink
 	 */
 	public ModelElementHyperlinkDetector(ITextEditor editor) {
 		Assert.isNotNull(editor);
@@ -74,10 +75,10 @@ public class ModelElementHyperlinkDetector implements IHyperlinkDetector {
 			if (wordRegion == null)
 				return null;
 
-			IModelElement[] elements = null;
-			elements = ((ICodeAssist) input).codeSelect(wordRegion.getOffset(),
-					wordRegion.getLength());
-			if (elements != null && elements.length > 0) {
+			final Object[] elements = SelectionConverter
+					.filterElements(((ICodeAssist) input).codeSelectAll(
+							wordRegion.getOffset(), wordRegion.getLength()));
+			if (elements.length > 0) {
 				final IHyperlink link;
 				if (elements.length == 1) {
 					link = new ModelElementHyperlink(wordRegion, elements[0],

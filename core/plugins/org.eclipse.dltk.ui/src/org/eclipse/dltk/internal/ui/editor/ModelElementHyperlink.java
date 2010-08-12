@@ -13,6 +13,7 @@ package org.eclipse.dltk.internal.ui.editor;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.ui.DelegatedOpen;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.actions.OpenAction;
 import org.eclipse.dltk.ui.infoviews.ModelElementArray;
@@ -47,11 +48,11 @@ public class ModelElementHyperlink implements IHyperlink {
 	}
 
 	public void open() {
-		if (selection instanceof IModelElement) {
-			fOpenAction.run(new Object[] { selection });
-		} else if (selection instanceof ModelElementArray) {
+		if (selection instanceof ModelElementArray) {
 			fOpenAction.selectAndOpen(((ModelElementArray) selection)
 					.getElements());
+		} else {
+			fOpenAction.run(new Object[] { selection });
 		}
 	}
 
@@ -75,6 +76,8 @@ public class ModelElementHyperlink implements IHyperlink {
 			final IModelElement me = (IModelElement) selection;
 			text = ScriptElementLabels.getDefault().getElementLabel(me,
 					TITLE_FLAGS);
+		} else if (selection instanceof DelegatedOpen) {
+			text = ((DelegatedOpen) selection).getName();
 		} else if (selection instanceof ModelElementArray) {
 			final ModelElementArray array = (ModelElementArray) selection;
 			text = array.getContentDescription();

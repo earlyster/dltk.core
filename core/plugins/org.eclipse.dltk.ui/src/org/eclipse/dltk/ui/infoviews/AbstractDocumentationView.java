@@ -488,34 +488,34 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 *            the Script elements for which to get the Javadoc
 	 * @return a string with the Javadoc in HTML format.
 	 */
-	private String getScriptdocHtmlDetailed(IModelElement[] result) {
+	private String getScriptdocHtmlDetailed(Object[] result) {
 		final StringBuffer buffer = new StringBuffer();
 		final List<String> nodocs = new ArrayList<String>();
 		for (int i = 0; i < result.length; i++) {
-			final IModelElement curr = result[i];
-			if (curr instanceof IMember) {
-				final IMember member = (IMember) curr;
-				try {
-					Reader reader = ScriptDocumentationAccess
-							.getHTMLContentReader(getNature(), member, true,
-									true);
-					if (reader != null) {
-						buffer.append("<b>"); //$NON-NLS-1$
-						buffer.append(getInfoText(member));
-						buffer.append("</b>"); //$NON-NLS-1$
-						HTMLPrinter.addParagraph(buffer, reader);
-					} else {
+			final Object member = result[i];
+			try {
+				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
+						getNature(), member, true, true);
+				if (reader != null) {
+					buffer.append("<b>"); //$NON-NLS-1$
+					buffer.append(getInfoText(member));
+					buffer.append("</b>"); //$NON-NLS-1$
+					HTMLPrinter.addParagraph(buffer, reader);
+				} else {
+					if (member instanceof IModelElement) {
 						nodocs.add(ScriptElementLabels
 								.getDefault()
 								.getElementLabel(
-										member,
+										(IModelElement) member,
 										LABEL_FLAGS
 												| ScriptElementLabels.APPEND_FILE));
+					} else {
+						// TODO
 					}
-				} catch (ModelException ex) {
-					DLTKUIPlugin.log(ex);
-					return null;
 				}
+			} catch (ModelException ex) {
+				DLTKUIPlugin.log(ex);
+				return null;
 			}
 		}
 		if (!nodocs.isEmpty()) {
@@ -627,9 +627,14 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 *            the Script member
 	 * @return a string containing the member's label
 	 */
-	private String getInfoText(IMember member) {
-		return ScriptElementLabels.getDefault().getElementLabel(member,
-				LABEL_FLAGS);
+	private String getInfoText(Object member) {
+		if (member instanceof IModelElement) {
+			return ScriptElementLabels.getDefault().getElementLabel(
+					(IModelElement) member, LABEL_FLAGS);
+		} else {
+			// TODO
+			return null;
+		}
 	}
 
 	/*

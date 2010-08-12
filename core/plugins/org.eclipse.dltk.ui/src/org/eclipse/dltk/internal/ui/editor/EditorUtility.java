@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IExternalSourceModule;
-import org.eclipse.dltk.core.IForeignElement;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
@@ -33,6 +32,7 @@ import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.ui.DelegatedOpen;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
@@ -139,36 +139,30 @@ public class EditorUtility {
 			throws ModelException, PartInitException {
 		if (inputElement instanceof IFile) {
 			return openInEditor((IFile) inputElement, activate);
+		} else if (inputElement instanceof DelegatedOpen) {
+			return ((DelegatedOpen) inputElement).openInEditor(activate);
 		}
 
-		if (inputElement instanceof IForeignElement) {
-			IForeignElement el = (IForeignElement) inputElement;
-			el.codeSelect();
-		} else {
-			IEditorInput input = getEditorInput(inputElement);
-			if (input != null) {
-				if (inputElement instanceof IModelElement) {
+		IEditorInput input = getEditorInput(inputElement);
+		if (input != null) {
+			if (inputElement instanceof IModelElement) {
+				// first try to get it from the system.
+				String editorId = null;
+				IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
+						.getLanguageToolkit((IModelElement) inputElement);
+				if (toolkit != null) {
+					editorId = toolkit.getEditorId(inputElement);
+				}
+				if (editorId == null) { // Transitional code
+					editorId = getEditorID(input, inputElement);
+				}
 
-					// first try to get it from the system.
-					String editorId = null;
-					if (input != null) {
-						IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
-								.getLanguageToolkit((IModelElement) inputElement);
-						if (toolkit != null) {
-							editorId = toolkit.getEditorId(inputElement);
-						}
-					}
-					if (editorId == null) { // Transitional code
-						editorId = getEditorID(input, inputElement);
-					}
-
-					if (editorId != null) {
-						return openInEditor(input, editorId, activate);
-					}
-				} else
-					return openInEditor(input,
-							getEditorID(input, inputElement), activate);
-			}
+				if (editorId != null) {
+					return openInEditor(input, editorId, activate);
+				}
+			} else
+				return openInEditor(input, getEditorID(input, inputElement),
+						activate);
 		}
 		if (inputElement instanceof IModelElement) {
 			IModelElement modelElement = (IModelElement) inputElement;

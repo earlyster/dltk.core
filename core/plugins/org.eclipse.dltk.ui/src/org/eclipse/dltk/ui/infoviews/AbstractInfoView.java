@@ -228,16 +228,17 @@ public abstract class AbstractInfoView extends ViewPart implements
 	/*
 	 * @see IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public final void createPartControl(Composite parent) {
 		internalCreatePartControl(parent);
 		inititalizeColors();
-		getSite().getWorkbenchWindow().getPartService().addPartListener(
-				fPartListener);
+		getSite().getWorkbenchWindow().getPartService()
+				.addPartListener(fPartListener);
 		createActions();
 		createContextMenu();
 		fillActionBars(getViewSite().getActionBars());
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
-				getHelpContextId());
+		PlatformUI.getWorkbench().getHelpSystem()
+				.setHelp(getControl(), getHelpContextId());
 	}
 
 	/**
@@ -474,11 +475,12 @@ public abstract class AbstractInfoView extends ViewPart implements
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
+	@Override
 	final public void dispose() {
 		// cancel possible running computation
 		fComputeCount++;
-		getSite().getWorkbenchWindow().getPartService().removePartListener(
-				fPartListener);
+		getSite().getWorkbenchWindow().getPartService()
+				.removePartListener(fPartListener);
 		ISelectionProvider provider = getSelectionProvider();
 		if (provider != null)
 			provider.removeSelectionChangedListener(fCopyToClipboardAction);
@@ -512,6 +514,7 @@ public abstract class AbstractInfoView extends ViewPart implements
 		if (selection == null || selection.isEmpty())
 			return;
 		Thread thread = new Thread("Info view input computer") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				if (currentCount != fComputeCount)
 					return;
@@ -529,8 +532,8 @@ public abstract class AbstractInfoView extends ViewPart implements
 								((ITextSelection) selection).getOffset());
 						if (reg != null) {
 							try {
-								tmp = new KeywordInput(document.get(reg
-										.getOffset(), reg.getLength()),
+								tmp = new KeywordInput(document.get(
+										reg.getOffset(), reg.getLength()),
 										EditorUtility
 												.getEditorInputModelElement(
 														edit, false));

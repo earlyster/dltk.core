@@ -27,7 +27,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
-import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.actions.ActionMessages;
 import org.eclipse.dltk.internal.ui.actions.ActionUtil;
 import org.eclipse.dltk.internal.ui.actions.OpenActionUtil;
@@ -40,6 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
@@ -62,8 +62,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/**
 	 * Creates a new <code>OpenAction</code>. The action requires that the
 	 * selection provided by the site's selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>
-	 * .
+	 * org.eclipse.jface.viewers.IStructuredSelection</code> .
 	 * 
 	 * @param site
 	 *            the site providing context information for this action
@@ -146,9 +145,9 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @throws InvocationTargetException
 	 * @throws InterruptedException
 	 */
-	protected IModelElement[] resolveModelElements()
-			throws InvocationTargetException, InterruptedException {
-		return SelectionConverter.codeResolveForked(fEditor, false);
+	protected Object[] resolveElements() throws InvocationTargetException,
+			InterruptedException {
+		return SelectionConverter.resolveForked(fEditor, false);
 	}
 
 	/*
@@ -158,9 +157,9 @@ public class OpenAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!isProcessable())
 			return;
-		final IModelElement[] elements;
+		final Object[] elements;
 		try {
-			elements = resolveModelElements();
+			elements = resolveElements();
 		} catch (InvocationTargetException e) {
 			showError(e);
 			return;
@@ -170,7 +169,7 @@ public class OpenAction extends SelectionDispatchAction {
 		selectAndOpen(elements);
 	}
 
-	public void selectAndOpen(IModelElement[] elements) {
+	public void selectAndOpen(Object[] elements) {
 		elements = filterElements(elements);
 		if (elements == null || elements.length == 0) {
 			IEditorStatusLine statusLine = null;
@@ -184,39 +183,44 @@ public class OpenAction extends SelectionDispatchAction {
 			getShell().getDisplay().beep();
 			return;
 		}
-		IModelElement element = elements[0];
+		Object element = elements[0];
 		if (elements.length > 1) {
-			element = OpenActionUtil.selectModelElement(elements, getShell(),
+			element = OpenActionUtil.select(elements, getShell(),
 					getDialogTitle(), ActionMessages.OpenAction_select_element);
 			if (element == null)
 				return;
 		}
-
-		int type = element.getElementType();
-		if (type == IModelElement.SCRIPT_PROJECT
-				|| type == IModelElement.PROJECT_FRAGMENT
-				|| type == IModelElement.SCRIPT_FOLDER)
-			element = EditorUtility.getEditorInputModelElement(fEditor, false);
+		if (element instanceof IModelElement) {
+			int type = ((IModelElement) element).getElementType();
+			if (type == IModelElement.SCRIPT_PROJECT
+					|| type == IModelElement.PROJECT_FRAGMENT
+					|| type == IModelElement.SCRIPT_FOLDER)
+				element = EditorUtility.getEditorInputModelElement(fEditor,
+						false);
+		}
 		run(new Object[] { element });
 	}
 
-	private IModelElement[] filterElements(IModelElement[] elements) {
+	private Object[] filterElements(Object[] elements) {
 		if (elements == null)
 			return null;
 
-		Map<IModelElement, IModelElement> uniqueElements = new HashMap<IModelElement, IModelElement>();
+		Map<Object, Object> uniqueElements = new HashMap<Object, Object>();
 		for (int i = 0; i < elements.length; i++) {
-			IModelElement element = elements[i];
-			IModelElement module = element
-					.getAncestor(IModelElement.SOURCE_MODULE);
-			if (module != null) {
-				if (!uniqueElements.containsKey(module)) {
-					uniqueElements.put(module, element);
+			Object element = elements[i];
+			if (element instanceof IModelElement) {
+				final IModelElement module = ((IModelElement) element)
+						.getAncestor(IModelElement.SOURCE_MODULE);
+				if (module != null) {
+					if (!uniqueElements.containsKey(module)) {
+						uniqueElements.put(module, element);
+					}
 				}
+			} else {
+				uniqueElements.put(element, element);
 			}
 		}
-		return uniqueElements.values().toArray(
-				new IModelElement[uniqueElements.size()]);
+		return uniqueElements.values().toArray();
 	}
 
 	private boolean isProcessable() {
@@ -264,8 +268,8 @@ public class OpenAction extends SelectionDispatchAction {
 						ActionMessages.OpenAction_error_message, e));
 
 				ErrorDialog.openError(getShell(), getDialogTitle(),
-						ActionMessages.OpenAction_error_messageProblems, e
-								.getStatus());
+						ActionMessages.OpenAction_error_messageProblems,
+						e.getStatus());
 
 			} catch (PartInitException x) {
 
@@ -284,11 +288,9 @@ public class OpenAction extends SelectionDispatchAction {
 							.openError(
 									getShell(),
 									ActionMessages.OpenAction_error_messageProblems,
-									Messages
-											.format(
-													ActionMessages.OpenAction_error_messageArgs,
-													new String[] { name,
-															x.getMessage() }));
+									NLS.bind(
+											ActionMessages.OpenAction_error_messageArgs,
+											name, x.getMessage()));
 				}
 			}
 		}

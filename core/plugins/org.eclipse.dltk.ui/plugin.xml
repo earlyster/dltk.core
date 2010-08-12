@@ -21,6 +21,7 @@
    <extension-point id="folding" name="Folding Structure Provider" schema="schema/folding.exsd"/>
    <extension-point id="completion" name="Script Completion stuff" schema="schema/completion.exsd"/>
    <extension-point id="coloring" name="Syntax Coloring Preferences" schema="schema/coloring.exsd"/>
+   <extension-point id="openDelegate" name="Open Delegate" schema="schema/openDelegate.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">

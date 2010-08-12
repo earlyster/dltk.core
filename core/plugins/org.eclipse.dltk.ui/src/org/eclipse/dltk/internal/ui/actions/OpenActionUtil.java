@@ -51,9 +51,10 @@ public class OpenActionUtil {
 	 * Filters out source references from the given code resolve results. A
 	 * utility method that can be called by subclasses.
 	 */
-	public static List filterResolveResults(IModelElement[] codeResolveResults) {
+	public static List<IModelElement> filterResolveResults(
+			IModelElement[] codeResolveResults) {
 		int nResults = codeResolveResults.length;
-		List refs = new ArrayList(nResults);
+		List<IModelElement> refs = new ArrayList<IModelElement>(nResults);
 		for (int i = 0; i < nResults; i++) {
 			if (codeResolveResults[i] instanceof ISourceReference)
 				refs.add(codeResolveResults[i]);
@@ -61,12 +62,8 @@ public class OpenActionUtil {
 		return refs;
 	}
 
-	/**
-	 * Shows a dialog for resolving an ambiguous script element. Utility method
-	 * that can be called by subclasses.
-	 */
-	public static IModelElement selectModelElement(IModelElement[] elements,
-			Shell shell, String title, String message) {
+	public static Object select(Object[] elements, Shell shell, String title,
+			String message) {
 
 		int nResults = elements.length;
 
@@ -90,13 +87,21 @@ public class OpenActionUtil {
 		if (dialog.open() == Window.OK) {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
-				nResults = selection.length;
-				for (int i = 0; i < nResults; i++) {
-					Object current = selection[i];
-					if (current instanceof IModelElement)
-						return (IModelElement) current;
-				}
+				return selection[0];
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Shows a dialog for resolving an ambiguous script element. Utility method
+	 * that can be called by subclasses.
+	 */
+	public static IModelElement selectModelElement(IModelElement[] elements,
+			Shell shell, String title, String message) {
+		Object selection = select(elements, shell, title, message);
+		if (selection instanceof IModelElement) {
+			return (IModelElement) selection;
 		}
 		return null;
 	}

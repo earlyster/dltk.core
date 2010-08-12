@@ -21,19 +21,21 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.ui.DelegatedOpen;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 
 public class ModelElementArray {
 
-	private final IModelElement[] elements;
+	private final Object[] elements;
 
-	public ModelElementArray(IModelElement[] elements) {
+	public ModelElementArray(Object[] elements) {
 		Assert.isLegal(elements != null && elements.length > 1);
 		this.elements = elements;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ModelElementArray) {
 			final ModelElementArray other = (ModelElementArray) obj;
@@ -46,7 +48,7 @@ public class ModelElementArray {
 	/**
 	 * @return the elements
 	 */
-	public IModelElement[] getElements() {
+	public Object[] getElements() {
 		return elements;
 	}
 
@@ -57,17 +59,21 @@ public class ModelElementArray {
 	 * @return
 	 */
 	private boolean isSingleMethodName() {
-		final IModelElement element0 = elements[0];
-		if (element0.getElementType() == IModelElement.METHOD) {
-			final String methodName = element0.getElementName();
-			for (int i = 1; i < elements.length; ++i) {
-				final IModelElement element = elements[i];
-				if (element.getElementType() != IModelElement.METHOD
-						|| !methodName.equals(element.getElementName())) {
-					return false;
+		if (elements[0] instanceof IModelElement) {
+			final IModelElement element0 = (IModelElement) elements[0];
+			if (element0.getElementType() == IModelElement.METHOD) {
+				final String methodName = element0.getElementName();
+				for (int i = 1; i < elements.length; ++i) {
+					if (!(elements[i] instanceof IModelElement))
+						return false;
+					final IModelElement element = (IModelElement) elements[i];
+					if (element.getElementType() != IModelElement.METHOD
+							|| !methodName.equals(element.getElementName())) {
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
 		}
 		return false;
 	}
@@ -81,20 +87,24 @@ public class ModelElementArray {
 	public String getContentDescription() {
 		if (isSingleMethodName()) {
 			return NLS
-					.bind(
-							InfoViewMessages.ContentDescription_multipleMethodsWithSameName,
-							elements[0].getElementName());
+					.bind(InfoViewMessages.ContentDescription_multipleMethodsWithSameName,
+							((IModelElement) elements[0]).getElementName());
 		}
 		final ScriptElementLabels labels = ScriptElementLabels.getDefault();
-		final Set names = new HashSet();
+		final Set<String> names = new HashSet<String>();
 		for (int i = 0; i < elements.length; ++i) {
-			names.add(labels.getElementLabel(elements[i], NAME_FLAGS));
+			if (elements[i] instanceof IModelElement) {
+				names.add(labels.getElementLabel((IModelElement) elements[i],
+						NAME_FLAGS));
+			} else if (elements[i] instanceof DelegatedOpen) {
+				names.add(((DelegatedOpen) elements[i]).getName());
+			}
 		}
 		return sortAndJoin(names, ", ");//$NON-NLS-1$
 	}
 
-	private String sortAndJoin(final Set names, final String separator) {
-		final List nameList = new ArrayList(names);
+	private String sortAndJoin(final Set<String> names, final String separator) {
+		final List<String> nameList = new ArrayList<String>(names);
 		Collections.sort(nameList);
 		return join(nameList, separator);
 	}
@@ -116,9 +126,14 @@ public class ModelElementArray {
 	 */
 	public String getTitleTooltip() {
 		final ScriptElementLabels labels = ScriptElementLabels.getDefault();
-		final Set names = new HashSet();
+		final Set<String> names = new HashSet<String>();
 		for (int i = 0; i < elements.length; ++i) {
-			names.add(labels.getElementLabel(elements[i], TOOLTIP_FLAGS));
+			if (elements[i] instanceof IModelElement) {
+				names.add(labels.getElementLabel((IModelElement) elements[i],
+						TOOLTIP_FLAGS));
+			} else if (elements[i] instanceof DelegatedOpen) {
+				names.add(((DelegatedOpen) elements[i]).getName());
+			}
 		}
 		return sortAndJoin(names, "\n");//$NON-NLS-1$
 	}
@@ -141,7 +156,7 @@ public class ModelElementArray {
 	 *            the separator character to use, null treated as ""
 	 * @return the joined String, <code>null</code> if null collection input
 	 */
-	private static String join(Collection collection, String separator) {
+	private static String join(Collection<?> collection, String separator) {
 		return TextUtils.join(collection, separator);
 	}
 
