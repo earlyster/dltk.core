@@ -76,9 +76,16 @@ public interface IIndexingRequestor {
 		/** Element parent information */
 		public String parent;
 
-		/** DOC information */
+		/**
+		 * DOC information
+		 * 
+		 * @since 3.0
+		 */
 		public String doc;
 
+		/**
+		 * @since 3.0
+		 */
 		public DeclarationInfo(int elementType, int flags, int offset,
 				int length, int nameOffset, int nameLength, String elementName,
 				String metadata, String doc, String qualifier, String parent) {

@@ -21,6 +21,9 @@ import org.eclipse.dltk.internal.core.SearchableEnvironment;
 public abstract class ScriptSelectionEngine extends Engine implements
 		ISelectionEngine {
 
+	/**
+	 * @since 3.0
+	 */
 	protected ISelectionRequestor requestor;
 
 	public ScriptSelectionEngine() {
@@ -32,26 +35,41 @@ public abstract class ScriptSelectionEngine extends Engine implements
 		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public void setRequestor(ISelectionRequestor requestor) {
 		this.requestor = requestor;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void reportModelElement(IModelElement element) {
 		requestor.acceptModelElement(element);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void reportModelElements(IModelElement[] elements) {
 		for (IModelElement element : elements) {
 			requestor.acceptModelElement(element);
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void reportModelElements(Collection<IModelElement> elements) {
 		for (IModelElement element : elements) {
 			requestor.acceptModelElement(element);
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void reportForeignElement(Object object) {
 		requestor.acceptForeignElement(object);
 	}

@@ -50,6 +50,7 @@ public interface IElementResolver {
 	 *            Element parent (declaring type, for example)
 	 * @param sourceModule
 	 *            Source module where this element is declared
+	 * @since 3.0
 	 */
 	public IModelElement resolve(int elementType, int flags, int offset,
 			int length, int nameOffset, int nameLength, String elementName,

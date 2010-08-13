@@ -47,6 +47,7 @@ public interface ISearchRequestor {
 	 *            Source module where element is declared
 	 * @param isReference
 	 *            Whether this element is a reference or declaration
+	 * @since 3.0
 	 */
 	public void match(int elementType, int flags, int offset, int length,
 			int nameOffset, int nameLength, String elementName,

@@ -13,6 +13,9 @@ package org.eclipse.dltk.codeassist;
 
 import org.eclipse.dltk.core.IModelElement;
 
+/**
+ * @since 3.0
+ */
 public interface ISelectionRequestor {
 
 	void acceptModelElement(IModelElement element);
