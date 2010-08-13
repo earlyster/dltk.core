@@ -155,4 +155,16 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 
 	};
 
+	protected void configureNatures(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		((ProjectWizard) getWizard()).configureNatures(project, monitor);
+	}
+
+	@Override
+	protected void configureProject(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		super.configureProject(project, monitor);
+		((ProjectWizard) getWizard()).configureProject(project, monitor);
+	}
+
 }

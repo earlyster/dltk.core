@@ -23,6 +23,7 @@ import org.eclipse.dltk.internal.ui.wizards.ProjectWizardInitializerManager;
 import org.eclipse.dltk.internal.ui.wizards.ProjectWizardState;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.ui.wizards.IProjectWizardInitializer.IProjectWizardState;
+import org.eclipse.dltk.utils.ResourceUtil;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
@@ -39,12 +40,16 @@ public abstract class ProjectWizard extends NewElementWizard implements
 
 	@Override
 	public void createPageControls(Composite pageContainer) {
+		initProjectWizard();
+		super.createPageControls(pageContainer);
+	}
+
+	protected void initProjectWizard() {
 		for (IWizardPage page : getPages()) {
 			if (page instanceof IProjectWizardPage) {
 				((IProjectWizardPage) page).initProjectWizardPage();
 			}
 		}
-		super.createPageControls(pageContainer);
 	}
 
 	@Override
@@ -196,6 +201,15 @@ public abstract class ProjectWizard extends NewElementWizard implements
 			}
 		}
 		return projectWizardState;
+	}
+
+	protected void configureNatures(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		ResourceUtil.addNature(project, monitor, getScriptNature());
+	}
+
+	protected void configureProject(IProject project, IProgressMonitor monitor)
+			throws CoreException {
 	}
 
 }

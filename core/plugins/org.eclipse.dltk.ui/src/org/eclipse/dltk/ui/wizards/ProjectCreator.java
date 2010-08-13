@@ -141,10 +141,9 @@ public class ProjectCreator {
 		if (monitor == null || noProgressMonitor) {
 			monitor = new NullProgressMonitor();
 		}
-		monitor
-				.beginTask(
-						NewWizardMessages.ScriptProjectWizardSecondPage_operation_remove,
-						3);
+		monitor.beginTask(
+				NewWizardMessages.ScriptProjectWizardSecondPage_operation_remove,
+				3);
 		try {
 			try {
 				boolean removeContent = !fKeepContent
@@ -459,10 +458,9 @@ public class ProjectCreator {
 			monitor = new NullProgressMonitor();
 		}
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.ScriptProjectWizardSecondPage_operation_initialize,
-							70);
+			monitor.beginTask(
+					NewWizardMessages.ScriptProjectWizardSecondPage_operation_initialize,
+					70);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -478,8 +476,8 @@ public class ProjectCreator {
 					 * "/C:/Users/alex/...")
 					 */
 					realLocation = new URI(rootLocation.getScheme(), null, Path
-							.fromPortableString(rootLocation.getPath()).append(
-									fCurrProject.getName()).toString(), null);
+							.fromPortableString(rootLocation.getPath())
+							.append(fCurrProject.getName()).toString(), null);
 				} catch (URISyntaxException e) {
 					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
 				}
@@ -561,10 +559,9 @@ public class ProjectCreator {
 	public void performFinish(IProgressMonitor monitor) throws CoreException,
 			InterruptedException {
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.ScriptProjectWizardSecondPage_operation_create,
-							4);
+			monitor.beginTask(
+					NewWizardMessages.ScriptProjectWizardSecondPage_operation_create,
+					4);
 			final IStepTracker finishStepTracker = new FinishStepTracker(
 					fStepTracker);
 			if (fCurrProject == null) {
@@ -651,8 +648,9 @@ public class ProjectCreator {
 			}
 		} else if (fLocation.isSrc()) {
 			final IDLTKUILanguageToolkit toolkit = getUILanguageToolkit();
-			final IPath srcPath = toolkit != null ? new Path(toolkit
-					.getString(PreferenceConstants.SRC_SRCNAME)) : Path.EMPTY;
+			final IPath srcPath = toolkit != null ? new Path(
+					toolkit.getString(PreferenceConstants.SRC_SRCNAME))
+					: Path.EMPTY;
 			if (srcPath.segmentCount() > 0) {
 				final IFolder folder = fCurrProject.getFolder(srcPath);
 				CoreUtility.createFolder(folder, true, true,
@@ -665,18 +663,20 @@ public class ProjectCreator {
 			// InterpreterEnvironment library.
 			List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
 			cpEntries.add(DLTKCore.newSourceEntry(projectPath.append(srcPath)));
-			cpEntries.addAll(ProjectWizardUtils
-					.getDefaultBuildpathEntry(fLocation));
+			cpEntries.addAll(getDefaultBuildpathEntries());
 			return cpEntries.toArray(new IBuildpathEntry[cpEntries.size()]);
 		} else {
 			IPath projectPath = fCurrProject.getFullPath();
 			List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
 			cpEntries.add(DLTKCore.newSourceEntry(projectPath));
-			cpEntries.addAll(ProjectWizardUtils
-					.getDefaultBuildpathEntry(fLocation));
+			cpEntries.addAll(getDefaultBuildpathEntries());
 			monitor.worked(WORK_INIT_BP);
 			return cpEntries.toArray(new IBuildpathEntry[cpEntries.size()]);
 		}
+	}
+
+	protected List<IBuildpathEntry> getDefaultBuildpathEntries() {
+		return ProjectWizardUtils.getDefaultBuildpathEntry(fLocation);
 	}
 
 }

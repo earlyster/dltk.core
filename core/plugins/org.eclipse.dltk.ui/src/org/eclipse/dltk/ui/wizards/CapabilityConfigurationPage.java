@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
+import org.eclipse.dltk.utils.ResourceUtil;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
@@ -154,8 +155,9 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 			boolean defaultsOverrideExistingBuildpath) {
 		if (!defaultsOverrideExistingBuildpath
 				&& jproject.exists()
-				&& jproject.getProject().getFile(
-						IScriptProjectFilenames.BUILDPATH_FILENAME).exists()) {
+				&& jproject.getProject()
+						.getFile(IScriptProjectFilenames.BUILDPATH_FILENAME)
+						.exists()) {
 			defaultEntries = null;
 		}
 		getBuildPathsBlock().init(jproject, defaultEntries);
@@ -249,22 +251,29 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 		}
 
 		int nSteps = 6;
-		monitor
-				.beginTask(
-						NewWizardMessages.ScriptCapabilityConfigurationPage_op_desc_Script,
-						nSteps);
+		monitor.beginTask(
+				NewWizardMessages.ScriptCapabilityConfigurationPage_op_desc_Script,
+				nSteps);
 
 		try {
-			IProject project = getScriptProject().getProject();
-			BuildpathsBlock.addScriptNature(project, new SubProgressMonitor(
-					monitor, 1), getScriptNature());
-			getBuildPathsBlock().configureScriptProject(
-					new SubProgressMonitor(monitor, 5));
+			final IProject project = getScriptProject().getProject();
+			configureNatures(project, new SubProgressMonitor(monitor, 1));
+			configureProject(project, new SubProgressMonitor(monitor, 5));
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException();
 		} finally {
 			monitor.done();
 		}
+	}
+
+	protected void configureNatures(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		ResourceUtil.addNature(project, monitor, getScriptNature());
+	}
+
+	protected void configureProject(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		getBuildPathsBlock().configureScriptProject(monitor);
 	}
 
 	protected void setHelpContext(Control control) {
