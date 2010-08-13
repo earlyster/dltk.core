@@ -97,6 +97,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 *            error code
 	 * @throws CoreException
 	 *             the "abort" core exception
+	 * @since 3.0
 	 */
 	protected CoreException abort(String message, Throwable exception, int code)
 			throws CoreException {
@@ -104,6 +105,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				DLTKLaunchingPlugin.PLUGIN_ID, code, message, exception));
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected CoreException abort(String message, Throwable exception)
 			throws CoreException {
 		throw new CoreException(new Status(IStatus.ERROR,
