@@ -563,8 +563,7 @@ public class BuildpathsBlock {
 			} else {
 				fPathStatus
 						.setWarning(Messages
-								.format(
-										NewWizardMessages.BuildPathsBlock_warning_EntriesMissing,
+								.format(NewWizardMessages.BuildPathsBlock_warning_EntriesMissing,
 										String.valueOf(nEntriesMissing)));
 			}
 		}
@@ -618,6 +617,7 @@ public class BuildpathsBlock {
 		}
 	}
 
+	@Deprecated
 	public static void addScriptNature(IProject project,
 			IProgressMonitor monitor, String nature) throws CoreException {
 		ResourceUtil.addNature(project, monitor, nature);
@@ -640,8 +640,7 @@ public class BuildpathsBlock {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
-		monitor
-				.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_Script);
+		monitor.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_Script);
 		monitor.beginTask("", buildpathEntries.size() * 4 + 4); //$NON-NLS-1$
 		try {
 			IProject project = javaProject.getProject();
@@ -796,8 +795,7 @@ public class BuildpathsBlock {
 								.getActiveWorkbenchShell();
 						String title = NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title;
 						String message = Messages
-								.format(
-										NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description,
+								.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description,
 										oldOutputLocation.toString());
 						MessageDialog dialog = new MessageDialog(sh, title,
 								null, message, MessageDialog.QUESTION,
@@ -839,11 +837,9 @@ public class BuildpathsBlock {
 		IResource initSelection = null;
 		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
 				lp, cp);
-		dialog
-				.setTitle(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_title);
+		dialog.setTitle(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_title);
 		dialog.setValidator(validator);
-		dialog
-				.setMessage(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_description);
+		dialog.setMessage(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_description);
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);
