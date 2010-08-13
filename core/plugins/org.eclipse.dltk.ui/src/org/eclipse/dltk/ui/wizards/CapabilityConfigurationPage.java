@@ -266,11 +266,17 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void configureNatures(IProject project, IProgressMonitor monitor)
 			throws CoreException {
 		ResourceUtil.addNature(project, monitor, getScriptNature());
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void configureProject(IProject project, IProgressMonitor monitor)
 			throws CoreException {
 		getBuildPathsBlock().configureScriptProject(monitor);

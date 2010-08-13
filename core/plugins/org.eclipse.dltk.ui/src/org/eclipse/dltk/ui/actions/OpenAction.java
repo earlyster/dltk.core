@@ -144,6 +144,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @return
 	 * @throws InvocationTargetException
 	 * @throws InterruptedException
+	 * @since 3.0
 	 */
 	protected Object[] resolveElements() throws InvocationTargetException,
 			InterruptedException {
@@ -169,6 +170,9 @@ public class OpenAction extends SelectionDispatchAction {
 		selectAndOpen(elements);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public void selectAndOpen(Object[] elements) {
 		elements = filterElements(elements);
 		if (elements == null || elements.length == 0) {

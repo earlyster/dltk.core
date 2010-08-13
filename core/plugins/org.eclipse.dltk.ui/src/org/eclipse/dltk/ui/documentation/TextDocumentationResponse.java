@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+/**
+ * @since 3.0
+ */
 public class TextDocumentationResponse extends AbstractDocumentationResponse {
 
 	private final String content;

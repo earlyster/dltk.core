@@ -56,7 +56,7 @@ public class HTMLPrinter {
 		}
 	}
 
-	public static void insertPageProlog(StringBuffer buffer, int position,
+	private static void insertPageProlog(StringBuffer buffer, int position,
 			RGB bgRGB, RGB fgRGB, String styleSheet) {
 
 		if (bgRGB == null)

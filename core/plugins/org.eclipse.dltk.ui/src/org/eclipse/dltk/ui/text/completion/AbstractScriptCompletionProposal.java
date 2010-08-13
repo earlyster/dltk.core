@@ -302,6 +302,9 @@ public abstract class AbstractScriptCompletionProposal implements
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void ensureTriggerAtCursorLocation(char trigger) {
 		String replacement = getReplacementString();
 

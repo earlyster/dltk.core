@@ -30,6 +30,9 @@ public class ModelElementArray {
 
 	private final Object[] elements;
 
+	/**
+	 * @since 3.0
+	 */
 	public ModelElementArray(Object[] elements) {
 		Assert.isLegal(elements != null && elements.length > 1);
 		this.elements = elements;
@@ -47,6 +50,7 @@ public class ModelElementArray {
 
 	/**
 	 * @return the elements
+	 * @since 3.0
 	 */
 	public Object[] getElements() {
 		return elements;

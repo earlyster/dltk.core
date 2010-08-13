@@ -44,6 +44,9 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		super.createPageControls(pageContainer);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void initProjectWizard() {
 		for (IWizardPage page : getPages()) {
 			if (page instanceof IProjectWizardPage) {
@@ -203,6 +206,9 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return projectWizardState;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void configureNatures(IProject project, IProgressMonitor monitor)
 			throws CoreException {
 		ResourceUtil.addNature(project, monitor, getScriptNature());

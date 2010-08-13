@@ -53,6 +53,9 @@ public class HTMLUtils {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public static RGB getFgColor() {
 		return FG_COLOR_RGB;
 	}

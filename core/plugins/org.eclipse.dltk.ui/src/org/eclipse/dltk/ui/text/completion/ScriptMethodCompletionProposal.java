@@ -57,6 +57,9 @@ public class ScriptMethodCompletionProposal extends
 		super(proposal, context);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public static interface IReplacementBuffer {
 		void addArgument(int offset, int length);
 
@@ -247,6 +250,9 @@ public class ScriptMethodCompletionProposal extends
 		return replacementBuffer.toString();
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected void computeReplacement(IReplacementBuffer buffer) {
 		if (!hasArgumentList()) {
 			buffer.append(super.computeReplacementString());

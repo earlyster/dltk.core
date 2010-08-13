@@ -675,6 +675,9 @@ public class ProjectCreator {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected List<IBuildpathEntry> getDefaultBuildpathEntries() {
 		return ProjectWizardUtils.getDefaultBuildpathEntry(fLocation);
 	}

@@ -84,8 +84,9 @@ public class ScriptAnnotationIterator implements Iterator<Annotation> {
 		return fNext != null;
 	}
 
-	/*
+	/**
 	 * @see Iterator#next()
+	 * @since 3.0
 	 */
 	public Annotation next() {
 		try {

@@ -15,6 +15,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
+/**
+ * @since 3.0
+ */
 public interface IOpenDelegate {
 
 	boolean supports(Object object);

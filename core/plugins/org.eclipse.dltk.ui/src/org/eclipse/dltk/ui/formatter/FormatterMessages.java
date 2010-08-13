@@ -64,6 +64,9 @@ public class FormatterMessages extends NLS {
 	public static String FormatterPreferencePage_settingsLink;
 	public static String ScriptFormattingStrategy_formattingError;
 	public static String ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError;
+	/**
+	 * @since 3.0
+	 */
 	public static String ScriptFormattingStrategy_unableToFormat;
 	public static String ScriptFormattingStrategy_unexpectedFormatterError;
 	static {

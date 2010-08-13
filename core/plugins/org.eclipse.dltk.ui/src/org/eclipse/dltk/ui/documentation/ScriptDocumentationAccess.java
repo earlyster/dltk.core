@@ -149,6 +149,7 @@ public class ScriptDocumentationAccess {
 	 *         found.
 	 * @throws ModelException
 	 *             is thrown when the elements documentation can not be accessed
+	 * @since 3.0
 	 */
 	public static Reader getHTMLContentReader(String nature,
 			final Object member, final boolean allowInherited,
