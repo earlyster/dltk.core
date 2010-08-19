@@ -175,7 +175,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		}
 		if (methodInfo.parameterTypes != null) {
 			for (String type : methodInfo.parameterTypes) {
-				this.indexer.addTypeReference(type);
+				if (type != null) {
+					this.indexer.addTypeReference(type);
+				}
 			}
 		}
 		this.methodDepth++;
