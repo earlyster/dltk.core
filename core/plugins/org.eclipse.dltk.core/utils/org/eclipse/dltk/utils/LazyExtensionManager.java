@@ -62,6 +62,10 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			return configurationElement.getAttribute(name);
 		}
 
+		public int getIntAttribute(String name) {
+			return parseInt(getAttribute(name));
+		}
+
 		/**
 		 * @since 2.0
 		 */
@@ -263,11 +267,17 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			IConfigurationElement[] confElements) {
 		for (int i = 0; i < confElements.length; i++) {
 			final IConfigurationElement confElement = confElements[i];
-			final Descriptor<E> descriptor = createDescriptor(confElement);
-			if (isValidDescriptor(descriptor)) {
-				extensions.add(descriptor);
+			if (isValidElement(confElement)) {
+				final Descriptor<E> descriptor = createDescriptor(confElement);
+				if (isValidDescriptor(descriptor)) {
+					extensions.add(descriptor);
+				}
 			}
 		}
+	}
+
+	protected boolean isValidElement(IConfigurationElement confElement) {
+		return true;
 	}
 
 	/**
