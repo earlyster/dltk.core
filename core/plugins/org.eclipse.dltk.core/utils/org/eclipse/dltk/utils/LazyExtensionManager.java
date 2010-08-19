@@ -62,6 +62,9 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			return configurationElement.getAttribute(name);
 		}
 
+		/**
+		 * @since 3.0
+		 */
 		public int getIntAttribute(String name) {
 			return parseInt(getAttribute(name));
 		}
@@ -276,6 +279,9 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected boolean isValidElement(IConfigurationElement confElement) {
 		return true;
 	}
