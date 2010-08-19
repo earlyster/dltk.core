@@ -549,7 +549,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				context.setProperty(
 						ScriptFormattingContextProperties.CONTEXT_FORMATTER_ID,
 						factory.getId());
-				final Map preferences = factory
+				final Map<String, String> preferences = factory
 						.retrievePreferences(new PreferencesLookupDelegate(
 								project));
 				context.setProperty(
@@ -1377,7 +1377,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
-	public Object getAdapter(Class required) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class required) {
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null)
 				fOutlinePage = createOutlinePage();
@@ -1424,7 +1424,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	protected void doSelectionChanged(SelectionChangedEvent event) {
 		ISourceReference reference = null;
 		ISelection selection = event.getSelection();
-		Iterator iter = ((IStructuredSelection) selection).iterator();
+		Iterator<?> iter = ((IStructuredSelection) selection).iterator();
 		while (iter.hasNext()) {
 			Object o = iter.next();
 			if (o instanceof ISourceReference) {
@@ -1634,9 +1634,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		IAnnotationModel model = getDocumentProvider().getAnnotationModel(
 				getEditorInput());
-		Iterator e = new ScriptAnnotationIterator(model, true, true);
+		Iterator<Annotation> e = new ScriptAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
-			Annotation a = (Annotation) e.next();
+			Annotation a = e.next();
 			if ((a instanceof IScriptAnnotation)
 					&& ((IScriptAnnotation) a).hasOverlay()
 					|| !isNavigationTarget(a))
@@ -1719,9 +1719,10 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	private Annotation getAnnotation(int offset, int length) {
 		IAnnotationModel model = getDocumentProvider().getAnnotationModel(
 				getEditorInput());
-		Iterator e = new ScriptAnnotationIterator(model, true, false);
+		Iterator<Annotation> e = new ScriptAnnotationIterator(model, true,
+				false);
 		while (e.hasNext()) {
-			Annotation a = (Annotation) e.next();
+			Annotation a = e.next();
 			Position p = model.getPosition(a);
 			if (p != null && p.overlapsWith(offset, length))
 				return a;
