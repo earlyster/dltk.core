@@ -23,6 +23,14 @@ public class ScriptFormattingContextProperties {
 	public static final String CONTEXT_PROJECT = "formatting.context.project"; //$NON-NLS-1$
 
 	/**
+	 * Property key of the source module property. The property must be
+	 * <code>org.eclipse.dltk.core.ISourceModule</code>.
+	 * <p>
+	 * Value: <code>"formatting.context.sourceModule"</code>
+	 */
+	public static final String MODULE = "formatting.context.sourceModule"; //$NON-NLS-1$
+
+	/**
 	 * Property key of the formatter id property. The property must be of the
 	 * type <code>java.lang.String</code>.
 	 * <p>

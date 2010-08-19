@@ -537,9 +537,20 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			return null;
 		}
 
+		private ISourceModule getSourceModule() {
+			final IModelElement input = getInputModelElement();
+			if (input != null) {
+				return (ISourceModule) input
+						.getAncestor(IModelElement.SOURCE_MODULE);
+			}
+			return null;
+		}
+
 		@Override
 		public IFormattingContext createFormattingContext() {
 			final IFormattingContext context = super.createFormattingContext();
+			context.setProperty(ScriptFormattingContextProperties.MODULE,
+					getSourceModule());
 			final IProject project = getProject();
 			context.setProperty(
 					ScriptFormattingContextProperties.CONTEXT_PROJECT, project);

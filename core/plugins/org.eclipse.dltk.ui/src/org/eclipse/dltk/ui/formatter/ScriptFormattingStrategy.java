@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -42,6 +43,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	private static class FormatJob {
 		final IDocument document;
 		final TypedPosition partition;
+		final ISourceModule module;
 		final IProject project;
 		final String formatterId;
 
@@ -51,9 +53,10 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 		 * @param project
 		 */
 		public FormatJob(IDocument document, TypedPosition partition,
-				IProject project, String formatterId) {
+				ISourceModule module, IProject project, String formatterId) {
 			this.document = document;
 			this.partition = partition;
+			this.module = module;
 			this.project = project;
 			this.formatterId = formatterId;
 		}
@@ -106,9 +109,15 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					final Map<String, String> prefs = getPreferences();
 					final IScriptFormatter formatter = formatterFactory
 							.createFormatter(lineDelimiter, prefs);
-					if (formatter instanceof IScriptFormatterExtension) {
+					if (job.project != null
+							&& formatter instanceof IScriptFormatterExtension) {
 						((IScriptFormatterExtension) formatter)
 								.initialize(job.project);
+					}
+					if (job.module != null
+							&& formatter instanceof IScriptFormatterExtension2) {
+						((IScriptFormatterExtension2) formatter)
+								.initialize(job.module);
 					}
 					final int indentationLevel = formatter
 							.detectIndentationLevel(document, offset);
@@ -177,11 +186,14 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 				.getProperty(FormattingContextProperties.CONTEXT_MEDIUM);
 		final TypedPosition partition = (TypedPosition) context
 				.getProperty(FormattingContextProperties.CONTEXT_PARTITION);
+		final ISourceModule module = (ISourceModule) context
+				.getProperty(ScriptFormattingContextProperties.MODULE);
 		final IProject project = (IProject) context
 				.getProperty(ScriptFormattingContextProperties.CONTEXT_PROJECT);
 		final String formatterId = (String) context
 				.getProperty(ScriptFormattingContextProperties.CONTEXT_FORMATTER_ID);
-		fJobs.addLast(new FormatJob(document, partition, project, formatterId));
+		fJobs.addLast(new FormatJob(document, partition, module, project,
+				formatterId));
 	}
 
 	@Override
