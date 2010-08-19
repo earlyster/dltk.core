@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.formatter.internal.ScriptFormattingContextProperties;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;

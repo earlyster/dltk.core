@@ -13,6 +13,9 @@ package org.eclipse.dltk.ui.formatter;
 
 import org.eclipse.dltk.core.ISourceModule;
 
+/**
+ * @since 3.0
+ */
 public interface IScriptFormatterExtension2 extends IScriptFormatter {
 
 	void initialize(ISourceModule module);

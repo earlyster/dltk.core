@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.ui.formatter;
+package org.eclipse.dltk.ui.formatter.internal;
 
 public class ScriptFormattingContextProperties {
 

@@ -79,7 +79,7 @@ import org.eclipse.dltk.ui.actions.SearchActionGroup;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
-import org.eclipse.dltk.ui.formatter.ScriptFormattingContextProperties;
+import org.eclipse.dltk.ui.formatter.internal.ScriptFormattingContextProperties;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.text.folding.FoldingProviderManager;
