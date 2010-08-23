@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.eclipse.dltk.core</groupId>
+  <artifactId>core</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>features/org.eclipse.dltk.core-feature</module>
+    <module>plugins/org.eclipse.dltk</module>
+    <module>plugins/org.eclipse.dltk.console</module>
+    <module>plugins/org.eclipse.dltk.console.ui</module>
+    <module>plugins/org.eclipse.dltk.core</module>
+    <module>plugins/org.eclipse.dltk.core.doc.isv</module>
+    <module>plugins/org.eclipse.dltk.core.index</module>
+    <module>plugins/org.eclipse.dltk.core.index.sql</module>
+    <module>plugins/org.eclipse.dltk.core.index.sql.h2</module>
+    <module>plugins/org.eclipse.dltk.core.tools.ui</module>
+    <module>plugins/org.eclipse.dltk.debug</module>
+    <module>plugins/org.eclipse.dltk.debug.ui</module>
+    <module>plugins/org.eclipse.dltk.formatter</module>
+    <module>plugins/org.eclipse.dltk.launching</module>
+    <module>plugins/org.eclipse.dltk.testing</module>
+    <module>plugins/org.eclipse.dltk.ui</module>
+    <module>plugins/org.eclipse.dltk.validators.core</module>
+    <module>plugins/org.eclipse.dltk.validators.externalchecker</module>
+    <module>plugins/org.eclipse.dltk.validators.ui</module>
+  </modules>
+
+	<repositories>
+		<repository>
+			<id>helios</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/helios/</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>0.9.0</version>
+				<extensions>true</extensions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>0.9.0</version>
+				<configuration>
+					<resolver>p2</resolver>
+				</configuration>
+			</plugin>
+			
+		</plugins>
+	</build>
+</project>
