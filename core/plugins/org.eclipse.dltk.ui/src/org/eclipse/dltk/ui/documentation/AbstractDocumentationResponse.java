@@ -26,6 +26,10 @@ public abstract class AbstractDocumentationResponse implements
 		this.object = object;
 	}
 
+	public String getTitle() {
+		return null;
+	}
+
 	public Object getObject() {
 		return object;
 	}

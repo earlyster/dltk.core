@@ -25,6 +25,14 @@ import java.net.URL;
 public interface IDocumentationResponse {
 
 	/**
+	 * Returns the title for the this documentation if available or
+	 * <code>null</code> otherwise
+	 * 
+	 * @return
+	 */
+	String getTitle();
+
+	/**
 	 * Returns the object this documentation applies to
 	 * 
 	 * @return

@@ -21,14 +21,25 @@ import java.io.StringReader;
 public class TextDocumentationResponse extends AbstractDocumentationResponse {
 
 	private final String content;
+	private final String title;
 
 	public TextDocumentationResponse(Object object, String content) {
-		super(content);
+		this(object, content, null);
+	}
+
+	public TextDocumentationResponse(Object object, String content, String title) {
+		super(object);
 		this.content = content;
+		this.title = title;
 	}
 
 	public Reader getReader() throws IOException {
 		return new StringReader(content);
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
 	}
 
 }
