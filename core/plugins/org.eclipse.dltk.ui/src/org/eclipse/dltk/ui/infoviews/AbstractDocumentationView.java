@@ -138,11 +138,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			setText(InfoViewMessages.SelectAllAction_label);
 			setToolTipText(InfoViewMessages.SelectAllAction_tooltip);
 			setDescription(InfoViewMessages.SelectAllAction_description);
-			PlatformUI
-					.getWorkbench()
-					.getHelpSystem()
-					.setHelp(this,
-							IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
+					IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
 
 		/**
@@ -223,8 +220,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		 */
 		public ISelection getSelection() {
 			if (fControl instanceof StyledText) {
-				IDocument document = new Document(
-						((StyledText) fControl).getSelectionText());
+				IDocument document = new Document(((StyledText) fControl)
+						.getSelectionText());
 				return new TextSelection(document, 0, document.getLength());
 			} else {
 				// FIXME: see
@@ -269,8 +266,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 						.openError(parent.getShell(), title, message,
 								toggleMessage, false, null, null);
 				if (dialog.getReturnCode() == Window.OK)
-					store.setValue(DO_NOT_WARN_PREFERENCE_KEY,
-							dialog.getToggleState());
+					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog
+							.getToggleState());
 			}
 			fIsUsingBrowserWidget = false;
 		}
@@ -493,29 +490,23 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		final List<String> nodocs = new ArrayList<String>();
 		for (int i = 0; i < result.length; i++) {
 			final Object member = result[i];
-			try {
-				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
-						getNature(), member, true, true);
-				if (reader != null) {
-					buffer.append("<b>"); //$NON-NLS-1$
-					buffer.append(getInfoText(member));
-					buffer.append("</b>"); //$NON-NLS-1$
-					HTMLPrinter.addParagraph(buffer, reader);
+			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
+					getNature(), member, true, true);
+			if (reader != null) {
+				buffer.append("<b>"); //$NON-NLS-1$
+				buffer.append(getInfoText(member));
+				buffer.append("</b>"); //$NON-NLS-1$
+				HTMLPrinter.addParagraph(buffer, reader);
+			} else {
+				if (member instanceof IModelElement) {
+					nodocs.add(ScriptElementLabels.getDefault()
+							.getElementLabel(
+									(IModelElement) member,
+									LABEL_FLAGS
+											| ScriptElementLabels.APPEND_FILE));
 				} else {
-					if (member instanceof IModelElement) {
-						nodocs.add(ScriptElementLabels
-								.getDefault()
-								.getElementLabel(
-										(IModelElement) member,
-										LABEL_FLAGS
-												| ScriptElementLabels.APPEND_FILE));
-					} else {
-						// TODO
-					}
+					// TODO
 				}
-			} catch (ModelException ex) {
-				DLTKUIPlugin.log(ex);
-				return null;
 			}
 		}
 		if (!nodocs.isEmpty()) {
@@ -564,21 +555,14 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		if (curr instanceof IMember) {
 			IMember member = (IMember) curr;
 			// HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
-			try {
-				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
-						getNature(), member, true, true);
-				if (reader != null) {
-					HTMLPrinter.addParagraph(buffer, reader);
-				} else {
-					// Provide hint why there's no Javadoc
-					HTMLPrinter
-							.addParagraph(
-									buffer,
-									InfoViewMessages.ScriptdocView_noAttachedInformation);
-				}
-			} catch (ModelException ex) {
-				DLTKUIPlugin.log(ex);
-				return null;
+			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
+					getNature(), member, true, true);
+			if (reader != null) {
+				HTMLPrinter.addParagraph(buffer, reader);
+			} else {
+				// Provide hint why there's no Javadoc
+				HTMLPrinter.addParagraph(buffer,
+						InfoViewMessages.ScriptdocView_noAttachedInformation);
 			}
 		}
 		return addPrologeEpilog(buffer);

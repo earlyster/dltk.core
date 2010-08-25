@@ -9,8 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text.hover;
 
+import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
@@ -19,7 +19,10 @@ import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.IInformationControlExtension4;
 import org.eclipse.dltk.ui.ScriptElementLabels;
+import org.eclipse.dltk.ui.documentation.IDocumentationResponse;
+import org.eclipse.dltk.ui.documentation.IScriptDocumentationTitleAdapter;
 import org.eclipse.dltk.ui.documentation.ScriptDocumentationAccess;
+import org.eclipse.dltk.ui.documentation.TextDocumentationResponse;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -93,12 +96,12 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 						Shell parent) {
 					if (BrowserInformationControl.isAvailable(parent))
 						return new BrowserInformationControl(parent, SWT.TOOL
-								| SWT.NO_TRIM, SWT.NONE,
-								EditorsUI.getTooltipAffordanceString());
+								| SWT.NO_TRIM, SWT.NONE, EditorsUI
+								.getTooltipAffordanceString());
 					else
 						return new DefaultInformationControl(parent, SWT.NONE,
-								new HTMLTextPresenter(true),
-								EditorsUI.getTooltipAffordanceString());
+								new HTMLTextPresenter(true), EditorsUI
+										.getTooltipAffordanceString());
 				}
 
 				public boolean canReuse(IInformationControl control) {
@@ -125,17 +128,13 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 
 		boolean hasContents = false;
 		if (nResults > 1) {
-			HTMLPrinter.addSmallHeader(buffer, getInfoText(result[0]));
+			HTMLPrinter
+					.addSmallHeader(buffer, titleAdapter.getTitle(result[0]));
 			HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
 			for (int i = 0; i < result.length; i++) {
 				Object element = result[i];
-				Reader reader;
-				try {
-					reader = ScriptDocumentationAccess.getHTMLContentReader(
-							nature, element, true, true);
-				} catch (ModelException ex) {
-					return null;
-				}
+				Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
+						nature, element, true, true);
 				if (reader == null) {
 					continue;
 				}
@@ -147,21 +146,22 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 			}
 		} else {
 			Object element = result[0];
-			HTMLPrinter.addSmallHeader(buffer, getInfoText(element));
-			Reader reader;
-			try {
-				reader = ScriptDocumentationAccess.getHTMLContentReader(nature,
-						element, true, true);
-			} catch (ModelException ex) {
-				return null;
-			}
+			IDocumentationResponse response = ScriptDocumentationAccess
+					.getDocumentation(nature, element, titleAdapter);
 			// Provide hint why there's no doc
-			if (reader == null) {
-				reader = new StringReader(
+			if (response == null) {
+				response = new TextDocumentationResponse(
+						element,
+						titleAdapter.getTitle(element),
 						ScriptHoverMessages.ScriptdocHover_noAttachedInformation);
 			}
-			HTMLPrinter.addParagraph(buffer, reader);
-			hasContents = true;
+			try {
+				HTMLPrinter.addSmallHeader(buffer, response.getTitle());
+				HTMLPrinter.addParagraph(buffer, response.getReader());
+				hasContents = true;
+			} catch (IOException e) {
+				return null;
+			}
 			/*
 			 * else if (curr.getElementType() == IModelElement.LOCAL_VARIABLE ||
 			 * curr.getElementType() == IModelElement.TYPE_PARAMETER) {
@@ -199,16 +199,18 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		return null;
 	}
 
-	private String getInfoText(Object element) {
-		if (element instanceof IModelElement) {
-			IModelElement member = (IModelElement) element;
-			long flags = member.getElementType() == IModelElement.FIELD ? LOCAL_VARIABLE_FLAGS
-					: LABEL_FLAGS;
-			String label = ScriptElementLabels.getDefault().getElementLabel(
-					member, flags);
-			return TextUtils.escapeHTML(label);
-		} else {
-			return null;
+	private final IScriptDocumentationTitleAdapter titleAdapter = new IScriptDocumentationTitleAdapter() {
+		public String getTitle(Object element) {
+			if (element instanceof IModelElement) {
+				IModelElement member = (IModelElement) element;
+				long flags = member.getElementType() == IModelElement.FIELD ? LOCAL_VARIABLE_FLAGS
+						: LABEL_FLAGS;
+				String label = ScriptElementLabels.getDefault()
+						.getElementLabel(member, flags);
+				return TextUtils.escapeHTML(label);
+			} else {
+				return null;
+			}
 		}
-	}
+	};
 }

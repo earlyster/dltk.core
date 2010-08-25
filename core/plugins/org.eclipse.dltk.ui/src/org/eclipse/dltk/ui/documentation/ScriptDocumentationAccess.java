@@ -97,6 +97,10 @@ public class ScriptDocumentationAccess {
 		Reader getInfo(IScriptDocumentationProvider provider);
 	}
 
+	private static interface Operation2 {
+		IDocumentationResponse getInfo(IScriptDocumentationProvider provider);
+	}
+
 	private static final int BUFF_SIZE = 2048;
 
 	private static Reader merge(String nature, Operation operation) {
@@ -131,6 +135,17 @@ public class ScriptDocumentationAccess {
 		return null;
 	}
 
+	private static IDocumentationResponse merge(String nature,
+			Operation2 operation) {
+		for (IScriptDocumentationProvider p : getProviders(nature)) {
+			final IDocumentationResponse response = operation.getInfo(p);
+			if (response != null) {
+				return response;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Gets a reader for an IMember documentation. Content are found using
 	 * documentation documentationProviders, contributed via extension point.
@@ -153,7 +168,7 @@ public class ScriptDocumentationAccess {
 	 */
 	public static Reader getHTMLContentReader(String nature,
 			final Object member, final boolean allowInherited,
-			final boolean allowExternal) throws ModelException {
+			final boolean allowExternal) {
 		return merge(nature, new Operation() {
 			public Reader getInfo(IScriptDocumentationProvider provider) {
 				if (member instanceof IMember) {
@@ -164,6 +179,25 @@ public class ScriptDocumentationAccess {
 					final IDocumentationResponse response = ext
 							.getDocumentationFor(member);
 					return DocumentationUtils.getReader(response);
+				} else {
+					return null;
+				}
+			}
+		});
+	}
+
+	public static IDocumentationResponse getDocumentation(String nature,
+			final Object member, final Object context) {
+		return merge(nature, new Operation2() {
+			public IDocumentationResponse getInfo(
+					IScriptDocumentationProvider provider) {
+				if (member instanceof IMember) {
+					final IMember m = (IMember) member;
+					return DocumentationUtils.wrap(member, context, provider
+							.getInfo(m, true, true));
+				} else if (provider instanceof IScriptDocumentationProviderExtension2) {
+					final IScriptDocumentationProviderExtension2 ext = (IScriptDocumentationProviderExtension2) provider;
+					return ext.getDocumentationFor(member);
 				} else {
 					return null;
 				}

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.utils.AdaptUtils;
 
 /**
  * @since 2.0
@@ -37,6 +38,40 @@ public class DocumentationUtils {
 				if (DLTKCore.DEBUG)
 					e.printStackTrace();
 			}
+		}
+		return null;
+	}
+
+	private static String readAll(Reader rd) {
+		final StringBuilder buffer = new StringBuilder();
+		char[] readBuffer = new char[2048];
+		try {
+			int n = rd.read(readBuffer);
+			while (n > 0) {
+				buffer.append(readBuffer, 0, n);
+				n = rd.read(readBuffer);
+			}
+			return buffer.toString();
+		} catch (IOException x) {
+		}
+		return null;
+	}
+
+	/**
+	 * @param member
+	 * @param context
+	 * @param reader
+	 * @return
+	 */
+	public static IDocumentationResponse wrap(Object member, Object context,
+			Reader reader) {
+		if (reader != null) {
+			final IScriptDocumentationTitleAdapter titleAdapter = AdaptUtils
+					.getAdapter(context, IScriptDocumentationTitleAdapter.class);
+			return new TextDocumentationResponse(
+					member,
+					titleAdapter != null ? titleAdapter.getTitle(member) : null,
+					readAll(reader));
 		}
 		return null;
 	}

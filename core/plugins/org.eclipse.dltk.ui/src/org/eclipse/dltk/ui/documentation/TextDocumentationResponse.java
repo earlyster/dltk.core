@@ -24,10 +24,10 @@ public class TextDocumentationResponse extends AbstractDocumentationResponse {
 	private final String title;
 
 	public TextDocumentationResponse(Object object, String content) {
-		this(object, content, null);
+		this(object, null, content);
 	}
 
-	public TextDocumentationResponse(Object object, String content, String title) {
+	public TextDocumentationResponse(Object object, String title, String content) {
 		super(object);
 		this.content = content;
 		this.title = title;
