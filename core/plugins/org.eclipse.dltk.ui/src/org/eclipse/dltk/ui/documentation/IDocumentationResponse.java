@@ -29,6 +29,7 @@ public interface IDocumentationResponse {
 	 * <code>null</code> otherwise
 	 * 
 	 * @return
+	 * @since 3.0
 	 */
 	String getTitle();
 

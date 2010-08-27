@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.documentation;
 
+/**
+ * @since 3.0
+ */
 public interface IScriptDocumentationTitleAdapter {
 
 	String getTitle(Object element);

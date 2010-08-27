@@ -186,6 +186,9 @@ public class ScriptDocumentationAccess {
 		});
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public static IDocumentationResponse getDocumentation(String nature,
 			final Object member, final Object context) {
 		return merge(nature, new Operation2() {
