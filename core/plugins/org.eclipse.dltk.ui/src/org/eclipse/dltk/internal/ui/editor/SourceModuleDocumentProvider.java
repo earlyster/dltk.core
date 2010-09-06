@@ -599,17 +599,20 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 		protected Position createPositionFromProblem(IProblem problem) {
 			int start = problem.getSourceStart();
-			if (start < 0)
-				return null;
 			int end = problem.getSourceEnd();
-			if (end == 0 && start == 0) {
-				return new Position(0, 0);
-			}
+			if (start <= 0 && end <= 0)
+				return new Position(0);
+			if (start < 0)
+				return new Position(end);
+			if (end < 0)
+				return new Position(start);
 			int length = end - start;
 			if (length < 0)
 				return null;
-			int documentLength = fDocument.getLength();
-			if(start + length > documentLength){
+			final int documentLength = fDocument.getLength();
+			if (start > documentLength)
+				start = documentLength;
+			if (start + length > documentLength) {
 				length = documentLength - start;
 			}
 			return new Position(start, length);
