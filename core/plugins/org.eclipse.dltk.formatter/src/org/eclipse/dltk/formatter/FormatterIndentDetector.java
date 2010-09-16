@@ -40,7 +40,7 @@ public class FormatterIndentDetector implements IFormatterWriter {
 	}
 
 	public void write(IFormatterContext context, int startOffset, int endOffset) {
-		if (!indentDetected && startOffset >= offset) {
+		if (!indentDetected && endOffset >= offset) {
 			level = context.getIndent();
 			indentDetected = true;
 		}
