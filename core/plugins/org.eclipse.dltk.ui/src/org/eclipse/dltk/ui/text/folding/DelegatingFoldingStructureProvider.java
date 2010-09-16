@@ -633,7 +633,7 @@ public class DelegatingFoldingStructureProvider implements
 		return EditorUtility.getEditorInputModelElement(fEditor, false);
 	}
 
-	private void update(FoldingStructureComputationContext ctx) {
+	private synchronized void update(FoldingStructureComputationContext ctx) {
 		if (ctx == null)
 			return;
 		Map<Annotation, Position> additions = new HashMap<Annotation, Position>();
@@ -705,8 +705,8 @@ public class DelegatingFoldingStructureProvider implements
 			final Requestor requestor = new Requestor(content, ctx);
 			for (IFoldingBlockProvider provider : blockProviders) {
 				provider.setRequestor(requestor);
-				requestor.lineCountDelta = Math.max(1, provider
-						.getMinimalLineCount() - 1);
+				requestor.lineCountDelta = Math.max(1,
+						provider.getMinimalLineCount() - 1);
 				provider.computeFoldableBlocks(content);
 				provider.setRequestor(null);
 			}
@@ -788,8 +788,8 @@ public class DelegatingFoldingStructureProvider implements
 	 * @return a folding position corresponding to <code>aligned</code>
 	 */
 	protected static final Position createMemberPosition(IRegion aligned) {
-		return new ScriptElementPosition(aligned.getOffset(), aligned
-				.getLength());
+		return new ScriptElementPosition(aligned.getOffset(),
+				aligned.getLength());
 	}
 
 	/**
@@ -918,8 +918,8 @@ public class DelegatingFoldingStructureProvider implements
 				}
 			}
 		}
-		model.modifyAnnotations(null, null, modified
-				.toArray(new Annotation[modified.size()]));
+		model.modifyAnnotations(null, null,
+				modified.toArray(new Annotation[modified.size()]));
 	}
 
 	protected final IModelElement getModuleElement() {
@@ -1055,9 +1055,9 @@ public class DelegatingFoldingStructureProvider implements
 				if (position == null) {
 					return;
 				}
-				ctx.addProjectionRange(new ScriptProjectionAnnotation(ctx
-						.allowCollapsing()
-						&& collapse, kind, element), position);
+				ctx.addProjectionRange(
+						new ScriptProjectionAnnotation(ctx.allowCollapsing()
+								&& collapse, kind, element), position);
 			} catch (StringIndexOutOfBoundsException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
