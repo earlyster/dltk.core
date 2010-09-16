@@ -633,7 +633,7 @@ public class DelegatingFoldingStructureProvider implements
 		return EditorUtility.getEditorInputModelElement(fEditor, false);
 	}
 
-	private void update(FoldingStructureComputationContext ctx) {
+	private synchronized void update(FoldingStructureComputationContext ctx) {
 		if (ctx == null)
 			return;
 		Map<Annotation, Position> additions = new HashMap<Annotation, Position>();
