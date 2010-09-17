@@ -63,8 +63,7 @@ public class CompletionProposalLabelProvider {
 	 * @return the list of comma-separated parameters suitable for display
 	 */
 	public String createParameterList(CompletionProposal methodProposal) {
-		Assert
-				.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
+		Assert.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
 		return appendParameterList(new StringBuffer(), methodProposal)
 				.toString();
 	}
@@ -327,9 +326,7 @@ public class CompletionProposalLabelProvider {
 		case CompletionProposal.METHOD_NAME_REFERENCE:
 		case CompletionProposal.METHOD_REF:
 		case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-			descriptor = ScriptElementImageProvider
-					.getMethodImageDescriptor(proposal.getFlags());
-			break;
+			return createMethodImageDescriptor(proposal);
 		case CompletionProposal.TYPE_REF:
 			descriptor = DLTKPluginImages.DESC_OBJS_CLASSALT;
 			break;
@@ -370,25 +367,25 @@ public class CompletionProposalLabelProvider {
 
 	public ImageDescriptor createMethodImageDescriptor(
 			CompletionProposal proposal) {
-		final int flags = proposal.getFlags();
-		return decorateImageDescriptor(ScriptElementImageProvider
-				.getMethodImageDescriptor(flags), proposal);
+		return decorateImageDescriptor(
+				ScriptElementImageProvider.getMethodImageDescriptor(proposal
+						.getFlags()), proposal);
 	}
 
 	protected ImageDescriptor createTypeImageDescriptor(
 			CompletionProposal proposal) {
-		final int flags = proposal.getFlags();
 		// boolean isInterfaceOrAnnotation= Flags.isInterface(flags) ||
 		// Flags.isAnnotation(flags);
-		return decorateImageDescriptor(ScriptElementImageProvider
-				.getTypeImageDescriptor(flags, false), proposal);
+		return decorateImageDescriptor(
+				ScriptElementImageProvider.getTypeImageDescriptor(
+						proposal.getFlags(), false), proposal);
 	}
 
 	protected ImageDescriptor createFieldImageDescriptor(
 			CompletionProposal proposal) {
-		final int flags = proposal.getFlags();
-		return decorateImageDescriptor(ScriptElementImageProvider
-				.getFieldImageDescriptor(flags), proposal);
+		return decorateImageDescriptor(
+				ScriptElementImageProvider.getFieldImageDescriptor(proposal
+						.getFlags()), proposal);
 	}
 
 	protected ImageDescriptor createLocalImageDescriptor(

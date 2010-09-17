@@ -347,6 +347,9 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_METHOD_PRIVATE= createManagedFromKey(T_OBJ, IMG_METHOD_PRIVATE);
 	public static final ImageDescriptor DESC_METHOD_DEFAULT = createManagedFromKey(T_OBJ, IMG_METHOD_DEFAULT);
 	
+	public static final ImageDescriptor DESC_OVR_DEPRECATED = createUnManagedCached(
+			T_OVR, "deprecated.gif"); //$NON-NLS-1$
+
 	private static final class CachedImageDescriptor extends ImageDescriptor {
 		private ImageDescriptor fDescriptor;
 		private ImageData fData;
