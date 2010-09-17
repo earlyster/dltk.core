@@ -31,7 +31,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 public class ScriptCommentScanner extends AbstractScriptScanner {
 
-	private final String[] fProperties;
 	private final String fTodoToken;
 	private final String fDefaultTokenProperty;
 
@@ -94,8 +93,9 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			Assert.isNotNull(token);
 
 			super.addWord(word, token);
-			fUppercaseWords.put(new CombinedWordRule.CharacterBuffer(word
-					.toUpperCase()), token);
+			fUppercaseWords.put(
+					new CombinedWordRule.CharacterBuffer(word.toUpperCase()),
+					token);
 		}
 
 		@Override
@@ -150,7 +150,6 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			boolean initializeAutomatically) {
 		super(manager, store);
 
-		fProperties = new String[] { comment, todoTag };
 		fTodoToken = todoTag;
 		fDefaultTokenProperty = comment;
 
@@ -162,23 +161,28 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 
 	@Override
 	protected String[] getTokenProperties() {
-		return fProperties;
+		return new String[] { fDefaultTokenProperty, fTodoToken };
+	}
+
+	protected Token getDefaultToken() {
+		return getToken(fDefaultTokenProperty);
+	}
+
+	protected Token getTodoToken() {
+		return getToken(fTodoToken);
 	}
 
 	@Override
 	protected List<IRule> createRules() {
-		IToken defaultToken = getToken(fDefaultTokenProperty);
-		setDefaultReturnToken(defaultToken);
-
+		setDefaultReturnToken(getDefaultToken());
 		List<IRule> list = new ArrayList<IRule>();
 		list.add(createTodoRule());
-
 		return list;
 	}
 
 	protected IRule createTodoRule() {
 		CombinedWordRule combinedWordRule = new CombinedWordRule(
-				new ScriptIdentifierDetector(), getToken(fDefaultTokenProperty));
+				createIdentifierDetector(), getDefaultToken());
 
 		List<CombinedWordRule.WordMatcher> matchers = createMatchers();
 		if (matchers.size() > 0) {
@@ -190,6 +194,10 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		return combinedWordRule;
 	}
 
+	protected IWordDetector createIdentifierDetector() {
+		return new ScriptIdentifierDetector();
+	}
+
 	/**
 	 * Creates a list of word matchers.
 	 * 
@@ -197,17 +205,13 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 */
 	protected List<CombinedWordRule.WordMatcher> createMatchers() {
 		List<CombinedWordRule.WordMatcher> list = new ArrayList<CombinedWordRule.WordMatcher>();
-
-		boolean isCaseSensitive = preferences.isCaseSensitive();
 		String[] tasks = preferences.getTagNames();
-
-		if (tasks != null) {
-			fTaskTagMatcher = new TaskTagMatcher(getToken(fTodoToken));
+		if (tasks != null && tasks.length != 0) {
+			fTaskTagMatcher = new TaskTagMatcher(getTodoToken());
 			fTaskTagMatcher.addTaskTags(tasks);
-			fTaskTagMatcher.setCaseSensitive(isCaseSensitive);
+			fTaskTagMatcher.setCaseSensitive(preferences.isCaseSensitive());
 			list.add(fTaskTagMatcher);
 		}
-
 		return list;
 	}
 
