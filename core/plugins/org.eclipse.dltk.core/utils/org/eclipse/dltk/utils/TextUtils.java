@@ -230,9 +230,9 @@ public abstract class TextUtils {
 				lineOffsets.add(begin);
 				delimiters.add(lastLineDelimiter);
 			}
-			return new DefaultSourceLineTracker(contentEnd, lineOffsets
-					.toArray(), delimiters
-					.toArray(new String[delimiters.size()]));
+			return new DefaultSourceLineTracker(contentEnd,
+					lineOffsets.toArray(),
+					delimiters.toArray(new String[delimiters.size()]));
 		}
 
 	}
@@ -316,7 +316,7 @@ public abstract class TextUtils {
 		}
 
 		public int getLineOffset(int line) {
-			if (line < 0 && line > lineOffsets.length) {
+			if (line < 0 || line > lineOffsets.length) {
 				return WRONG_OFFSET;
 			}
 			if (line == lineOffsets.length) {
