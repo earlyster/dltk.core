@@ -9,10 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-import java.util.Locale;
-
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-
+import org.eclipse.core.runtime.CoreException;
 
 /*
  * Factory used from inside the compiler to build the actual problems
@@ -22,22 +21,19 @@ import org.eclipse.core.resources.IResource;
  *
  * Note: The factory is responsible for computing and storing a localized error message.
  */
-
 public interface IProblemFactory {
 
-	IProblem createProblem(
-		String originatingFileName,
-		int problemId,
-		String[] problemArguments,
-		String[] messageArguments, // shorter versions of the problemArguments
-		int severity,
-		int startPosition,
-		int endPosition,
-		int lineNumber, int columnNumber);
-		
-	Locale getLocale();
-	
-	String getLocalizedMessage(int problemId, String[] messageArguments);
-	
-	IProblemReporter createReporter(IResource resource);
+	String getProblemMarker();
+
+	String getTaskMarker();
+
+	/**
+	 * @param resource
+	 * @param problem
+	 * @return
+	 * @throws CoreException
+	 */
+	IMarker createMarker(IResource resource, IProblem problem)
+			throws CoreException;
+
 }

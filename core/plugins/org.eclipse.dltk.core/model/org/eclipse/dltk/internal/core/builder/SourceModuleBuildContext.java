@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.ISourceModule;
@@ -24,10 +25,12 @@ public class SourceModuleBuildContext extends AbstractBuildContext {
 	/**
 	 * @param module
 	 */
-	public SourceModuleBuildContext(ISourceModule module, int buildType) {
+	public SourceModuleBuildContext(IProblemFactory problemFactory,
+			ISourceModule module, int buildType) {
 		super(module, buildType);
 		final IResource resource = module.getResource();
-		reporter = resource != null ? new BuildProblemReporter(resource) : null;
+		reporter = resource != null ? new BuildProblemReporter(problemFactory,
+				resource) : null;
 	}
 
 	public IFileHandle getFileHandle() {

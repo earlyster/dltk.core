@@ -82,6 +82,7 @@ public abstract class CategorizedProblem implements IProblem {
 	 * 
 	 * @return the type of the marker which would be associated to the problem
 	 */
+	@Deprecated
 	public abstract String getMarkerType();
 
 	/**

@@ -225,8 +225,11 @@ public class DefaultProblem extends CategorizedProblem {
 	 * @see org.eclipse.dltk.core.compiler.CategorizedProblem#getMarkerType()
 	 */
 	public String getMarkerType() {
-		return this.id == IProblem.Task ? MARKER_TYPE_TASK
-				: MARKER_TYPE_PROBLEM;
+		return isTask() ? MARKER_TYPE_TASK : MARKER_TYPE_PROBLEM;
+	}
+
+	public boolean isTask() {
+		return this.id == IProblem.Task;
 	}
 
 	/**
@@ -336,6 +339,7 @@ public class DefaultProblem extends CategorizedProblem {
 		this.startPosition = sourceStart;
 	}
 
+	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append("Pb"); //$NON-NLS-1$
@@ -365,6 +369,7 @@ public class DefaultProblem extends CategorizedProblem {
 		return sb.toString();
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -381,6 +386,7 @@ public class DefaultProblem extends CategorizedProblem {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

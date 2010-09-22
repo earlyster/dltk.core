@@ -43,7 +43,8 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		return problems.isEmpty();
 	}
 
-	public Object getAdapter(@SuppressWarnings("unchecked") Class adapter) {
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (ITaskReporter.class.equals(adapter)
 				|| IProblemReporter.class.equals(adapter)) {
 			return this;
@@ -90,6 +91,10 @@ public class ProblemCollector extends AbstractProblemReporter implements
 
 		public int getCategoryID() {
 			return 0;
+		}
+
+		public boolean isTask() {
+			return true;
 		}
 
 		public String getMarkerType() {
@@ -148,6 +153,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			// unsupported
 		}
 
+		@Override
 		public String toString() {
 			final StringBuffer sb = new StringBuffer();
 			sb.append("Task"); //$NON-NLS-1$

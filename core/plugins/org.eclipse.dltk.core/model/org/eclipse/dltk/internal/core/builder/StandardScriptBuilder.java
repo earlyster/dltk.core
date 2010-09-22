@@ -23,9 +23,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
+import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
+import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -49,8 +52,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			int buildType) {
 		monitor.beginTask(Util.EMPTY_STRING, WORK_BUILD);
 		try {
-			buildModules(project, elements, buildType, BuildUtils
-					.subMonitorFor(monitor, WORK_BUILD));
+			buildModules(project, elements, buildType,
+					BuildUtils.subMonitorFor(monitor, WORK_BUILD));
 			return Status.OK_STATUS;
 		} finally {
 			monitor.done();
@@ -70,12 +73,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 				if (monitor.isCanceled())
 					return;
 				final ISourceModule module = j.next();
-				monitor
-						.subTask(NLS
-								.bind(
-										Messages.ValidatorBuilder_buildExternalModuleSubTask,
-										String.valueOf(remainingWork), module
-												.getElementName()));
+				monitor.subTask(NLS.bind(
+						Messages.ValidatorBuilder_buildExternalModuleSubTask,
+						String.valueOf(remainingWork), module.getElementName()));
 				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
 						module, buildType);
 				try {
@@ -86,12 +86,10 @@ public class StandardScriptBuilder implements IScriptBuilder,
 						extensions.get(i).buildExternalModule(context);
 					}
 				} catch (CoreException e) {
-					DLTKCore
-							.error(
-									NLS
-											.bind(
-													Messages.StandardScriptBuilder_errorBuildingExternalModule,
-													module.getElementName()), e);
+					DLTKCore.error(
+							NLS.bind(
+									Messages.StandardScriptBuilder_errorBuildingExternalModule,
+									module.getElementName()), e);
 				}
 				--remainingWork;
 			}
@@ -130,8 +128,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			List<ISourceModule> elements, int buildType,
 			IProgressMonitor monitor) {
 		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
-		monitor.beginTask(Messages.ValidatorBuilder_buildingModules, elements
-				.size());
+		monitor.beginTask(Messages.ValidatorBuilder_buildingModules,
+				elements.size());
 		if (toolkit != null) {
 			buildNatureModules(project, buildType, elements, monitor);
 		}
@@ -158,11 +156,11 @@ public class StandardScriptBuilder implements IScriptBuilder,
 				return;
 			final ISourceModule module = j.next();
 			monitor.subTask(NLS.bind(
-					Messages.ValidatorBuilder_buildModuleSubTask, String
-							.valueOf(modules.size() - counter), module
-							.getElementName()));
+					Messages.ValidatorBuilder_buildModuleSubTask,
+					String.valueOf(modules.size() - counter),
+					module.getElementName()));
 			final SourceModuleBuildContext context = new SourceModuleBuildContext(
-					module, buildType);
+					problemFactory, module, buildType);
 			if (context.reporter != null) {
 				buildModule(context);
 				reporters.add(context.reporter);
@@ -226,8 +224,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 
 	public IStatus buildResources(IScriptProject project,
 			List<IResource> resources, IProgressMonitor monitor, int buildType) {
-		final IProgressMonitor sub = new SubProgressMonitor(monitor, resources
-				.size() * 2);
+		final IProgressMonitor sub = new SubProgressMonitor(monitor,
+				resources.size() * 2);
 		try {
 			sub.beginTask(Util.EMPTY_STRING, resources.size());
 			try {
@@ -265,9 +263,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			p.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
 					IResource.DEPTH_INFINITE);
 		} catch (CoreException e) {
-			DLTKCore.error(NLS.bind(
-					Messages.StandardScriptBuilder_errorCleaning, p.getName()),
-					e);
+			DLTKCore.error(
+					NLS.bind(Messages.StandardScriptBuilder_errorCleaning,
+							p.getName()), e);
 		}
 	}
 
@@ -328,12 +326,17 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	private boolean endBuildNeeded = false;
 	private IBuildParticipant[] participants = null;
 	private IDLTKLanguageToolkit toolkit = null;
+	private IProblemFactory problemFactory = null;
 
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
 			participants = BuildParticipantManager.getBuildParticipants(
 					project, toolkit.getNatureId());
+			problemFactory = DLTKLanguageManager.getProblemFactory(toolkit
+					.getNatureId());
+		} else {
+			problemFactory = new DefaultProblemFactory();
 		}
 		beginBuildDone = false;
 		endBuildNeeded = false;
@@ -361,6 +364,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 		participants = null;
 		toolkit = null;
+		problemFactory = null;
 		beginBuildDone = false;
 	}
 

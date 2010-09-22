@@ -15,8 +15,8 @@ package org.eclipse.dltk.compiler.problem;
  * <ul>
  * <li>its location (originating source file name, source position, line
  * number),</li>
- * <li>its message description and a predicate to check its severity (warning
- * or error).</li>
+ * <li>its message description and a predicate to check its severity (warning or
+ * error).</li>
  * <li>its ID : a number identifying the very nature of this problem. All
  * possible IDs are listed as constants on this interface.</li>
  * </ul>
@@ -99,6 +99,8 @@ public interface IProblem {
 	 */
 	boolean isWarning();
 
+	boolean isTask();
+
 	/**
 	 * Set the end position of the problem (inclusive), or -1 if unknown. Used
 	 * for shifting problem positions.
@@ -127,8 +129,8 @@ public interface IProblem {
 
 	/**
 	 * Problem Categories The high bits of a problem ID contains information
-	 * about the category of a problem. For example, (problemID & TypeRelated) !=
-	 * 0, indicates that this problem is type related.
+	 * about the category of a problem. For example, (problemID & TypeRelated)
+	 * != 0, indicates that this problem is type related.
 	 * 
 	 * A problem category can help to implement custom problem filters. Indeed,
 	 * when numerous problems are listed, focusing on import related problems
