@@ -221,7 +221,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			 * fProblem.getID()) { setType(SPELLING_ANNOTATION_TYPE); fLayer=
 			 * WARNING_LAYER; } else
 			 */
-			if (IProblem.Task == fProblem.getID()) {
+			if (fProblem.isTask()) {
 				setType(ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE);
 				fLayer = TASK_LAYER;
 			} else if (fProblem.isWarning()) {
