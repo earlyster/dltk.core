@@ -30,7 +30,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 public class ScriptMethodCompletionProposal extends
-		LazyScriptCompletionProposal {
+		LazyScriptCompletionProposal implements
+		IScriptCompletionProposalExtension2 {
 	/**
 	 * Triggers for method proposals without parameters. Do not modify.
 	 */
@@ -55,6 +56,10 @@ public class ScriptMethodCompletionProposal extends
 	public ScriptMethodCompletionProposal(CompletionProposal proposal,
 			ScriptContentAssistInvocationContext context) {
 		super(proposal, context);
+	}
+
+	public String getName() {
+		return fProposal.getName();
 	}
 
 	/**
