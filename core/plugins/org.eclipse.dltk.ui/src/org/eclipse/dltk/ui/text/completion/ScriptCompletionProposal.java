@@ -82,6 +82,7 @@ public class ScriptCompletionProposal extends
 		setSortString(displayString == null ? replacementString : displayString);
 	}
 
+	@Override
 	protected boolean isValidPrefix(String prefix) {
 		String word = getReplacementString();
 		if (isInScriptdoc()) {
@@ -98,6 +99,7 @@ public class ScriptCompletionProposal extends
 		return isPrefix(prefix, word);
 	}
 
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document,
 			int completionOffset) {
 		String string = getReplacementString();

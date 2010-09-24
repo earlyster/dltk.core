@@ -254,6 +254,7 @@ public abstract class LazyScriptCompletionProposal extends
 	 * 
 	 * @return Returns a String
 	 */
+	@Override
 	public final String getReplacementString() {
 		if (!fReplacementStringComputed)
 			setReplacementString(computeReplacementString());
