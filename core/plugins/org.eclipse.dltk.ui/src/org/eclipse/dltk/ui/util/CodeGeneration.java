@@ -12,6 +12,7 @@
 package org.eclipse.dltk.ui.util;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -70,7 +71,7 @@ public class CodeGeneration {
 		IDocument doc = new Document(buffer.getString());
 		int nLines = doc.getNumberOfLines();
 		MultiTextEdit edit = new MultiTextEdit();
-		HashSet removedLines = new HashSet();
+		Set<Integer> removedLines = new HashSet<Integer>();
 		for (int i = 0; i < variables.length; i++) {
 			TemplateVariable position = findVariable(buffer, variables[i]);
 			if (position == null) {
@@ -90,9 +91,7 @@ public class CodeGeneration {
 						if (prefix.length() > 0 && startLine < endLine) {
 							for (int line = startLine + 1; line <= endLine; ++line) {
 								int lineOffset = doc.getLineOffset(line);
-								edit
-										.addChild(new InsertEdit(lineOffset,
-												prefix));
+								edit.addChild(new InsertEdit(lineOffset, prefix));
 							}
 						}
 					} catch (BadLocationException exc) {
@@ -107,8 +106,7 @@ public class CodeGeneration {
 					int offset = lineInfo.getOffset();
 					String str = doc.get(offset, lineInfo.getLength());
 					if (Strings.containsOnlyWhitespaces(str)
-							&& nLines > line + 1
-							&& removedLines.add(new Integer(line))) {
+							&& nLines > line + 1 && removedLines.add(line)) {
 						int nextStart = doc.getLineOffset(line + 1);
 						int length = nextStart - offset;
 						edit.addChild(new DeleteEdit(offset, length));
