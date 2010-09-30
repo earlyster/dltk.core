@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.completion;
 
+/**
+ * @since 3.0
+ */
 public interface IScriptCompletionProposalExtension2 {
 
 	int getReplacementLength();

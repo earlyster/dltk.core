@@ -164,10 +164,16 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		return new String[] { fDefaultTokenProperty, fTodoToken };
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected Token getDefaultToken() {
 		return getToken(fDefaultTokenProperty);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected Token getTodoToken() {
 		return getToken(fTodoToken);
 	}
@@ -194,6 +200,9 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		return combinedWordRule;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected IWordDetector createIdentifierDetector() {
 		return new ScriptIdentifierDetector();
 	}

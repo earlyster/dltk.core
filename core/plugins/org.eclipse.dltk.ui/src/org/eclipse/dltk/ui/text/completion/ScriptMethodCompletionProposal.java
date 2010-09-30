@@ -58,6 +58,9 @@ public class ScriptMethodCompletionProposal extends
 		super(proposal, context);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public String getName() {
 		return fProposal.getName();
 	}
