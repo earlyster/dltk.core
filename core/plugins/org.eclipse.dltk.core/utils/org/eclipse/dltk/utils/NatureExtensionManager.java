@@ -27,17 +27,17 @@ public class NatureExtensionManager {
 	private final String extensionPoint;
 	protected final String classAttr = "class"; //$NON-NLS-1$
 	private final String universalNatureId;
-	private final Class elementType;
+	private final Class<?> elementType;
 
 	/**
 	 * @param extensionPoint
 	 * @param elementType
 	 */
-	public NatureExtensionManager(String extensionPoint, Class elementType) {
+	public NatureExtensionManager(String extensionPoint, Class<?> elementType) {
 		this(extensionPoint, elementType, null);
 	}
 
-	public NatureExtensionManager(String extensionPoint, Class elementType,
+	public NatureExtensionManager(String extensionPoint, Class<?> elementType,
 			String universalNatureId) {
 		this.extensionPoint = extensionPoint;
 		this.elementType = elementType;
@@ -45,17 +45,18 @@ public class NatureExtensionManager {
 	}
 
 	// Contains list of instances for selected nature.
-	private Map extensions;
+	private Map<String, Object> extensions;
 
 	private synchronized void initialize() {
 		if (extensions != null) {
 			return;
 		}
 
-		extensions = new HashMap(5);
+		extensions = new HashMap<String, Object>(5);
 		registerConfigurationElements();
-		for (Iterator i = extensions.values().iterator(); i.hasNext();) {
-			final List descriptors = (List) i.next();
+		for (Iterator<Object> i = extensions.values().iterator(); i.hasNext();) {
+			@SuppressWarnings("unchecked")
+			final List<Object> descriptors = (List<Object>) i.next();
 			initializeDescriptors(descriptors);
 		}
 	}
@@ -74,9 +75,10 @@ public class NatureExtensionManager {
 				continue;
 			final String category = confElement.getAttribute(categoryAttr);
 			if (category != null) {
-				List elements = (List) extensions.get(category);
+				@SuppressWarnings("unchecked")
+				List<Object> elements = (List<Object>) extensions.get(category);
 				if (elements == null) {
-					elements = new ArrayList();
+					elements = new ArrayList<Object>();
 					extensions.put(category, elements);
 				}
 				elements.add(createDescriptor(confElement));
@@ -84,8 +86,7 @@ public class NatureExtensionManager {
 				final String[] bindings = new String[] { categoryAttr,
 						extensionPoint, confElement.getContributor().getName() };
 				final String msg = NLS
-						.bind(
-								Messages.NatureExtensionManager_missingCategoryAttribute,
+						.bind(Messages.NatureExtensionManager_missingCategoryAttribute,
 								bindings);
 				DLTKCore.warn(msg);
 			}
@@ -108,7 +109,7 @@ public class NatureExtensionManager {
 	/**
 	 * @param descriptors
 	 */
-	protected void initializeDescriptors(List descriptors) {
+	protected void initializeDescriptors(List<Object> descriptors) {
 		// empty
 	}
 
@@ -123,9 +124,9 @@ public class NatureExtensionManager {
 	 */
 	public Object[] getInstances(String natureId) {
 		initialize();
-		final Object[] nature = getByNature(natureId);
-		final Object[] all = universalNatureId != null ? getByNature(universalNatureId)
-				: null;
+		final Object[] nature = filter(getByNature(natureId), natureId);
+		final Object[] all = universalNatureId != null ? filter(
+				getByNature(universalNatureId), natureId) : null;
 		if (nature != null) {
 			if (all != null) {
 				final Object[] result = createArray(all.length + nature.length);
@@ -144,11 +145,15 @@ public class NatureExtensionManager {
 		}
 	}
 
+	protected Object[] filter(Object[] objects, String natureId) {
+		return objects;
+	}
+
 	public Object[] getAllInstances() {
 		initialize();
-		List result = new ArrayList();
-		for (Iterator i = extensions.keySet().iterator(); i.hasNext();) {
-			Object[] natureInstances = getByNature((String) i.next());
+		List<Object> result = new ArrayList<Object>();
+		for (Iterator<String> i = extensions.keySet().iterator(); i.hasNext();) {
+			Object[] natureInstances = getByNature(i.next());
 			if (natureInstances != null) {
 				for (int j = 0; j < natureInstances.length; ++j) {
 					result.add(natureInstances[j]);
@@ -164,7 +169,7 @@ public class NatureExtensionManager {
 		return null;
 	}
 
-	private Object[] createArray(int length) {
+	protected Object[] createArray(int length) {
 		return (Object[]) Array.newInstance(elementType, length);
 	}
 
@@ -182,8 +187,10 @@ public class NatureExtensionManager {
 			if (ext instanceof Object[]) {
 				return (Object[]) ext;
 			} else if (ext instanceof List) {
-				final List elements = (List) ext;
-				final List result = new ArrayList(elements.size());
+				@SuppressWarnings("unchecked")
+				final List<Object> elements = (List<Object>) ext;
+				final List<Object> result = new ArrayList<Object>(
+						elements.size());
 				for (int i = 0; i < elements.size(); ++i) {
 					final Object element = elements.get(i);
 					if (isInstance(element)) {
@@ -196,8 +203,7 @@ public class NatureExtensionManager {
 							}
 						} catch (Exception e) {
 							final String msg = NLS
-									.bind(
-											Messages.NatureExtensionManager_instantiantionError,
+									.bind(Messages.NatureExtensionManager_instantiantionError,
 											elementType.getName());
 							DLTKCore.error(msg, e);
 						}
