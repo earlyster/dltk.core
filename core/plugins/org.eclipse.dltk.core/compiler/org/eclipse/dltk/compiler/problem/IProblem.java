@@ -99,6 +99,9 @@ public interface IProblem {
 	 */
 	boolean isWarning();
 
+	/**
+	 * @since 3.0
+	 */
 	boolean isTask();
 
 	/**

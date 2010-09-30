@@ -228,6 +228,9 @@ public class DefaultProblem extends CategorizedProblem {
 		return isTask() ? MARKER_TYPE_TASK : MARKER_TYPE_PROBLEM;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public boolean isTask() {
 		return this.id == IProblem.Task;
 	}

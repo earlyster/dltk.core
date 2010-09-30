@@ -23,8 +23,14 @@ import org.eclipse.core.runtime.CoreException;
  */
 public interface IProblemFactory {
 
+	/**
+	 * @since 3.0
+	 */
 	String getProblemMarker();
 
+	/**
+	 * @since 3.0
+	 */
 	String getTaskMarker();
 
 	/**
@@ -32,6 +38,7 @@ public interface IProblemFactory {
 	 * @param problem
 	 * @return
 	 * @throws CoreException
+	 * @since 3.0
 	 */
 	IMarker createMarker(IResource resource, IProblem problem)
 			throws CoreException;

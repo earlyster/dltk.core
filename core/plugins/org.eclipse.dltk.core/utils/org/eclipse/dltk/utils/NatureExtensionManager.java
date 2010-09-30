@@ -145,6 +145,9 @@ public class NatureExtensionManager {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected Object[] filter(Object[] objects, String natureId) {
 		return objects;
 	}
@@ -169,6 +172,9 @@ public class NatureExtensionManager {
 		return null;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	protected Object[] createArray(int length) {
 		return (Object[]) Array.newInstance(elementType, length);
 	}

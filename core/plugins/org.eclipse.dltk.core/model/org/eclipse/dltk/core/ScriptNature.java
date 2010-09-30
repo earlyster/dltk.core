@@ -103,6 +103,7 @@ public class ScriptNature implements IProjectNature {
 	 * @param buildSpec
 	 * @param builderID
 	 * @return
+	 * @since 3.0
 	 */
 	protected static int getCommandIndex(ICommand[] buildSpec, String builderID) {
 		for (int i = 0; i < buildSpec.length; ++i) {
