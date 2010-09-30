@@ -39,8 +39,8 @@ public class ScriptNature implements IProjectNature {
 	 */
 	protected void addToBuildSpec(String builderID) throws CoreException {
 		IProjectDescription description = this.project.getDescription();
-		int scriptCommandIndex = getScriptCommandIndex(
-				description.getBuildSpec(), builderID);
+		int scriptCommandIndex = getCommandIndex(description.getBuildSpec(),
+				builderID);
 		if (scriptCommandIndex == -1) {
 			// Add a Java command to the build spec
 			ICommand command = description.newCommand();
@@ -57,7 +57,7 @@ public class ScriptNature implements IProjectNature {
 			ICommand newCommand) throws CoreException {
 
 		ICommand[] oldBuildSpec = description.getBuildSpec();
-		int oldScriptCommandIndex = getScriptCommandIndex(oldBuildSpec,
+		int oldScriptCommandIndex = getCommandIndex(oldBuildSpec,
 				newCommand.getBuilderName());
 		ICommand[] newCommands;
 
@@ -97,12 +97,14 @@ public class ScriptNature implements IProjectNature {
 	}
 
 	/**
-	 * Find the specific Script command amongst the given build spec and return
-	 * its index or -1 if not found.
+	 * Find the specific command amongst the given build spec and return its
+	 * index or -1 if not found.
 	 * 
+	 * @param buildSpec
 	 * @param builderID
+	 * @return
 	 */
-	private int getScriptCommandIndex(ICommand[] buildSpec, String builderID) {
+	protected static int getCommandIndex(ICommand[] buildSpec, String builderID) {
 		for (int i = 0; i < buildSpec.length; ++i) {
 			if (buildSpec[i].getBuilderName().equals(builderID)) {
 				return i;
