@@ -233,10 +233,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 					final IResource resource = i.next();
 					final String template = Messages.ValidatorBuilder_clearingResourceMarkers;
 					sub.subTask(NLS.bind(template, resource.getName()));
-					resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM,
-							true, IResource.DEPTH_INFINITE);
-					resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK,
-							true, IResource.DEPTH_INFINITE);
+					deleteMarkers(resource);
 					sub.worked(1);
 				}
 			} catch (CoreException e) {
@@ -258,15 +255,19 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 		final IProject p = project.getProject();
 		try {
-			p.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
-					IResource.DEPTH_INFINITE);
-			p.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
-					IResource.DEPTH_INFINITE);
+			deleteMarkers(p);
 		} catch (CoreException e) {
 			DLTKCore.error(
 					NLS.bind(Messages.StandardScriptBuilder_errorCleaning,
 							p.getName()), e);
 		}
+	}
+
+	protected void deleteMarkers(IResource resource) throws CoreException {
+		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
+				IResource.DEPTH_INFINITE);
+		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
+				IResource.DEPTH_INFINITE);
 	}
 
 	public DependencyResponse getDependencies(IScriptProject project,
