@@ -14,7 +14,6 @@ package org.eclipse.dltk.internal.core.builder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
@@ -41,10 +40,7 @@ public class BuildProblemReporter extends ProblemCollector {
 		try {
 			if (!oldMarkersDeleted) {
 				oldMarkersDeleted = true;
-				resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM,
-						true, IResource.DEPTH_INFINITE);
-				resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
-						IResource.DEPTH_INFINITE);
+				problemFactory.deleteMarkers(resource);
 			}
 			for (final IProblem problem : problems) {
 				final IMarker m = problemFactory

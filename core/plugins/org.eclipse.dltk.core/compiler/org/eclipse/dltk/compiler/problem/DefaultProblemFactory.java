@@ -30,4 +30,11 @@ public class DefaultProblemFactory implements IProblemFactory {
 		return resource.createMarker(markerType);
 	}
 
+	public void deleteMarkers(IResource resource) throws CoreException {
+		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
+				IResource.DEPTH_INFINITE);
+		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
+				IResource.DEPTH_INFINITE);
+	}
+
 }

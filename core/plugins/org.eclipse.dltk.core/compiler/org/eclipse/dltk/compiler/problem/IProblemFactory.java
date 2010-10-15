@@ -43,4 +43,11 @@ public interface IProblemFactory {
 	IMarker createMarker(IResource resource, IProblem problem)
 			throws CoreException;
 
+	/**
+	 * @param resource
+	 * @throws CoreException
+	 * @since 3.0
+	 */
+	void deleteMarkers(IResource resource) throws CoreException;
+
 }

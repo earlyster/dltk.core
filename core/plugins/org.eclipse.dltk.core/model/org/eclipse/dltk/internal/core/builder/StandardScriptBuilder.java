@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
@@ -233,7 +232,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 					final IResource resource = i.next();
 					final String template = Messages.ValidatorBuilder_clearingResourceMarkers;
 					sub.subTask(NLS.bind(template, resource.getName()));
-					deleteMarkers(resource);
+					problemFactory.deleteMarkers(resource);
 					sub.worked(1);
 				}
 			} catch (CoreException e) {
@@ -255,19 +254,12 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 		final IProject p = project.getProject();
 		try {
-			deleteMarkers(p);
+			problemFactory.deleteMarkers(p);
 		} catch (CoreException e) {
 			DLTKCore.error(
 					NLS.bind(Messages.StandardScriptBuilder_errorCleaning,
 							p.getName()), e);
 		}
-	}
-
-	protected void deleteMarkers(IResource resource) throws CoreException {
-		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
-				IResource.DEPTH_INFINITE);
-		resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
-				IResource.DEPTH_INFINITE);
 	}
 
 	public DependencyResponse getDependencies(IScriptProject project,
@@ -329,18 +321,27 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	private IDLTKLanguageToolkit toolkit = null;
 	private IProblemFactory problemFactory = null;
 
+	protected IDLTKLanguageToolkit getLanguageToolkit() {
+		return toolkit;
+	}
+
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
 			participants = BuildParticipantManager.getBuildParticipants(
 					project, toolkit.getNatureId());
-			problemFactory = DLTKLanguageManager.getProblemFactory(toolkit
-					.getNatureId());
-		} else {
-			problemFactory = new DefaultProblemFactory();
 		}
+		problemFactory = createProblemFactory();
 		beginBuildDone = false;
 		endBuildNeeded = false;
+	}
+
+	protected IProblemFactory createProblemFactory() {
+		if (toolkit != null) {
+			return DLTKLanguageManager.getProblemFactory(toolkit.getNatureId());
+		} else {
+			return new DefaultProblemFactory();
+		}
 	}
 
 	public void endBuild(IScriptProject project, IProgressMonitor monitor) {
