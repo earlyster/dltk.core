@@ -74,8 +74,13 @@ public abstract class OpenTypeAction extends Action implements
 		return DLTKUIMessages.OpenTypeAction_errorMessage;
 	}
 
+	protected String getLanguageName() {
+		return getUILanguageToolkit().getCoreToolkit().getLanguageName();
+	}
+
 	protected String getOpenTypeErrorTitle() {
-		return DLTKUIMessages.OpenTypeAction_errorTitle;
+		return NLS.bind(DLTKUIMessages.OpenTypeAction_errorTitle,
+				getLanguageName());
 	}
 
 	protected String getOpenTypeDialogMessage() {
@@ -84,7 +89,7 @@ public abstract class OpenTypeAction extends Action implements
 
 	protected String getOpenTypeDialogTitle() {
 		return NLS.bind(DLTKUIMessages.OpenTypeAction_dialogTitle,
-				getUILanguageToolkit().getCoreToolkit().getLanguageName());
+				getLanguageName());
 	}
 
 	// ---- IWorkbenchWindowActionDelegate
