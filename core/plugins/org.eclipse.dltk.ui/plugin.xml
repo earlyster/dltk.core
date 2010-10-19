@@ -1030,6 +1030,14 @@
             class="org.eclipse.dltk.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.dltk.ui.ScriptExplorer.ImportDeclarationFilter">
       </filter>
+ 	 <filter
+            targetId="org.eclipse.dltk.ui.ScriptExplorer"
+            name="%HidePackageDeclaration.label"
+            enabled="true"
+            description="%HidePackageDeclaration.description"
+            class="org.eclipse.dltk.internal.ui.filters.PackageDeclarationFilter"
+            id="org.eclipse.dltk.ui.ScriptExplorer.PackageDeclarationFilter">
+      </filter>
       <filter
             class="org.eclipse.dltk.internal.ui.filters.SyntheticMembersFilter"
             description="%HideSyntheticMembers.description"
