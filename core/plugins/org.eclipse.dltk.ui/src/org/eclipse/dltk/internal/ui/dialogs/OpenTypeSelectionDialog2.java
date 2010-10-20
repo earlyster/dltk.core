@@ -10,7 +10,6 @@
  package org.eclipse.dltk.internal.ui.dialogs;
 
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.dialogs.TypeSelectionExtension;
