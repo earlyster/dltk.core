@@ -954,7 +954,7 @@ public class MixinModel {
 	public void clearKeysCache() {
 		existKeysCache.clear();
 		notExistKeysCache.clear();
-		requestCache.clone();
+		requestCache.flush();
 	}
 
 	// // Mixin object initialize listeners code
