@@ -237,8 +237,8 @@ public class MixinModel {
 	private synchronized void addKeyToSet(Set<MixinElement> result,
 			MixinElement element, String pattern) {
 		// Skip all not matched keys
-		if (!CharOperation.match(pattern.toCharArray(), element.key
-				.toCharArray(), true)) {
+		if (!CharOperation.match(pattern.toCharArray(),
+				element.key.toCharArray(), true)) {
 			return;
 		}
 		result.add(element);
@@ -251,7 +251,7 @@ public class MixinModel {
 		}
 	}
 
-	private RequestCacheEntry findFromMixin(String pattern,
+	private synchronized RequestCacheEntry findFromMixin(String pattern,
 			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
@@ -268,8 +268,8 @@ public class MixinModel {
 			}
 			entry.expireTime = System.currentTimeMillis()
 					+ REQUEST_CACHE_EXPIRE_TIME;
-			entry.modules = new HashSet<ISourceModule>(Arrays
-					.asList(containedModules));
+			entry.modules = new HashSet<ISourceModule>(
+					Arrays.asList(containedModules));
 			entry.prefix = pattern;
 			Collection values = keys.values();
 			entry.keys = new HashSet<String>();
@@ -944,14 +944,14 @@ public class MixinModel {
 		removes = 0;
 	}
 
-	public void clearKeysCache(String key) {
+	public synchronized void clearKeysCache(String key) {
 		existKeysCache.remove(key);
 		notExistKeysCache.remove(key);
 		requestCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
 	}
 
-	public void clearKeysCache() {
+	public synchronized void clearKeysCache() {
 		existKeysCache.clear();
 		notExistKeysCache.clear();
 		requestCache.flush();
@@ -978,7 +978,7 @@ public class MixinModel {
 		}
 	}
 
-	protected void clear() {
+	protected synchronized void clear() {
 		cache.flush();
 		elementToMixinCache.clear();
 		existKeysCache.clear();
