@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.corext.util;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
+import org.eclipse.dltk.core.ISearchPatternProcessor.ITypePattern;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -21,8 +22,6 @@ import org.eclipse.dltk.internal.ui.util.StringMatcher;
 import org.eclipse.dltk.ui.dialogs.ITypeInfoFilterExtension;
 
 public class TypeInfoFilter {
-
-	private static final String PACKAGE_DELIM = "."; //$NON-NLS-1$
 
 	private static class PatternMatcher {
 
@@ -145,44 +144,43 @@ public class TypeInfoFilter {
 				.createWorkspaceScope(toolkit));
 		fElementKind = elementKind;
 		fFilterExtension = extension;
-
-		String packageDelimiter = getPackageDelimiter(toolkit);
-		int index = text.lastIndexOf(packageDelimiter);
-		if (index == -1) {
-			fNameMatcher = new PatternMatcher(text, true);
-		} else {
-			fPackageMatcher = new PatternMatcher(evaluatePackagePattern(text
-					.substring(0, index), packageDelimiter), true);
-			String name = text.substring(index + packageDelimiter.length());
-			if (name.length() == 0)
-				name = "*"; //$NON-NLS-1$
-			fNameMatcher = new PatternMatcher(name, true);
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(toolkit, true);
+		ITypePattern pattern = processor.parseType(text);
+		String simpleName = pattern.getSimpleName();
+		if (simpleName.length() == 0) {
+			simpleName = "*";
+		}
+		fNameMatcher = new PatternMatcher(simpleName, true);
+		if (pattern.getQualificatin() != null) {
+			fPackageMatcher = new PatternMatcher(
+					evaluatePackagePattern(pattern.getQualificatin()), true);
 		}
 	}
 
 	/*
 	 * Transforms o.e.j to o*.e*.j*
 	 */
-	private String evaluatePackagePattern(String s, String packageDelimiter) {
-		StringBuffer buf = new StringBuffer();
+	private String evaluatePackagePattern(String s) {
+		StringBuilder buf = new StringBuilder();
 		boolean hasWildCard = false;
-		for (int i = 0; i < s.length(); i++) {
-			if (s.substring(i).startsWith(packageDelimiter)) {
+		int len = s.length();
+		for (int i = 0; i < len; i++) {
+			char ch = s.charAt(i);
+			if (ch == ISearchPatternProcessor.TYPE_SEPARATOR) {
 				if (!hasWildCard) {
 					buf.append('*');
 				}
 				hasWildCard = false;
-				i += packageDelimiter.length();
-				buf.append(packageDelimiter);
-			} else {
-				char ch = s.charAt(i);
-				if (ch == '*' || ch == '?') {
-					hasWildCard = true;
-				}
-				buf.append(ch);
+			} else if (ch == '*' || ch == '?') {
+				hasWildCard = true;
 			}
+			buf.append(ch);
 		}
 		if (!hasWildCard) {
+			if (len == 0) {
+				buf.append('?');
+			}
 			buf.append('*');
 		}
 		return buf.toString();
@@ -276,12 +274,4 @@ public class TypeInfoFilter {
 		return false;
 	}
 
-	private static String getPackageDelimiter(IDLTKLanguageToolkit toolkit) {
-		ISearchPatternProcessor processor = DLTKLanguageManager
-				.getSearchPatternProcessor(toolkit);
-		if (processor != null) {
-			return processor.getDelimiterReplacementString();
-		}
-		return PACKAGE_DELIM;
-	}
 }
