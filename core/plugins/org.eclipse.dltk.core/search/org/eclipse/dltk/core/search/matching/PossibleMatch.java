@@ -118,10 +118,13 @@ public class PossibleMatch implements ISourceModule {
 			// use the
 			// element name
 			// get main type name
-			char[] mainTypeName = fileName.toCharArray();
+			String mainTypeName = fileName;
 			SourceModule cu = (SourceModule) this.openable;
-			return cu.getType(new String(mainTypeName)).getFullyQualifiedName()
-					.toCharArray();
+			String fqName = cu.getType(mainTypeName).getFullyQualifiedName();
+			if (fqName != null) {
+				// can be null on errors
+				return fqName.toCharArray();
+			}
 		}
 		if (DLTKCore.DEBUG) {
 			System.err.println("TODO: Code review here..."); //$NON-NLS-1$
