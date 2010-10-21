@@ -180,7 +180,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					IStatus.ERROR, "", null); //$NON-NLS-1$
 		} else {
 			if (fValidator != null) {
-				List jElements = new ArrayList();
+				List<IType> jElements = new ArrayList<IType>();
 				for (int i = 0; i < selection.length; i++) {
 					IType type = selection[i].getType();
 					if (type != null) {
