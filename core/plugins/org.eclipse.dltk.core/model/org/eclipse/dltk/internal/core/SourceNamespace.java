@@ -11,14 +11,17 @@ public class SourceNamespace implements INamespace {
 
 	public SourceNamespace(String[] namespace) {
 		if (namespace == null || namespace.length == 0) {
-			segments = CharOperation.NO_STRINGS;
+			this.segments = CharOperation.NO_STRINGS;
 		} else {
-			segments = Arrays.copyOf(namespace, namespace.length);
+			this.segments = new String[namespace.length];
+			System.arraycopy(namespace, 0, this.segments, 0, namespace.length);
 		}
 	}
 
 	public String[] getStrings() {
-		return Arrays.copyOf(segments, segments.length);
+		final String[] result = new String[segments.length];
+		System.arraycopy(this.segments, 0, result, 0, segments.length);
+		return result;
 	}
 
 	public String getQualifiedName() {
