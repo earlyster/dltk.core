@@ -36,6 +36,23 @@ public class LocalVariable extends SourceRefElement implements ILocalVariable {
 	private int nameStart, nameEnd;
 	private String type;
 
+	/**
+	 * @param parent
+	 *            the parent of the variable
+	 * @param name
+	 *            the name of the variable
+	 * @param declarationSourceStart
+	 *            the position of the statement start
+	 * @param declarationSourceEnd
+	 *            the position of the statement end (including - the position of
+	 *            the last character)
+	 * @param nameStart
+	 *            the position of the variable name start
+	 * @param nameEnd
+	 *            the position of the variable name end (including - the
+	 *            position of the last character)
+	 * @param type
+	 */
 	public LocalVariable(IModelElement parent, String name,
 			int declarationSourceStart, int declarationSourceEnd,
 			int nameStart, int nameEnd, String type) {
