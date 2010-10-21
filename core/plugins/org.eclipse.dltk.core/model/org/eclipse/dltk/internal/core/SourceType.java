@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -57,7 +58,7 @@ public class SourceType extends NamedMember implements IType {
 		SourceTypeElementInfo info = (SourceTypeElementInfo) this
 				.getElementInfo();
 		if (info == null) {
-			return new String[0];
+			return CharOperation.NO_STRINGS;
 		}
 		return info.superclassNames;
 	}
