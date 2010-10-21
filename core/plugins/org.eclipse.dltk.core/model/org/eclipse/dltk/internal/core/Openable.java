@@ -451,22 +451,40 @@ public abstract class Openable extends ModelElement implements IOpenable,
 	}
 
 	static class CompletionThread extends Thread {
-		final ICompletionEngine engine;
+		final IDLTKLanguageToolkit toolkit;
+		final IScriptProject project;
 		final ISourceModule cu;
 		final int position;
+		final CompletionRequestor requestor;
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 
-		public CompletionThread(ICompletionEngine engine, ISourceModule cu,
-				int position) {
-			this.engine = engine;
+		public CompletionThread(IDLTKLanguageToolkit toolkit,
+				IScriptProject project, ISourceModule cu, int position,
+				CompletionRequestor requestor) {
+			super("CompletionThread-" + toolkit.getLanguageName());
+			this.toolkit = toolkit;
+			this.project = project;
 			this.cu = cu;
 			this.position = position;
+			this.requestor = requestor;
 		}
 
 		private boolean done = false;
 
 		@Override
 		public void run() {
+			// code complete
+			final ICompletionEngine engine = DLTKLanguageManager
+					.getCompletionEngine(toolkit.getNatureId());
+			if (engine == null) {
+				return;
+			}
+			// engine.setEnvironment(environment);
+			engine.setRequestor(requestor);
+
+			engine.setOptions(project.getOptions(true));
+			engine.setProject(project);
+
 			engine.setProgressMonitor(monitor);
 			engine.complete(cu, position, 0);
 			done = true;
@@ -512,27 +530,14 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			return;
 		}
 
-		IScriptProject project = getScriptProject();
-
-		IDLTKLanguageToolkit toolkit = null;
-
-		toolkit = DLTKLanguageManager.getLanguageToolkit(this);
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
 		if (toolkit == null) {
 			return;
 		}
 
-		// code complete
-		final ICompletionEngine engine = DLTKLanguageManager
-				.getCompletionEngine(toolkit.getNatureId());
-		if (engine == null) {
-			return;
-		}
-		// engine.setEnvironment(environment);
-		engine.setRequestor(requestor);
-		engine.setOptions(project.getOptions(true));
-		engine.setProject(project);
-
-		CompletionThread thread = new CompletionThread(engine, cu, position);
+		CompletionThread thread = new CompletionThread(toolkit,
+				getScriptProject(), cu, position, requestor);
 		if (!thread.execute(timeout)) {
 			Thread.interrupted();
 			requestor.completionFailure(new DefaultProblem(
