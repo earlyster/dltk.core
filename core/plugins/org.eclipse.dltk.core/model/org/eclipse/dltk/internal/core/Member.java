@@ -11,9 +11,11 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -36,9 +38,8 @@ public abstract class Member extends SourceRefElement implements IMember {
 		Object elementInfo = getElementInfo();
 		if (elementInfo instanceof MemberElementInfo) {
 			MemberElementInfo info = (MemberElementInfo) elementInfo;
-			return new SourceRange(info.getNameSourceStart(), info
-					.getNameSourceEnd()
-					- info.getNameSourceStart() + 1);
+			return new SourceRange(info.getNameSourceStart(),
+					info.getNameSourceEnd() - info.getNameSourceStart() + 1);
 		} else {
 			return null;
 		}
@@ -52,6 +53,10 @@ public abstract class Member extends SourceRefElement implements IMember {
 		} else {
 			return 0;
 		}
+	}
+
+	public INamespace getNamespace() throws ModelException {
+		return ((MemberElementInfo) getElementInfo()).getNamespace();
 	}
 
 	public IModelElement getHandleFromMemento(String token,
@@ -149,15 +154,16 @@ public abstract class Member extends SourceRefElement implements IMember {
 		try {
 			parameters = method.getParameterNames();
 		} catch (ModelException e) {
-			parameters = new String[0];
+			parameters = CharOperation.NO_STRINGS;
 			e.printStackTrace();
 		}
 		ArrayList list = new ArrayList();
 		for (int i = 0, length = methods.length; i < length; i++) {
 			IMethod existingMethod = methods[i];
 			try {
-				if (areSimilarMethods(elementName, parameters, existingMethod
-						.getElementName(), existingMethod.getParameterNames())) {
+				if (areSimilarMethods(elementName, parameters,
+						existingMethod.getElementName(),
+						existingMethod.getParameterNames())) {
 					list.add(existingMethod);
 				}
 			} catch (ModelException e) {
@@ -192,29 +198,31 @@ public abstract class Member extends SourceRefElement implements IMember {
 		}
 		return false;
 	}
+
 	/*
-	 * Returns the outermost context defining a local element. Per construction, it can only be a
-	 * method/field/initializarer member; thus, returns null if this member is already a top-level type or member type.
-	 * e.g for X.java/X/Y/foo()/Z/bar()/T, it will return X.java/X/Y/foo()
+	 * Returns the outermost context defining a local element. Per construction,
+	 * it can only be a method/field/initializarer member; thus, returns null if
+	 * this member is already a top-level type or member type. e.g for
+	 * X.java/X/Y/foo()/Z/bar()/T, it will return X.java/X/Y/foo()
 	 */
 	public Member getOuterMostLocalContext() {
 		IModelElement current = this;
 		Member lastLocalContext = null;
 		parentLoop: while (true) {
 			switch (current.getElementType()) {
-				case SOURCE_MODULE:
-					break parentLoop; // done recursing
-				case TYPE:
-					// cannot be a local context
-					break;
-				case FIELD:
-				case METHOD:
-					 // these elements can define local members
-					lastLocalContext = (Member) current;
-					break;
-			}		
+			case SOURCE_MODULE:
+				break parentLoop; // done recursing
+			case TYPE:
+				// cannot be a local context
+				break;
+			case FIELD:
+			case METHOD:
+				// these elements can define local members
+				lastLocalContext = (Member) current;
+				break;
+			}
 			current = current.getParent();
-		} 
+		}
 		return lastLocalContext;
 	}
 }

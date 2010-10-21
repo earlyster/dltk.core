@@ -28,4 +28,7 @@ public interface IStructureConstants {
 	 * @since 2.0
 	 */
 	static final int TAG_ACCEPT_IMPORT = 20;
+
+	int TAG_ENTER_NAMESPACE = 21;
+	int TAG_EXIT_NAMESPACE = 22;
 }

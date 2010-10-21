@@ -46,6 +46,17 @@ public interface IElementRequestor {
 
 	void acceptPackage(int declarationStart, int declarationEnd, String name);
 
+	/**
+	 * @param namespace
+	 * @since 3.0
+	 */
+	void enterNamespace(String[] namespace);
+
+	/**
+	 * @since 3.0
+	 */
+	void exitNamespace();
+
 	void acceptTypeReference(String typeName, int sourcePosition);
 
 	void enterField(FieldInfo info);

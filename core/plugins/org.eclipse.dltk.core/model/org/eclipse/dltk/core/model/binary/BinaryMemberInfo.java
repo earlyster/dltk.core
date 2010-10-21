@@ -1,5 +1,6 @@
 package org.eclipse.dltk.core.model.binary;
 
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.internal.core.ModelElementInfo;
 
 /**
@@ -14,5 +15,15 @@ public class BinaryMemberInfo extends ModelElementInfo {
 
 	public int getFlags() {
 		return flags;
+	}
+
+	private INamespace namespace;
+
+	public INamespace getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(INamespace namespace) {
+		this.namespace = namespace;
 	}
 }

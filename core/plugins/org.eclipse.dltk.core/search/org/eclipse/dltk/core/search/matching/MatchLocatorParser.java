@@ -120,8 +120,8 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 				name = patternProcessor.extractTypeChars(name);
 			}
 			// TODO create QualifiedTypeReference if needed
-			return new TypeReference(superClass.sourceStart(), superClass
-					.sourceEnd(), name);
+			return new TypeReference(superClass.sourceStart(),
+					superClass.sourceEnd(), name);
 		} else {
 			return null;
 		}

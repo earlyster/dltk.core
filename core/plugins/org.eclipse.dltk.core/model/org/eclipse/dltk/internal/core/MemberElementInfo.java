@@ -9,23 +9,23 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-/** 
- *Element info for IMember elements. 
+import org.eclipse.dltk.core.INamespace;
+
+/**
+ * Element info for IMember elements.
  */
-public abstract class MemberElementInfo extends SourceRefElementInfo {	
+public abstract class MemberElementInfo extends SourceRefElementInfo {
 	protected int flags;
 
 	/**
-	 * The start position of this member's name in the its
-	 * openable's buffer.
+	 * The start position of this member's name in the its openable's buffer.
 	 */
-	protected int nameStart= -1;
+	protected int nameStart = -1;
 
 	/**
-	 * The last position of this member's name in the its
-	 * openable's buffer.
+	 * The last position of this member's name in the its openable's buffer.
 	 */
-	protected int nameEnd= -1;
+	protected int nameEnd = -1;
 
 	/**
 	 * @see org.eclipse.dltk.internal.compiler.env.IGenericType#getModifiers()
@@ -35,6 +35,7 @@ public abstract class MemberElementInfo extends SourceRefElementInfo {
 	public int getModifiers() {
 		return this.flags;
 	}
+
 	/**
 	 * @see org.eclipse.dltk.internal.compiler.env.ISourceType#getNameSourceEnd()
 	 * @see org.eclipse.dltk.internal.compiler.env.ISourceMethod#getNameSourceEnd()
@@ -43,6 +44,7 @@ public abstract class MemberElementInfo extends SourceRefElementInfo {
 	public int getNameSourceEnd() {
 		return this.nameEnd;
 	}
+
 	/**
 	 * @see org.eclipse.dltk.internal.compiler.env.ISourceType#getNameSourceStart()
 	 * @see org.eclipse.dltk.internal.compiler.env.ISourceMethod#getNameSourceStart()
@@ -51,21 +53,34 @@ public abstract class MemberElementInfo extends SourceRefElementInfo {
 	public int getNameSourceStart() {
 		return this.nameStart;
 	}
+
 	protected void setFlags(int flags) {
 		this.flags = flags;
 	}
+
 	/**
-	 * Sets the last position of this member's name, relative
-	 * to its openable's source buffer.
+	 * Sets the last position of this member's name, relative to its openable's
+	 * source buffer.
 	 */
 	protected void setNameSourceEnd(int end) {
-		this.nameEnd= end;
+		this.nameEnd = end;
 	}
+
 	/**
-	 * Sets the start position of this member's name, relative
-	 * to its openable's source buffer.
+	 * Sets the start position of this member's name, relative to its openable's
+	 * source buffer.
 	 */
 	protected void setNameSourceStart(int start) {
-		this.nameStart= start;
+		this.nameStart = start;
+	}
+
+	protected INamespace namespace;
+
+	public INamespace getNamespace() {
+		return namespace;
+	}
+
+	protected void setNamespace(INamespace namespace) {
+		this.namespace = namespace;
 	}
 }

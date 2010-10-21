@@ -40,7 +40,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, String methodName,
-			String[] parameterNames, String packageName,
+			String[] parameterNames, String[] namespace,
 			String[] enclosingTypeNames) {
 
 		int typeNameLength = methodName == null ? 0 : methodName.length();
@@ -54,15 +54,8 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 			}
 		}
 
-		int packageLength = packageName == null ? 0 : packageName.length();
-		int enclosingNamesLength = 0;
-		if (enclosingTypeNames != null) {
-			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				enclosingNamesLength += enclosingTypeNames[i].length();
-				if (++i < length)
-					enclosingNamesLength++; // for the '.' separator
-			}
-		}
+		int packageLength = indexKeyLength(namespace);
+		int enclosingNamesLength = indexKeyLength(enclosingTypeNames);
 		int resultLength = typeNameLength + parameterNamesLength
 				+ packageLength + enclosingNamesLength + 6;
 
@@ -84,21 +77,9 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 			}
 		}
 		result[pos++] = SEPARATOR;
-		if (packageLength > 0) {
-			packageName.getChars(0, packageLength, result, pos);
-			pos += packageLength;
-		}
+		pos = encodeNames(namespace, packageLength, result, pos);
 		result[pos++] = SEPARATOR;
-		if (enclosingTypeNames != null && enclosingNamesLength > 0) {
-			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				String enclosingName = enclosingTypeNames[i];
-				int itsLength = enclosingName.length();
-				enclosingName.getChars(0, itsLength, result, pos);
-				pos += itsLength;
-				if (++i < length)
-					result[pos++] = '$';
-			}
-		}
+		pos = encodeNames(enclosingTypeNames, enclosingNamesLength, result, pos);
 		result[pos++] = SEPARATOR;
 		result[pos++] = (char) modifiers;
 		result[pos] = (char) (modifiers >> 16);

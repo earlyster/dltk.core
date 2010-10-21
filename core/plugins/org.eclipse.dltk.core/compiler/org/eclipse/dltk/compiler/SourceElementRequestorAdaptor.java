@@ -96,4 +96,16 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	 */
 	public void acceptImport(ImportInfo importInfo) {
 	}
+
+	/**
+	 * @since 3.0
+	 */
+	public void enterNamespace(String[] namespace) {
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public void exitNamespace() {
+	}
 }

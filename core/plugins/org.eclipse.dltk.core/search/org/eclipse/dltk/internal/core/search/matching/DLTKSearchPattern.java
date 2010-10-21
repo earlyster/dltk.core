@@ -18,6 +18,46 @@ import org.eclipse.dltk.core.search.SearchPattern;
 
 public class DLTKSearchPattern extends SearchPattern {
 
+	protected static int indexKeyLength(String name) {
+		return name != null ? name.length() : 0;
+	}
+
+	protected static int indexKeyLength(String[] names) {
+		int result = 0;
+		if (names != null) {
+			for (int i = 0, length = names.length; i < length;) {
+				result += names[i].length();
+				if (++i < length)
+					result++; // for the '.' separator
+			}
+		}
+		return result;
+	}
+
+	protected static int encodeName(String name, int nameLength, char[] result,
+			int pos) {
+		if (nameLength > 0) {
+			name.getChars(0, nameLength, result, pos);
+			pos += nameLength;
+		}
+		return pos;
+	}
+
+	protected static int encodeNames(String[] names, int namesLength,
+			char[] result, int pos) {
+		if (names != null && namesLength > 0) {
+			for (int i = 0, length = names.length; i < length;) {
+				String name = names[i];
+				int itsLength = name.length();
+				name.getChars(0, itsLength, result, pos);
+				pos += itsLength;
+				if (++i < length)
+					result[pos++] = '$';
+			}
+		}
+		return pos;
+	}
+
 	/*
 	 * Whether this pattern is case sensitive.
 	 */

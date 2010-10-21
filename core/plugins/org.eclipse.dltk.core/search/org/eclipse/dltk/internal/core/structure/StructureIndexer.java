@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core.structure;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.util.Util;
@@ -20,7 +19,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
@@ -30,7 +28,6 @@ import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
 import org.eclipse.dltk.core.model.binary.IBinaryModule;
-import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
@@ -97,16 +94,6 @@ public class StructureIndexer extends AbstractIndexer {
 		SourceIndexerRequestor requestor = ModelManager.getModelManager().indexManager
 				.getSourceRequestor(sourceModule.getScriptProject());
 		requestor.setIndexer(this);
-		if (!this.document.isExternal()) {
-			IScriptFolder folder = (IScriptFolder) sourceModule.getParent();
-			requestor.setPackageName(folder.getElementName());
-		} else {
-			String ppath = this.document.getPath().toString();
-			String pkgName = (new Path(ppath.substring(ppath
-					.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1))
-					.removeLastSegments(1)).toString();
-			requestor.setPackageName(pkgName);
-		}
 
 		boolean performed = false;
 		// Try to restore index from persistent cache

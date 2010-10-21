@@ -301,6 +301,25 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	public void enterNamespace(String[] namespace) {
+		this.baseRequestor.enterNamespace(namespace);
+		try {
+			writeTag(TAG_ENTER_NAMESPACE);
+			writeString(namespace);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void exitNamespace() {
+		this.baseRequestor.exitNamespace();
+		try {
+			writeTag(TAG_EXIT_NAMESPACE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public byte[] getBytes() {
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {

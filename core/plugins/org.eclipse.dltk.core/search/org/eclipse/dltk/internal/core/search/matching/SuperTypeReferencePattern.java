@@ -43,7 +43,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 
 	protected static char[][] CATEGORIES = { IIndexConstants.SUPER_REF };
 
-	public static char[] createIndexKey(int modifiers, String packageName,
+	public static char[] createIndexKey(int modifiers, String namespace[],
 			String typeName, String[] enclosingTypeNames,
 			char[][] typeParameterSignatures, char classOrInterface,
 			char[] superTypeName, char superClassOrInterface) {
@@ -84,9 +84,9 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		char[] enclosingTypeName = CharOperation.concatWith(enclosingTypeNames,
 				'$');
 		if (superQualification != null
-				&& CharOperation.equals(new String(superQualification),
-						packageName))
-			packageName = IIndexConstants.ONE_ZERO_CHAR_STRING; // save some
+				&& CharOperation.equals(superQualification,
+						CharOperation.concatWith(namespace, '$')))
+			namespace = IIndexConstants.ONE_ZERO_CHAR_STRINGS; // save some
 		// space
 
 		char[] typeParameters = CharOperation.NO_CHAR;
@@ -115,7 +115,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		int simpleLength = simpleName == null ? 0 : simpleName.length();
 		int enclosingLength = enclosingTypeName == null ? 0
 				: enclosingTypeName.length;
-		int packageLength = packageName == null ? 0 : packageName.length();
+		int packageLength = indexKeyLength(namespace);
 		char[] result = new char[superLength + superQLength + simpleLength
 				+ enclosingLength + typeParametersLength + packageLength + 9];
 		int pos = 0;
@@ -135,9 +135,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
 		if (enclosingLength > 0) {
-			System
-					.arraycopy(enclosingTypeName, 0, result, pos,
-							enclosingLength);
+			System.arraycopy(enclosingTypeName, 0, result, pos, enclosingLength);
 			pos += enclosingLength;
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
@@ -148,8 +146,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
 		if (packageLength > 0) {
-			packageName.getChars(0, packageLength, result, pos);
-			pos += packageLength;
+			pos = encodeNames(namespace, packageLength, result, pos);
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
 		result[pos++] = superClassOrInterface;

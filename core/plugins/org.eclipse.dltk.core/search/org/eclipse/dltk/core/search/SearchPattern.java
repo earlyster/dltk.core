@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
+import static org.eclipse.dltk.core.search.indexing.IIndexConstants.TYPE_SEPARATOR;
+
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -19,7 +21,9 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
+import org.eclipse.dltk.core.ISearchPatternProcessor.ITypePattern;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
@@ -294,8 +298,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			return true; // null pattern is equivalent to '*'
 		if (name == null)
 			return false; // null name cannot match
-		return camelCaseMatch(pattern, 0, pattern.length(), name, 0, name
-				.length());
+		return camelCaseMatch(pattern, 0, pattern.length(), name, 0,
+				name.length());
 	}
 
 	/**
@@ -910,8 +914,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 */
 	public static SearchPattern createPattern(IModelElement element, int limitTo) {
 		return createPattern(element, limitTo, R_EXACT_MATCH | R_CASE_SENSITIVE
-				| R_ERASURE_MATCH, DLTKLanguageManager
-				.getLanguageToolkit(element));
+				| R_ERASURE_MATCH,
+				DLTKLanguageManager.getLanguageToolkit(element));
 	}
 
 	/**
@@ -1038,8 +1042,9 @@ public abstract class SearchPattern extends InternalSearchPattern {
 					enclosingNames = enclosingTypeNames(element);
 					if (enclosingNames.length > 0) {
 						declaringSimpleName = CharOperation.concat(
-								declaringQualification, CharOperation
-										.concatWith(enclosingNames, '$'), '$');
+								declaringQualification,
+								CharOperation.concatWith(enclosingNames, '$'),
+								'$');
 					}
 				}
 			}
@@ -1083,17 +1088,18 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			break;
 		case IModelElement.TYPE:
 			IType type = (IType) element;
+			char[] packageName = null;
 			char[][] superTypes = null;
 			try {
 				superTypes = CharOperation.stringArrayToCharCharArray(type
 						.getSuperClasses());
+				packageName = createPackagePattern(type.getNamespace());
 			} catch (ModelException e) {
 				return null;
 			}
 
 			searchPattern = createTypePattern(type.getElementName()
-					.toCharArray(), type.getScriptFolder().getElementName()
-					.toCharArray(), ignoreDeclaringType ? null
+					.toCharArray(), packageName, ignoreDeclaringType ? null
 					: enclosingTypeNames(type), superTypes, null, type,
 					maskedLimitTo, matchRule);
 			break;
@@ -1109,6 +1115,15 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		if (searchPattern != null)
 			MatchLocator.setFocus(searchPattern, element);
 		return searchPattern;
+	}
+
+	static char[] createPackagePattern(INamespace namespace) {
+		if (namespace != null) {
+			return CharOperation.concatWith(namespace.getStrings(),
+					TYPE_SEPARATOR);
+		} else {
+			return null;
+		}
 	}
 
 	private static SearchPattern createTypePattern(char[] simpleName,
@@ -1171,18 +1186,15 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		if (type == null)
 			return null;
 
-		char[] qualificationChars = null, typeChars = null;
-
-		ISearchPatternProcessor processor = DLTKLanguageManager
-				.getSearchPatternProcessor(toolkit);
-		if (processor != null) {
-			qualificationChars = processor
-					.extractTypeQualification(patternString);
-			typeChars = processor.extractTypeChars(patternString).toCharArray();
-		} else {
-			typeChars = patternString.toCharArray();
+		char[] qualificationChars;
+		char[] typeChars;
+		{
+			ITypePattern typePattern = DLTKLanguageManager
+					.getSearchPatternProcessor(toolkit, true).parseType(
+							patternString);
+			qualificationChars = typePattern.qualification();
+			typeChars = typePattern.simpleName();
 		}
-
 		if (typeChars.length == 1 && typeChars[0] == '*') {
 			typeChars = null;
 		}

@@ -24,12 +24,12 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		this.document = document;
 	}
 
-	public void addTypeDeclaration(int modifiers, String packageName,
+	public void addTypeDeclaration(int modifiers, String[] namespace,
 			String name, String[] enclosingTypeNames, String[] superclasss) {
 
 		char[] indexKey = TypeDeclarationPattern.createIndexKey(modifiers,
-				name, packageName, enclosingTypeNames, CharOperation
-						.stringArrayToCharCharArray(superclasss));
+				name, namespace, enclosingTypeNames,
+				CharOperation.stringArrayToCharCharArray(superclasss));
 		addIndexEntry(TYPE_DECL, indexKey);
 		//
 		if (superclasss != null) {
@@ -40,10 +40,11 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			for (int i = 0, max = superclasss.length; i < max; i++) {
 				String superClass = erasure(superclasss[i]);
 				addTypeReference(superClass);
-				addIndexEntry(SUPER_REF, SuperTypeReferencePattern
-						.createIndexKey(modifiers, packageName, name,
-								enclosingTypeNames, null, TYPE_SUFFIX,
-								superClass.toCharArray(), TYPE_SUFFIX));
+				addIndexEntry(SUPER_REF,
+						SuperTypeReferencePattern.createIndexKey(modifiers,
+								namespace, name, enclosingTypeNames, null,
+								TYPE_SUFFIX, superClass.toCharArray(),
+								TYPE_SUFFIX));
 
 			}
 		}
@@ -60,7 +61,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		// ConstructorPattern.createIndexKey(CharOperation.lastSegment(typeName,
 		// '.'),
 		// argCount));
-		//	
+		//
 		// if (parameterTypes != null) {
 		// for (int i = 0; i < argCount; i++)
 		// addTypeReference(parameterTypes[i]);
@@ -96,12 +97,12 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		this.document.addIndexEntry(category, key);
 	}
 
-	public void addMethodDeclaration(int modifiers, String packageName,
+	public void addMethodDeclaration(int modifiers, String[] namespace,
 			String[] enclosingTypeNames, String methodName,
 			String[] parameterNames, String[] exceptionTypes) {
 
 		addIndexEntry(METHOD_DECL, MethodDeclarationPattern.createIndexKey(
-				modifiers, methodName, parameterNames, packageName,
+				modifiers, methodName, parameterNames, namespace,
 				enclosingTypeNames));
 
 		// if (parameterNames != null) {
@@ -116,8 +117,8 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public void addMethodReference(String methodName, int argCount) {
-		addIndexEntry(METHOD_REF, MethodPattern.createIndexKey(methodName
-				.toCharArray(), argCount));
+		addIndexEntry(METHOD_REF, MethodPattern.createIndexKey(
+				methodName.toCharArray(), argCount));
 	}
 
 	public void addNameReference(String name) {

@@ -15,6 +15,7 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.internal.core.DuplicateResolver;
 import org.eclipse.dltk.internal.core.ImportContainer;
 import org.eclipse.dltk.internal.core.MethodParameterInfo;
@@ -22,6 +23,7 @@ import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelElementInfo;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.SourceMethodUtils;
+import org.eclipse.dltk.internal.core.SourceNamespace;
 import org.eclipse.dltk.internal.core.SourceRefElement;
 
 /**
@@ -54,6 +56,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	private SourceMapper mapper;
 	private Map<IModelElement, ModelElementInfo> newElements;
+	private Stack<INamespace> namespaces = new Stack<INamespace>();
 
 	public BinaryModuleStructureRequestor(IBinaryModule module,
 			BinaryModuleElementInfo moduleInfo, SourceMapper mapper,
@@ -89,8 +92,8 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 			ModelElementInfo parentInfo) {
 		ModelManager manager = ModelManager.getModelManager();
 
-		BinaryField handle = new BinaryField(parentHandle, manager
-				.intern(fieldInfo.name));
+		BinaryField handle = new BinaryField(parentHandle,
+				manager.intern(fieldInfo.name));
 		BinaryFieldElementInfo handleInfo = new BinaryFieldElementInfo();
 		handleInfo.setFlags(fieldInfo.modifiers);
 		handleInfo.setType(fieldInfo.type);
@@ -117,8 +120,8 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	private void processMethod(MethodInfo methodInfo,
 			ModelElement parentHandle, ModelElementInfo parentInfo) {
 		ModelManager manager = ModelManager.getModelManager();
-		BinaryMethod handle = new BinaryMethod(parentHandle, manager
-				.intern(methodInfo.name));
+		BinaryMethod handle = new BinaryMethod(parentHandle,
+				manager.intern(methodInfo.name));
 		resolveDuplicates(handle);
 
 		BinaryMethodElementInfo handleInfo = new BinaryMethodElementInfo();
@@ -149,8 +152,8 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 						defaultValue = manager.intern(defaultValue);
 					}
 				}
-				params[i] = new MethodParameterInfo(manager
-						.intern(parameterNames[i]), type, defaultValue);
+				params[i] = new MethodParameterInfo(
+						manager.intern(parameterNames[i]), type, defaultValue);
 			}
 			handleInfo.setArguments(params);
 		}
@@ -177,9 +180,12 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	private void processType(TypeInfo typeInfo, ModelElement parentHandle,
 			ModelElementInfo parentInfo) {
-		String nameString = typeInfo.name;
-		BinaryType handle = new BinaryType(parentHandle, nameString);
+		BinaryType handle = new BinaryType(parentHandle, typeInfo.name);
 		BinaryTypeElementInfo handleInfo = new BinaryTypeElementInfo();
+		if (parentHandle.getElementType() == IModelElement.BINARY_MODULE
+				&& !namespaces.isEmpty()) {
+			handleInfo.setNamespace(namespaces.peek());
+		}
 		handleInfo.setFlags(typeInfo.modifiers);
 		resolveDuplicates(handle);
 
@@ -251,6 +257,14 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	public void acceptImport(ImportInfo importInfo) {
 
+	}
+
+	public void enterNamespace(String[] namespace) {
+		namespaces.add(new SourceNamespace(namespace));
+	}
+
+	public void exitNamespace() {
+		namespaces.pop();
 	}
 
 	private void resolveDuplicates(SourceRefElement handle) {

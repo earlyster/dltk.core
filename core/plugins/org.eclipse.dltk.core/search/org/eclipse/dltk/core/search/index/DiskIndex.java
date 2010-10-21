@@ -62,7 +62,7 @@ public class DiskIndex {
 
 	private char[] cachedCategoryName;
 
-	public static final String SIGNATURE = "DLTK INDEX VERSION 1.012"; //$NON-NLS-1$
+	public static final String SIGNATURE = "DLTK INDEX VERSION 1.013"; //$NON-NLS-1$
 
 	public final static boolean DEBUG = false;
 
@@ -812,9 +812,9 @@ public class DiskIndex {
 					// negating
 					// documentNumber
 				} else if (arrayOffset < largeArraySize) {
-					categoryTable.put(word, readDocumentArray(stream,
-							arrayOffset)); // read in-lined array providing
-					// size
+					categoryTable.put(word,
+							readDocumentArray(stream, arrayOffset));
+					// read in-lined array providing size
 				} else {
 					arrayOffset = stream.readInt(); // read actual offset
 					if (readDocNumbers) {
@@ -849,8 +849,8 @@ public class DiskIndex {
 				stream.skip(firstOffset);
 				for (int i = 0; i < count; i++)
 					// each array follows the previous one
-					categoryTable.put(matchingWords[i], readDocumentArray(
-							stream, stream.readInt()));
+					categoryTable.put(matchingWords[i],
+							readDocumentArray(stream, stream.readInt()));
 			} finally {
 				stream.close();
 			}
@@ -916,8 +916,7 @@ public class DiskIndex {
 			boolean isLastChunk = chunkNumber == this.numberOfChunks - 1;
 			int start = this.chunkOffsets[chunkNumber];
 			int numberOfBytes = (isLastChunk ? this.startOfCategoryTables
-					: this.chunkOffsets[chunkNumber + 1])
-					- start;
+					: this.chunkOffsets[chunkNumber + 1]) - start;
 			if (numberOfBytes < 0)
 				throw new IllegalArgumentException();
 			byte[] bytes = new byte[numberOfBytes];
@@ -994,8 +993,8 @@ public class DiskIndex {
 					this.categoryTables = null;
 				} else if (this.categoryTables.elementSize > 1) {
 					HashtableOfObject newTables = new HashtableOfObject(3);
-					newTables.put(this.cachedCategoryName, this.categoryTables
-							.get(this.cachedCategoryName));
+					newTables.put(this.cachedCategoryName,
+							this.categoryTables.get(this.cachedCategoryName));
 					this.categoryTables = newTables;
 				}
 			}
@@ -1064,9 +1063,7 @@ public class DiskIndex {
 				stream.writeByte(end);
 
 				int last = next.length() - end;
-				stream
-						.writeUTF(start < last ? next.substring(start, last)
-								: ""); //$NON-NLS-1$
+				stream.writeUTF(start < last ? next.substring(start, last) : ""); //$NON-NLS-1$
 				current = next;
 			}
 		}

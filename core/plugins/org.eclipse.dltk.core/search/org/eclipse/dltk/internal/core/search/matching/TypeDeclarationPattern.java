@@ -40,20 +40,12 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, String typeName,
-			String packageName, String[] enclosingTypeNames, char[][] superTypes) { // ,
-		// char
-		// typeSuffix)
-		// {
+			String[] packageName, String[] enclosingTypeNames,
+			char[][] superTypes) {
+		// , char typeSuffix) {
 		int typeNameLength = typeName == null ? 0 : typeName.length();
-		int packageLength = packageName == null ? 0 : packageName.length();
-		int enclosingNamesLength = 0;
-		if (enclosingTypeNames != null) {
-			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				enclosingNamesLength += enclosingTypeNames[i].length();
-				if (++i < length)
-					enclosingNamesLength++; // for the '.' separator
-			}
-		}
+		int packageLength = indexKeyLength(packageName);
+		int enclosingNamesLength = indexKeyLength(enclosingTypeNames);
 		int superTypesLength = 0;
 		if (superTypes != null) {
 			for (int i = 0, length = superTypes.length; i < length;) {
@@ -72,21 +64,9 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 			pos += typeNameLength;
 		}
 		result[pos++] = SEPARATOR;
-		if (packageLength > 0) {
-			packageName.getChars(0, packageLength, result, pos);
-			pos += packageLength;
-		}
+		pos = encodeNames(packageName, packageLength, result, pos);
 		result[pos++] = SEPARATOR;
-		if (enclosingTypeNames != null && enclosingNamesLength > 0) {
-			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				String enclosingName = enclosingTypeNames[i];
-				int itsLength = enclosingName.length();
-				enclosingName.getChars(0, itsLength, result, pos);
-				pos += itsLength;
-				if (++i < length)
-					result[pos++] = '$';
-			}
-		}
+		pos = encodeNames(enclosingTypeNames, enclosingNamesLength, result, pos);
 		result[pos++] = SEPARATOR;
 		if (superTypes != null && superTypesLength > 0) {
 			for (int i = 0, length = superTypes.length; i < length;) {
@@ -112,11 +92,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		if (isCaseSensitive() || enclosingTypeNames == null) {
 			this.enclosingTypeNames = enclosingTypeNames;
 		} else {
-			int length = enclosingTypeNames.length;
-			this.enclosingTypeNames = new char[length][];
-			for (int i = 0; i < length; i++)
-				this.enclosingTypeNames[i] = CharOperation
-						.toLowerCase(enclosingTypeNames[i]);
+			this.enclosingTypeNames = CharOperation
+					.toLowerCase(enclosingTypeNames);
 		}
 		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName
 				: CharOperation.toLowerCase(simpleName);

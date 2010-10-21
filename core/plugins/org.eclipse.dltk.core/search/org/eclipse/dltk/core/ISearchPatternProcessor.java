@@ -11,7 +11,61 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
+
 public interface ISearchPatternProcessor {
+
+	char TYPE_SEPARATOR = IIndexConstants.TYPE_SEPARATOR;
+
+	/**
+	 * Parsed type pattern
+	 */
+	public interface ITypePattern {
+		/**
+		 * Returns the type qualification as chars, can be <code>null</code> if
+		 * no qualification.
+		 * 
+		 * In qualification segment separators should be replaced with
+		 * {@link ISearchPatternProcessor#TYPE_SEPARATOR}
+		 * 
+		 * @return
+		 */
+		char[] qualification();
+
+		/**
+		 * Returns the type qualification as String, can be <code>null</code> if
+		 * no qualification
+		 * 
+		 * In qualification segment separators should be replaced with
+		 * {@link ISearchPatternProcessor#TYPE_SEPARATOR}
+		 * 
+		 * @return
+		 */
+		String getQualificatin();
+
+		/**
+		 * Returns the simple type name as chars, not <code>null</code>
+		 * 
+		 * @return
+		 */
+		char[] simpleName();
+
+		/**
+		 * Returns the simple type name as String, not <code>null</code>
+		 * 
+		 * @return
+		 */
+		String getSimpleName();
+	}
+
+	/**
+	 * Returns the parsed type pattern. MUST NOT return <code>null</code>
+	 * 
+	 * @param patternString
+	 *            search pattern string, not <code>null</code>
+	 * @return
+	 */
+	ITypePattern parseType(String patternString);
 
 	/**
 	 * Delimiter replacement string. For example "::" for tcl, "." for python.
@@ -57,6 +111,7 @@ public interface ISearchPatternProcessor {
 	 * @param patternString
 	 * @return
 	 */
+	@Deprecated
 	char[] extractTypeQualification(String patternString);
 
 	/**
@@ -66,6 +121,7 @@ public interface ISearchPatternProcessor {
 	 * @param patternString
 	 * @return
 	 */
+	@Deprecated
 	String extractTypeChars(String patternString);
 
 }

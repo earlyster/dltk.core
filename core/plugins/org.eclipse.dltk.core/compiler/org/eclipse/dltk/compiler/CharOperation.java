@@ -254,6 +254,21 @@ public final class CharOperation {
 	}
 
 	/**
+	 * Returns the string as char array
+	 * 
+	 * @param string
+	 *            the string to convert
+	 * @return the char array or <code>null</code>
+	 * @since 3.0
+	 */
+	public static char[] stringToChar(String string) {
+		if (string == null) {
+			return null;
+		}
+		return string.toCharArray();
+	}
+
+	/**
 	 * Answers a new array adding the second array at the end of first array. It
 	 * answers null if the first and second are null. If the first array is
 	 * null, then a new array char[][] is created with second. If the second
@@ -941,6 +956,60 @@ public final class CharOperation {
 		return result;
 	}
 
+	private static final int concatLength(char[][] array, int separatorLength) {
+		int size = 0;
+		if (array != null) {
+			int index = array.length;
+			if (index > 0) {
+				while (--index >= 0) {
+					if (array[index].length > 0) {
+						if (size != 0) {
+							size += separatorLength;
+						}
+						size += array[index].length;
+					}
+				}
+			}
+		}
+		return size;
+	}
+
+	private static int concatWithTo(char[][] array, char separator,
+			char[] result, int index) {
+		int count = 0;
+		int arrayLen = array.length;
+		for (int i = 0; i < arrayLen; i++) {
+			int subLength = array[i].length;
+			if (subLength > 0) {
+				if (count != 0) {
+					result[index++] = separator;
+				}
+				++count;
+				System.arraycopy(array[i], 0, result, index, subLength);
+				index += subLength;
+			}
+		}
+		return index;
+	}
+
+	public static final char[] concatWith(char[][] first, char[][] second,
+			char separator) {
+		int firstLen = concatLength(first, 1);
+		if (firstLen == 0) {
+			return concatWith(second, separator);
+		}
+		int secondLen = concatLength(second, 1);
+		if (secondLen == 0) {
+			return concatWith(first, separator);
+		}
+		char[] result = new char[firstLen + 1 + secondLen];
+		int index = 0;
+		index = concatWithTo(first, separator, result, index);
+		result[index++] = separator;
+		index = concatWithTo(second, separator, result, index);
+		return result;
+	}
+
 	/**
 	 * Answers the concatenation of the given array parts using the given
 	 * separator between each part. <br>
@@ -1027,6 +1096,43 @@ public final class CharOperation {
 				array[index].getChars(0, length, result, (size -= length));
 				if (--size >= 0)
 					result[size] = separator;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @param array
+	 * @param separator
+	 * @return
+	 * @since 3.0
+	 */
+	public static final char[] concatWith(String[] array, String separator) {
+		int length = array == null ? 0 : array.length;
+		if (length == 0)
+			return CharOperation.NO_CHAR;
+
+		int size = (length - 1) * separator.length();
+		int index = length;
+		while (--index >= 0) {
+			final int len = array[index].length();
+			if (len == 0)
+				size -= separator.length();
+			else
+				size += len;
+		}
+		if (size <= 0)
+			return CharOperation.NO_CHAR;
+		char[] result = new char[size];
+		index = length;
+		while (--index >= 0) {
+			length = array[index].length();
+			if (length > 0) {
+				array[index].getChars(0, length, result, (size -= length));
+				size -= separator.length();
+				if (size >= 0) {
+					separator.getChars(0, separator.length(), result, size);
+				}
 			}
 		}
 		return result;
@@ -2507,8 +2613,7 @@ public final class CharOperation {
 			if (iName == nameEnd)
 				return false;
 			if (patternChar != (isCaseSensitive ? name[iName] : Character
-					.toLowerCase(name[iName]))
-					&& patternChar != '?') {
+					.toLowerCase(name[iName])) && patternChar != '?') {
 				return false;
 			}
 			iName++;
@@ -3306,9 +3411,7 @@ public final class CharOperation {
 		while (end > start && array[end] == ' ')
 			end--;
 		split[currentWord] = new char[end - start + 1];
-		System
-				.arraycopy(array, start, split[currentWord++], 0, end - start
-						+ 1);
+		System.arraycopy(array, start, split[currentWord++], 0, end - start + 1);
 		return split;
 	}
 
@@ -3368,9 +3471,7 @@ public final class CharOperation {
 		for (int i = 0; i < length; i++) {
 			if (array[i] == divider) {
 				split[currentWord] = new char[i - last];
-				System
-						.arraycopy(array, last, split[currentWord++], 0, i
-								- last);
+				System.arraycopy(array, last, split[currentWord++], 0, i - last);
 				last = i + 1;
 			}
 		}
@@ -3477,9 +3578,7 @@ public final class CharOperation {
 		for (int i = start; i < end; i++) {
 			if (array[i] == divider) {
 				split[currentWord] = new char[i - last];
-				System
-						.arraycopy(array, last, split[currentWord++], 0, i
-								- last);
+				System.arraycopy(array, last, split[currentWord++], 0, i - last);
 				last = i + 1;
 			}
 		}
@@ -3648,6 +3747,14 @@ public final class CharOperation {
 			}
 		}
 		return lowerChars == null ? chars : lowerChars;
+	}
+
+	public static char[][] toLowerCase(char[][] names) {
+		int length = names.length;
+		char[][] result = new char[length][];
+		for (int i = 0; i < length; i++)
+			result[i] = toLowerCase(names[i]);
+		return result;
 	}
 
 	/**
@@ -4146,4 +4253,5 @@ public final class CharOperation {
 			return name;
 		}
 	}
+
 }

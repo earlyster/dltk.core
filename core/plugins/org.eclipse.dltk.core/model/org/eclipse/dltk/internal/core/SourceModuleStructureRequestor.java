@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestorExtension;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 
@@ -36,6 +37,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 	 * The info object for the module being parsed
 	 */
 	private SourceModuleElementInfo moduleInfo;
+
+	private Stack<INamespace> namespaces = new Stack<INamespace>();
 
 	/**
 	 * The import container info - null until created
@@ -104,8 +107,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 			ModelElement parentHandle) {
 		ModelManager manager = ModelManager.getModelManager();
 
-		SourceField handle = new SourceField(parentHandle, manager
-				.intern(fieldInfo.name));
+		SourceField handle = new SourceField(parentHandle,
+				manager.intern(fieldInfo.name));
 		this.resolveDuplicates(handle);
 
 		SourceFieldElementInfo info = new SourceFieldElementInfo();
@@ -179,8 +182,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 			ModelElementInfo parentInfo, ModelElement parentHandle) {
 		String nameString = methodInfo.name;
 		ModelManager manager = ModelManager.getModelManager();
-		SourceMethod handle = new SourceMethod(parentHandle, manager
-				.intern(nameString));
+		SourceMethod handle = new SourceMethod(parentHandle,
+				manager.intern(nameString));
 		this.resolveDuplicates(handle);
 
 		SourceMethodElementInfo info = new SourceMethodElementInfo();
@@ -328,18 +331,27 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 		return false;
 	}
 
+	public void enterNamespace(String[] namespace) {
+		namespaces.push(new SourceNamespace(namespace));
+	}
+
+	public void exitNamespace() {
+		namespaces.pop();
+	}
+
 	private void processType(TypeInfo typeInfo, ModelElementInfo parentInfo,
 			ModelElement parentHandle) {
 		String nameString = typeInfo.name;
-		SourceType handle = new SourceType(parentHandle, nameString); // NB:
-		// occurenceCount
-		// is
-		// computed
-		// in
-		// resolveDuplicates
+		SourceType handle = new SourceType(parentHandle, nameString);
+		// NB: occurenceCount is computed in resolveDuplicates
 		this.resolveDuplicates(handle);
 
 		SourceTypeElementInfo info = new SourceTypeElementInfo();
+		if (parentHandle.getElementType() == IModelElement.SOURCE_MODULE
+				&& !namespaces.isEmpty()) {
+			// TODO review the condition above
+			info.setNamespace(namespaces.peek());
+		}
 		info.setHandle(handle);
 		info.setSourceRangeStart(typeInfo.declarationStart);
 		info.setFlags(typeInfo.modifiers);

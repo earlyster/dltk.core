@@ -14,6 +14,7 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface IType extends IMember {
+
 	String[] getSuperClasses() throws ModelException;
 	/**
 	 * Returns the field with the specified name
@@ -94,13 +95,11 @@ public interface IType extends IMember {
 	 * @param enclosingTypeSeparator the given enclosing type separator
 	 * @return the fully qualified name of this type, including qualification for any containing types and packages
 	 * @see IType#getTypeQualifiedName(char)
-	 * @deprecated this methods prepends type name with package (folder) but this is needed only in java   
 	 */
 	String getFullyQualifiedName(String enclosingTypeSeparator);
 	
 	/**
 	 * @return
-	 * @deprecated this methods prepends type name with package (folder) but this is needed only in java
 	 */
 	String getFullyQualifiedName();
 	

@@ -144,4 +144,12 @@ public class SourceElementRequestorDelegate implements ISourceElementRequestor {
 		return target.enterTypeAppend(fullName, fullName);
 	}
 
+	public void enterNamespace(String[] namespace) {
+		target.enterNamespace(namespace);
+	}
+
+	public void exitNamespace() {
+		target.exitNamespace();
+	}
+
 }

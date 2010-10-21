@@ -1,6 +1,7 @@
 package org.eclipse.dltk.core.model.binary;
 
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -59,6 +60,11 @@ public abstract class BinaryMember extends NamedMember implements
 	@Override
 	public int getFlags() throws ModelException {
 		return ((BinaryMemberInfo) getElementInfo()).getFlags();
+	}
+
+	@Override
+	public INamespace getNamespace() throws ModelException {
+		return ((BinaryMemberInfo) getElementInfo()).getNamespace();
 	}
 
 	public IModelElement getHandleFromMemento(String token,

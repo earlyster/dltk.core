@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -636,7 +635,8 @@ public class BasicSearchEngine {
 	}
 
 	boolean match(char patternTypeSuffix, char[] patternPkg,
-			char[] patternTypeName, int matchRule, int typeKind, char[] typeName) {
+			char[] patternTypeName, int matchRule, int typeKind, char[] pkg,
+			char[] typeName) {
 
 		boolean isCaseSensitive = (matchRule & SearchPattern.R_CASE_SENSITIVE) != 0;
 		// if (patternPkg != null && !CharOperation.equals(patternPkg, pkg,
@@ -906,25 +906,11 @@ public class BasicSearchEngine {
 			break;
 		}
 
-		char[][] enclosingTypeNames = null;
-		if (typeName != null) {
-			ISearchPatternProcessor processor = DLTKLanguageManager
-					.getSearchPatternProcessor(scope.getLanguageToolkit());
-			if (processor != null) {
-				String patternString = new String(typeName);
-				char[] qualificationChars = processor
-						.extractTypeQualification(patternString);
-				enclosingTypeNames = CharOperation.splitOn(processor
-						.getDelimiterReplacementString().toCharArray(),
-						qualificationChars);
-				typeName = processor.extractTypeChars(patternString)
-						.toCharArray();
-			}
-		}
-
-		final TypeDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new TypeDeclarationPattern(
-				packageName, enclosingTypeNames, null, typeName, typeSuffix,
-				typeMatchRule, scope.getLanguageToolkit())
+		final boolean simple = packageName == null || packageName.length == 0;
+		// packageMatchRule == SearchPattern.R_EXACT_MATCH
+		final TypeDeclarationPattern pattern = simple ? new TypeDeclarationPattern(
+				packageName, null, null, typeName, typeSuffix, typeMatchRule,
+				scope.getLanguageToolkit())
 				: new QualifiedTypeDeclarationPattern(packageName,
 						packageMatchRule, typeName, typeSuffix, typeMatchRule,
 						scope.getLanguageToolkit());
@@ -1042,6 +1028,7 @@ public class BasicSearchEngine {
 					for (int j = 0; j < allTypes.length; j++) {
 						IType type = allTypes[i];
 						IModelElement parent = type.getParent();
+						final char[][] enclosingTypeNames;
 						if (parent instanceof IType) {
 							char[] parentQualifiedName = ((IType) parent)
 									.getTypeQualifiedName().toCharArray();
@@ -1051,16 +1038,15 @@ public class BasicSearchEngine {
 							enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 						}
 						char[] simpleName = type.getElementName().toCharArray();
+						char[] packageDeclaration = SearchPattern
+								.createPackagePattern(type.getNamespace());
 						int kind = 0;
 						if (match(typeSuffix, packageName, typeName,
-								typeMatchRule, kind, /* packageDeclaration, */
+								typeMatchRule, kind, packageDeclaration,
 								simpleName)) {
 							nameRequestor.acceptType(type.getFlags(),
-									CharOperation.NO_CHAR, /*
-															 * packageDeclaration,
-															 */
-									simpleName, enclosingTypeNames,
-									CharOperation
+									packageDeclaration, simpleName,
+									enclosingTypeNames, CharOperation
 											.stringArrayToCharCharArray(type
 													.getSuperClasses()), path,
 									null);

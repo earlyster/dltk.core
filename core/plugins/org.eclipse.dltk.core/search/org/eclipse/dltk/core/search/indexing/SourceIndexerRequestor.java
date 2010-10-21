@@ -9,9 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
+import java.util.Stack;
+
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
-import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
@@ -28,10 +29,11 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	protected String[] enclosingTypeNames = new String[5];
 	protected int depth = 0;
 	protected int methodDepth = 0;
-	protected String pkgName = Util.EMPTY_STRING;
+	// protected String pkgName = Util.EMPTY_STRING;
 
 	protected ISearchFactory searchFactory;
 	protected ISearchPatternProcessor searchPatternProcessor;
+	private Stack<String[]> namespaces = new Stack<String[]>();
 
 	public SourceIndexerRequestor(AbstractIndexer indexer) {
 		this.indexer = indexer;
@@ -106,7 +108,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * java.lang.Object ---> null java.util.Hashtable$Entry --> [Hashtable]
 	 * x.y.A$B$C --> [A, B]
 	 */
-	public String[] enclosingTypeNames() {
+	protected String[] enclosingTypeNames() {
 		if (depth == 0)
 			return null;
 		String[] qualification = new String[this.depth];
@@ -114,6 +116,10 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 				this.depth);
 
 		return qualification;
+	}
+
+	protected String[] namespace() {
+		return !namespaces.isEmpty() ? namespaces.peek() : null;
 	}
 
 	/**
@@ -139,7 +145,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		} else {
 			typeNames = this.enclosingTypeNames();
 		}
-		this.indexer.addTypeDeclaration(typeInfo.modifiers, this.pkgName,
+		this.indexer.addTypeDeclaration(typeInfo.modifiers, namespace(),
 				typeInfo.name, typeNames, typeInfo.superclasses);
 		this.pushTypeName(typeInfo.name);
 	}
@@ -167,7 +173,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @since 2.0
 	 */
 	public void enterMethod(MethodInfo methodInfo) {
-		this.indexer.addMethodDeclaration(methodInfo.modifiers, this.pkgName,
+		this.indexer.addMethodDeclaration(methodInfo.modifiers, namespace(),
 				this.enclosingTypeNames(), methodInfo.name,
 				methodInfo.parameterNames, methodInfo.exceptionTypes);
 		if (methodInfo.returnType != null) {
@@ -247,15 +253,12 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	public void exitModule(int declarationEnd) {
 	}
 
-	public void setPackageName(String pkgName) {
-		this.pkgName = pkgName;
-	}
-
 	/**
 	 * @since 2.0
 	 */
 	public void acceptPackage(int declarationStart, int declarationEnd,
 			String name) {
+		// this.pkgName = name;
 	}
 
 	/**
@@ -292,6 +295,14 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @since 2.0
 	 */
 	public void acceptImport(ImportInfo importInfo) {
+	}
+
+	public void enterNamespace(String[] namespace) {
+		namespaces.push(namespace);
+	}
+
+	public void exitNamespace() {
+		namespaces.pop();
 	}
 
 }

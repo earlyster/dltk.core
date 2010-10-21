@@ -26,6 +26,7 @@ import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
+import org.eclipse.dltk.core.search.SearchPatternProcessor;
 import org.eclipse.dltk.core.search.DLTKSearchParticipant;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
@@ -361,8 +362,23 @@ public class DLTKLanguageManager {
 	 */
 	public static ISearchPatternProcessor getSearchPatternProcessor(
 			IDLTKLanguageToolkit toolkit) {
+		return getSearchPatternProcessor(toolkit, false);
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public static ISearchPatternProcessor getSearchPatternProcessor(
+			IDLTKLanguageToolkit toolkit, boolean allowDefault) {
 		if (toolkit != null) {
-			return getSearchPatternProcessor(toolkit.getNatureId());
+			final ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit
+					.getNatureId());
+			if (processor != null) {
+				return processor;
+			}
+		}
+		if (allowDefault) {
+			return SearchPatternProcessor.getDefault();
 		} else {
 			return null;
 		}
