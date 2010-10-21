@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.tests.mixin.MixinIndexTests;
 import org.eclipse.dltk.core.tests.mixin.MixinModelTests;
 import org.eclipse.dltk.core.tests.model.BufferTests;
 import org.eclipse.dltk.core.tests.model.ModelMembersTests;
+import org.eclipse.dltk.core.tests.model.NamespaceTests;
 import org.eclipse.dltk.core.tests.model.WorkingCopyTests;
 import org.eclipse.dltk.core.tests.util.CharacterStackTests;
 import org.eclipse.dltk.core.tests.utils.CharOperationTests;
@@ -42,6 +43,7 @@ public class AllTests {
 
 		suite.addTest(CoreDDPTests.suite());
 
+		suite.addTestSuite(NamespaceTests.class);
 		suite.addTest(BufferTests.suite());
 		suite.addTest(ModelMembersTests.suite());
 		suite.addTest(WorkingCopyTests.suite());
