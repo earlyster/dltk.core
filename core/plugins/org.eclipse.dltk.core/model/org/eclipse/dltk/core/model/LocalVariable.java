@@ -31,10 +31,10 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 public class LocalVariable extends SourceRefElement implements ILocalVariable {
 
-	String name;
-	public int declarationSourceStart, declarationSourceEnd;
-	public int nameStart, nameEnd;
-	String type;
+	private String name;
+	private int declarationSourceStart, declarationSourceEnd;
+	private int nameStart, nameEnd;
+	private String type;
 
 	public LocalVariable(IModelElement parent, String name,
 			int declarationSourceStart, int declarationSourceEnd,
