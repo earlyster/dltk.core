@@ -195,4 +195,12 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 	 */
 	public void acceptImport(ImportInfo importInfo) {
 	}
+
+	public void enterNamespace(String[] namespace) {
+		// TODO Auto-generated method stub
+	}
+
+	public void exitNamespace() {
+		// TODO Auto-generated method stub
+	}
 }

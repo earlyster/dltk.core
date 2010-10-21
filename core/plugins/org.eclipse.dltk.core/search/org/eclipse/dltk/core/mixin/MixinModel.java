@@ -251,10 +251,13 @@ public class MixinModel {
 		}
 	}
 
-	private synchronized RequestCacheEntry findFromMixin(String pattern,
+	private RequestCacheEntry findFromMixin(String pattern,
 			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
-		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
+		RequestCacheEntry entry;
+		synchronized (this) {
+			entry = (RequestCacheEntry) requestCache.get(pattern);
+		}
 		// Set modules = new HashSet();
 		if (entry == null || entry.expireTime < System.currentTimeMillis()) {
 			Map keys = new HashMap();
@@ -278,7 +281,9 @@ public class MixinModel {
 				entry.keys.addAll(vals);
 			}
 			if (!monitor.isCanceled()) {
-				this.requestCache.put(pattern, entry);
+				synchronized (this) {
+					this.requestCache.put(pattern, entry);
+				}
 			}
 		}
 		p.done(getNature(), "Mixin model search items", 0);
