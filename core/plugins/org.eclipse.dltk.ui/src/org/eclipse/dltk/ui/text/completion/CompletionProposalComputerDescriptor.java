@@ -247,6 +247,13 @@ final class CompletionProposalComputerDescriptor {
 	}
 
 	/**
+	 * Tells whether we tried to load the computer.
+	 * 
+	 * @since 3.0
+	 */
+	private boolean fTriedLoadingComputer = false;
+
+	/**
 	 * Returns a cached instance of the computer as described in the extension's
 	 * xml. The computer is {@link #createComputer() created} the first time
 	 * that this method is called and then cached.
@@ -259,10 +266,14 @@ final class CompletionProposalComputerDescriptor {
 	 *             if the extension is not valid any longer (e.g. due to plug-in
 	 *             unloading)
 	 */
-	private synchronized IScriptCompletionProposalComputer getComputer()
+	private synchronized IScriptCompletionProposalComputer getComputer(
+			boolean canCreate)
 			throws CoreException, InvalidRegistryObjectException {
-		if (fComputer == null && (fActivate || isPluginLoaded()))
+		if (fComputer == null && canCreate && !fTriedLoadingComputer
+				&& (fActivate || isPluginLoaded())) {
+			fTriedLoadingComputer = true;
 			fComputer = createComputer();
+		}
 		return fComputer;
 	}
 
@@ -321,7 +332,7 @@ final class CompletionProposalComputerDescriptor {
 
 		IStatus status;
 		try {
-			IScriptCompletionProposalComputer computer = getComputer();
+			IScriptCompletionProposalComputer computer = getComputer(true);
 			if (computer == null) // not active yet
 				return Collections.EMPTY_LIST;
 
@@ -376,7 +387,7 @@ final class CompletionProposalComputerDescriptor {
 
 		IStatus status;
 		try {
-			IScriptCompletionProposalComputer computer = getComputer();
+			IScriptCompletionProposalComputer computer = getComputer(true);
 			if (computer == null) // not active yet
 				return Collections.EMPTY_LIST;
 
@@ -421,7 +432,7 @@ final class CompletionProposalComputerDescriptor {
 
 		IStatus status;
 		try {
-			IScriptCompletionProposalComputer computer = getComputer();
+			IScriptCompletionProposalComputer computer = getComputer(true);
 			if (computer == null) // not active yet
 				return;
 
@@ -456,7 +467,7 @@ final class CompletionProposalComputerDescriptor {
 
 		IStatus status;
 		try {
-			IScriptCompletionProposalComputer computer = getComputer();
+			IScriptCompletionProposalComputer computer = getComputer(false);
 			if (computer == null) // not active yet
 				return;
 
