@@ -207,7 +207,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 	}
 
 	public IInformationPresenter getOutlinePresenter(
-			ScriptSourceViewer sourceViewer, boolean doCodeResolve) {
+			ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter;
 		if (doCodeResolve)
 			presenter = new InformationPresenter(
@@ -225,11 +225,25 @@ public abstract class ScriptSourceViewerConfiguration extends
 		presenter.setInformationProvider(provider,
 				IDocument.DEFAULT_CONTENT_TYPE);
 		initializeQuickOutlineContexts(presenter, provider);
+		for (String contentType : getOutlinePresenterContentTypes(sourceViewer,
+				doCodeResolve)) {
+			if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
+				continue;
+			if (presenter.getInformationProvider(contentType) != null)
+				continue;
+			presenter.setInformationProvider(provider, contentType);
+		}
 
 		presenter.setSizeConstraints(50, 20, true, false);
 		return presenter;
 	}
 
+	protected String[] getOutlinePresenterContentTypes(
+			ISourceViewer sourceViewer, boolean doCodeResolve) {
+		return getConfiguredContentTypes(sourceViewer);
+	}
+
+	@Deprecated
 	protected void initializeQuickOutlineContexts(
 			InformationPresenter presenter, IInformationProvider provider) {
 	}
