@@ -762,18 +762,18 @@ public abstract class AbstractScriptCompletionProposal implements
 		return null;
 	}
 
+	protected IPreferenceStore getPreferenceStore() {
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
+
 	protected boolean insertCompletion() {
-		IPreferenceStore preference = DLTKUIPlugin.getDefault()
-				.getPreferenceStore();
-		return preference
-				.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
+		return getPreferenceStore().getBoolean(
+				PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	}
 
 	protected Color getForegroundColor(StyledText text) {
 
-		IPreferenceStore preference = DLTKUIPlugin.getDefault()
-				.getPreferenceStore();
-		RGB rgb = PreferenceConverter.getColor(preference,
+		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(),
 				PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
 		ScriptTextTools textTools = getTextTools();
 		if (textTools == null) {
@@ -788,9 +788,7 @@ public abstract class AbstractScriptCompletionProposal implements
 
 	protected Color getBackgroundColor(StyledText text) {
 
-		IPreferenceStore preference = DLTKUIPlugin.getDefault()
-				.getPreferenceStore();
-		RGB rgb = PreferenceConverter.getColor(preference,
+		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(),
 				PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
 		ScriptTextTools textTools = getTextTools();
 		if (textTools != null)
@@ -957,10 +955,8 @@ public abstract class AbstractScriptCompletionProposal implements
 	}
 
 	protected boolean autocloseBrackets() {
-		IPreferenceStore preferenceStore = DLTKUIPlugin.getDefault()
-				.getPreferenceStore();
-		return preferenceStore
-				.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
+		return getPreferenceStore().getBoolean(
+				PreferenceConstants.EDITOR_CLOSE_BRACKETS);
 	}
 
 	protected void setDisplayString(String string) {
