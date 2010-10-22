@@ -37,7 +37,7 @@ import org.eclipse.swt.graphics.Image;
 
 /**
  * Script UI implementation of <code>CompletionRequestor</code>. Produces
- * {@link IJavaCompletionProposal}s from the proposal descriptors received via
+ * {@link IScriptCompletionProposal}s from the proposal descriptors received via
  * the <code>CompletionRequestor</code> interface.
  * <p>
  * The lifecycle of a <code>CompletionProposalCollector</code> instance is very
@@ -49,7 +49,7 @@ import org.eclipse.swt.graphics.Image;
  *    
  *    CompletionProposalCollector collector= new CompletionProposalCollector(cu);
  *    unit.codeComplete(offset, collector);
- *    IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+ *    IScriptCompletionProposal[] proposals= collector.getScriptCompletionProposals();
  *    String errorMessage= collector.getErrorMessage();
  *    
  *     / / display  / process proposals
