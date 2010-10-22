@@ -36,10 +36,9 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * An entry on the runtime buildpath that the user can manipulate and share in a
@@ -92,10 +91,9 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 			break;
 		default:
 			throw new IllegalArgumentException(
-					MessageFormat
-							.format(
-									LaunchingMessages.RuntimeBuildpathEntry_Illegal_classpath_entry__0__1,
-									new String[] { entry.toString() }));
+					NLS.bind(
+							LaunchingMessages.RuntimeBuildpathEntry_Illegal_classpath_entry__0__1,
+							entry.toString()));
 		}
 		setBuildpathEntry(entry);
 		initializeBuildpathProperty();
@@ -116,10 +114,9 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 			break;
 		default:
 			throw new IllegalArgumentException(
-					MessageFormat
-							.format(
-									LaunchingMessages.RuntimeBuildpathEntry_Illegal_classpath_entry__0__1,
-									new String[] { entry.toString() }));
+					NLS.bind(
+							LaunchingMessages.RuntimeBuildpathEntry_Illegal_classpath_entry__0__1,
+							entry.toString()));
 		}
 		setBuildpathEntry(entry);
 		setBuildpathProperty(buildpathProperty);
@@ -138,15 +135,13 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 		try {
 			setType(Integer.parseInt(root.getAttribute("type"))); //$NON-NLS-1$
 		} catch (NumberFormatException e) {
-			abort(
-					LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_type_2,
+			abort(LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_type_2,
 					e);
 		}
 		try {
 			setBuildpathProperty(Integer.parseInt(root.getAttribute("path"))); //$NON-NLS-1$
 		} catch (NumberFormatException e) {
-			abort(
-					LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_location_3,
+			abort(LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_location_3,
 					e);
 		}
 
@@ -156,8 +151,7 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 		case PROJECT:
 			String name = root.getAttribute("projectName"); //$NON-NLS-1$
 			if (isEmpty(name)) {
-				abort(
-						LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_project_name_4,
+				abort(LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_project_name_4,
 						null);
 			} else {
 				IProject proj = ResourcesPlugin.getWorkspace().getRoot()
@@ -171,8 +165,7 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 				// internal
 				path = root.getAttribute("internalArchive"); //$NON-NLS-1$
 				if (isEmpty(path)) {
-					abort(
-							LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_archive_path_5,
+					abort(LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_archive_path_5,
 							null);
 				} else {
 					setBuildpathEntry(createLibraryEntry(path));
@@ -185,8 +178,7 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 		case CONTAINER:
 			String var = root.getAttribute("containerPath"); //$NON-NLS-1$
 			if (isEmpty(var)) {
-				abort(
-						LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_variable_name_6,
+				abort(LaunchingMessages.RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry___missing_variable_name_6,
 						null);
 			} else {
 				setBuildpathEntry(DLTKCore.newContainerEntry(new Path(var)));
@@ -220,8 +212,8 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 	 * Throws an internal error exception
 	 */
 	protected void abort(String message, Throwable e) throws CoreException {
-		IStatus s = new Status(IStatus.ERROR, DLTKLaunchingPlugin
-				.getUniqueIdentifier(),
+		IStatus s = new Status(IStatus.ERROR,
+				DLTKLaunchingPlugin.getUniqueIdentifier(),
 				ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, message,
 				e);
 		throw new CoreException(s);
@@ -525,8 +517,8 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 					}
 					Object comparisonID1 = initializer.getComparisonID(
 							getPath(), scriptProject1);
-					Object comparisonID2 = initializer.getComparisonID(r
-							.getPath(), scriptProject2);
+					Object comparisonID2 = initializer.getComparisonID(
+							r.getPath(), scriptProject2);
 					return comparisonID1.equals(comparisonID2);
 				}
 			}
