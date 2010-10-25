@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.dltk.core.sdk"
       label="%featureName"
-      version="2.0.0.qualifier"
+      version="3.0.0.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -14,7 +14,7 @@
       %license
    </license>
 
-    <includes
+   <includes
          id="org.eclipse.dltk.core"
          version="0.0.0"/>
 
