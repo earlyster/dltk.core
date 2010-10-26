@@ -11,13 +11,15 @@ package org.eclipse.dltk.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ScriptModelUtil;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
+import org.eclipse.dltk.core.manipulation.IRefactoringEngine;
+import org.eclipse.dltk.core.manipulation.RefactoringEngineManager;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.dltk.internal.ui.actions.ActionUtil;
@@ -192,6 +194,11 @@ public class RenameModelElementAction extends SelectionDispatchAction {
 //				return RefactoringAvailabilityTester.isRenameAvailable((ITypeParameter) element);
 //			case IModelElement.LOCAL_VARIABLE:
 //				return RefactoringAvailabilityTester.isRenameAvailable((ILocalVariable) element);
+		}
+		IRefactoringEngine engine = RefactoringEngineManager.getInstance()
+				.findRefactoringEngine(element);
+		if (engine != null) {
+			return engine.isRenameAvailable(element);
 		}
 		return false;
 	}

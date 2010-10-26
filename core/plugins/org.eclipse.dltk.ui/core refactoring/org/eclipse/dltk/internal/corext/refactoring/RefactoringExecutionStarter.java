@@ -13,17 +13,19 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.manipulation.IRefactoringEngine;
+import org.eclipse.dltk.core.manipulation.RefactoringEngineManager;
 import org.eclipse.dltk.internal.corext.refactoring.rename.RenameResourceProcessor;
 import org.eclipse.dltk.internal.corext.refactoring.rename.ScriptRenameRefactoring;
+import org.eclipse.dltk.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ScriptDeleteProcessor;
-import org.eclipse.dltk.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.dltk.internal.corext.refactoring.structure.ScriptMoveRefactoring;
 import org.eclipse.dltk.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.dltk.internal.ui.refactoring.RefactoringMessages;
@@ -90,6 +92,11 @@ public final class RefactoringExecutionStarter {
 //				return RenameSupport.create((ITypeParameter) element, newName, flags);
 //			case IModelElement.LOCAL_VARIABLE:
 //				return RenameSupport.create((ILocalVariable) element, newName, flags);
+		}
+		IRefactoringEngine engine = RefactoringEngineManager.getInstance()
+				.findRefactoringEngine(element);
+		if (engine != null) {
+			return RenameSupport.create(engine, element, newName, flags);
 		}
 		return null;
 	}

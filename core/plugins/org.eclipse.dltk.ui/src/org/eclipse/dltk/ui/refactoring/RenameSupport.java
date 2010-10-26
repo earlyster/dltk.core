@@ -12,12 +12,14 @@ package org.eclipse.dltk.ui.refactoring;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.internal.corext.refactoring.rename.RenameScriptProjectProcessor;
+import org.eclipse.dltk.core.manipulation.IRefactoringEngine;
 import org.eclipse.dltk.internal.corext.refactoring.rename.RenameScriptFolderProcessor;
+import org.eclipse.dltk.internal.corext.refactoring.rename.RenameScriptProjectProcessor;
 import org.eclipse.dltk.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
 import org.eclipse.dltk.internal.corext.refactoring.rename.RenameSourceModuleProcessor;
 import org.eclipse.dltk.internal.corext.refactoring.rename.ScriptRenameProcessor;
@@ -121,6 +123,13 @@ public class RenameSupport {
 		ScriptRenameProcessor processor= new RenameSourceModuleProcessor(unit);
 		return new RenameSupport(processor, newName, flags);
 	}	
+
+	public static RenameSupport create(IRefactoringEngine engine,
+			IModelElement element, String newName, int flags)
+			throws CoreException {
+		ScriptRenameProcessor processor = engine.createRenameProcessor(element);
+		return new RenameSupport(processor, newName, flags);
+	}
 	/**
 	 * Executes some light weight precondition checking. If the returned status
 	 * is an error then the refactoring can't be executed at all. However,

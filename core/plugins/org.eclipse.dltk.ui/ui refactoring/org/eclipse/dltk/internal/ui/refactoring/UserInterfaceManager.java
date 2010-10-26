@@ -40,9 +40,12 @@ public class UserInterfaceManager {
 		RefactoringProcessor processor= (RefactoringProcessor)refactoring.getAdapter(RefactoringProcessor.class);
 		if (processor == null)
 			return null;
-		Tuple tuple= (Tuple)fMap.get(processor.getClass());
-		if (tuple == null)
-			return null;
+		Tuple tuple = null;
+		Class clazz = processor.getClass();
+		do {
+			tuple = (Tuple) fMap.get(clazz);
+			clazz = clazz.getSuperclass();
+		} while (tuple == null);
 		try {
 			UserInterfaceStarter starter= (UserInterfaceStarter)tuple.starter.newInstance();
 			Class wizardClass= tuple.wizard;
