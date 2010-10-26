@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.text.templates.ITemplateAccess.ITemplateAccessInternal;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
@@ -37,14 +38,16 @@ public class ProjectTemplateStore {
 	public ProjectTemplateStore(ITemplateAccess templateAccess, IProject project) {
 		this.fTemplateAccess = templateAccess;
 		this.fInstanceStore = templateAccess.getTemplateStore();
-		if (project == null) {
+		if (project == null
+				|| templateAccess instanceof ITemplateAccessInternal) {
 			fProjectStore = null;
 		} else {
+			final ITemplateAccessInternal internal = (ITemplateAccessInternal) templateAccess;
 			final ScopedPreferenceStore projectSettings = new ScopedPreferenceStore(
 					new ProjectScope(project),
-					templateAccess.getPreferenceQualifier());
+					internal.getPreferenceQualifier());
 			fProjectStore = new TemplateStore(projectSettings,
-					templateAccess.getPreferenceKey()) {
+					internal.getPreferenceKey()) {
 				/*
 				 * Make sure we keep the id of added code templates - add
 				 * removes it in the usual add() method
@@ -64,7 +67,7 @@ public class ProjectTemplateStore {
 							writer.save(getTemplateData(false), output);
 
 							projectSettings.setValue(
-									fTemplateAccess.getPreferenceKey(),
+									internal.getPreferenceKey(),
 									output.toString());
 							projectSettings.save();
 
@@ -72,8 +75,7 @@ public class ProjectTemplateStore {
 						}
 					}
 
-					projectSettings.setToDefault(fTemplateAccess
-							.getPreferenceKey());
+					projectSettings.setToDefault(internal.getPreferenceKey());
 					projectSettings.save();
 				}
 			};
@@ -81,9 +83,13 @@ public class ProjectTemplateStore {
 	}
 
 	public boolean hasProjectSpecificTempates(IProject project) {
-		String pref = new ProjectScope(project).getNode(
-				fTemplateAccess.getPreferenceQualifier()).get(
-				fTemplateAccess.getPreferenceKey(), null);
+		if (!(fTemplateAccess instanceof ITemplateAccessInternal)) {
+			return false;
+		}
+		final ITemplateAccessInternal internal = (ITemplateAccessInternal) fTemplateAccess;
+		final String pref = new ProjectScope(project).getNode(
+				internal.getPreferenceQualifier()).get(
+				internal.getPreferenceKey(), null);
 		if (pref != null && pref.trim().length() > 0) {
 			Reader input = new StringReader(pref);
 			TemplateReaderWriter reader = new TemplateReaderWriter();

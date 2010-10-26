@@ -13,6 +13,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
+import org.eclipse.dltk.ui.text.templates.ITemplateAccess;
 import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -45,6 +46,10 @@ public interface IDLTKUILanguageToolkit {
 	String getDebugPreferencePage();
 
 	String[] getEditorPreferencePages();
+
+	String getEditorTemplatesPreferencePageId();
+
+	ITemplateAccess getEditorTemplates();
 
 	/**
 	 * Returns the current value of the boolean-valued preference with the given

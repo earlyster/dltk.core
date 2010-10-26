@@ -11,6 +11,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
+import org.eclipse.dltk.ui.text.templates.ITemplateAccess;
 import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IEditorDescriptor;
@@ -133,6 +134,27 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 	}
 
 	public String[] getEditorPreferencePages() {
+		return null;
+	}
+
+	public String getEditorTemplatesPreferencePageId() {
+		final String[] pages = getEditorPreferencePages();
+		if (pages != null && pages.length != 0) {
+			String selected = null;
+			for (String page : pages) {
+				if (page.toLowerCase().contains("templates")) {
+					if (selected != null) {
+						return null;
+					}
+					selected = page;
+				}
+			}
+			return selected;
+		}
+		return null;
+	}
+
+	public ITemplateAccess getEditorTemplates() {
 		return null;
 	}
 

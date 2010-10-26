@@ -85,6 +85,7 @@ import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.text.folding.FoldingProviderManager;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProvider;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
+import org.eclipse.dltk.ui.text.templates.ITemplateAccess;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -189,6 +190,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.texteditor.templates.ITemplatesPage;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -1210,7 +1212,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				.getExtensionRegistry().getConfigurationElementsFor(
 						DLTKUIPlugin.PLUGIN_ID,
 						EXTENSION_EDITOR_CONTEXT_ACTION_GROUPS);
-		final String natureId = getLanguageToolkit().getNatureId();
+		final String natureId = getNatureId();
 		for (int i = 0; i < elements.length; ++i) {
 			final IConfigurationElement element = elements[i];
 			final String elementNature = element.getAttribute(ATTR_NATURE);
@@ -1388,7 +1390,41 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	/**
+	 * The templates page.
+	 * 
+	 * @since 3.0
+	 */
+	private ScriptTemplatesPage fTemplatesPage;
+
+	/**
+	 * Creates the templates page used with this editor.
+	 * 
+	 * @return the created script templates page
+	 * @since 3.0
+	 */
+	protected ScriptTemplatesPage createTemplatesPage() {
+		final IDLTKUILanguageToolkit uiToolkit = getUILanguageToolkit();
+		if (uiToolkit == null) {
+			return null;
+		}
+		final ITemplateAccess templateAccess = uiToolkit.getEditorTemplates();
+		if (templateAccess == null) {
+			return null;
+		}
+		try {
+			return new ScriptTemplatesPage(this, templateAccess);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class required) {
+		if (ITemplatesPage.class.equals(required)) {
+			if (fTemplatesPage == null)
+				fTemplatesPage = createTemplatesPage();
+			return fTemplatesPage;
+		}
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null)
 				fOutlinePage = createOutlinePage();
@@ -2086,8 +2122,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 */
 	@Deprecated
 	protected IFoldingStructureProvider getFoldingStructureProvider() {
-		return FoldingProviderManager.getStructureProvider(getLanguageToolkit()
-				.getNatureId());
+		return FoldingProviderManager.getStructureProvider(getNatureId());
 	}
 
 	private boolean isEditorHoverProperty(String property) {
@@ -2800,7 +2835,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	protected String getNatureId() {
+		return getLanguageToolkit().getNatureId();
+	}
+
 	public abstract IDLTKLanguageToolkit getLanguageToolkit();
+
+	protected IDLTKUILanguageToolkit getUILanguageToolkit() {
+		return DLTKUILanguageManager.getLanguageToolkit(getNatureId());
+	}
 
 	/**
 	 * Return identifier of call hierarchy. Used by call hierarchy actions.
@@ -3183,8 +3226,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	@Override
 	protected String[] collectContextMenuPreferencePages() {
 		final List<String> result = new ArrayList<String>();
-		final IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(getLanguageToolkit().getNatureId());
+		final IDLTKUILanguageToolkit uiToolkit = getUILanguageToolkit();
 		addPages(result, uiToolkit.getEditorPreferencePages());
 		addPages(result, super.collectContextMenuPreferencePages());
 		return result.toArray(new String[result.size()]);
@@ -3219,4 +3261,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		return false;
 	}
+
+	protected String getSymbolicFontName() {
+		return getFontPropertyPreferenceKey();
+	}
+
 }

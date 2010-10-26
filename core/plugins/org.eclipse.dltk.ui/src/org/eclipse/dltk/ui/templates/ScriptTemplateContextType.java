@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.templates;
 
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -43,6 +44,13 @@ public abstract class ScriptTemplateContextType extends TemplateContextType {
 	public abstract ScriptTemplateContext createContext(IDocument document,
 			int completionPosition, int length, ISourceModule sourceModule);
 
+	public ScriptTemplateContext createContext(IDocument document,
+			Position position, ISourceModule sourceModule) {
+		// TODO abstract and let everyone implement it
+		return createContext(document, position.getOffset(),
+				position.getLength(), sourceModule);
+	}
+
 	protected void validateVariables(TemplateVariable[] variables)
 			throws TemplateException {
 		// Check for multiple cursor variables
@@ -74,8 +82,10 @@ public abstract class ScriptTemplateContextType extends TemplateContextType {
 	/**
 	 * Adds script template variable resolvers
 	 * 
-	 * <p>Subclasses may override this method if they wish to add additional
-	 * resolvers.</p>
+	 * <p>
+	 * Subclasses may override this method if they wish to add additional
+	 * resolvers.
+	 * </p>
 	 */
 	protected void addScriptResolvers() {
 		addResolver(new ScriptTemplateVariables.File());

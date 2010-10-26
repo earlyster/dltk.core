@@ -63,6 +63,10 @@ public abstract class CodeTemplateAccess implements ICodeTemplateAccess,
 		return fCodeTemplateStore;
 	}
 
+	public IPreferenceStore getTemplatePreferenceStore() {
+		return preferenceStore;
+	}
+
 	/*
 	 * @see ICodeTemplateAccess#getPreferenceQualifier()
 	 */

@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.templates;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
@@ -18,11 +19,11 @@ public interface ITemplateAccess {
 
 	public interface ITemplateAccessInternal {
 		void dispose();
+
+		String getPreferenceQualifier();
+
+		String getPreferenceKey();
 	}
-
-	String getPreferenceQualifier();
-
-	String getPreferenceKey();
 
 	/**
 	 * Returns the template context type registry for the code generation
@@ -39,5 +40,13 @@ public interface ITemplateAccess {
 	 * @return the template store for the code generation templates
 	 */
 	TemplateStore getTemplateStore();
+
+	/**
+	 * Returns the preference store used to create the template store returned
+	 * by {@link #getTemplateStore()}.
+	 * 
+	 * @return the preference store
+	 */
+	IPreferenceStore getTemplatePreferenceStore();
 
 }

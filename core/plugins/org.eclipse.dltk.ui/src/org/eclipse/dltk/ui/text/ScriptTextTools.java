@@ -25,9 +25,9 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public abstract class ScriptTextTools implements IPartitioningProvider {
 	private DLTKColorManager fColorManager;
 
-	private String fDefaultPartitioning;
+	private final String fDefaultPartitioning;
 
-	private String[] fLegalContentTypes;
+	private final String[] fLegalContentTypes;
 
 	protected ScriptTextTools(String defaultPartitioning,
 			String[] legalContentTypes, boolean autoDisposeOnDisplayDispose) {
