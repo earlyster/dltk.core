@@ -1,5 +1,6 @@
 package org.eclipse.dltk.ui;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -62,6 +63,7 @@ public class EclipsePreferencesAdapter implements IPreferenceStore {
 	 *            The context to access
 	 */
 	public EclipsePreferencesAdapter(IScopeContext context, String qualifier) {
+		Assert.isNotNull(qualifier);
 		fContext = context;
 		fQualifier = qualifier;
 	}

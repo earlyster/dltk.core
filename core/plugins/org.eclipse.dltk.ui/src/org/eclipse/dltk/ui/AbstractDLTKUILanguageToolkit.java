@@ -1,5 +1,8 @@
 package org.eclipse.dltk.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
@@ -49,16 +52,20 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 	 */
 	public IPreferenceStore getCombinedPreferenceStore() {
 		if (fCombinedPreferenceStore == null) {
+			final List<IPreferenceStore> scopes = new ArrayList<IPreferenceStore>();
 			final InstanceScope instanceScope = new InstanceScope();
+			scopes.add(getPreferenceStore());
+			final String qualifier = getCoreToolkit().getPreferenceQualifier();
+			if (qualifier != null) {
+				scopes.add(new EclipsePreferencesAdapter(instanceScope,
+						qualifier));
+			}
+			scopes.add(DLTKUIPlugin.getDefault().getPreferenceStore());
+			scopes.add(new EclipsePreferencesAdapter(instanceScope,
+					DLTKCore.PLUGIN_ID));
+			scopes.add(EditorsUI.getPreferenceStore());
 			fCombinedPreferenceStore = new ChainedPreferenceStore(
-					new IPreferenceStore[] {
-							getPreferenceStore(),
-							new EclipsePreferencesAdapter(instanceScope,
-									getCoreToolkit().getPreferenceQualifier()),
-							DLTKUIPlugin.getDefault().getPreferenceStore(),
-							new EclipsePreferencesAdapter(instanceScope,
-									DLTKCore.PLUGIN_ID),
-							EditorsUI.getPreferenceStore() });
+					scopes.toArray(new IPreferenceStore[scopes.size()]));
 		}
 		return fCombinedPreferenceStore;
 	}
