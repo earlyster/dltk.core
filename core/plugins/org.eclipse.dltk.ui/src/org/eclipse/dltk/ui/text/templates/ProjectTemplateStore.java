@@ -41,10 +41,10 @@ public class ProjectTemplateStore {
 			fProjectStore = null;
 		} else {
 			final ScopedPreferenceStore projectSettings = new ScopedPreferenceStore(
-					new ProjectScope(project), templateAccess
-							.getPreferenceQualifier());
-			fProjectStore = new TemplateStore(projectSettings, templateAccess
-					.getPreferenceKey()) {
+					new ProjectScope(project),
+					templateAccess.getPreferenceQualifier());
+			fProjectStore = new TemplateStore(projectSettings,
+					templateAccess.getPreferenceKey()) {
 				/*
 				 * Make sure we keep the id of added code templates - add
 				 * removes it in the usual add() method
@@ -63,8 +63,9 @@ public class ProjectTemplateStore {
 							TemplateReaderWriter writer = new TemplateReaderWriter();
 							writer.save(getTemplateData(false), output);
 
-							projectSettings.setValue(fTemplateAccess
-									.getPreferenceKey(), output.toString());
+							projectSettings.setValue(
+									fTemplateAccess.getPreferenceKey(),
+									output.toString());
 							projectSettings.save();
 
 							return;
@@ -119,7 +120,7 @@ public class ProjectTemplateStore {
 		if (fProjectStore != null) {
 			fProjectStore.load();
 
-			Set datas = new HashSet();
+			Set<String> datas = new HashSet<String>();
 			TemplatePersistenceData[] data = fProjectStore
 					.getTemplateData(false);
 			for (int i = 0; i < data.length; i++) {
