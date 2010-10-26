@@ -45,7 +45,9 @@ public class TemplateVariableTextHover implements ITextHover {
 				String varName = doc.get(offset, subject.getLength());
 				TemplateContextType contextType = fProcessor.getContextType();
 				if (contextType != null) {
-					Iterator iter = contextType.resolvers();
+					@SuppressWarnings("unchecked")
+					Iterator<TemplateVariableResolver> iter = contextType
+							.resolvers();
 					while (iter.hasNext()) {
 						TemplateVariableResolver var = (TemplateVariableResolver) iter
 								.next();
