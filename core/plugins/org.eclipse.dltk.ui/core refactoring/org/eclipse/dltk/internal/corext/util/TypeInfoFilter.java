@@ -152,9 +152,9 @@ public class TypeInfoFilter {
 			simpleName = "*";
 		}
 		fNameMatcher = new PatternMatcher(simpleName, true);
-		if (pattern.getQualificatin() != null) {
+		if (pattern.getQualification() != null) {
 			fPackageMatcher = new PatternMatcher(
-					evaluatePackagePattern(pattern.getQualificatin()), true);
+					evaluatePackagePattern(pattern.getQualification()), true);
 		}
 	}
 
