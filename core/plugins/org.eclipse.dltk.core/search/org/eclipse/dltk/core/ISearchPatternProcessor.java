@@ -41,7 +41,7 @@ public interface ISearchPatternProcessor {
 		 * 
 		 * @return
 		 */
-		String getQualificatin();
+		String getQualification();
 
 		/**
 		 * Returns the simple type name as chars, not <code>null</code>

@@ -34,7 +34,7 @@ public abstract class SearchPatternProcessor implements ISearchPatternProcessor 
 			return qualification != null ? qualification.toCharArray() : null;
 		}
 
-		public String getQualificatin() {
+		public String getQualification() {
 			return qualification;
 		}
 
