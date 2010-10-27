@@ -12,6 +12,7 @@
     <module>plugins/org.eclipse.dltk.console</module>
     <module>plugins/org.eclipse.dltk.console.ui</module>
     <module>plugins/org.eclipse.dltk.core</module>
+    <module>plugins/org.eclipse.dltk.core.manipulation</module>
     <module>plugins/org.eclipse.dltk.core.doc.isv</module>
     <module>plugins/org.eclipse.dltk.core.index</module>
     <module>plugins/org.eclipse.dltk.core.index.sql</module>
