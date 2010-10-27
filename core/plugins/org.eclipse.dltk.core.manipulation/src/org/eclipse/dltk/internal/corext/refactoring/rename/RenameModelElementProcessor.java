@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IModelElement;
@@ -23,26 +27,40 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.manipulation.IScriptRefactorings;
-import org.eclipse.dltk.core.manipulation.SourceModuleChange;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.SearchEngine;
+import org.eclipse.dltk.core.search.SearchMatch;
+import org.eclipse.dltk.core.search.SearchParticipant;
+import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.core.search.SearchRequestor;
 import org.eclipse.dltk.internal.core.manipulation.Messages;
 import org.eclipse.dltk.internal.core.manipulation.ScriptManipulationPlugin;
 import org.eclipse.dltk.internal.core.refactoring.descriptors.RenameModelElementDescriptor;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.ScriptRefactoringArguments;
 import org.eclipse.dltk.internal.corext.refactoring.ScriptRefactoringDescriptor;
+import org.eclipse.dltk.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.dltk.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.dltk.internal.corext.refactoring.participants.ScriptProcessors;
 import org.eclipse.dltk.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.dltk.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.dltk.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.dltk.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 public abstract class RenameModelElementProcessor extends ScriptRenameProcessor implements IReferenceUpdating {
-	public static final String IDENTIFIER= "org.eclipse.dltk.javascript.renameLocalVariableProcessor"; //$NON-NLS-1$
 
 	protected IModelElement fLocalVariable;
 	protected ISourceModule fCu;
@@ -52,19 +70,20 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 	protected String fCurrentName;
 	//private CompilationUnit fCompilationUnitNode;
 	//private VariableDeclaration fTempDeclarationNode;
-	protected SourceModuleChange fChange;
+	//protected SourceModuleChange fChange;
 
 	//private boolean fIsComposite is always false
 	//private GroupCategorySet fCategorySet;
-	//private TextChangeManager fChangeManager;
+	private TextChangeManager fChangeManager;
 	//private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
 	
 	public RenameModelElementProcessor(IModelElement localVariable) {
 		fLocalVariable = localVariable;
 		fCu = (ISourceModule)fLocalVariable.getAncestor(IModelElement.SOURCE_MODULE);
+		fChangeManager = new TextChangeManager(true);
 	}
 
-
+	
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (!(arguments instanceof ScriptRefactoringArguments))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
@@ -151,7 +170,9 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 	protected RenameModifications computeRenameModifications()
 			throws CoreException {
 		RenameModifications result= new RenameModifications();
-		if (fLocalVariable instanceof IField) {
+		if (fLocalVariable instanceof ILocalVariable) {
+			result.rename((ILocalVariable)fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
+		} else if (fLocalVariable instanceof IField) {
 			// TODO: add switching method in RenameModifications
 			result.rename((IField)fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		}
@@ -160,7 +181,69 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 
 	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
-		return new IFile[] {ResourceUtil.getFile(fCu)};
+		return ResourceUtil.getFiles(fChangeManager.getAllSourceModules());
+	}
+	@Override
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm,
+			CheckConditionsContext context) throws CoreException,
+			OperationCanceledException {
+		try {
+			pm.beginTask("", 1);	 //$NON-NLS-1$
+
+			RefactoringStatus result= checkNewElementName(getNewElementName());
+			if (result.hasFatalError())
+				return result;
+			createEdits(pm);
+			//LocalAnalyzePackage[] localAnalyzePackages= new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage };
+			//result.merge(RenameAnalyzeUtil.analyzeLocalRenames(localAnalyzePackages, fChange, fCompilationUnitNode, true));
+			return result;
+		} finally {
+			pm.done();
+		}
+	}
+	
+	protected abstract IDLTKLanguageToolkit getToolkit();
+
+	private void createEdits(IProgressMonitor pm) throws CoreException{
+		IDLTKLanguageToolkit toolkit = getToolkit();
+		IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(toolkit);
+		SearchEngine engine = new SearchEngine();
+		int rule = fUpdateReferences ? IDLTKSearchConstants.ALL_OCCURRENCES : IDLTKSearchConstants.DECLARATIONS;
+		SearchPattern pattern= SearchPattern.createPattern(fLocalVariable, rule, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE, toolkit);
+		IProgressMonitor monitor = new SubProgressMonitor(pm, 1000);
+		final List<TextEdit> edits = new ArrayList<TextEdit>();
+		engine.search(pattern, new SearchParticipant[]{ SearchEngine.getDefaultSearchParticipant() }, scope, new SearchRequestor() {
+			@Override
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				if (!(match.getElement() instanceof IModelElement)) return;
+				IModelElement elem = (IModelElement)match.getElement();
+				ISourceModule cu = (ISourceModule)elem.getAncestor(IModelElement.SOURCE_MODULE);
+				if (cu != null) {
+					ReplaceEdit edit = new ReplaceEdit(match.getOffset(), fCurrentName.length(), getNewElementName());
+					addTextEdit(fChangeManager.get(cu), RefactoringCoreMessages.RenameTempRefactoring_rename, edit);
+				}
+				//if (match.getResource().equals(fCu.getCorrespondingResource()))
+				//	edits.add(new ReplaceEdit(match.getOffset(), fCurrentName.length(), getNewElementName()));
+			}
+		}, monitor);
+		//fChange= new SourceModuleChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu);
+		//MultiTextEdit rootEdit= new MultiTextEdit();
+		//fChange.setEdit(rootEdit);
+		//fChange.setKeepPreviewEdits(true);
+		//for (TextEdit edit : edits) {
+		//	rootEdit.addChild(edit);
+		//	fChange.addTextEditGroup(new TextEditGroup(RefactoringCoreMessages.RenameTempRefactoring_changeName, edit));
+		//}
+	}
+	
+	private static void addTextEdit(TextChange change, String name, TextEdit edit) throws MalformedTreeException {
+		TextEdit root= change.getEdit();
+		if (root == null) {
+			root= new MultiTextEdit();
+			change.setEdit(root);
+		}
+		root.addChild(edit);
+		change.addTextEditGroup(new TextEditGroup(name, edit));
 	}
 
 	@Override
@@ -175,11 +258,6 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 	
 	public String getNewElement() {
 		return getNewElementName();
-	}
-
-	@Override
-	public String getIdentifier() {
-		return IDENTIFIER;
 	}
 
 	@Override
@@ -233,7 +311,18 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 		return null;
 	}*/
 
-	@Override
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.RenameFieldRefactoring_checking, 1);
+			TextChange[] changes= fChangeManager.getAllChanges();
+			RenameModelElementDescriptor descriptor= createRefactoringDescriptor();
+			return new DynamicValidationRefactoringChange(descriptor, getProcessorName(), changes);
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/*@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException,
 			OperationCanceledException {
 		try {
@@ -244,7 +333,7 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 		} finally {
 			pm.done();
 		}
-	}
+	}*/
 	private RenameModelElementDescriptor createRefactoringDescriptor() {
 		String project= null;
 		IScriptProject scriptProject= fCu.getScriptProject();
