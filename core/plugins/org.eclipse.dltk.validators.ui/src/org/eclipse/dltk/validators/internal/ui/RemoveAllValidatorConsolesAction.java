@@ -32,7 +32,7 @@ public class RemoveAllValidatorConsolesAction extends Action {
 		final IConsoleManager manager = ConsolePlugin.getDefault()
 				.getConsoleManager();
 		final IConsole[] consoles = manager.getConsoles();
-		final List toRemove = new ArrayList();
+		final List<IConsole> toRemove = new ArrayList<IConsole>();
 		for (int i = 0; i < consoles.length; ++i) {
 			IConsole console = consoles[i];
 			if (console instanceof ValidatorConsole
@@ -42,8 +42,8 @@ public class RemoveAllValidatorConsolesAction extends Action {
 			}
 		}
 		if (!toRemove.isEmpty()) {
-			manager.removeConsoles((IConsole[]) toRemove
-					.toArray(new IConsole[toRemove.size()]));
+			manager.removeConsoles(toRemove.toArray(new IConsole[toRemove
+					.size()]));
 		}
 	}
 
