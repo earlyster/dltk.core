@@ -45,7 +45,7 @@ public abstract class NamedMember extends Member {
 		INamespace namespace = getNamespace();
 		if (namespace != null && !namespace.isRoot()) {
 			return namespace.getQualifiedName(enclosingTypeSeparator)
-					+ IScriptFolder.PACKAGE_DELIMETER_STR
+					+ enclosingTypeSeparator
 					+ getTypeQualifiedName(enclosingTypeSeparator,
 							showParameters);
 		}
