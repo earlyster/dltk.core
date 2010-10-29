@@ -201,7 +201,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	@Override
 	protected IProject[] build(int kind,
-			@SuppressWarnings("unchecked") Map args, IProgressMonitor monitor)
+			@SuppressWarnings("rawtypes") Map args, IProgressMonitor monitor)
 			throws CoreException {
 		this.currentProject = getProject();
 		if (currentProject == null || !currentProject.isAccessible())
@@ -363,8 +363,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		try {
 			monitor.beginTask(NLS.bind(
-					Messages.ScriptBuilder_cleaningScriptsIn, currentProject
-							.getName()), 66);
+					Messages.ScriptBuilder_cleaningScriptsIn,
+					currentProject.getName()), 66);
 			if (monitor.isCanceled()) {
 				return;
 			}
@@ -476,8 +476,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
-					Messages.ScriptBuilder_buildingScriptsIn, currentProject
-							.getName()));
+					Messages.ScriptBuilder_buildingScriptsIn,
+					currentProject.getName()));
 			monitor.beginTask(NONAME, WORK_RESOURCES + WORK_EXTERNAL
 					+ WORK_SOURCES + WORK_BUILD);
 			Set<IResource> resources = getResourcesFrom(currentProject,
@@ -630,8 +630,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		final Set<IPath> externalFoldersBefore;
 		if (this.lastState != null) {
 			newState.copyFrom(this.lastState);
-			externalFoldersBefore = new HashSet<IPath>(newState
-					.getExternalFolders());
+			externalFoldersBefore = new HashSet<IPath>(
+					newState.getExternalFolders());
 		} else {
 			externalFoldersBefore = new HashSet<IPath>();
 		}
@@ -640,8 +640,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
-					Messages.ScriptBuilder_buildingScriptsIn, currentProject
-							.getName()));
+					Messages.ScriptBuilder_buildingScriptsIn,
+					currentProject.getName()));
 			monitor.beginTask(NONAME, WORK_RESOURCES + WORK_EXTERNAL
 					+ WORK_SOURCES + WORK_BUILD);
 
@@ -764,8 +764,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 			IResource res = iterator.next();
 			sub.subTask(NLS.bind(
-					Messages.ScriptBuilder_Locating_source_modules, String
-							.valueOf(remainingWork), res.getName()));
+					Messages.ScriptBuilder_Locating_source_modules,
+					String.valueOf(remainingWork), res.getName()));
 			sub.worked(1);
 			if (sub.isCanceled()) {
 				return;
@@ -853,8 +853,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				final int step = buildElementsList.size() * ticks / total;
 				builderWork -= step;
 				monitor.subTask(NLS.bind(
-						Messages.ScriptBuilder_building_N_localModules, Integer
-								.toString(buildElementsList.size())));
+						Messages.ScriptBuilder_building_N_localModules,
+						Integer.toString(buildElementsList.size())));
 				builder.buildModelElements(scriptProject, buildElementsList,
 						new SubProgressMonitor(monitor, step), state.buildType);
 			}
