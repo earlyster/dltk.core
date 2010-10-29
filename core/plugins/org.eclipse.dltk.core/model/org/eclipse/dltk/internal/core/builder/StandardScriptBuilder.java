@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -264,8 +265,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 
 	public DependencyResponse getDependencies(IScriptProject project,
 			int buildType, Set<ISourceModule> localElements,
-			Set<ISourceModule> externalElements, Set oldExternalFolders,
-			Set externalFolders) {
+			Set<ISourceModule> externalElements, Set<IPath> oldExternalFolders,
+			Set<IPath> externalFolders) {
 		if (participants == null) {
 			return null;
 		}

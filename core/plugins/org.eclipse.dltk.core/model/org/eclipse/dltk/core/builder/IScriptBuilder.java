@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.IScriptProject;
@@ -153,8 +154,8 @@ public interface IScriptBuilder {
 	 */
 	DependencyResponse getDependencies(IScriptProject project, int buildType,
 			Set<ISourceModule> localElements,
-			Set<ISourceModule> externalElements, Set oldExternalFolders,
-			Set externalFolders);
+			Set<ISourceModule> externalElements, Set<IPath> oldExternalFolders,
+			Set<IPath> externalFolders);
 
 	/**
 	 * @see IncrementalProjectBuilder
