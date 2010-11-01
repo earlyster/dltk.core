@@ -32,7 +32,7 @@ public class BuildParticipantManager extends NatureExtensionManager {
 		final IBuildParticipantFactory factory;
 		final String id;
 		final String name;
-		public final Set requirements = new HashSet();
+		public final Set<String> requirements = new HashSet<String>();
 
 		/**
 		 * @param factory
@@ -64,8 +64,8 @@ public class BuildParticipantManager extends NatureExtensionManager {
 			return null;
 		}
 		final BuildParticipantDescriptor descriptor = new BuildParticipantDescriptor(
-				(IBuildParticipantFactory) factory, element
-						.getAttribute(ATTR_ID), element.getAttribute(ATTR_NAME));
+				(IBuildParticipantFactory) factory,
+				element.getAttribute(ATTR_ID), element.getAttribute(ATTR_NAME));
 		final IConfigurationElement[] requires = element.getChildren(REQUIRES);
 		for (int i = 0; i < requires.length; ++i) {
 			final String id = requires[i].getAttribute(REQUIRES_ID);
@@ -108,8 +108,8 @@ public class BuildParticipantManager extends NatureExtensionManager {
 	public static IBuildParticipant[] createParticipants(
 			IScriptProject project, BuildParticipantDescriptor[] descriptors) {
 		final IBuildParticipant[] result = new IBuildParticipant[descriptors.length];
-		final Set processed = new HashSet();
-		final Set created = new HashSet();
+		final Set<String> processed = new HashSet<String>();
+		final Set<String> created = new HashSet<String>();
 		for (;;) {
 			final int iterationStartCount = created.size();
 			for (int i = 0; i < descriptors.length; ++i) {
