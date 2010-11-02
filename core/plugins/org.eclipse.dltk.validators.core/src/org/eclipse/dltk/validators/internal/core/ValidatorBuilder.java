@@ -10,15 +10,17 @@
 package org.eclipse.dltk.validators.internal.core;
 
 import java.util.List;
-import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.builder.IBuildChange;
+import org.eclipse.dltk.core.builder.IBuildState;
+import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
@@ -27,70 +29,52 @@ import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.core.ValidatorRuntime.AutomaticValidatorPredicate;
 
 public class ValidatorBuilder implements IScriptBuilder {
-	private static final boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
-	private static final int WORK_EXTERNAL = 200;
+    private static final int WORK_EXTERNAL = 200;
 
-	public IStatus buildModelElements(IScriptProject project, List elements,
-			IProgressMonitor monitor, int buildType) {
-		final IValidator[] validators = ValidatorRuntime.getProjectValidators(
-				project, ISourceModuleValidator.class,
-				new AutomaticValidatorPredicate(project));
-		final int validatorWork = validators.length * WORK_EXTERNAL;
-		monitor.beginTask("", validatorWork); //$NON-NLS-1$
-		try {
-			if (validators.length != 0) {
-				final long startTime = DEBUG ? System.currentTimeMillis() : 0;
-				final IStatus status = ValidatorRuntime
-						.executeSourceModuleValidators(project, elements,
-								new NullValidatorOutput(), validators,
-								ValidatorUtils.subMonitorFor(monitor,
-										validatorWork));
-				if (DEBUG) {
-					System.out
-							.println("Validate " + project.getElementName() + "(" //$NON-NLS-1$ //$NON-NLS-2$
-									+ elements.size()
-									+ ") in " //$NON-NLS-1$
-									+ (System.currentTimeMillis() - startTime)
-									+ "ms"); //$NON-NLS-1$
-				}
-				return status;
-			}
-			return Status.OK_STATUS;
-		} finally {
-			monitor.done();
-		}
-	}
+    public void prepare(IBuildChange change, IBuildState state, IProgressMonitor monitor) throws CoreException {
+        // NOP
+    }
 
-	public IStatus buildResources(IScriptProject project, List resources,
-			IProgressMonitor monitor, int buildType) {
-		final IProgressMonitor sub = new SubProgressMonitor(monitor, resources
-				.size());
-		try {
-			return ValidatorRuntime.executeAutomaticResourceValidators(project,
-					resources, new NullValidatorOutput(), sub);
-		} finally {
-			sub.done();
-		}
-	}
+    public void build(IBuildChange change, IBuildState state, IProgressMonitor monitor) throws CoreException {
+        final IScriptProject project = change.getScriptProject();
+        final List<ISourceModule> elements = change.getSourceModules(IProjectChange.DEFAULT);
+        final IValidator[] validators = ValidatorRuntime.getProjectValidators(
+                project,
+                ISourceModuleValidator.class,
+                new AutomaticValidatorPredicate(project));
+        final int validatorWork = validators.length * WORK_EXTERNAL;
+        monitor.beginTask("", validatorWork); //$NON-NLS-1$
+        try {
+            ValidatorRuntime.executeSourceModuleValidators(
+                    project,
+                    elements,
+                    new NullValidatorOutput(),
+                    validators,
+                    ValidatorUtils.subMonitorFor(monitor, validatorWork));
+        } finally {
+            monitor.done();
+        }
+        final List<IFile> resources = change.getResources(IProjectChange.DEFAULT);
+        final IProgressMonitor sub = new SubProgressMonitor(monitor, resources.size());
+        try {
+            ValidatorRuntime.executeAutomaticResourceValidators(project, resources, new NullValidatorOutput(), sub);
+        } finally {
+            sub.done();
+        }
+    }
 
-	public void clean(IScriptProject project, IProgressMonitor monitor) {
-		ValidatorRuntime.cleanAll(project, new ISourceModule[0],
-				new IResource[] { project.getProject() }, monitor);
-	}
+    public void clean(IScriptProject project, IProgressMonitor monitor) {
+        ValidatorRuntime.cleanAll(project, new ISourceModule[0], new IResource[] { project.getProject() }, monitor);
+    }
 
-	public void initialize(IScriptProject project) {
-		// NOP
-	}
+    public boolean initialize(IScriptProject project) {
+        return true;
+    }
 
-	public void endBuild(IScriptProject project, IProgressMonitor monitor) {
-		// NOP
-	}
-
-	public DependencyResponse getDependencies(IScriptProject project,
-			int buildType, Set localElements, Set externalElements,
-			Set oldExternalFolders, Set externalFolders) {
-		return null;
-	}
+    public void endBuild(IScriptProject project, IProgressMonitor monitor) {
+        // NOP
+    }
 
 }
