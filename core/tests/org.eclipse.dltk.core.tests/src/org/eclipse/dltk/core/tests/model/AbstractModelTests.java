@@ -403,15 +403,15 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	/**
 	 * Returns the IWorkspace this test suite is running on.
 	 */
-	public IWorkspace getWorkspace() {
+	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
-	public IWorkspaceRoot getWorkspaceRoot() {
+	public static IWorkspaceRoot getWorkspaceRoot() {
 		return getWorkspace().getRoot();
 	}
 
-	protected IProject getProject(String project) {
+	protected static IProject getProject(String project) {
 		return getWorkspaceRoot().getProject(project);
 	}
 
