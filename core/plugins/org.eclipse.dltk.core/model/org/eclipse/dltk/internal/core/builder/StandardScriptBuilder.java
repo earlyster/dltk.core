@@ -10,15 +10,12 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,22 +29,49 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.builder.IBuildChange;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension3;
+import org.eclipse.dltk.core.builder.IBuildState;
+import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
-import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.osgi.util.NLS;
 
-public class StandardScriptBuilder implements IScriptBuilder,
-		IScriptBuilderExtension {
+public class StandardScriptBuilder implements IScriptBuilder {
 	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
 
-	public IStatus buildModelElements(IScriptProject project,
+	public void prepare(IBuildChange change, IBuildState state,
+			IProgressMonitor monitor) throws CoreException {
+		if (participants != null) {
+			for (int i = 0; i < participants.length; ++i) {
+				final IBuildParticipant participant = participants[i];
+				if (participant instanceof IBuildParticipantExtension2) {
+					((IBuildParticipantExtension2) participant).prepare(change,
+							state);
+				}
+			}
+		}
+	}
+
+	public void build(IBuildChange change, IBuildState state,
+			IProgressMonitor monitor) throws CoreException {
+		// TODO progress reporting
+		buildExternalElements(change.getScriptProject(),
+				change.getExternalModules(IProjectChange.DEFAULT), monitor,
+				change.getBuildType());
+		if (toolkit != null) {
+			buildNatureModules(change.getScriptProject(),
+					change.getBuildType(),
+					change.getSourceModules(IProjectChange.DEFAULT), monitor);
+		}
+	}
+
+	private IStatus buildModelElements(IScriptProject project,
 			List<ISourceModule> elements, IProgressMonitor monitor,
 			int buildType) {
 		monitor.beginTask(Util.EMPTY_STRING, WORK_BUILD);
@@ -60,7 +84,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	public void buildExternalElements(IScriptProject project,
+	private void buildExternalElements(IScriptProject project,
 			List<ISourceModule> externalElements, IProgressMonitor monitor,
 			int buildType) {
 		beginBuild(buildType, monitor);
@@ -263,59 +287,6 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	public DependencyResponse getDependencies(IScriptProject project,
-			int buildType, Set<ISourceModule> localElements,
-			Set<ISourceModule> externalElements, Set<IPath> oldExternalFolders,
-			Set<IPath> externalFolders) {
-		if (participants == null) {
-			return null;
-		}
-		Set<ISourceModule> localDependencies = null;
-		Set<ISourceModule> externalDependencies = null;
-		boolean fullLocal = false;
-		for (int i = 0; i < participants.length; ++i) {
-			final IBuildParticipant participant = participants[i];
-			if (participant instanceof IBuildParticipantExtension2) {
-				final DependencyResponse response = ((IBuildParticipantExtension2) participant)
-						.getDependencies(buildType, localElements,
-								externalElements, oldExternalFolders,
-								externalFolders);
-				if (response != null) {
-					if (response.isFullExternalBuild()) {
-						return response;
-					} else {
-						if (response.isFullLocalBuild()) {
-							fullLocal = true;
-						} else if (!response.getLocalDependencies().isEmpty()) {
-							if (localDependencies == null) {
-								localDependencies = new HashSet<ISourceModule>();
-							}
-							localDependencies.addAll(response
-									.getLocalDependencies());
-						}
-						if (!response.getExternalDependencies().isEmpty()) {
-							if (externalDependencies == null) {
-								externalDependencies = new HashSet<ISourceModule>();
-							}
-							externalDependencies.addAll(response
-									.getExternalDependencies());
-						}
-					}
-				}
-			}
-		}
-		if (externalDependencies == null) {
-			if (fullLocal) {
-				return DependencyResponse.FULL_LOCAL_BUILD;
-			} else {
-				return DependencyResponse.createLocal(localDependencies);
-			}
-		} else {
-			return DependencyResponse.create(fullLocal, localDependencies,
-					externalDependencies);
-		}
-	}
-
 	private boolean beginBuildDone = false;
 	private boolean endBuildNeeded = false;
 	private IBuildParticipant[] participants = null;
@@ -326,15 +297,19 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		return toolkit;
 	}
 
-	public void initialize(IScriptProject project) {
+	public boolean initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
 			participants = BuildParticipantManager.getBuildParticipants(
 					project, toolkit.getNatureId());
 		}
+		if (participants == null || participants.length == 0) {
+			return false;
+		}
 		problemFactory = createProblemFactory();
 		beginBuildDone = false;
 		endBuildNeeded = false;
+		return true;
 	}
 
 	protected IProblemFactory createProblemFactory() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 xored software, Inc.
+ * Copyright (c) 2010 xored software, Inc.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,18 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
-import org.eclipse.core.runtime.CoreException;
-
-public interface IBuildParticipantExtension2 extends IBuildParticipantExtension {
-
-	/**
-	 * @param buildChange
-	 * @param buildState
-	 * @return
-	 */
-	void prepare(IBuildChange buildChange, IBuildState buildState)
-			throws CoreException;
-
-	void buildExternalModule(IBuildContext context) throws CoreException;
+/**
+ * Reserved for future use.
+ * 
+ * Eventually it will be used to collect dependencies between project sources.
+ */
+public interface IBuildState {
 
 }

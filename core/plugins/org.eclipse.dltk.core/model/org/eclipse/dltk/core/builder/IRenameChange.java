@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 xored software, Inc.
+ * Copyright (c) 2010 xored software, Inc.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,22 +11,25 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
-import java.util.List;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
-
-public interface IScriptBuilderExtension {
+/**
+ * Renamed file.
+ */
+public interface IRenameChange {
 
 	/**
-	 * @param project
-	 * @param externalElements
-	 * @param monitor
-	 * @param buildType
+	 * Returns the original project related path
+	 * 
+	 * @return
 	 */
-	void buildExternalElements(IScriptProject project,
-			List<ISourceModule> externalElements, IProgressMonitor monitor,
-			int buildType);
+	IPath getSource();
 
+	/**
+	 * Returns the destination file
+	 * 
+	 * @return
+	 */
+	IFile getTarget();
 }
