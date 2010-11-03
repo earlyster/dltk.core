@@ -97,7 +97,7 @@ public class RenameScriptFolderProcessor extends ScriptRenameProcessor implement
 			setNewElementName(fPackage.getElementName());
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
-		fRenameSubpackages= false;
+		fRenameSubpackages = true;
 	}
 
 	public String getIdentifier() {
