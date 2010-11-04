@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.model.LocalVariable;
@@ -30,9 +31,9 @@ import org.eclipse.dltk.internal.core.util.Util;
 public class LocalVariablePattern extends VariablePattern implements
 		IIndexConstants {
 
-	final LocalVariable localVariable;
+	private final ILocalVariable localVariable;
 
-	public LocalVariablePattern(LocalVariable localVariable, int limitTo,
+	public LocalVariablePattern(ILocalVariable localVariable, int limitTo,
 			int matchRule, IDLTKLanguageToolkit toolkit) {
 		this(localVariable, isDeclarations(limitTo), isReferences(limitTo),
 				matchRule, toolkit);
@@ -48,7 +49,7 @@ public class LocalVariablePattern extends VariablePattern implements
 				|| limitTo == IDLTKSearchConstants.ALL_OCCURRENCES;
 	}
 
-	private LocalVariablePattern(LocalVariable localVariable,
+	private LocalVariablePattern(ILocalVariable localVariable,
 			boolean declarations, boolean references, int matchRule,
 			IDLTKLanguageToolkit toolkit) {
 		super(LOCAL_VAR_PATTERN, declarations, references, references,
@@ -109,7 +110,16 @@ public class LocalVariablePattern extends VariablePattern implements
 		} else {
 			output.append("LocalVarReferencePattern: "); //$NON-NLS-1$
 		}
-		output.append(this.localVariable.toStringWithAncestors());
+		if (localVariable instanceof LocalVariable) {
+			output.append(((LocalVariable) localVariable)
+					.toStringWithAncestors());
+		} else {
+			output.append(localVariable.getElementName());
+		}
 		return super.print(output);
+	}
+
+	public ILocalVariable getLocalVariable() {
+		return localVariable;
 	}
 }
