@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IPackageDeclaration;
@@ -65,8 +66,9 @@ public abstract class FindReferencesAction extends FindAction {
 	}
 
 	Class[] getValidTypes() {
-		return new Class[] { ISourceModule.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, 
-				IScriptFolder.class};
+		return new Class[] { ISourceModule.class, IType.class, IMethod.class,
+				IField.class, IPackageDeclaration.class, IScriptFolder.class,
+				ILocalVariable.class };
 	}
 
 	void init() {
