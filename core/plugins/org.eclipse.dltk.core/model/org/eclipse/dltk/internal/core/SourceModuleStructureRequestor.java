@@ -16,6 +16,7 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestorExtension;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceModule;
@@ -440,11 +441,14 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 		if (this.importContainers == null) {
 			importContainers = new HashMap<String, ImportContainer>();
 		}
-		importContainer = importContainers.get(importInfo.containerName);
+		String containerName = importInfo.containerName;
+		if (containerName == null) {
+			containerName = Util.EMPTY_STRING;
+		}
+		importContainer = importContainers.get(containerName);
 		if (importContainer == null) {
-			importContainer = createImportContainer(parentCU,
-					importInfo.containerName);
-			importContainers.put(importInfo.containerName, importContainer);
+			importContainer = createImportContainer(parentCU, containerName);
+			importContainers.put(containerName, importContainer);
 			importContainerInfo = new ImportContainerInfo();
 			ModelElementInfo parentInfo = this.infoStack.peek();
 			parentInfo.addChild(importContainer);
