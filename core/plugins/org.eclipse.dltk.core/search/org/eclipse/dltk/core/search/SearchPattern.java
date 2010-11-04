@@ -26,10 +26,12 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISearchPatternProcessor.ITypePattern;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.model.LocalVariable;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
+import org.eclipse.dltk.internal.core.search.matching.LocalVariablePattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
 import org.eclipse.dltk.internal.core.search.matching.OrPattern;
@@ -1109,6 +1111,10 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			break;
 		case IModelElement.FIELD:
 			searchPattern = createFieldPattern(element.getElementName(),
+					maskedLimitTo, matchRule, toolkit);
+			break;
+		case IModelElement.LOCAL_VARIABLE:
+			searchPattern = new LocalVariablePattern((LocalVariable) element,
 					maskedLimitTo, matchRule, toolkit);
 			break;
 		}
