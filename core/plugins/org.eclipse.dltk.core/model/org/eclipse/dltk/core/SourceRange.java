@@ -7,17 +7,13 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.internal.core;
+package org.eclipse.dltk.core;
 
-import org.eclipse.dltk.core.ISourceRange;
-
-/**
- * use {@link org.eclipse.dltk.core.SourceRange}
- */
-@Deprecated
 public class SourceRange implements ISourceRange {
 
-	private int offset, length;
+	public static final ISourceRange UNKNOWN_RANGE = new SourceRange(-1, 0);
+
+	private final int offset, length;
 
 	public SourceRange(int offset, int length) {
 		this.offset = offset;
@@ -36,5 +32,18 @@ public class SourceRange implements ISourceRange {
 	public String toString() {
 		int end = getOffset() + getLength() - 1;
 		return "[" + getOffset() + "," + end + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	/**
+	 * Helper method that answers whether a valid source range is available in
+	 * the given ISourceRange.
+	 * 
+	 * @param range
+	 *            a source range, can be <code>null</code>
+	 * @return <code>true</code> if range is not <code>null</code> and is not
+	 *         {@link #UNKNOWN_RANGE}
+	 */
+	public static boolean isAvailable(ISourceRange range) {
+		return range != null && range != UNKNOWN_RANGE;
 	}
 }

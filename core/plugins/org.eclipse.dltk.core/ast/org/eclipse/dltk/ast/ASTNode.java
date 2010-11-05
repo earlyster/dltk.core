@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceRange;
-import org.eclipse.dltk.internal.core.SourceRange;
+import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.utils.CorePrinter;
 import org.eclipse.osgi.util.NLS;
 

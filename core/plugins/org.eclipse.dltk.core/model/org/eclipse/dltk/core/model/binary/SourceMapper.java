@@ -18,14 +18,12 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.internal.core.SourceRange;
+import org.eclipse.dltk.core.SourceRange;
 
 /**
  * @since 2.0
  */
 public class SourceMapper {
-	protected static final ISourceRange UNKNOWN_RANGE = new SourceRange(-1, 0);
-
 	private static class Range {
 		int start;
 		int end;
@@ -55,7 +53,7 @@ public class SourceMapper {
 
 	private ISourceRange getRange(Range range) {
 		if (range == null) {
-			return UNKNOWN_RANGE;
+			return SourceRange.UNKNOWN_RANGE;
 		}
 		return new SourceRange(range.start, range.end - range.start + 1);
 	}

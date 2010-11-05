@@ -4,11 +4,11 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.MementoModelElementUtil;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.NamedMember;
-import org.eclipse.dltk.internal.core.SourceRange;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
 /**

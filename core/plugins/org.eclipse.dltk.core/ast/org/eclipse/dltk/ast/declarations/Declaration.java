@@ -20,7 +20,7 @@ import org.eclipse.dltk.ast.PositionInformation;
 import org.eclipse.dltk.ast.references.SimpleReference;
 import org.eclipse.dltk.ast.statements.Statement;
 import org.eclipse.dltk.core.ISourceRange;
-import org.eclipse.dltk.internal.core.SourceRange;
+import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.utils.CorePrinter;
 
 public abstract class Declaration extends Statement implements Modifiers {

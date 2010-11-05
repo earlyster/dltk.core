@@ -19,6 +19,7 @@ import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
@@ -157,7 +158,7 @@ public abstract class Member extends SourceRefElement implements IMember {
 			parameters = CharOperation.NO_STRINGS;
 			e.printStackTrace();
 		}
-		ArrayList list = new ArrayList();
+		ArrayList<IMethod> list = new ArrayList<IMethod>();
 		for (int i = 0, length = methods.length; i < length; i++) {
 			IMethod existingMethod = methods[i];
 			try {
@@ -174,9 +175,7 @@ public abstract class Member extends SourceRefElement implements IMember {
 		if (size == 0) {
 			return null;
 		} else {
-			IMethod[] result = new IMethod[size];
-			list.toArray(result);
-			return result;
+			return list.toArray(new IMethod[size]);
 		}
 	}
 

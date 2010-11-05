@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.SourceRange;
 
 class SourceRefElementInfo extends ModelElementInfo {
 	protected int fSourceRangeStart, fSourceRangeEnd;
