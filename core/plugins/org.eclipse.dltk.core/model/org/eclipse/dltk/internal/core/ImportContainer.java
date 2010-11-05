@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -127,12 +128,11 @@ public class ImportContainer extends SourceRefElement implements
 					.getSourceRange();
 			ISourceRange lastRange = ((ISourceReference) imports[imports.length - 1])
 					.getSourceRange();
-			SourceRange range = new SourceRange(firstRange.getOffset(),
+			return new SourceRange(firstRange.getOffset(),
 					lastRange.getOffset() + lastRange.getLength()
 							- firstRange.getOffset());
-			return range;
 		} else {
-			return new SourceRange(0, 0);
+			return null;
 		}
 	}
 
