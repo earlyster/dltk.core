@@ -11,20 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.matching2;
 
-public class MatchingCollector<E> implements IMatchingCollector<E> {
-	private final IMatchingPredicate<E> predicate;
-	private final IMatchingNodeSet<E> nodeSet;
+public interface IMatchingCollector<E> {
 
-	public MatchingCollector(IMatchingPredicate<E> predicate,
-			IMatchingNodeSet<E> nodeSet) {
-		this.predicate = predicate;
-		this.nodeSet = nodeSet;
-	}
+	void report(E node);
 
-	public void report(E node) {
-		MatchLevel level = predicate.match(node);
-		if (level != null) {
-			nodeSet.addMatch(node, level);
-		}
-	}
 }
