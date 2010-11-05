@@ -67,9 +67,14 @@ public class TodoTaskSimpleParser {
 	private int contentEnd;
 
 	public void parse(ITaskReporter reporter, char[] content) {
-		lineNumber = 0;
-		contentPos = 0;
-		contentEnd = content.length;
+		parse(reporter, content, 0, content.length, 0);
+	}
+
+	protected void parse(ITaskReporter reporter, char[] content,
+			int startIndex, int endIndex, int startLineNumber) {
+		lineNumber = startLineNumber;
+		contentPos = startIndex;
+		contentEnd = endIndex;
 		while (contentPos < contentEnd) {
 			int begin = contentPos;
 			final int end = findEndOfLine(content);
