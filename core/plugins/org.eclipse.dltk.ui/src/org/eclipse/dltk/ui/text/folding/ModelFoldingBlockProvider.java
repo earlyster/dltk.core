@@ -73,12 +73,11 @@ public class ModelFoldingBlockProvider implements IFoldingBlockProvider,
 		try {
 			final ISourceRange range = ((ISourceReference) element)
 					.getSourceRange();
-			if (!SourceRange.isAvailable(range)) {
-				return;
+			if (SourceRange.isAvailable(range) && range.getLength() > 0) {
+				requestor.acceptBlock(range.getOffset(), range.getOffset()
+						+ range.getLength(), getKind(element), element,
+						isFoldedInitially(element));
 			}
-			requestor.acceptBlock(range.getOffset(),
-					range.getOffset() + range.getLength(), getKind(element),
-					element, isFoldedInitially(element));
 		} catch (ModelException e) {
 			abortFolding(e);
 		}
