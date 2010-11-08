@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.util.Iterator;
-
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.IProblemRequestor;
@@ -30,8 +28,7 @@ class AccumulatingProblemReporter extends ProblemCollector {
 
 	public void reportToRequestor() {
 		problemRequestor.beginReporting();
-		for (Iterator i = problems.iterator(); i.hasNext();) {
-			final IProblem problem = (IProblem) i.next();
+		for (final IProblem problem : problems) {
 			problemRequestor.acceptProblem(problem);
 		}
 		problemRequestor.endReporting();
