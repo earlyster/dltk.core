@@ -11,6 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-public interface IModelElementVisitorExtension {
+public interface IModelElementVisitorExtension extends IModelElementVisitor {
 	void endVisit(IModelElement element);
 }
