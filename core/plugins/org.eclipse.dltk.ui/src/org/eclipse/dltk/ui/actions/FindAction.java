@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
@@ -22,6 +21,7 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.internal.ui.actions.ActionUtil;
 import org.eclipse.dltk.internal.ui.actions.OpenActionUtil;
@@ -41,6 +41,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -149,7 +150,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}	
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.DLTKElementAction_operationUnavailable_generic; 
+		return NLS.bind(
+				SearchMessages.DLTKElementAction_operationUnavailable_generic,
+				fEditor.getLanguageToolkit().getLanguageName());
 	}
 
 	private IModelElement findType(ISourceModule cu, boolean silent) {
