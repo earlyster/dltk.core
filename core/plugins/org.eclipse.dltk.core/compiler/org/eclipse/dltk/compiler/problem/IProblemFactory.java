@@ -50,4 +50,13 @@ public interface IProblemFactory {
 	 */
 	void deleteMarkers(IResource resource) throws CoreException;
 
+	/**
+	 * Validates that the specified marker has correct type for this problem
+	 * factory
+	 * 
+	 * @param marker
+	 * @return
+	 */
+	boolean isValidMarker(IMarker marker);
+
 }

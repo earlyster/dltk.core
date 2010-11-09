@@ -12,6 +12,7 @@ package org.eclipse.dltk.compiler.problem;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.DLTKCore;
 
 public class DefaultProblemFactory implements IProblemFactory {
 
@@ -37,4 +38,24 @@ public class DefaultProblemFactory implements IProblemFactory {
 				IResource.DEPTH_INFINITE);
 	}
 
+	public boolean isValidMarker(IMarker marker) {
+		try {
+			return isValidMarkerType(marker.getType());
+		} catch (CoreException e) {
+			DLTKCore.error(e);
+			return false;
+		}
+	}
+
+	/**
+	 * Validates that the specified marker type is correct for this problem
+	 * factory
+	 * 
+	 * @param markerType
+	 *            not null
+	 * @return
+	 */
+	protected boolean isValidMarkerType(String markerType) {
+		return markerType.startsWith(DefaultProblem.MARKER_TYPE_PREFIX);
+	}
 }
