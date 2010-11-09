@@ -24,7 +24,6 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class ScriptMarkerAnnotation extends MarkerAnnotation implements IScriptAnnotation {
 
-	public static final String DLTK_MARKER_TYPE_PREFIX= "org.eclipse.dltk"; //$NON-NLS-1$
 	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.dltk.ui.error"; //$NON-NLS-1$
 	public static final String WARNING_ANNOTATION_TYPE= "org.eclipse.dltk.ui.warning"; //$NON-NLS-1$
 	public static final String INFO_ANNOTATION_TYPE= "org.eclipse.dltk.ui.info"; //$NON-NLS-1$

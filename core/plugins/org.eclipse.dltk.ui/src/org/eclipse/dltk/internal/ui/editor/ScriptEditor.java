@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.ILocalVariable;
@@ -52,6 +53,7 @@ import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
+import org.eclipse.dltk.internal.ui.editor.SourceModuleDocumentProvider.SourceModuleAnnotationModel;
 import org.eclipse.dltk.internal.ui.editor.selectionaction.GoToNextPreviousMemberAction;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingReconciler;
@@ -812,7 +814,13 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		super.doSetInput(input);
 
-		IDocument doc = getDocumentProvider().getDocument(input);
+		final IDocumentProvider docProvider = getDocumentProvider();
+		final IAnnotationModel model = docProvider.getAnnotationModel(input);
+		if (model instanceof SourceModuleAnnotationModel) {
+			((SourceModuleAnnotationModel) model).problemFactory = DLTKLanguageManager
+					.getProblemFactory(getNatureId());
+		}
+		final IDocument doc = docProvider.getDocument(input);
 		connectPartitioningToElement(input, doc);
 
 		if (scriptSourceViewer != null

@@ -46,7 +46,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.dltk.compiler.problem.CategorizedProblem;
+import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -329,9 +331,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					if (ar.startsWith(IProblem.DESCRIPTION_ARGUMENT_PREFIX)) {
 						return fProblem.getMessage()
 								+ '\n'
-								+ ar
-										.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
-												.length());
+								+ ar.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
+										.length());
 					}
 				}
 			}
@@ -570,6 +571,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private ReverseMap fReverseMap = new ReverseMap();
 		private List<ScriptMarkerAnnotation> fPreviouslyOverlaid = null;
 		private List<ScriptMarkerAnnotation> fCurrentlyOverlaid = new ArrayList<ScriptMarkerAnnotation>();
+		protected IProblemFactory problemFactory;
 
 		public SourceModuleAnnotationModel(IResource resource) {
 			super(resource);
@@ -580,12 +582,20 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
-			String markerType = MarkerUtilities.getMarkerType(marker);
-			if (markerType != null
-					&& markerType
-							.startsWith(ScriptMarkerAnnotation.DLTK_MARKER_TYPE_PREFIX))
+			if (isScriptMarker(marker))
 				return new ScriptMarkerAnnotation(marker);
 			return super.createMarkerAnnotation(marker);
+		}
+
+		private boolean isScriptMarker(IMarker marker) {
+			if (problemFactory != null) {
+				return problemFactory.isValidMarker(marker);
+			} else {
+				String markerType = MarkerUtilities.getMarkerType(marker);
+				return markerType != null
+						&& markerType
+								.startsWith(DefaultProblem.MARKER_TYPE_PREFIX);
+			}
 		}
 
 		/*
@@ -1721,8 +1731,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			if (setContents) {
 				int READER_CHUNK_SIZE = 2048;
 				int BUFFER_SIZE = 8 * READER_CHUNK_SIZE;
-				Reader in = new BufferedReader(new InputStreamReader(storage
-						.getContents()));
+				Reader in = new BufferedReader(new InputStreamReader(
+						storage.getContents()));
 				StringBuffer buffer = new StringBuffer(BUFFER_SIZE);
 				char[] readBuffer = new char[READER_CHUNK_SIZE];
 				int n;
