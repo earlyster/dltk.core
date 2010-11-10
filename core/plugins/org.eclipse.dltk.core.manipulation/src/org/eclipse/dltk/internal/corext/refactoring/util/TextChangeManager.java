@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.internal.corext.refactoring.changes.SourceModuleChange;
+import org.eclipse.dltk.core.manipulation.SourceModuleChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 
@@ -26,7 +26,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  */
 public class TextChangeManager {
 	
-	private Map/*<ISourceModule, TextChange>*/ fMap= new HashMap(10);
+	private Map<ISourceModule, TextChange> fMap= new HashMap<ISourceModule, TextChange>(10);
 	
 	private final boolean fKeepExecutedTextEdits;
 	
@@ -57,7 +57,7 @@ public class TextChangeManager {
 	 * @return the text change associated with the given compilation unit. 
 	 */
 	public TextChange get(ISourceModule cu) {
-		TextChange result= (TextChange)fMap.get(cu);
+		TextChange result= fMap.get(cu);
 		if (result == null) {
 			result= new SourceModuleChange(cu.getElementName(), cu);
 			result.setKeepPreviewEdits(fKeepExecutedTextEdits);
@@ -74,7 +74,7 @@ public class TextChangeManager {
 	 * @return the removed <tt>TextChange</tt>.
 	 */
 	public TextChange remove(ISourceModule unit) {
-		return (TextChange)fMap.remove(unit);
+		return fMap.remove(unit);
 	}
 	
 	/**
@@ -83,20 +83,20 @@ public class TextChangeManager {
 	 * @return all text changes managed by this instance
 	 */
 	public TextChange[] getAllChanges(){
-		Set cuSet= fMap.keySet();
-		ISourceModule[] cus= (ISourceModule[]) cuSet.toArray(new ISourceModule[cuSet.size()]);
+		Set<ISourceModule> cuSet= fMap.keySet();
+		ISourceModule[] cus= cuSet.toArray(new ISourceModule[cuSet.size()]);
 		// sort by cu name:
-		Arrays.sort(cus, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				String name1= ((ISourceModule) o1).getElementName();
-				String name2= ((ISourceModule) o2).getElementName();
+		Arrays.sort(cus, new Comparator<ISourceModule>() {
+			public int compare(ISourceModule o1, ISourceModule o2) {
+				String name1= o1.getElementName();
+				String name2= o2.getElementName();
 				return name1.compareTo(name2);
 			}
 		});
 		
 		TextChange[] textChanges= new TextChange[cus.length];
 		for (int i= 0; i < cus.length; i++) {
-			textChanges[i]= (TextChange) fMap.get(cus[i]);
+			textChanges[i]= fMap.get(cus[i]);
 		}
 		return textChanges;
 	}
@@ -107,7 +107,7 @@ public class TextChangeManager {
 	 * @return all compilation units managed by this instance
 	 */	
 	public ISourceModule[] getAllSourceModules(){
-		return (ISourceModule[]) fMap.keySet().toArray(new ISourceModule[fMap.keySet().size()]);
+		return fMap.keySet().toArray(new ISourceModule[fMap.keySet().size()]);
 	}
 	
 	/**
