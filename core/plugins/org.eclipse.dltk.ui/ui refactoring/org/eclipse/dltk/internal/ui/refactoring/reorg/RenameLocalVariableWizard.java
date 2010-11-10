@@ -19,7 +19,7 @@ public final class RenameLocalVariableWizard extends RenameRefactoringWizard {
 	public RenameLocalVariableWizard(Refactoring refactoring) {
 		super(
 				refactoring,
-				RefactoringMessages.RenameLocalVariableWizard_defaultPageTitle,
+				refactoring.getName(),
 				RefactoringMessages.RenameTypeParameterWizard_inputPage_description,
 				DLTKPluginImages.DESC_WIZBAN_REFACTOR, "" //$NON-NLS-1$
 		/* IJavaHelpContextIds.RENAME_LOCAL_VARIABLE_WIZARD_PAGE */);
