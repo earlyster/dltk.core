@@ -47,7 +47,6 @@ public class SourceModuleChange extends TextFileChange {
 		super(name, getFile(cunit));
 		Assert.isNotNull(cunit);
 		fCUnit= cunit;
-		setTextType("java"); //$NON-NLS-1$
 	}
 
 	private static IFile getFile(ISourceModule cunit) {
@@ -116,7 +115,7 @@ public class SourceModuleChange extends TextFileChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (ISourceModule.class.equals(adapter))
 			return fCUnit;
 		return super.getAdapter(adapter);

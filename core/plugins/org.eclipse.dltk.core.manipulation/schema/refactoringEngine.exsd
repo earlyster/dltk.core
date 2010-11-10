@@ -3,7 +3,7 @@
 <schema targetNamespace="org.eclipse.dltk.core.manipulation" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.dltk.core.manipulation" id="refactoringEngine" name="%exten"/>
+         <meta.schema plugin="org.eclipse.dltk.core.manipulation" id="refactoringEngine" name="refactoringEngine"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -17,7 +17,7 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="0" maxOccurs="unbounded">
+         <sequence>
             <element ref="refactoringEngine"/>
          </sequence>
          <attribute name="point" type="string" use="required">

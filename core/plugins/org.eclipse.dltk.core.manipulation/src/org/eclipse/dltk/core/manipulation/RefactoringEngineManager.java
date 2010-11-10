@@ -39,11 +39,8 @@ public class RefactoringEngineManager {
 								.getAttribute(ManipulationConstants.REFACTORING_ENGINE_NATURE_ID))) {
 					Object obj = ce[j]
 							.createExecutableExtension(ManipulationConstants.REFACTORING_ENGINE_CLASS);
-					if (obj instanceof IRefactoringEngine) {
+					if (obj instanceof IRefactoringEngine)
 						return (IRefactoringEngine) obj;
-					} else {
-						return null;
-					}
 				}
 			}
 		}
