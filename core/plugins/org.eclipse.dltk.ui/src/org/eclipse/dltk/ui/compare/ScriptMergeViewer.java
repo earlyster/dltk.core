@@ -13,11 +13,15 @@ package org.eclipse.dltk.ui.compare;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -30,21 +34,38 @@ import org.eclipse.swt.widgets.Composite;
  */
 public abstract class ScriptMergeViewer extends TextMergeViewer {
 
+	private final IDLTKUILanguageToolkit fToolkit;
+
 	/**
 	 * @param parent
 	 * @param configuration
 	 * @param title
 	 */
 	public ScriptMergeViewer(Composite parent,
-			CompareConfiguration configuration) {
+			CompareConfiguration configuration, IDLTKUILanguageToolkit toolkit) {
 		super(parent, SWT.LEFT_TO_RIGHT, configuration);
+		Assert.isNotNull(toolkit);
+		this.fToolkit = toolkit;
 	}
 
-	protected abstract ScriptTextTools getTextTools();
+	public ScriptMergeViewer(Composite parent,
+			CompareConfiguration configuration, String natureId) {
+		this(parent, configuration, DLTKUILanguageManager
+				.getLanguageToolkit(natureId));
+	}
 
-	protected abstract IPreferenceStore getPreferenceStore();
+	protected ScriptTextTools getTextTools() {
+		return fToolkit.getTextTools();
+	}
 
-	public abstract String getTitle();
+	protected IPreferenceStore getPreferenceStore() {
+		return fToolkit.getPreferenceStore();
+	}
+
+	public String getTitle() {
+		return NLS.bind("{0} Compare", fToolkit.getCoreToolkit()
+				.getLanguageName());
+	}
 
 	/*
 	 * @see
