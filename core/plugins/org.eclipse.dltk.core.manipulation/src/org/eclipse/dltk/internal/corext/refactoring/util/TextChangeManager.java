@@ -29,14 +29,20 @@ public class TextChangeManager {
 	private Map<ISourceModule, TextChange> fMap= new HashMap<ISourceModule, TextChange>(10);
 	
 	private final boolean fKeepExecutedTextEdits;
+	private final String fTextType;
 	
-	public TextChangeManager() {
-		this(false);
-	}
+    public TextChangeManager() {
+        this(false);
+    }
 
-	public TextChangeManager(boolean keepExecutedTextEdits) {
-		fKeepExecutedTextEdits= keepExecutedTextEdits;
-	}
+    public TextChangeManager(boolean keepExecutedTextEdits) {
+        this(keepExecutedTextEdits, null);
+    }
+
+    public TextChangeManager(boolean keepExecutedTextEdits, String textType) {
+        fKeepExecutedTextEdits = keepExecutedTextEdits;
+        fTextType = textType;
+    }
 	
 	/**
 	 * Adds an association between the given compilation unit and the passed
@@ -60,6 +66,9 @@ public class TextChangeManager {
 		TextChange result= fMap.get(cu);
 		if (result == null) {
 			result= new SourceModuleChange(cu.getElementName(), cu);
+            if (fTextType != null) {
+                result.setTextType(fTextType);
+            }
 			result.setKeepPreviewEdits(fKeepExecutedTextEdits);
 			fMap.put(cu, result);
 		}

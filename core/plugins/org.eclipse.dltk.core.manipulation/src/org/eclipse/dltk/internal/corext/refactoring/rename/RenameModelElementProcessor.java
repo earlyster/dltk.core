@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.rename;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
@@ -29,7 +27,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.manipulation.IScriptRefactorings;
-import org.eclipse.dltk.core.manipulation.SourceModuleChange;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -79,14 +76,15 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 	//private GroupCategorySet fCategorySet;
 	private TextChangeManager fChangeManager;
 	//private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
+	private final IDLTKLanguageToolkit fToolkit;
 	
-	public RenameModelElementProcessor(IModelElement localVariable) {
-		fModelElement = localVariable;
-		fCu = (ISourceModule)fModelElement.getAncestor(IModelElement.SOURCE_MODULE);
-		fChangeManager = new TextChangeManager(true);
-	}
+    public RenameModelElementProcessor(IModelElement localVariable, IDLTKLanguageToolkit toolkit) {
+        fToolkit = toolkit;
+        fModelElement = localVariable;
+        fCu = (ISourceModule) fModelElement.getAncestor(IModelElement.SOURCE_MODULE);
+        fChangeManager = new TextChangeManager(true, toolkit.getFileType());
+    }
 
-	
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (!(arguments instanceof ScriptRefactoringArguments))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
@@ -205,16 +203,12 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 		}
 	}
 	
-	protected abstract IDLTKLanguageToolkit getToolkit();
-
 	private void createEdits(IProgressMonitor pm) throws CoreException{
 		fChangeManager.clear();
-		IDLTKLanguageToolkit toolkit = getToolkit();
-		IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(toolkit);
+		IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(fToolkit);
 		SearchEngine engine = new SearchEngine();
-		final List<TextEdit> edits = new ArrayList<TextEdit>();
 		if (fUpdateReferences) {
-			SearchPattern pattern= SearchPattern.createPattern(fModelElement, IDLTKSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE, toolkit);
+			SearchPattern pattern= SearchPattern.createPattern(fModelElement, IDLTKSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE, fToolkit);
 			IProgressMonitor monitor = new SubProgressMonitor(pm, 1000);
 			engine.search(pattern, new SearchParticipant[]{ SearchEngine.getDefaultSearchParticipant() }, scope, new SearchRequestor() {
 				@Override
