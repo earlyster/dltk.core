@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.compare;
 
+import java.util.Stack;
+
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.core.runtime.Assert;
@@ -32,7 +34,24 @@ import org.eclipse.swt.widgets.Composite;
  * so it descendants should not be anonymous classes, because their class name
  * is unpredictable.
  */
-public abstract class ScriptMergeViewer extends TextMergeViewer {
+public class ScriptMergeViewer extends TextMergeViewer {
+
+	private static final Stack<IDLTKUILanguageToolkit> toolkitStorage = new Stack<IDLTKUILanguageToolkit>();
+
+	/*
+	 * Unfortunately, super constructor creates controls and calls getTitle().
+	 * But the fields of this instance aren't initialized yet. So, this
+	 * workaround is used to temporary save toolkit into the static variable.
+	 */
+	private static int pushToolkit(IDLTKUILanguageToolkit toolkit) {
+		Assert.isNotNull(toolkit);
+		toolkitStorage.push(toolkit);
+		return SWT.LEFT_TO_RIGHT;
+	}
+
+	private static void popToolkit() {
+		toolkitStorage.pop();
+	}
 
 	private final IDLTKUILanguageToolkit fToolkit;
 
@@ -43,8 +62,8 @@ public abstract class ScriptMergeViewer extends TextMergeViewer {
 	 */
 	public ScriptMergeViewer(Composite parent,
 			CompareConfiguration configuration, IDLTKUILanguageToolkit toolkit) {
-		super(parent, SWT.LEFT_TO_RIGHT, configuration);
-		Assert.isNotNull(toolkit);
+		super(parent, pushToolkit(toolkit), configuration);
+		popToolkit();
 		this.fToolkit = toolkit;
 	}
 
@@ -54,16 +73,20 @@ public abstract class ScriptMergeViewer extends TextMergeViewer {
 				.getLanguageToolkit(natureId));
 	}
 
+	protected IDLTKUILanguageToolkit getToolkit() {
+		return fToolkit != null ? fToolkit : toolkitStorage.peek();
+	}
+
 	protected ScriptTextTools getTextTools() {
-		return fToolkit.getTextTools();
+		return getToolkit().getTextTools();
 	}
 
 	protected IPreferenceStore getPreferenceStore() {
-		return fToolkit.getPreferenceStore();
+		return getToolkit().getPreferenceStore();
 	}
 
 	public String getTitle() {
-		return NLS.bind("{0} Compare", fToolkit.getCoreToolkit()
+		return NLS.bind("{0} Compare", getToolkit().getCoreToolkit()
 				.getLanguageName());
 	}
 
