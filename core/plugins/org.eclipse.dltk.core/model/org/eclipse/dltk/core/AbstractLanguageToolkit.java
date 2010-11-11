@@ -7,7 +7,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.dltk.core.DLTKFeatures.BooleanFeature;
 import org.eclipse.dltk.core.DLTKFeatures.IntegerFeature;
 import org.eclipse.dltk.core.DLTKFeatures.StringFeature;
@@ -80,5 +82,19 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 	 */
 	public IArchive openArchive(File localFile) throws IOException {
 		return new ZipArchiveFile(localFile);
+	}
+
+	public String getFileType() {
+		final IContentType contentType = Platform.getContentTypeManager()
+				.getContentType(getLanguageContentType());
+		if (contentType != null) {
+			final String[] specs = contentType
+					.getFileSpecs(IContentType.FILE_EXTENSION_SPEC
+							| IContentType.IGNORE_USER_DEFINED);
+			if (specs.length != 0) {
+				return specs[0];
+			}
+		}
+		return "txt";
 	}
 }

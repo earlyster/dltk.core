@@ -28,6 +28,17 @@ public interface IDLTKLanguageToolkit {
 	 */
 	String getLanguageContentType();
 
+	/**
+	 * Returns the file type, i.e. the most used file name extension.
+	 * 
+	 * Default implementation delegates to content type and returns "txt" as
+	 * fallback.
+	 * 
+	 * @return
+	 * @since 3.0
+	 */
+	String getFileType();
+
 	boolean validateSourcePackage(IPath path, IEnvironment environment);
 
 	/**
