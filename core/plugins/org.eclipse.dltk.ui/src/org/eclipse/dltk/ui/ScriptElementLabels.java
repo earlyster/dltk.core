@@ -643,8 +643,8 @@ public class ScriptElementLabels {
 				if (dot - start > fgPkgNameLength - 1) {
 					buf.append(fgPkgNamePrefix);
 					if (fgPkgNameChars > 0)
-						buf.append(name.substring(start, Math.min(start
-								+ fgPkgNameChars, dot)));
+						buf.append(name.substring(start,
+								Math.min(start + fgPkgNameChars, dot)));
 					buf.append(fgPkgNamePostfix);
 				} else
 					buf.append(name.substring(start, dot + 1));
@@ -827,13 +827,11 @@ public class ScriptElementLabels {
 
 			if (getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
 					&& method.exists() && !method.isConstructor()) {
-				if (!method.isConstructor()) {
-					String type = method.getType();
-					if (type != null) {
-						// int offset = buf.length();
-						buf.append(ScriptElementLabels.DECL_STRING);
-						buf.append(type);
-					}
+				final String type = method.getType();
+				if (type != null) {
+					// int offset = buf.length();
+					buf.append(ScriptElementLabels.DECL_STRING);
+					buf.append(type);
 				}
 			}
 
@@ -959,8 +957,7 @@ public class ScriptElementLabels {
 		IResource resource = root.getResource();
 		boolean rootQualified = getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified = getFlag(flags,
-				REFERENCED_ARCHIVE_POST_QUALIFIED)
-				&& isReferenced(root);
+				REFERENCED_ARCHIVE_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())
 					.makeRelative().toString());
@@ -972,8 +969,9 @@ public class ScriptElementLabels {
 						.toString());
 			} else if (getFlag(flags, ROOT_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				buf.append(EnvironmentPathUtils.getLocalPath(
-						root.getParent().getPath()).makeRelative().toString());
+				buf.append(EnvironmentPathUtils
+						.getLocalPath(root.getParent().getPath())
+						.makeRelative().toString());
 			}
 		}
 	}
@@ -984,8 +982,7 @@ public class ScriptElementLabels {
 		IResource resource = root.getResource();
 		boolean rootQualified = getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified = getFlag(flags,
-				REFERENCED_ROOT_POST_QUALIFIED)
-				&& resource != null;
+				REFERENCED_ROOT_POST_QUALIFIED) && resource != null;
 		if (rootQualified) {
 			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())
 					.makeRelative().toString());
