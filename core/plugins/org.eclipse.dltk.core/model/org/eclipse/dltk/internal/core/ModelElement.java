@@ -539,16 +539,32 @@ public abstract class ModelElement extends PlatformObject implements
 
 		if (this instanceof ISourceReference) {
 			IModelElement[] children = getChildren();
-			for (int i = children.length - 1; i >= 0; i--) {
+
+			List<SourceRefElement> childrenList = new ArrayList<SourceRefElement>();
+			for (int i = 0; i < children.length; i++) {
 				IModelElement aChild = children[i];
-				if (aChild instanceof SourceRefElement) {
-					SourceRefElement child = (SourceRefElement) children[i];
-					if (child instanceof IParent) {
-						res = child.getSourceElementAt(position);
-						if (res != child)
-							return res;
-					}
+				if (aChild instanceof SourceRefElement
+						&& aChild instanceof IParent) {
+					childrenList.add((SourceRefElement) aChild);
 				}
+			}
+			int low = 0;
+			int high = childrenList.size() - 1;
+			int mid;
+			while (low <= high) {
+				mid = (low + high) / 2;
+				SourceRefElement child = childrenList.get(mid);
+				ISourceRange range = child.getSourceRange();
+				int start = range.getOffset();
+				int end = start + range.getLength();
+				res = child.getSourceElementAt(position);
+				if (res != child)
+					return res;
+				else if (end < position)
+					low = mid + 1;
+				else
+					/* if( position < start ) */
+					high = mid - 1;
 			}
 		} else {
 			// should not happen
@@ -569,45 +585,56 @@ public abstract class ModelElement extends PlatformObject implements
 			throws ModelException {
 		if (this instanceof ISourceReference) {
 			IModelElement[] children = getChildren();
-			for (int i = children.length - 1; i >= 0; i--) {
+			List<SourceRefElement> childrenList = new ArrayList<SourceRefElement>();
+			for (int i = 0; i < children.length; i++) {
 				IModelElement aChild = children[i];
 				if (aChild instanceof SourceRefElement) {
-					SourceRefElement child = (SourceRefElement) children[i];
-					ISourceRange range = child.getSourceRange();
-					int start = range.getOffset();
-					int end = start + range.getLength();
-					if (start <= position && position <= end) {
-						if (child instanceof IField) {
-							// check muti-declaration case (see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943
-							// )
-							int declarationStart = start;
-							SourceRefElement candidate = null;
-							do {
-								// check name range
-								range = ((IField) child).getNameRange();
-								if (position <= range.getOffset()
-										+ range.getLength()) {
-									candidate = child;
-								} else {
-									return candidate == null ? child
-											.getSourceElementAt(position)
-											: candidate
-													.getSourceElementAt(position);
-								}
-								child = --i >= 0 ? (SourceRefElement) children[i]
-										: null;
-							} while (child != null
-									&& child.getSourceRange().getOffset() == declarationStart);
-							// position in field's type: use first field
-							return candidate.getSourceElementAt(position);
-						} else if (child instanceof IParent) {
-							return child.getSourceElementAt(position);
-						} else {
-							return child;
-						}
-					}
+					childrenList.add((SourceRefElement) aChild);
 				}
+			}
+			int low = 0;
+			int high = childrenList.size() - 1;
+			int mid;
+			while (low <= high) {
+				mid = (low + high) / 2;
+				SourceRefElement child = childrenList.get(mid);
+				ISourceRange range = child.getSourceRange();
+				int start = range.getOffset();
+				int end = start + range.getLength();
+				if (start <= position && position <= end) {
+					if (child instanceof IField) {
+						// check muti-declaration case (see
+						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943
+						// )
+						int declarationStart = start;
+						SourceRefElement candidate = null;
+						do {
+							// check name range
+							range = ((IField) child).getNameRange();
+							if (position <= range.getOffset()
+									+ range.getLength()) {
+								candidate = child;
+							} else {
+								return candidate == null ? child
+										.getSourceElementAt(position)
+										: candidate
+												.getSourceElementAt(position);
+							}
+							child = --mid >= 0 ? childrenList.get(mid) : null;
+						} while (child != null
+								&& child.getSourceRange().getOffset() == declarationStart);
+						// position in field's type: use first field
+						return candidate.getSourceElementAt(position);
+					} else if (child instanceof IParent) {
+						return child.getSourceElementAt(position);
+					} else {
+						return child;
+					}
+				} else if (end < position)
+					low = mid + 1;
+				else
+					/* if( position < start ) */
+					high = mid - 1;
 			}
 		} else {
 			// should not happen
