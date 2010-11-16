@@ -129,32 +129,20 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 		if (VERBOSE) {
 			buffer.append("{\n");//$NON-NLS-1$
-			buffer
-					.append("\tCompletion[").append(proposal.getCompletion() == null ? "null" : proposal.getCompletion()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			buffer
-					.append("\tDeclarationKey[").append(proposal.getDeclarationKey() == null ? "null" : proposal.getDeclarationKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			buffer
-					.append("\tKey[").append(proposal.getKey() == null ? "null" : proposal.getKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-			buffer
-					.append("\tName[").append(proposal.getName() == null ? "null" : proposal.getName()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-			buffer
-					.append("\tCompletionLocation[").append(proposal.getCompletionLocation()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("\tCompletion[").append(proposal.getCompletion() == null ? "null" : proposal.getCompletion()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer.append("\tDeclarationKey[").append(proposal.getDeclarationKey() == null ? "null" : proposal.getDeclarationKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer.append("\tKey[").append(proposal.getKey() == null ? "null" : proposal.getKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer.append("\tName[").append(proposal.getName() == null ? "null" : proposal.getName()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer.append("\tCompletionLocation[").append(proposal.getCompletionLocation()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			int start = proposal.getReplaceStart();
 			int end = proposal.getReplaceEnd();
 			buffer.append("\tReplaceStart[").append(start).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("-ReplaceEnd[").append(end).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (this.source != null)
-				buffer
-						.append("\tReplacedText[").append(this.source, start, end - start).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			buffer
-					.append("\tTokenStart[").append(proposal.getTokenStart()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
-			buffer
-					.append("-TokenEnd[").append(proposal.getTokenEnd()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			buffer
-					.append("\tRelevance[").append(proposal.getRelevance()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-
+				buffer.append("\tReplacedText[").append(this.source, start, end - start).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("\tTokenStart[").append(proposal.getTokenStart()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("-TokenEnd[").append(proposal.getTokenEnd()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("\tRelevance[").append(proposal.getRelevance()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("}\n");//$NON-NLS-1$
 		} else {
 			if (proposal.getCompletion() != null) {
@@ -233,13 +221,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 								this.actualCompletionPosition);
 						proposal.setName(choices[i]);
 						proposal.setCompletion(choices[i]);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -286,13 +269,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setCompletion(co);
 
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -353,13 +331,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setName(name);
 						proposal.setCompletion(name);
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -407,13 +380,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setName(name);
 						proposal.setCompletion(name);
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -488,13 +456,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setName(name);
 						proposal.setCompletion(name);
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -541,13 +504,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setCompletion(nameProvider
 								.getCompletion(field));
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -586,13 +544,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setModelElement(field);
 						proposal.setName(name);
 						proposal.setCompletion(qname);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -637,13 +590,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						proposal.setName(name);
 						proposal.setCompletion(name);
 						// proposal.setFlags(Flags.AccDefault);
-						proposal.setReplaceRange(this.startPosition
-								- this.offset, this.endPosition - this.offset);
 						proposal.setRelevance(relevance);
-						this.requestor.accept(proposal);
-						if (DEBUG) {
-							this.printDebug(proposal);
-						}
+						accept(proposal);
 					}
 				}
 			}
@@ -699,6 +647,15 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	public void setOptions(Map options) {
+	}
+
+	protected void accept(CompletionProposal proposal) {
+		proposal.setReplaceRange(this.startPosition - this.offset,
+				this.endPosition - this.offset);
+		this.requestor.accept(proposal);
+		if (DEBUG) {
+			this.printDebug(proposal);
+		}
 	}
 
 	public void setProject(IScriptProject project) {
