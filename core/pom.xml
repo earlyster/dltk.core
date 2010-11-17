@@ -27,6 +27,7 @@
     <module>plugins/org.eclipse.dltk.validators.core</module>
     <module>plugins/org.eclipse.dltk.validators.externalchecker</module>
     <module>plugins/org.eclipse.dltk.validators.ui</module>
+    <module>update.site</module>    
   </modules>
 
 	<properties>
