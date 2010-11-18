@@ -663,6 +663,12 @@
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.dltk.ui.edit.text.script.search.references.in.project">
       </command>
+      <command
+            name="%ActionDefinition.referencesInWorkspace.name"
+            description="%ActionDefinition.referencesInWorkspace.description"
+            categoryId="org.eclipse.search.ui.category.search"
+            id="org.eclipse.dltk.ui.edit.text.script.search.references.in.workspace">
+      </command>
  </extension>
 	<extension
 		point="org.eclipse.ui.commands">
@@ -907,6 +913,11 @@
             sequence="M1+I"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
             commandId="org.eclipse.dltk.ui.edit.text.script.indent"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+G"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.script.search.references.in.workspace"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	</extension>
 
