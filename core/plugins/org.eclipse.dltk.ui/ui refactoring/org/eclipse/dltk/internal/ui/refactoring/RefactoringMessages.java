@@ -437,6 +437,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterWizard_parameters;
 
+	public static String ScriptStatusContextViewer_no_source_available;
+
 	public static String ScriptStatusContextViewer_no_source_found0;
 
 	public static String ScriptTypeCompletionProcessor_no_completion;

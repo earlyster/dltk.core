@@ -1534,4 +1534,12 @@
 	<extension point="org.eclipse.ui.startup">
     	<startup class="org.eclipse.dltk.internal.ui.DLTKUI"/>
 	</extension>
+ <extension
+       point="org.eclipse.ltk.ui.refactoring.statusContextViewers">
+    <statusContextViewer
+          class="org.eclipse.dltk.internal.ui.refactoring.ScriptStatusContextViewer"
+          id="org.eclipse.dltk.ui.scriptStatusContextViewer">
+       <enablement></enablement>
+    </statusContextViewer>
+ </extension>
 </plugin>
