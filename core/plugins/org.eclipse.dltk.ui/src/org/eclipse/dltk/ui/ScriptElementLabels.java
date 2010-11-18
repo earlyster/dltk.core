@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.INamespace;
 import org.eclipse.dltk.core.IParameter;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
@@ -682,22 +683,38 @@ public class ScriptElementLabels {
 		}
 	}
 
+	protected void appendTypeQualification(IType type, long flags,
+			StringBuffer buf) {
+		try {
+			final INamespace namespace = type.getNamespace();
+			if (namespace != null) {
+				// TODO customize separator
+				buf.append(namespace.getQualifiedName("."));
+				buf.append(".");
+				return;
+			}
+		} catch (ModelException e) {
+			// ignore
+			return;
+		}
+		IResource resource = type.getResource();
+		IProjectFragment pack = null;
+		if (resource != null) {
+			IScriptProject project = type.getScriptProject();
+			pack = project.getProjectFragment(resource);
+		} else {
+			pack = findProjectFragment(type);
+		}
+		if (pack == null) {
+			pack = findProjectFragment(type);
+		}
+		getScriptFolderLabel(pack, (flags & QUALIFIER_FLAGS), buf);
+	}
+
 	protected void getTypeLabel(IType type, long flags, StringBuffer buf) {
 
-		IScriptProject project = type.getScriptProject();
-
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
-			IResource resource = type.getResource();
-			IProjectFragment pack = null;
-			if (resource != null) {
-				pack = project.getProjectFragment(resource);
-			} else {
-				pack = findProjectFragment(type);
-			}
-			if (pack == null) {
-				pack = findProjectFragment(type);
-			}
-			getScriptFolderLabel(pack, (flags & QUALIFIER_FLAGS), buf);
+			appendTypeQualification(type, flags, buf);
 		}
 
 		if (getFlag(flags, T_FULLY_QUALIFIED | T_CONTAINER_QUALIFIED)) {
