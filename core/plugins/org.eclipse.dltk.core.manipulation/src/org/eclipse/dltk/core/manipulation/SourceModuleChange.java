@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.core.manipulation.ScriptManipulationPlugin;
 import org.eclipse.dltk.internal.corext.refactoring.changes.UndoSourceModuleChange;
@@ -47,6 +49,9 @@ public class SourceModuleChange extends TextFileChange {
 		super(name, getFile(cunit));
 		Assert.isNotNull(cunit);
 		fCUnit= cunit;
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(cunit);
+		if (toolkit != null)
+			setTextType(toolkit.getFileType());
 	}
 
 	private static IFile getFile(ISourceModule cunit) {

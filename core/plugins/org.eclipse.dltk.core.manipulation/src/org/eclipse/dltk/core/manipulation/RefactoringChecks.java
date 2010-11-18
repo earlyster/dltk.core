@@ -10,6 +10,7 @@
 package org.eclipse.dltk.core.manipulation;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IMember;
@@ -17,6 +18,8 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.internal.core.refactoring.Resources;
 
 @SuppressWarnings("restriction")
@@ -46,4 +49,12 @@ public class RefactoringChecks {
     	return new RefactoringStatus();
     }
 
+	public static void addModifiedFilesToChecker(IFile[] filesToModify, CheckConditionsContext context) {
+		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+
+		for (int i= 0; i < filesToModify.length; i++) {
+			deltaFactory.change(filesToModify[i]);
+		}
+	}
 }

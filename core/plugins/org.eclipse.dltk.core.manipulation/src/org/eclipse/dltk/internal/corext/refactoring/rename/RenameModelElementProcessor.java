@@ -82,7 +82,7 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
         fToolkit = toolkit;
         fModelElement = localVariable;
         fCu = (ISourceModule) fModelElement.getAncestor(IModelElement.SOURCE_MODULE);
-        fChangeManager = new TextChangeManager(true, toolkit.getFileType());
+        fChangeManager = new TextChangeManager(true);
     }
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {

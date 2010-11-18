@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.core.runtime,
 Import-Package: com.ibm.icu.text
 Export-Package: org.eclipse.dltk.core.manipulation,
  org.eclipse.dltk.internal.corext.refactoring,
+ org.eclipse.dltk.internal.corext.refactoring.base,
  org.eclipse.dltk.internal.corext.refactoring.changes,
  org.eclipse.dltk.internal.corext.refactoring.code,
  org.eclipse.dltk.internal.corext.refactoring.participants,
