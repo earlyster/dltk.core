@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.matching2;
 
+import java.util.Arrays;
+
 /**
  * Hashtable for non-zero long keys.
  */
@@ -113,10 +115,8 @@ final class HashtableOfLong<E> {
 
 	public void clear() {
 		if (elementSize > 0) {
-			for (int i = valueTable.length; --i >= 0;) {
-				valueTable[i] = null;
-				keyTable[i] = 0;
-			}
+			Arrays.fill(valueTable, null);
+			Arrays.fill(keyTable, 0);
 			elementSize = 0;
 		}
 	}
