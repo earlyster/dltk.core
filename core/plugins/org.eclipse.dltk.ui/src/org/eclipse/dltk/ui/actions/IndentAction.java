@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.ScriptUtils;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.formatter.FormatterException;
 import org.eclipse.dltk.ui.formatter.IScriptFormatter;
+import org.eclipse.dltk.ui.formatter.IScriptFormatterExtension;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.jface.text.BadLocationException;
@@ -109,6 +110,11 @@ public class IndentAction extends TextEditorAction {
 							.getDefaultLineDelimiter(document);
 					final IScriptFormatter formatter = factory.createFormatter(
 							lineDelimiter, preferences);
+					if (project != null
+							&& formatter instanceof IScriptFormatterExtension) {
+						((IScriptFormatterExtension) formatter)
+								.initialize(project);
+					}
 					final Position end = new Position(offset + length);
 					document.addPosition(end);
 					if (indentLines(document, startLine, lastLine, formatter)) {
@@ -162,8 +168,8 @@ public class IndentAction extends TextEditorAction {
 				final String indent1 = getIndent(getLine(copyDoc, i));
 				final String indent2 = getIndent(getLine(document, i));
 				if (!indent1.equals(indent2)) {
-					document.replace(document.getLineOffset(i), indent2
-							.length(), indent1);
+					document.replace(document.getLineOffset(i),
+							indent2.length(), indent1);
 					changed = true;
 				}
 			}
