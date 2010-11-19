@@ -113,8 +113,9 @@ final class HashtableOfLong<E> {
 
 	public void clear() {
 		if (elementSize > 0) {
-			for (int i = elementSize; --i >= 0;) {
+			for (int i = valueTable.length; --i >= 0;) {
 				valueTable[i] = null;
+				keyTable[i] = 0;
 			}
 			elementSize = 0;
 		}
