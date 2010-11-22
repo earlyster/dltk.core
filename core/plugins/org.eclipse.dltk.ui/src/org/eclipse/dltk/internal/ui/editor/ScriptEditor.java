@@ -3283,8 +3283,17 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		return getFontPropertyPreferenceKey();
 	}
 
+	/*
+	 * Increase visibility for this package - called from {@link
+	 * OccurrencesFinder}
+	 */
 	protected IProgressMonitor getProgressMonitor() {
 		return super.getProgressMonitor();
+	}
+
+	protected boolean isMarkingOccurrences() {
+		return occurrencesFinder != null
+				&& occurrencesFinder.isMarkingOccurrences();
 	}
 
 }

@@ -12,10 +12,13 @@ package org.eclipse.dltk.internal.ui.editor;
 import java.util.ResourceBundle;
 
 import org.eclipse.dltk.ui.IContextMenuConstants;
+import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -25,12 +28,22 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 public class SourceModuleEditorActionContributor extends BasicSourceModuleEditorActionContributor {
 
 	private RetargetTextEditorAction fToggleInsertModeAction;
+	private ToggleMarkOccurrencesAction fToggleMarkOccurrencesAction;
 
 	public SourceModuleEditorActionContributor() {
 		super();
 		ResourceBundle b= ScriptEditorMessages.getBundleForConstructedKeys();
 		fToggleInsertModeAction= new RetargetTextEditorAction(b, "SourceModuleEditorActionContributor.ToggleInsertMode.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		fToggleInsertModeAction.setActionDefinitionId(ITextEditorActionDefinitionIds.TOGGLE_INSERT_MODE);
+		fToggleMarkOccurrencesAction = new ToggleMarkOccurrencesAction();
+	}
+
+	@Override
+	public void init(IActionBars bars, IWorkbenchPage page) {
+		super.init(bars, page);
+		bars.setGlobalActionHandler(
+				IScriptEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES,
+				fToggleMarkOccurrencesAction);
 	}
 
 	public void contributeToMenu(IMenuManager menu) {
@@ -53,5 +66,6 @@ public class SourceModuleEditorActionContributor extends BasicSourceModuleEditor
 			textEditor= (ITextEditor) part;
 
 		fToggleInsertModeAction.setAction(getAction(textEditor, ITextEditorActionConstants.TOGGLE_INSERT_MODE));
+		fToggleMarkOccurrencesAction.setEditor(textEditor);
 	}
 }
