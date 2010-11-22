@@ -77,6 +77,7 @@ import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
 import org.eclipse.dltk.internal.core.search.matching.AndPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
+import org.eclipse.dltk.internal.core.search.matching.OrPattern;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -172,6 +173,11 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 	public static void setFocus(InternalSearchPattern pattern,
 			IModelElement focus) {
 		pattern.focus = focus;
+		if (pattern instanceof OrPattern) {
+			for (SearchPattern child : ((OrPattern) pattern).getPatterns()) {
+				child.focus = focus;
+			}
+		}
 	}
 
 	public static SearchPattern createAndPattern(
