@@ -511,6 +511,10 @@ public class PreferenceConstants {
 		// Fix bug 252155 - contributed by Eden Klein
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER,
 				"F,T,C,M"); //$NON-NLS-1$
+
+		// mark occurrences
+		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
 	}
 
 	/**
@@ -801,6 +805,26 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_QUICKASSIST_LIGHTBULB = "editor.quickassist_lightbulb"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that controls whether occurrences are marked in the editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_OCCURRENCES= "markOccurrences"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether occurrences are sticky in the editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */
+	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
+	
 	// Notification messages
 	public static final String NOTIFICATION_NOT_ON_BUILDPATH_MESSAGE = DLTKUIPlugin.PLUGIN_ID
 			+ ".notification.not_on_buildpath"; //$NON-NLS-1$

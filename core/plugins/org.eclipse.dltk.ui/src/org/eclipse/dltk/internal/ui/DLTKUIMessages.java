@@ -99,5 +99,7 @@ public final class DLTKUIMessages extends NLS {
 	public static String HistoryListAction_max_entries_constraint;
 	public static String HistoryListAction_remove_all;
 
+	public static String SelectionListenerWithASTManager_job_title;
+
 	public static String MethodSelectionComponent_label;
 }

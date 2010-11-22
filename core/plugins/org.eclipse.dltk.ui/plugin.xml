@@ -23,6 +23,7 @@
    <extension-point id="coloring" name="Syntax Coloring Preferences" schema="schema/coloring.exsd"/>
    <extension-point id="openDelegate" name="Open Delegate" schema="schema/openDelegate.exsd"/>
    <extension-point id="refactoring" name="Refactoring" schema="schema/refactoring.exsd"/>
+   <extension-point id="search" name="search" schema="schema/search.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
@@ -1542,4 +1543,37 @@
        <enablement></enablement>
     </statusContextViewer>
  </extension>
+
+<extension point="org.eclipse.ui.editors.annotationTypes">
+	<type name="org.eclipse.dltk.ui.occurrences"/>
+</extension>
+
+<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+	<specification
+		annotationType="org.eclipse.dltk.ui.occurrences"
+		label="%OccurrenceAnnotation.label"
+		icon="$nl$/icons/full/obj16/searchm_obj.gif"
+		textPreferenceKey="occurrenceIndication"
+		textPreferenceValue="false"
+		highlightPreferenceKey="occurrenceHighlighting"
+		highlightPreferenceValue="true"
+		contributesToHeader="false"
+		overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+		overviewRulerPreferenceValue="true"
+		verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+		verticalRulerPreferenceValue="false"
+		colorPreferenceKey="occurrenceIndicationColor"
+		colorPreferenceValue="212,212,212"
+		presentationLayer="4"
+		showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+		showInNextPrevDropdownToolbarAction="true"
+		isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+		isGoToNextNavigationTarget="false"
+		isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+		isGoToPreviousNavigationTarget="false"
+		textStylePreferenceKey="occurrenceTextStyle"
+		textStylePreferenceValue="NONE">
+	</specification>
+</extension>
+
 </plugin>

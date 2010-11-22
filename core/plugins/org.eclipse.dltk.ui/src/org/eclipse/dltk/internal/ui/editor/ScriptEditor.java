@@ -212,6 +212,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	private ScriptEditorErrorTickUpdater fScriptEditorErrorTickUpdater;
 
+	private OccurrencesFinder occurrencesFinder;
+
 	private static String[] GLOBAL_FOLDING_PROPERTIES = {
 			PreferenceConstants.EDITOR_FOLDING_ENABLED,
 			PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED,
@@ -711,6 +713,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			fProjectionModelUpdater.uninstall();
 			fProjectionModelUpdater = null;
 		}
+		occurrencesFinder.dispose();
 
 		// ISourceViewer sourceViewer= getSourceViewer();
 		// if (sourceViewer instanceof ITextViewerExtension)
@@ -732,6 +735,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	@Override
 	protected void initializeEditor() {
+		occurrencesFinder = new OccurrencesFinder(this);
 		IPreferenceStore store = createCombinedPreferenceStore(null);
 		setPreferenceStore(store);
 		ScriptTextTools textTools = getTextTools();
@@ -1349,6 +1353,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		if (getSourceViewer() instanceof ScriptSourceViewer) {
 			((ScriptSourceViewer) getSourceViewer()).setPreferenceStore(store);
 		}
+		occurrencesFinder.setPreferenceStore(store);
 	}
 
 	private ScriptOutlinePage createOutlinePage() {
@@ -1490,6 +1495,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		if (!isActivePart() && DLTKUIPlugin.getActivePage() != null)
 			DLTKUIPlugin.getActivePage().bringToTop(this);
 		setSelection(reference, !isActivePart());
+		occurrencesFinder.updateOccurrenceAnnotations();
 	}
 
 	protected boolean isActivePart() {
@@ -1880,6 +1886,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			 * doesn't create reconciler for read only editor.
 			 */
 			updateSemanticHighlighting();
+		}
+		if (occurrencesFinder.isMarkingOccurrences()) {
+			occurrencesFinder.install();
 		}
 	}
 
@@ -3272,6 +3281,10 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	protected String getSymbolicFontName() {
 		return getFontPropertyPreferenceKey();
+	}
+
+	protected IProgressMonitor getProgressMonitor() {
+		return super.getProgressMonitor();
 	}
 
 }
