@@ -835,7 +835,12 @@ public class ScriptElementLabels {
 				}
 			}
 
-			buf.append(method.getElementName());
+			final String methodName = method.getElementName();
+			if (methodName.length() != 0) {
+				buf.append(methodName);
+			} else {
+				buf.append("function"); // TODO language specific
+			}
 
 			// parameters
 			buf.append('(');
