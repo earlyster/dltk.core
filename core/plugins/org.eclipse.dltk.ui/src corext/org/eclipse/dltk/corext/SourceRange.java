@@ -65,10 +65,10 @@ public class SourceRange implements ISourceRange{
 	 * @param ranges the ranges to sort
 	 * @return the sorted ranges, which are identical to the parameter ranges
 	 */
-	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
-		Comparator comparator= new Comparator(){
-			public int compare(Object o1, Object o2){
-				return ((ISourceRange)o2).getOffset() - ((ISourceRange)o1).getOffset();
+	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges) {
+		Comparator<ISourceRange> comparator = new Comparator<ISourceRange>() {
+			public int compare(ISourceRange o1, ISourceRange o2) {
+				return o2.getOffset() - o1.getOffset();
 			}
 		};
 		Arrays.sort(ranges, comparator);
