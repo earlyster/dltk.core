@@ -60,11 +60,11 @@ public class ToggleMarkOccurrencesAction extends TextEditorAction implements
 	 */
 	public void update() {
 		final ITextEditor editor = getTextEditor();
-		boolean checked = false;
-		if (editor instanceof ScriptEditor)
-			checked = ((ScriptEditor) editor).isMarkingOccurrences();
-		setChecked(checked);
-		setEnabled(editor != null);
+		final OccurrencesFinder occurrencesFinder = (editor != null) ? (OccurrencesFinder) editor
+				.getAdapter(OccurrencesFinder.class) : null;
+		setEnabled(occurrencesFinder != null);
+		setChecked(occurrencesFinder != null
+				&& occurrencesFinder.isMarkingOccurrences());
 	}
 
 	/*

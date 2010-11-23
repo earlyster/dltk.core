@@ -57,12 +57,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+/**
+ * @since 3.0
+ */
 public class OccurrencesFinder {
 	/**
 	 * Tells whether all occurrences of the element at the current caret
 	 * location are automatically marked in this editor.
-	 * 
-	 * @since 3.0
 	 */
 	private boolean fMarkOccurrenceAnnotations;
 
@@ -70,8 +71,6 @@ public class OccurrencesFinder {
 	 * Tells whether the occurrence annotations are sticky i.e. whether they
 	 * stay even if there's no valid Java element at the current caret position.
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
-	 * 
-	 * @since 3.0
 	 */
 	private boolean fStickyOccurrenceAnnotations;
 
@@ -82,41 +81,32 @@ public class OccurrencesFinder {
 	/**
 	 * The document modification stamp at the time when the last occurrence
 	 * marking took place.
-	 * 
-	 * @since 3.1
 	 */
 	private long fMarkOccurrenceModificationStamp = IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
 
 	/**
 	 * The region of the word under the caret used to when computing the current
 	 * occurrence markings.
-	 * 
-	 * @since 3.1
 	 */
 	private IRegion fMarkOccurrenceTargetRegion;
 
 	/**
 	 * The selection used when forcing occurrence marking through code.
-	 * 
-	 * @since 3.0
 	 */
 	private ISelection fForcedMarkOccurrencesSelection;
 
 	/**
 	 * Holds the current occurrence annotations.
-	 * 
-	 * @since 3.0
 	 */
 	private Annotation[] fOccurrenceAnnotations = null;
 
 	private final ScriptEditor editor;
 	private final IOccurrencesFinder[] finders;
 
-	private static NatureExtensionManager occurrencesFinderManager = new NatureExtensionManager(
-			DLTKUIPlugin.PLUGIN_ID + ".search", IOccurrencesFinder.class);
-
 	public OccurrencesFinder(ScriptEditor editor) {
 		this.editor = editor;
+		final NatureExtensionManager occurrencesFinderManager = new NatureExtensionManager(
+				DLTKUIPlugin.PLUGIN_ID + ".search", IOccurrencesFinder.class);
 		finders = (IOccurrencesFinder[]) occurrencesFinderManager
 				.getInstances(editor.getLanguageToolkit().getNatureId());
 	}
@@ -373,7 +363,9 @@ public class OccurrencesFinder {
 
 	public void install() {
 		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
-		installOccurrencesFinder(false);
+		if (isMarkingOccurrences()) {
+			installOccurrencesFinder(false);
+		}
 	}
 
 	public void dispose() {
@@ -397,13 +389,35 @@ public class OccurrencesFinder {
 				.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 
+	/**
+	 * Checks if "mark occurrences" is enabled in preferences
+	 * 
+	 * @return
+	 */
 	public boolean isMarkingOccurrences() {
-		if (finders == null) {
+		return preferenceStore != null
+				&& preferenceStore
+						.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+	}
+
+	protected boolean handlePreferenceStoreChanged(String property,
+			boolean newValue) {
+		if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
+			if (newValue != fMarkOccurrenceAnnotations) {
+				fMarkOccurrenceAnnotations = newValue;
+				if (!newValue)
+					uninstallOccurrencesFinder();
+				else
+					installOccurrencesFinder(true);
+			}
+			return true;
+		} else if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES
+				.equals(property)) {
+			fStickyOccurrenceAnnotations = newValue;
+			return true;
+		} else {
 			return false;
 		}
-		IPreferenceStore store = preferenceStore;
-		return store != null
-				&& store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 	}
 
 	protected void installOccurrencesFinder(boolean forceUpdate) {
@@ -630,6 +644,16 @@ public class OccurrencesFinder {
 
 	protected ISourceViewer getViewer() {
 		return editor.getViewer();
+	}
+
+	/**
+	 * Checks if this object is correctly configured, i.e. has necessary finders
+	 * installed, etc.
+	 * 
+	 * @return
+	 */
+	public boolean isValid() {
+		return finders != null;
 	}
 
 }

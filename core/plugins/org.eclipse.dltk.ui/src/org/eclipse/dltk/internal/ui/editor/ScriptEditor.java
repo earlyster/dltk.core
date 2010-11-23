@@ -713,7 +713,10 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			fProjectionModelUpdater.uninstall();
 			fProjectionModelUpdater = null;
 		}
-		occurrencesFinder.dispose();
+		if (occurrencesFinder != null) {
+			occurrencesFinder.dispose();
+			occurrencesFinder = null;
+		}
 
 		// ISourceViewer sourceViewer= getSourceViewer();
 		// if (sourceViewer instanceof ITextViewerExtension)
@@ -736,6 +739,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	@Override
 	protected void initializeEditor() {
 		occurrencesFinder = new OccurrencesFinder(this);
+		if (!occurrencesFinder.isValid()) {
+			occurrencesFinder = null;
+		}
 		IPreferenceStore store = createCombinedPreferenceStore(null);
 		setPreferenceStore(store);
 		ScriptTextTools textTools = getTextTools();
@@ -1353,7 +1359,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		if (getSourceViewer() instanceof ScriptSourceViewer) {
 			((ScriptSourceViewer) getSourceViewer()).setPreferenceStore(store);
 		}
-		occurrencesFinder.setPreferenceStore(store);
+		if (occurrencesFinder != null) {
+			occurrencesFinder.setPreferenceStore(store);
+		}
 	}
 
 	private ScriptOutlinePage createOutlinePage() {
@@ -1451,6 +1459,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				}
 			};
 		}
+		if (required == OccurrencesFinder.class) {
+			return occurrencesFinder;
+		}
 		if (required == IFoldingStructureProvider.class)
 			return fProjectionModelUpdater;
 		if (required == IFoldingStructureProviderExtension.class)
@@ -1495,7 +1506,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		if (!isActivePart() && DLTKUIPlugin.getActivePage() != null)
 			DLTKUIPlugin.getActivePage().bringToTop(this);
 		setSelection(reference, !isActivePart());
-		occurrencesFinder.updateOccurrenceAnnotations();
+		if (occurrencesFinder != null) {
+			occurrencesFinder.updateOccurrenceAnnotations();
+		}
 	}
 
 	protected boolean isActivePart() {
@@ -1887,7 +1900,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			 */
 			updateSemanticHighlighting();
 		}
-		if (occurrencesFinder.isMarkingOccurrences()) {
+		if (occurrencesFinder != null) {
 			occurrencesFinder.install();
 		}
 	}
@@ -2210,6 +2223,13 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 					selectionChanged();
 				return;
 			}
+
+			if (occurrencesFinder != null
+					&& occurrencesFinder.handlePreferenceStoreChanged(property,
+							newBooleanValue)) {
+				return;
+			}
+
 			if (CodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)
 					|| CodeFormatterConstants.FORMATTER_INDENTATION_SIZE
 							.equals(property)
@@ -3289,11 +3309,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 */
 	protected IProgressMonitor getProgressMonitor() {
 		return super.getProgressMonitor();
-	}
-
-	protected boolean isMarkingOccurrences() {
-		return occurrencesFinder != null
-				&& occurrencesFinder.isMarkingOccurrences();
 	}
 
 }

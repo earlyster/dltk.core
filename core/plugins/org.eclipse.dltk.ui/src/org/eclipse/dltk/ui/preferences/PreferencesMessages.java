@@ -344,4 +344,10 @@ public final class PreferencesMessages extends NLS {
 	public static String SourceParsers_groupLabel;
 	public static String SourceParsers_nameLabel;
 	public static String SourceParsers_LinkToPreferences;
+
+	public static String MarkOccurrencesConfigurationBlock_title;
+	public static String MarkOccurrencesConfigurationBlock_link;
+	public static String MarkOccurrencesConfigurationBlock_link_tooltip;
+	public static String MarkOccurrencesConfigurationBlock_stickyOccurrences;
+	public static String MarkOccurrencesConfigurationBlock_markOccurrences;
 }
