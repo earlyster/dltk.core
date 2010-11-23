@@ -10,6 +10,8 @@
 
 package org.eclipse.dltk.ui.preferences;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
@@ -466,6 +468,19 @@ public class OverlayPreferenceStore implements IPreferenceStore {
 	public void setValue(String name, boolean value) {
 		if (covers(name))
 			fStore.setValue(name, value);
+	}
+
+	/**
+	 * The keys to add to the list of overlay keys.
+	 * <p>
+	 * Note: This method must be called before {@link #load()} is called.
+	 * </p>
+	 * 
+	 * @param keys
+	 * @since 3.0
+	 */
+	public void addKeys(List<OverlayKey> keys) {
+		addKeys(keys.toArray(new OverlayKey[keys.size()]));
 	}
 
 	/**
