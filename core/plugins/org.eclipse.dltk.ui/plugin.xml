@@ -947,6 +947,23 @@
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
             commandId="org.eclipse.dltk.ui.edit.text.script.search.references.in.workspace"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+J"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.add.javadoc.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+J"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+J"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.add.javadoc.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	</extension>
 
 	<extension

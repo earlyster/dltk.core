@@ -102,4 +102,6 @@ public final class DLTKUIMessages extends NLS {
 	public static String SelectionListenerWithASTManager_job_title;
 
 	public static String MethodSelectionComponent_label;
+
+	public static String ElementValidator_cannotPerform;
 }

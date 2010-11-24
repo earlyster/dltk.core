@@ -139,26 +139,23 @@ public class GenerateActionGroup extends ActionGroup {
 				.getLanguageToolkit().getNatureId())) {
 			return;
 		}
-		Action action = new TextOperationAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(),
+		Action action = new TextOperationAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"Format.", fEditor, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.FORMAT);
 		fEditor.setAction(DLTKActionConstants.FORMAT, action);
 		fEditor.markAsStateDependentAction(DLTKActionConstants.FORMAT, true);
-		fEditor
-				.markAsSelectionDependentAction(DLTKActionConstants.FORMAT,
-						true);
+		fEditor.markAsSelectionDependentAction(DLTKActionConstants.FORMAT, true);
 	}
 
 	private void installIndentAction() {
-		Action action = new IndentAction(DLTKEditorMessages
-				.getBundleForConstructedKeys(), "Indent.", fEditor); //$NON-NLS-1$
+		Action action = new IndentAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"Indent.", fEditor); //$NON-NLS-1$
 		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.INDENT);
 		fEditor.setAction(DLTKActionConstants.INDENT, action);
 		fEditor.markAsStateDependentAction(DLTKActionConstants.INDENT, true);
-		fEditor
-				.markAsSelectionDependentAction(DLTKActionConstants.INDENT,
-						true);
+		fEditor.markAsSelectionDependentAction(DLTKActionConstants.INDENT, true);
 	}
 
 	@Override
@@ -204,12 +201,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private int fillEditorSubMenu(IMenuManager source) {
 		int added = 0;
 		source.add(new Separator(GROUP_COMMENT));
-		added += addEditorAction(source, DLTKActionConstants.ADD_BLOCK_COMMENT);
-		added += addEditorAction(source,
-				DLTKActionConstants.REMOVE_BLOCK_COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.TOGGLE_COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
+		added = addEditorCommentActions(source);
 		source.add(new Separator(GROUP_EDIT));
 		added += addEditorAction(source, DLTKActionConstants.FORMAT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT_ELEMENT);
@@ -220,6 +212,17 @@ public class GenerateActionGroup extends ActionGroup {
 		source.add(new Separator(GROUP_GENERATE));
 		source.add(new Separator(GROUP_CODE));
 		source.add(new Separator(GROUP_EXTERNALIZE));
+		return added;
+	}
+
+	protected int addEditorCommentActions(IMenuManager source) {
+		int added = 0;
+		added += addEditorAction(source, DLTKActionConstants.ADD_BLOCK_COMMENT);
+		added += addEditorAction(source,
+				DLTKActionConstants.REMOVE_BLOCK_COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.TOGGLE_COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
 		return added;
 	}
 
@@ -237,23 +240,23 @@ public class GenerateActionGroup extends ActionGroup {
 		super.dispose();
 	}
 
-	private void setGlobalActionHandlers(IActionBars bars) {
-		bars.setGlobalActionHandler(DLTKActionConstants.COMMENT, getAction(
-				fEditor, DLTKActionConstants.COMMENT));
-		bars.setGlobalActionHandler(DLTKActionConstants.UNCOMMENT, getAction(
-				fEditor, DLTKActionConstants.UNCOMMENT));
+	protected void setGlobalActionHandlers(IActionBars bars) {
+		bars.setGlobalActionHandler(DLTKActionConstants.COMMENT,
+				getAction(fEditor, DLTKActionConstants.COMMENT));
+		bars.setGlobalActionHandler(DLTKActionConstants.UNCOMMENT,
+				getAction(fEditor, DLTKActionConstants.UNCOMMENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.TOGGLE_COMMENT,
 				getAction(fEditor, DLTKActionConstants.TOGGLE_COMMENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.ADD_BLOCK_COMMENT,
 				getAction(fEditor, DLTKActionConstants.ADD_BLOCK_COMMENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.REMOVE_BLOCK_COMMENT,
 				getAction(fEditor, DLTKActionConstants.REMOVE_BLOCK_COMMENT));
-		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT, getAction(
-				fEditor, DLTKActionConstants.FORMAT));
+		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT,
+				getAction(fEditor, DLTKActionConstants.FORMAT));
 		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT_ELEMENT,
 				getAction(fEditor, DLTKActionConstants.FORMAT_ELEMENT));
-		bars.setGlobalActionHandler(DLTKActionConstants.INDENT, getAction(
-				fEditor, DLTKActionConstants.INDENT));
+		bars.setGlobalActionHandler(DLTKActionConstants.INDENT,
+				getAction(fEditor, DLTKActionConstants.INDENT));
 		bars.updateActionBars();
 	}
 
@@ -286,7 +289,7 @@ public class GenerateActionGroup extends ActionGroup {
 		return 0;
 	}
 
-	private int addEditorAction(IMenuManager menu, String actionID) {
+	protected int addEditorAction(IMenuManager menu, String actionID) {
 		if (fEditor == null)
 			return 0;
 		IAction action = fEditor.getAction(actionID);

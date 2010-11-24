@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
+import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.ui.DelegatedOpen;
@@ -168,6 +169,19 @@ public class SelectionConverter {
 				getTextSelection(editor));
 	}
 
+	public static IType getTypeAtOffset(IEditorPart editor)
+			throws ModelException {
+		IModelElement element = SelectionConverter.getElementAtOffset(editor);
+		IType type = (IType) element.getAncestor(IModelElement.TYPE);
+		// if (type == null) {
+		// ICompilationUnit unit = SelectionConverter
+		// .getInputAsCompilationUnit(editor);
+		// if (unit != null)
+		// type = unit.findPrimaryType();
+		// }
+		return type;
+	}
+
 	private static ITextSelection getTextSelection(IEditorPart editor) {
 		if (editor instanceof ITextEditor) {
 			return (ITextSelection) ((ITextEditor) editor)
@@ -311,6 +325,7 @@ public class SelectionConverter {
 		}
 		return null;
 	}
+
 
 	// public static IModelElement[] resolveSelectedElements(IModelElement input
 	// , ITextSelection selection) throws ModelException {
