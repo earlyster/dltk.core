@@ -65,6 +65,7 @@ public abstract class FindReferencesAction extends FindAction {
 		super(editor);
 	}
 
+	@SuppressWarnings("rawtypes")
 	Class[] getValidTypes() {
 		return new Class[] { ISourceModule.class, IType.class, IMethod.class,
 				IField.class, IPackageDeclaration.class, IScriptFolder.class,
