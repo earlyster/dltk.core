@@ -195,7 +195,7 @@ public interface IScriptEditorActionDefinitionIds extends ITextEditorActionDefin
 	 * <code>"org.eclipse.dltk.ui.edit.text.script.add.Javadoc.comment"</code>).
 	 *
 	 */		
-	public static final String ADD_JAVADOC_COMMENT= "org.eclipse.dltk.ui.edit.text.script.add.Javadoc.comment"; //$NON-NLS-1$
+	public static final String ADD_JAVADOC_COMMENT = "org.eclipse.dltk.ui.edit.text.script.add.javadoc.comment"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the source -> surround with try/catch action

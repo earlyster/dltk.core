@@ -198,10 +198,15 @@ public class GenerateActionGroup extends ActionGroup {
 		}
 	}
 
-	private int fillEditorSubMenu(IMenuManager source) {
+	protected int fillEditorSubMenu(IMenuManager source) {
 		int added = 0;
 		source.add(new Separator(GROUP_COMMENT));
-		added = addEditorCommentActions(source);
+		added += addEditorAction(source, DLTKActionConstants.ADD_BLOCK_COMMENT);
+		added += addEditorAction(source,
+				DLTKActionConstants.REMOVE_BLOCK_COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.TOGGLE_COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.COMMENT);
+		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
 		source.add(new Separator(GROUP_EDIT));
 		added += addEditorAction(source, DLTKActionConstants.FORMAT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT_ELEMENT);
@@ -212,17 +217,6 @@ public class GenerateActionGroup extends ActionGroup {
 		source.add(new Separator(GROUP_GENERATE));
 		source.add(new Separator(GROUP_CODE));
 		source.add(new Separator(GROUP_EXTERNALIZE));
-		return added;
-	}
-
-	protected int addEditorCommentActions(IMenuManager source) {
-		int added = 0;
-		added += addEditorAction(source, DLTKActionConstants.ADD_BLOCK_COMMENT);
-		added += addEditorAction(source,
-				DLTKActionConstants.REMOVE_BLOCK_COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.TOGGLE_COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
 		return added;
 	}
 

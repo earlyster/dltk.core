@@ -558,6 +558,12 @@
             id="org.eclipse.dltk.ui.edit.text.script.remove.block.comment"
             name="%ActionDefinition.removeBlockComment.name">
       </command>
+      <command
+            name="%ActionDefinition.addJavadocComment.name"
+            description="%ActionDefinition.addJavadocComment.description"
+            categoryId="org.eclipse.dltk.ui.category.source"
+            id="org.eclipse.dltk.ui.edit.text.script.add.javadoc.comment">
+      </command>
 	  <command
 	        name="%toggleMarkOccurrences.label"
 	        description="%toggleMarkOccurrences.description"
@@ -950,7 +956,7 @@
       <key
             sequence="M2+M3+J"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
-            commandId="org.eclipse.dltk.ui.edit.text.add.javadoc.comment"
+            commandId="org.eclipse.dltk.ui.edit.text.script.add.javadoc.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
@@ -962,7 +968,7 @@
             platform="carbon"
             sequence="COMMAND+ALT+J"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
-            commandId="org.eclipse.dltk.ui.edit.text.add.javadoc.comment"
+            commandId="org.eclipse.dltk.ui.edit.text.script.add.javadoc.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	</extension>
 
