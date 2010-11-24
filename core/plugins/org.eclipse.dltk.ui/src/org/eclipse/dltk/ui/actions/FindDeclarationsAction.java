@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IPackageDeclaration;
@@ -30,10 +31,8 @@ import org.eclipse.ui.IWorkbenchSite;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindDeclarationsAction extends FindAction {
+public class FindDeclarationsAction extends FindAction {
 	
 	/**
 	 * Creates a new <code>FindDeclarationsAction</code>. The action requires
@@ -42,16 +41,18 @@ public abstract class FindDeclarationsAction extends FindAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindDeclarationsAction(IWorkbenchSite site) {
-		super(site);
+	public FindDeclarationsAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindDeclarationsAction(ScriptEditor editor) {
-		super(editor);
+	public FindDeclarationsAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 	
 	void init() {

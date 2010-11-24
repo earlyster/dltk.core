@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMethod;
@@ -28,19 +29,16 @@ import org.eclipse.dltk.ui.search.ElementQuerySpecification;
 import org.eclipse.dltk.ui.search.QuerySpecification;
 import org.eclipse.ui.IWorkbenchSite;
 
-
 /**
- * Finds references to the selected element in the enclosing project 
- * of the selected element.
- * The action is applicable to selections representing a Script element.
+ * Finds references to the selected element in the enclosing project of the
+ * selected element. The action is applicable to selections representing a
+ * Script element.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindReferencesInProjectAction extends FindReferencesAction {
+public class FindReferencesInProjectAction extends FindReferencesAction {
 
 	/**
 	 * Creates a new <code>FindReferencesInProjectAction</code>. The action 
@@ -49,16 +47,18 @@ public abstract class FindReferencesInProjectAction extends FindReferencesAction
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindReferencesInProjectAction(IWorkbenchSite site) {
-		super(site);
+	public FindReferencesInProjectAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindReferencesInProjectAction(ScriptEditor editor) {
-		super(editor);
+	public FindReferencesInProjectAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 	
 	@SuppressWarnings("rawtypes")

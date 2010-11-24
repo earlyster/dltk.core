@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -32,10 +33,8 @@ import org.eclipse.ui.IWorkingSet;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindReferencesInWorkingSetAction extends FindReferencesAction {
+public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
 	private IWorkingSet[] fWorkingSets;
 	
@@ -47,8 +46,9 @@ public abstract class FindReferencesInWorkingSetAction extends FindReferencesAct
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindReferencesInWorkingSetAction(IWorkbenchSite site) {
-		this(site, null);
+	public FindReferencesInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		this(toolkit, site, null);
 	}
 
 	/**
@@ -59,8 +59,9 @@ public abstract class FindReferencesInWorkingSetAction extends FindReferencesAct
 	 * @param site			the site providing context information for this action
 	 * @param workingSets	the working sets to be used in the search
 	 */
-	public FindReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		super(site);
+	public FindReferencesInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site, IWorkingSet[] workingSets) {
+		super(toolkit, site);
 		fWorkingSets= workingSets;
 	}
 
@@ -68,8 +69,9 @@ public abstract class FindReferencesInWorkingSetAction extends FindReferencesAct
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindReferencesInWorkingSetAction(ScriptEditor editor) {
-		this(editor, null);
+	public FindReferencesInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		this(toolkit, editor, null);
 	}
 
 	/**
@@ -77,8 +79,9 @@ public abstract class FindReferencesInWorkingSetAction extends FindReferencesAct
 	 * @param editor the Script editor
 	 * @param workingSets the working sets to be used in the search
 	 */
-	public FindReferencesInWorkingSetAction(ScriptEditor editor, IWorkingSet[] workingSets) {
-		super(editor);
+	public FindReferencesInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor, IWorkingSet[] workingSets) {
+		super(toolkit, editor);
 		fWorkingSets= workingSets;
 	}
 	

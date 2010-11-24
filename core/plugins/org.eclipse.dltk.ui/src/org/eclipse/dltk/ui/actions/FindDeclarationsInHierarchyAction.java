@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -33,10 +34,8 @@ import org.eclipse.ui.IWorkbenchSite;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
+public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
 	/**
 	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>. The action 
@@ -45,16 +44,18 @@ public abstract class FindDeclarationsInHierarchyAction extends FindDeclarations
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindDeclarationsInHierarchyAction(IWorkbenchSite site) {
-		super(site);
+	public FindDeclarationsInHierarchyAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindDeclarationsInHierarchyAction(ScriptEditor editor) {
-		super(editor);
+	public FindDeclarationsInHierarchyAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 	
 	Class[] getValidTypes() {

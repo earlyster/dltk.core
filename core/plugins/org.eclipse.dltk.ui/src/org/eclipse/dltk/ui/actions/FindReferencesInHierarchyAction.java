@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -34,10 +35,8 @@ import org.eclipse.ui.IWorkbenchSite;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindReferencesInHierarchyAction extends FindReferencesAction {
+public class FindReferencesInHierarchyAction extends FindReferencesAction {
 
 	/**
 	 * Creates a new <code>FindReferencesInHierarchyAction</code>. The action
@@ -47,8 +46,9 @@ public abstract class FindReferencesInHierarchyAction extends FindReferencesActi
 	 * @param site
 	 *            the site providing context information for this action
 	 */
-	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
-		super(site);
+	public FindReferencesInHierarchyAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
@@ -58,8 +58,9 @@ public abstract class FindReferencesInHierarchyAction extends FindReferencesActi
 	 * @param editor
 	 *            the Script editor
 	 */
-	public FindReferencesInHierarchyAction(ScriptEditor editor) {
-		super(editor);
+	public FindReferencesInHierarchyAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 
 	Class[] getValidTypes() {

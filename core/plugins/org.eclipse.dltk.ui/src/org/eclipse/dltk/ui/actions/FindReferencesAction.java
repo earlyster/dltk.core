@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMethod;
@@ -37,10 +38,8 @@ import org.eclipse.ui.IWorkbenchSite;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindReferencesAction extends FindAction {
+public class FindReferencesAction extends FindAction {
 
 	/**
 	 * Creates a new <code>FindReferencesAction</code>. The action requires
@@ -50,8 +49,9 @@ public abstract class FindReferencesAction extends FindAction {
 	 * @param site
 	 *            the site providing context information for this action
 	 */
-	public FindReferencesAction(IWorkbenchSite site) {
-		super(site);
+	public FindReferencesAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
@@ -61,8 +61,9 @@ public abstract class FindReferencesAction extends FindAction {
 	 * @param editor
 	 *            the Script editor
 	 */
-	public FindReferencesAction(ScriptEditor editor) {
-		super(editor);
+	public FindReferencesAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 
 	@SuppressWarnings("rawtypes")

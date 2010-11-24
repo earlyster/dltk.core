@@ -37,8 +37,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
 public class DeclarationsSearchGroup extends ActionGroup {
 
@@ -76,32 +74,19 @@ public class DeclarationsSearchGroup extends ActionGroup {
 		this.toolkit = tk;
 		fGroupId = IContextMenuConstants.GROUP_SEARCH;
 
-		fFindDeclarationsAction = new FindDeclarationsAction(site) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsAction = new FindDeclarationsAction(toolkit, site);
 		fFindDeclarationsAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
-		fFindDeclarationsInProjectAction = new FindDeclarationsInProjectAction(site) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInProjectAction = new FindDeclarationsInProjectAction(
+				toolkit, site);
 		fFindDeclarationsInProjectAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
 
-		fFindDeclarationsInHierarchyAction = new FindDeclarationsInHierarchyAction(site) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInHierarchyAction = new FindDeclarationsInHierarchyAction(
+				toolkit, site);
 		fFindDeclarationsInHierarchyAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_HIERARCHY);
 
-		fFindDeclarationsInWorkingSetAction = new FindDeclarationsInWorkingSetAction(site) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInWorkingSetAction = new FindDeclarationsInWorkingSetAction(
+				toolkit, site);
 		fFindDeclarationsInWorkingSetAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKING_SET);
 
 		// register the actions as selection listeners
@@ -126,35 +111,22 @@ public class DeclarationsSearchGroup extends ActionGroup {
 		fSite = fEditor.getSite();
 		fGroupId = ITextEditorActionConstants.GROUP_FIND;
 
-		fFindDeclarationsAction = new FindDeclarationsAction(fEditor) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsAction = new FindDeclarationsAction(toolkit, fEditor);
 		fFindDeclarationsAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 		fEditor.setAction("SearchDeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$
 
-		fFindDeclarationsInProjectAction = new FindDeclarationsInProjectAction(fEditor) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInProjectAction = new FindDeclarationsInProjectAction(
+				toolkit, fEditor);
 		fFindDeclarationsInProjectAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
 		fEditor.setAction("SearchDeclarationsInProjects", fFindDeclarationsInProjectAction); //$NON-NLS-1$
 
-		fFindDeclarationsInHierarchyAction = new FindDeclarationsInHierarchyAction(fEditor) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInHierarchyAction = new FindDeclarationsInHierarchyAction(
+				toolkit, fEditor);
 		fFindDeclarationsInHierarchyAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_HIERARCHY);
 		fEditor.setAction("SearchDeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$
 
-		fFindDeclarationsInWorkingSetAction = new FindDeclarationsInWorkingSetAction(fEditor) {
-			protected IDLTKLanguageToolkit getLanguageToolkit() {
-				return toolkit;
-			}
-		};
+		fFindDeclarationsInWorkingSetAction = new FindDeclarationsInWorkingSetAction(
+				toolkit, fEditor);
 		fFindDeclarationsInWorkingSetAction.setActionDefinitionId(IScriptEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKING_SET);
 		fEditor.setAction("SearchDeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$
 	}
@@ -182,17 +154,13 @@ public class DeclarationsSearchGroup extends ActionGroup {
 	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
 		FindAction action;
 		if (fEditor != null)
-			action = new WorkingSetFindAction(fEditor, new FindDeclarationsInWorkingSetAction(fEditor, workingSets) {
-				protected IDLTKLanguageToolkit getLanguageToolkit() {
-					return toolkit;
-				}
-			}, SearchUtil.toString(workingSets));
+			action = new WorkingSetFindAction(fEditor,
+					new FindDeclarationsInWorkingSetAction(toolkit, fEditor,
+							workingSets), SearchUtil.toString(workingSets));
 		else
-			action = new WorkingSetFindAction(fSite, new FindDeclarationsInWorkingSetAction(fSite, workingSets) {
-				protected IDLTKLanguageToolkit getLanguageToolkit() {
-					return toolkit;
-				}
-			}, SearchUtil.toString(workingSets));
+			action = new WorkingSetFindAction(fSite,
+					new FindDeclarationsInWorkingSetAction(toolkit, fSite,
+							workingSets), SearchUtil.toString(workingSets));
 		action.update(getContext().getSelection());
 		addAction(action, manager);
 	}

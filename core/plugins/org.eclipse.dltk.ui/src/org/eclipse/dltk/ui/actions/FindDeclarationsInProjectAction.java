@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -30,10 +31,8 @@ import org.eclipse.ui.IWorkbenchSite;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindDeclarationsInProjectAction extends FindDeclarationsAction {
+public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	
 	/**
 	 * Creates a new <code>FindDeclarationsInProjectAction</code>. The action 
@@ -42,16 +41,18 @@ public abstract class FindDeclarationsInProjectAction extends FindDeclarationsAc
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindDeclarationsInProjectAction(IWorkbenchSite site) {
-		super(site);
+	public FindDeclarationsInProjectAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		super(toolkit, site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindDeclarationsInProjectAction(ScriptEditor editor) {
-		super(editor);
+	public FindDeclarationsInProjectAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		super(toolkit, editor);
 	}
 	
 	void init() {

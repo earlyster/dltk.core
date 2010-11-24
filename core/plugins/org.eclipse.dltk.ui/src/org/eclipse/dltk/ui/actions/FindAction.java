@@ -62,18 +62,20 @@ public abstract class FindAction extends SelectionDispatchAction {
 	private static final IModelElement RETURN_WITHOUT_BEEP= DLTKCore.create(DLTKUIPlugin.getWorkspace().getRoot());
 		
 	private Class[] fValidTypes;
+	private final IDLTKLanguageToolkit toolkit;
 	private ScriptEditor fEditor;	
 
 
-	FindAction(IWorkbenchSite site) {
+	FindAction(IDLTKLanguageToolkit toolkit, IWorkbenchSite site) {
 		super(site);
-		fValidTypes= getValidTypes();
+		this.toolkit = toolkit;
+		fValidTypes = getValidTypes();
 		init();
 	}
 
-	FindAction(ScriptEditor editor) {
-		this(editor.getEditorSite());
-		fEditor= editor;
+	FindAction(IDLTKLanguageToolkit toolkit, ScriptEditor editor) {
+		this(toolkit, editor.getEditorSite());
+		fEditor = editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
@@ -287,7 +289,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 	
-	protected abstract IDLTKLanguageToolkit getLanguageToolkit();
+	protected final IDLTKLanguageToolkit getLanguageToolkit() {
+		return toolkit;
+	}
 	
 	QuerySpecification createQuery(IModelElement element) throws ModelException {
 		DLTKSearchScopeFactory factory= DLTKSearchScopeFactory.getInstance();

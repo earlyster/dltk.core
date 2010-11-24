@@ -11,7 +11,6 @@ package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.ui.IWorkbenchSite;
@@ -33,22 +32,20 @@ import org.eclipse.ui.IWorkbenchSite;
 public class WorkingSetFindAction extends FindAction {
 
 	private FindAction fAction;	
-	IDLTKLanguageToolkit toolkit;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public WorkingSetFindAction(IWorkbenchSite site, FindAction action, String workingSetName) {
-		super(site);
+		super(action.getLanguageToolkit(), site);
 		init(action, workingSetName);
-		toolkit = action.getLanguageToolkit();
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public WorkingSetFindAction(ScriptEditor editor, FindAction action, String workingSetName) {
-		super(editor);
+		super(action.getLanguageToolkit(), editor);
 		init(action, workingSetName);
 	}
 
@@ -88,7 +85,4 @@ public class WorkingSetFindAction extends FindAction {
 		return fAction.getOperationUnavailableMessage();
 	}
 
-	protected IDLTKLanguageToolkit getLanguageToolkit() {
-		return toolkit;
-	}	
 }

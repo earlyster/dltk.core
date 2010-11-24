@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -31,10 +32,8 @@ import org.eclipse.ui.IWorkingSet;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
-	 *
  */
-public abstract class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
+public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 
 	private IWorkingSet[] fWorkingSet;
 
@@ -46,8 +45,9 @@ public abstract class FindDeclarationsInWorkingSetAction extends FindDeclaration
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site) {
-		this(site, null);
+	public FindDeclarationsInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site) {
+		this(toolkit, site, null);
 	}
 
 	/**
@@ -58,8 +58,9 @@ public abstract class FindDeclarationsInWorkingSetAction extends FindDeclaration
 	 * @param site			the site providing context information for this action
 	 * @param workingSets	the working sets to be used in the search
 	 */
-	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		super(site);
+	public FindDeclarationsInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			IWorkbenchSite site, IWorkingSet[] workingSets) {
+		super(toolkit, site);
 		fWorkingSet= workingSets;
 	}
 
@@ -67,8 +68,9 @@ public abstract class FindDeclarationsInWorkingSetAction extends FindDeclaration
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Script editor
 	 */
-	public FindDeclarationsInWorkingSetAction(ScriptEditor editor) {
-		this(editor, null);
+	public FindDeclarationsInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor) {
+		this(toolkit, editor, null);
 	}
 
 	/**
@@ -77,8 +79,9 @@ public abstract class FindDeclarationsInWorkingSetAction extends FindDeclaration
 	 * @param editor the Script editor
 	 * @param workingSets the working sets to be used in the search
 	 */
-	public FindDeclarationsInWorkingSetAction(ScriptEditor editor, IWorkingSet[] workingSets) {
-		super(editor);
+	public FindDeclarationsInWorkingSetAction(IDLTKLanguageToolkit toolkit,
+			ScriptEditor editor, IWorkingSet[] workingSets) {
+		super(toolkit, editor);
 		fWorkingSet= workingSets;
 	}
 
