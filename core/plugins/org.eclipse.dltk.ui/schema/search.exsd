@@ -55,7 +55,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.internal.ui.editor.IOccurrencesFinder"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.search.IOccurrencesFinder"/>
                </appInfo>
             </annotation>
          </attribute>
