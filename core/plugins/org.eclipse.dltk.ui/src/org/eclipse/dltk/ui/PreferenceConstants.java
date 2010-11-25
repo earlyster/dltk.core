@@ -434,42 +434,33 @@ public class PreferenceConstants {
 																		// of
 																		// completion
 																		// proposals
-		store
-				.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY,
-						false);
+		store.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
-		store
-				.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION,
-						true);
+		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES,
 				true);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS,
 				false);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION,
 				false);
-		store
-				.setDefault(
-						PreferenceConstants.CODEASSIST_CATEGORY_ORDER,
-						"org.eclipse.dltk.ui.spellingProposalCategory:65545\0org.eclipse.dltk.ui.scriptTypeProposalCategory:65540\0org.eclipse.dltk.ui.scriptNoTypeProposalCategory:65539\0org.eclipse.dltk.ui.textProposalCategory:65541\0org.eclipse.dltk.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
+		store.setDefault(
+				PreferenceConstants.CODEASSIST_CATEGORY_ORDER,
+				"org.eclipse.dltk.ui.spellingProposalCategory:65545\0org.eclipse.dltk.ui.scriptTypeProposalCategory:65540\0org.eclipse.dltk.ui.scriptNoTypeProposalCategory:65539\0org.eclipse.dltk.ui.textProposalCategory:65541\0org.eclipse.dltk.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER,
 				"org.eclipse.dltk.ui.RelevanceSorter"); //$NON-NLS-1$
 
-		store
-				.setDefault(PreferenceConstants.DOUBLE_CLICK,
-						DOUBLE_CLICK_EXPANDS);
+		store.setDefault(PreferenceConstants.DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
 
 		final int sourceHoverModifier = SWT.MOD2;
 		final String sourceHoverModifierName = Action
 				.findModifierString(sourceHoverModifier); // Shift
-		store
-				.setDefault(
-						PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS,
-						"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifierName); //$NON-NLS-1$
-		store
-				.setDefault(
-						PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS,
-						"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifier); //$NON-NLS-1$
+		store.setDefault(
+				PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS,
+				"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifierName); //$NON-NLS-1$
+		store.setDefault(
+				PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS,
+				"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifier); //$NON-NLS-1$
 
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT, false);
@@ -477,36 +468,17 @@ public class PreferenceConstants {
 				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(
 						192, 192, 192));
 		if (commonPreferences) {
-			store
-					.setDefault(
-							PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
-							true);
+			store.setDefault(
+					PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, true);
 			store.setDefault(RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME, false);
 		}
-		store
-				.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION,
-						true);
+		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
 
-		// PreferenceConverter.setDefault(store,
-		// PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, new
-		// RGB(237, 233, 227));
-		final Display display = PlatformUI.getWorkbench().getDisplay();
-		final RGB rgb[] = new RGB[1];
-		display.syncExec(new Runnable() {
-			public void run() {
-				// TODO Auto-generated method stub
-				rgb[0] = display.getSystemColor(SWT.COLOR_INFO_BACKGROUND)
-						.getRGB();
-			}
+		initializeEditorHoverBackgroundColor(store);
 
-		});
-		PreferenceConverter.setValue(store,
-				PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
-				rgb[0]);
-		store
-				.setValue(
-						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT,
-						true);
+		store.setValue(
+				PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT,
+				true);
 
 		// Fix bug 252155 - contributed by Eden Klein
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER,
@@ -515,6 +487,30 @@ public class PreferenceConstants {
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
+	}
+
+	private static void initializeEditorHoverBackgroundColor(
+			IPreferenceStore store) {
+		final Display display;
+		try {
+			display = PlatformUI.getWorkbench().getDisplay();
+		} catch (IllegalStateException e) {
+			// no workbench
+			PreferenceConverter.setValue(store,
+					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
+					new RGB(237, 233, 227));
+			return;
+		}
+		final RGB rgb[] = new RGB[1];
+		display.syncExec(new Runnable() {
+			public void run() {
+				rgb[0] = display.getSystemColor(SWT.COLOR_INFO_BACKGROUND)
+						.getRGB();
+			}
+		});
+		PreferenceConverter.setValue(store,
+				PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
+				rgb[0]);
 	}
 
 	/**
@@ -734,8 +730,7 @@ public class PreferenceConstants {
 	 * container in the folders view.
 	 * <p>
 	 * Value is of type <code>String</code>: possible values are <code>
-	 * DOUBLE_CLICK_GOES_INTO</code>
-	 * or <code>
+	 * DOUBLE_CLICK_GOES_INTO</code> or <code>
 	 * DOUBLE_CLICK_EXPANDS</code>.
 	 * </p>
 	 * 
@@ -806,25 +801,27 @@ public class PreferenceConstants {
 	public static final String EDITOR_QUICKASSIST_LIGHTBULB = "editor.quickassist_lightbulb"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether occurrences are marked in the editor.
+	 * A named preference that controls whether occurrences are marked in the
+	 * editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 *
+	 * 
 	 * @since 3.0
 	 */
-	public static final String EDITOR_MARK_OCCURRENCES= "markOccurrences"; //$NON-NLS-1$
+	public static final String EDITOR_MARK_OCCURRENCES = "markOccurrences"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether occurrences are sticky in the editor.
+	 * A named preference that controls whether occurrences are sticky in the
+	 * editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 *
+	 * 
 	 * @since 3.0
 	 */
-	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
-	
+	public static final String EDITOR_STICKY_OCCURRENCES = "stickyOccurrences"; //$NON-NLS-1$
+
 	// Notification messages
 	public static final String NOTIFICATION_NOT_ON_BUILDPATH_MESSAGE = DLTKUIPlugin.PLUGIN_ID
 			+ ".notification.not_on_buildpath"; //$NON-NLS-1$
