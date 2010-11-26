@@ -13,6 +13,7 @@ package org.eclipse.dltk.core.tests.model;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -38,6 +39,22 @@ public class AbstractSingleProjectSearchTests extends AbstractModelTests
 		setUpScriptProject(scriptProjectName);
 		waitUntilIndexesReady();
 	}
+	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		if (!getScriptProject().exists())
+		{
+			setUpSuite();
+		}
+	}
+	
+	protected IScriptProject getScriptProject()
+	{
+		return getScriptProject(scriptProjectName);
+	}
+
+
 
 	public void tearDownSuite() throws Exception {
 		deleteProject(scriptProjectName);
