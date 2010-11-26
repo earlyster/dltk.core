@@ -13,6 +13,7 @@ import java.util.Stack;
 
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.compiler.ISourceElementRequestorExtension;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
@@ -23,7 +24,8 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
  * an index.
  */
 public class SourceIndexerRequestor implements ISourceElementRequestor,
-		IBinaryElementRequestor, IIndexConstants, IIndexRequestor {
+		IBinaryElementRequestor, IIndexConstants, IIndexRequestor,
+		ISourceElementRequestorExtension {
 	protected AbstractIndexer indexer;
 	// char[] packageName = CharOperation.NO_CHAR;
 	protected String[] enclosingTypeNames = new String[5];
@@ -303,6 +305,10 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 
 	public void exitNamespace() {
 		namespaces.pop();
+	}
+
+	public int getMode() {
+		return MODE_INDEX;
 	}
 
 }
