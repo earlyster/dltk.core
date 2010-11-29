@@ -91,6 +91,7 @@ public abstract class AbstractAnnotationHover extends
 					fAllAnnotations);
 			int layer = -1;
 			String message = null;
+			boolean multi = false;
 			while (e.hasNext()) {
 				Annotation a = e.next();
 
@@ -108,19 +109,30 @@ public abstract class AbstractAnnotationHover extends
 
 				int l = fAnnotationAccess.getLayer(a);
 
-				if (l > layer
+				if (l >= layer
 						&& p != null
 						&& p.overlapsWith(hoverRegion.getOffset(),
 								hoverRegion.getLength())) {
 					String msg = getMessageFromAnnotation(a);
 					if (msg != null && msg.trim().length() > 0) {
-						message = msg;
+						if (message != null) {
+							message = message + "\n-" + msg;
+							multi = true;
+						} else {
+							message = msg;
+						}
 						layer = l;
 					}
 				}
 			}
 			if (layer > -1)
+			{
+				if (multi)
+				{
+					message = "Multiply Markers:\n-" + message;
+				}
 				return formatMessage(message);
+			}
 
 		} finally {
 			try {
