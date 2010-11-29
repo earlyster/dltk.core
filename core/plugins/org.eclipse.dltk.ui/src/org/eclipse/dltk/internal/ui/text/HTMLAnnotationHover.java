@@ -16,20 +16,30 @@ import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 
-
 /**
- * Determines all markers for the given line and collects, concatenates, and formats
- * returns their messages in HTML.
- *
-	 *
+ * Determines all markers for the given line and collects, concatenates, and
+ * formats returns their messages in HTML.
  */
 public class HTMLAnnotationHover extends DefaultAnnotationHover {
+
+	/**
+	 * Creates a new HTML annotation hover.
+	 * 
+	 * @param showLineNumber
+	 *            <code>true</code> if the line number should be shown when no
+	 *            annotation is found
+	 * @since 3.0
+	 */
+	public HTMLAnnotationHover(boolean showLineNumber) {
+		super(showLineNumber);
+	}
 
 	/*
 	 * Formats a message as HTML text.
 	 */
+	@Override
 	protected String formatSingleMessage(String message) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
 		HTMLPrinter.addParagraph(buffer, TextUtils.escapeHTML(message));
 		HTMLPrinter.addPageEpilog(buffer);
@@ -39,15 +49,22 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 	/*
 	 * Formats several message as HTML text.
 	 */
-	protected String formatMultipleMessages(List messages) {
-		StringBuffer buffer= new StringBuffer();
+	@Override
+	protected String formatMultipleMessages(
+			@SuppressWarnings("rawtypes") List messages) {
+		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, TextUtils.escapeHTML(DLTKUIMessages.ScriptAnnotationHover_multipleMarkersAtThisLine));
+		HTMLPrinter
+				.addParagraph(
+						buffer,
+						TextUtils
+								.escapeHTML(DLTKUIMessages.ScriptAnnotationHover_multipleMarkersAtThisLine));
 
 		HTMLPrinter.startBulletList(buffer);
-		Iterator e= messages.iterator();
+		Iterator<?> e = messages.iterator();
 		while (e.hasNext())
-			HTMLPrinter.addBullet(buffer, TextUtils.escapeHTML((String) e.next()));
+			HTMLPrinter.addBullet(buffer,
+					TextUtils.escapeHTML((String) e.next()));
 		HTMLPrinter.endBulletList(buffer);
 
 		HTMLPrinter.addPageEpilog(buffer);

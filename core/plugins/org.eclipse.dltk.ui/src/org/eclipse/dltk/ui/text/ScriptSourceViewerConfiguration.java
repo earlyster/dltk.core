@@ -15,6 +15,7 @@ import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.editor.ModelElementHyperlinkDetector;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
+import org.eclipse.dltk.internal.ui.text.HTMLAnnotationHover;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptCompositeReconcilingStrategy;
 import org.eclipse.dltk.internal.ui.text.ScriptElementProvider;
@@ -49,6 +50,8 @@ import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -518,4 +521,35 @@ public abstract class ScriptSourceViewerConfiguration extends
 		return indentPrefixes;
 	}
 
+	/*
+	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
+	 * 
+	 * @since 3.0
+	 */
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new HTMLAnnotationHover(false) {
+			@Override
+			protected boolean isIncluded(Annotation annotation) {
+				return isShowInVerticalRuler(annotation);
+			}
+		};
+	}
+
+	/*
+	 * @see
+	 * SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
+	 * 
+	 * @since 3.0
+	 */
+	@Override
+	public IAnnotationHover getOverviewRulerAnnotationHover(
+			ISourceViewer sourceViewer) {
+		return new HTMLAnnotationHover(true) {
+			@Override
+			protected boolean isIncluded(Annotation annotation) {
+				return isShowInOverviewRuler(annotation);
+			}
+		};
+	}
 }
