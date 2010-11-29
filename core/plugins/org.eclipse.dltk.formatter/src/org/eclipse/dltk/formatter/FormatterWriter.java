@@ -22,6 +22,7 @@ public class FormatterWriter implements IFormatterWriter {
 
 	private final StringBuilder writer = new StringBuilder();
 	private final StringBuilder indent = new StringBuilder();
+	private final StringBuilder trimmedSpaces = new StringBuilder();
 	/**
 	 * @since 2.0
 	 */
@@ -84,15 +85,21 @@ public class FormatterWriter implements IFormatterWriter {
 			skipNextNewLine = false;
 		}
 		if (lineStarted) {
-			trimTrailingSpaces();
+			trimTrailingSpaces(false);
 		}
 		write(context, text);
 	}
 
-	private void trimTrailingSpaces() {
-		while (writer.length() > 0
-				&& FormatterUtils.isSpace(writer.charAt(writer.length() - 1))) {
-			writer.setLength(writer.length() - 1);
+	private void trimTrailingSpaces(boolean keepTrimmed) {
+		int length = writer.length();
+		while (length > 0 && FormatterUtils.isSpace(writer.charAt(length - 1))) {
+			--length;
+		}
+		if (keepTrimmed) {
+			trimmedSpaces.append(writer, length, writer.length());
+		}
+		if (length < writer.length()) {
+			writer.setLength(length);
 		}
 	}
 
@@ -129,7 +136,12 @@ public class FormatterWriter implements IFormatterWriter {
 					--len;
 				}
 				writer.setLength(len);
-				writer.append(text);
+				if (text.length() == 0) {
+					writer.append(trimmedSpaces);
+					trimmedSpaces.setLength(0);
+				} else {
+					writer.append(text);
+				}
 				lineStarted = true;
 			}
 		}
@@ -232,8 +244,9 @@ public class FormatterWriter implements IFormatterWriter {
 	protected void write(IFormatterContext context, char ch) {
 		if (ch == '\n' || ch == '\r') {
 			if (lineStarted) {
+				trimmedSpaces.setLength(0);
 				if (trimTrailingSpaces) {
-					trimTrailingSpaces();
+					trimTrailingSpaces(true);
 				}
 				writer.append(ch);
 				lineStarted = false;
