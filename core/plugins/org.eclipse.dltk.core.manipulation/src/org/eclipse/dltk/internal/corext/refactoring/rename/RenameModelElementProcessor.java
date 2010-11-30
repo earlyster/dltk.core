@@ -218,7 +218,7 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 					ISourceModule cu = (ISourceModule)elem.getAncestor(IModelElement.SOURCE_MODULE);
 					if (cu != null) {
 						ReplaceEdit edit = new ReplaceEdit(match.getOffset(), fCurrentName.length(), getNewElementName());
-						addTextEdit(fChangeManager.get(cu), RefactoringCoreMessages.RenameTempRefactoring_rename, edit);
+						addTextEdit(fChangeManager.get(cu), getProcessorName(), edit);
 					}
 					//if (match.getResource().equals(fCu.getCorrespondingResource()))
 					//	edits.add(new ReplaceEdit(match.getOffset(), fCurrentName.length(), getNewElementName()));
@@ -233,7 +233,7 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 		}
 		if (decl != null) {
 			ReplaceEdit edit = new ReplaceEdit(decl.getOffset(), fCurrentName.length(), getNewElementName());
-			addTextEdit(fChangeManager.get(fCu), RefactoringCoreMessages.RenameTempRefactoring_rename, edit);
+			addTextEdit(fChangeManager.get(fCu), getProcessorName(), edit);
 		}
 		//fChange= new SourceModuleChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu);
 		//MultiTextEdit rootEdit= new MultiTextEdit();
