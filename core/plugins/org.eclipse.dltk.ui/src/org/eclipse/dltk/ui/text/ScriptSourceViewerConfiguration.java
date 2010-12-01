@@ -522,6 +522,21 @@ public abstract class ScriptSourceViewerConfiguration extends
 	}
 
 	/*
+	 * @see
+	 * SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
+	 * 
+	 * @since 3.0
+	 */
+	public IInformationControlCreator getInformationControlCreator(
+			ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, false);
+			}
+		};
+	}
+
+	/*
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 * 
 	 * @since 3.0
