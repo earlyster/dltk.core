@@ -10,6 +10,9 @@
 
 package org.eclipse.dltk.internal.core.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.dltk.core.Flags;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IType;
@@ -108,6 +111,17 @@ public class MethodOverrideTester {
 	 */
 	public IMethod findOverriddenMethodInHierarchy(IType type,
 			IMethod overriding) throws ModelException {
+		return innerFindOverriddenMethodInHierarchy(type, overriding,
+				new HashSet<IType>());
+	}
+
+	private IMethod innerFindOverriddenMethodInHierarchy(IType type,
+			IMethod overriding, Set<IType> processedTypes)
+			throws ModelException {
+		if (!processedTypes.add(type)) {
+			return null;
+		}
+
 		IMethod method = findOverriddenMethodInType(type, overriding);
 		if (method != null) {
 			return method;
@@ -115,8 +129,8 @@ public class MethodOverrideTester {
 		IType[] superClass = fHierarchy.getSuperclass(type);
 		if (superClass != null) {
 			for (int q = 0; q < superClass.length; ++q) {
-				IMethod res = findOverriddenMethodInHierarchy(superClass[q],
-						overriding);
+				IMethod res = innerFindOverriddenMethodInHierarchy(
+						superClass[q], overriding, processedTypes);
 				if (res != null) {
 					return res;
 				}
