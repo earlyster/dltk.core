@@ -214,6 +214,11 @@ public abstract class ScriptSearchPage extends DialogPage implements
 
 	public static final String PARTICIPANT_EXTENSION_POINT = "org.eclipse.dltk.ui.queryParticipants"; //$NON-NLS-1$
 
+	/**
+	 * At the moment DLTK provides only abstract base class for search page, so
+	 * this identifier doesn't have any sense.
+	 */
+	@Deprecated
 	public static final String EXTENSION_POINT_ID = "org.eclipse.dltk.ui.DLTKSearchPage"; //$NON-NLS-1$
 
 	private static final int HISTORY_SIZE = 12;
