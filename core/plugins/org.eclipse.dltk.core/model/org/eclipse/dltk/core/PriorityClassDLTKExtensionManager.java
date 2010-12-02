@@ -10,7 +10,6 @@
 package org.eclipse.dltk.core;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.dltk.internal.core.ScriptProject;
 
 public class PriorityClassDLTKExtensionManager extends
 		SimplePriorityClassDLTKExtensionManager {
@@ -29,8 +28,7 @@ public class PriorityClassDLTKExtensionManager extends
 			return null;
 		}
 		IScriptProject scriptProject = element.getScriptProject();
-		IDLTKLanguageToolkit tk = ((ScriptProject) scriptProject)
-				.getLanguageToolkit();
+		IDLTKLanguageToolkit tk = scriptProject.getLanguageToolkit();
 		if (tk != null) {
 			return getObject(tk.getNatureId());
 		}
