@@ -13,6 +13,7 @@ package org.eclipse.dltk.core.tests.model;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -39,22 +40,22 @@ public class AbstractSingleProjectSearchTests extends AbstractModelTests
 		setUpScriptProject(scriptProjectName);
 		waitUntilIndexesReady();
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		if (!getScriptProject().exists())
-		{
+		if (!getScriptProject().exists()) {
 			setUpSuite();
 		}
 	}
-	
-	protected IScriptProject getScriptProject()
-	{
-		return getScriptProject(scriptProjectName);
+
+	protected String getProjectName() {
+		return scriptProjectName;
 	}
 
-
+	protected IScriptProject getScriptProject() {
+		return getScriptProject(scriptProjectName);
+	}
 
 	public void tearDownSuite() throws Exception {
 		deleteProject(scriptProjectName);
@@ -64,6 +65,15 @@ public class AbstractSingleProjectSearchTests extends AbstractModelTests
 	protected TestSearchResults search(String patternString, int searchFor,
 			int limitTo) throws CoreException {
 		return search(patternString, searchFor, limitTo, EXACT_RULE);
+	}
+
+	protected TestSearchResults search(IModelElement element, int limitTo)
+			throws CoreException {
+		final IDLTKSearchScope scope = SearchEngine
+				.createSearchScope(getScriptProject(scriptProjectName));
+		final SearchPattern pattern = SearchPattern.createPattern(element,
+				limitTo);
+		return search(pattern, scope);
 	}
 
 	protected TestSearchResults search(String patternString, int searchFor,
@@ -77,6 +87,11 @@ public class AbstractSingleProjectSearchTests extends AbstractModelTests
 		final IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
 		final SearchPattern pattern = SearchPattern.createPattern(
 				patternString, searchFor, limitTo, matchRule, toolkit);
+		return search(pattern, scope);
+	}
+
+	private TestSearchResults search(SearchPattern pattern,
+			IDLTKSearchScope scope) throws CoreException {
 		assertNotNull("Pattern should not be null", pattern);
 		final TestSearchResults results = new TestSearchResults();
 		final SearchParticipant[] participants = new SearchParticipant[] { SearchEngine
