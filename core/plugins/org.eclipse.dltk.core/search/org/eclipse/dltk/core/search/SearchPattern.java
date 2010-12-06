@@ -1051,6 +1051,11 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				}
 			}
 			char[] selector = method.getElementName().toCharArray();
+			if (selector.length == 0) {
+				// TODO introduce pattern for anonymous functions? (similar to
+				// local variables)
+				return null;
+			}
 			// Create method/constructor pattern
 			boolean findMethodDeclarations = true;
 			boolean findMethodReferences = true;
