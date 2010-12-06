@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -200,7 +201,7 @@ public class BasicSearchEngine {
 
 		// For EMPTY CASE
 		if (toolkit != null) {
-			HashSet visitedProjects = new HashSet(2);
+			HashSet<IProject> visitedProjects = new HashSet<IProject>(2);
 			for (int i = 0; i < elements.length; i++) {
 				IModelElement element = elements[i];
 				if (element != null) {

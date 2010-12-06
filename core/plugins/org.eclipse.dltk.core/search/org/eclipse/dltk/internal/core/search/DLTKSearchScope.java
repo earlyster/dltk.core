@@ -99,8 +99,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				}
 			}
 		}
-		return (String[]) relativePaths
-				.toArray(new String[relativePaths.size()]);
+		return relativePaths.toArray(new String[relativePaths.size()]);
 	}
 
 	private void addEnclosingProjectOrArchive(IPath path) {
@@ -121,7 +120,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 * @see #add(ScriptProject, IPath, int, HashSet, IClasspathEntry)
 	 */
 	public void add(ScriptProject project, int includeMask,
-			HashSet visitedProject) throws ModelException {
+			HashSet<IProject> visitedProject) throws ModelException {
 		add(project, null, includeMask, visitedProject, null);
 	}
 
@@ -146,7 +145,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 *             May happen while getting script model info
 	 */
 	void add(ScriptProject scriptProject, IPath pathToAdd, int includeMask,
-			HashSet visitedProjects, IBuildpathEntry referringEntry)
+			HashSet<IProject> visitedProjects, IBuildpathEntry referringEntry)
 			throws ModelException {
 		if (!natureFilter(scriptProject)) {
 			return;
@@ -278,8 +277,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			// a workspace scope should be used
 			break;
 		case IModelElement.SCRIPT_PROJECT:
-			add((ScriptProject) element, null, includeMask, new HashSet(2),
-					null);
+			add((ScriptProject) element, null, includeMask,
+					new HashSet<IProject>(2), null);
 			break;
 		case IModelElement.PROJECT_FRAGMENT:
 			IProjectFragment root = (IProjectFragment) element;
