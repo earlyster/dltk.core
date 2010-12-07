@@ -11,7 +11,9 @@ package org.eclipse.dltk.internal.ui.editor;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.ui.ExternalSourceModuleEditorInputFactory;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.ScriptElementLabels;
@@ -43,6 +45,10 @@ public class ExternalStorageEditorInput implements IEditorInput,
 	}
 
 	public IPersistableElement getPersistable() {
+		if (fStorage instanceof IExternalSourceModule) {
+			return ExternalSourceModuleEditorInputFactory
+					.createPersistableElement((IExternalSourceModule) fStorage);
+		}
 		return null;
 	}
 

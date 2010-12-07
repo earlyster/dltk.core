@@ -124,6 +124,10 @@
             class="org.eclipse.dltk.internal.ui.PersistableModelElementFactory"
             id="org.eclipse.dltk.ui.PersistableModelElementFactory">
       </factory>
+      <factory
+            class="org.eclipse.dltk.internal.ui.ExternalSourceModuleEditorInputFactory"
+            id="org.eclipse.dltk.ui.ExternalSourceModuleEditorInputFactory">
+      </factory>
    </extension>
  <extension point="org.eclipse.ui.ide.markerSupport">
       <markerTypeCategory name="%markerCategory.problem">
