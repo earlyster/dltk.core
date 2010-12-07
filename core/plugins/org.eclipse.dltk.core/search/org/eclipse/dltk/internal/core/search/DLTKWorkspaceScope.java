@@ -11,16 +11,17 @@ package org.eclipse.dltk.internal.core.search;
 
 import java.util.HashSet;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.Model;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
  * A Java-specific scope for searching the entire workspace. The scope can be
@@ -95,7 +96,7 @@ public class DLTKWorkspaceScope extends DLTKSearchScope {
 				int includeMask = SOURCES | APPLICATION_LIBRARIES
 						| SYSTEM_LIBRARIES;
 				add((ScriptProject) projects[i], null, includeMask,
-						new HashSet(length * 2, 1), null);
+						new HashSet<IProject>(length * 2, 1), null);
 			}
 		} catch (ModelException ignored) {
 			// ignore
@@ -157,6 +158,6 @@ public class DLTKWorkspaceScope extends DLTKSearchScope {
 	}
 
 	public String toString() {
-		return "DLTKWorkspaceScope"; //$NON-NLS-1$
+		return "DLTKWorkspaceScope(" + toolkit.getLanguageName() + ')'; //$NON-NLS-1$
 	}
 }
