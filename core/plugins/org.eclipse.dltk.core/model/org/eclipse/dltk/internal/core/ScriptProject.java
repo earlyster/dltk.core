@@ -397,7 +397,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 		}
 
 		int length = buildpathEntries.length;
-		List resolvedEntries = new ArrayList();
+		List<IBuildpathEntry> resolvedEntries = new ArrayList<IBuildpathEntry>();
 
 		for (int i = 0; i < length; i++) {
 
@@ -421,6 +421,36 @@ public class ScriptProject extends Openable implements IScriptProject,
 			}
 
 			switch (rawEntry.getEntryKind()) {
+
+			case IBuildpathEntry.BPE_VARIABLE:
+
+				IBuildpathEntry resolvedEntry = null;
+				try {
+					resolvedEntry = DLTKCore
+							.getResolvedBuildpathEntry(rawEntry);
+				} catch (AssertionFailedException e) {
+					// Catch the assertion failure and throw java model
+					// exception instead
+					// see bug
+					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55992
+					// if ignoredUnresolvedEntry is false, status is set by by
+					// ClasspathEntry.validateClasspathEntry
+					// called above as validation was needed
+					if (!ignoreUnresolvedEntry)
+						throw new ModelException(status);
+				}
+				if (resolvedEntry == null) {
+					if (!ignoreUnresolvedEntry)
+						throw new ModelException(status);
+				} else {
+					if (rawReverseMap != null) {
+						if (rawReverseMap.get(resolvedPath = resolvedEntry
+								.getPath()) == null)
+							rawReverseMap.put(resolvedPath, rawEntry);
+					}
+					resolvedEntries.add(resolvedEntry);
+				}
+				break;
 
 			case IBuildpathEntry.BPE_CONTAINER:
 
