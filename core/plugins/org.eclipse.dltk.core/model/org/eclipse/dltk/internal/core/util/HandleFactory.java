@@ -119,8 +119,7 @@ public class HandleFactory {
 							&& (rootPathLength = this.lastPkgFragmentRootPath
 									.length()) > 0 && resourcePath
 							.charAt(rootPathLength) == '/')) {
-				IProjectFragment root = this.getProjectFragment(resourcePath,
-						scope);
+				IProjectFragment root = this.getProjectFragment(resourcePath);
 				if (root == null)
 					return null; // match is outside classpath
 				this.lastPkgFragmentRoot = root;
@@ -297,34 +296,15 @@ public class HandleFactory {
 		return ResourcesPlugin.getWorkspace().getRoot().getProjects();
 	}
 
-	private static boolean checkScope(IProject project, IPath[] scopeProjects) {
-		final IPath location = project.getFullPath();
-		for (int j = 0; j < scopeProjects.length; j++) {
-			if (scopeProjects[j].equals(location)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Returns the package fragment root that contains the given resource path.
-	 * 
-	 * @param scope
 	 */
-	private IProjectFragment getProjectFragment(String pathString,
-			IDLTKSearchScope scope) {
-
+	private IProjectFragment getProjectFragment(String pathString) {
 		IPath path = Path.fromPortableString(pathString);
 		IProject[] projects = getAllProjects();
-		IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();
 		for (int i = 0, max = projects.length; i < max; i++) {
 			try {
 				IProject project = projects[i];
-				if (!checkScope(project, enclosingProjectsAndZips)) {
-					continue;
-				}
-
 				if (!project.isAccessible()
 						|| !DLTKLanguageManager.hasScriptNature(project))
 					continue;
