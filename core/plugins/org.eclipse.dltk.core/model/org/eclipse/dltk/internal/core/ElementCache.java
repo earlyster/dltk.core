@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.dltk.core.IElementCacheListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
@@ -21,8 +19,7 @@ import org.eclipse.dltk.internal.core.util.LRUCache;
  * An LRU cache of <code>ModelElements</code>.
  */
 public class ElementCache extends OverflowingLRUCache {
-	IModelElement spaceLimitParent = null;
-	private ListenerList listeners;
+	private IModelElement spaceLimitParent = null;
 
 	/**
 	 * Constructs a new element cache of the given size.
@@ -49,7 +46,6 @@ public class ElementCache extends OverflowingLRUCache {
 	@Override
 	protected boolean close(LRUCacheEntry entry) {
 		Openable element = (Openable) entry._fKey;
-		notifyListenersClose(element);
 		try {
 			if (!element.canBeRemovedFromCache()) {
 				return false;
@@ -106,28 +102,4 @@ public class ElementCache extends OverflowingLRUCache {
 		}
 	}
 
-	private synchronized ListenerList getListenerList() {
-		if (listeners == null) {
-			listeners = new ListenerList();
-		}
-		return listeners;
-	}
-
-	public void addListener(IElementCacheListener listener) {
-		getListenerList().add(listener);
-	}
-
-	public void removeListener(IElementCacheListener listener) {
-		getListenerList().remove(listener);
-	}
-
-	protected void notifyListenersClose(Object element) {
-		Object[] listeners2 = getListenerList().getListeners();
-		for (int i = 0; i < listeners2.length; i++) {
-			IElementCacheListener listener = (IElementCacheListener) listeners2[i];
-			if (listener != null) {
-				listener.close(element);
-			}
-		}
-	}
 }
