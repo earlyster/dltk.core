@@ -78,12 +78,18 @@ public class AbstractSingleProjectSearchTests extends AbstractModelTests
 
 	protected TestSearchResults search(String patternString, int searchFor,
 			int limitTo, int matchRule) throws CoreException {
+		final IDLTKSearchScope scope = SearchEngine
+				.createSearchScope(getScriptProject(scriptProjectName));
+		return search(patternString, searchFor, limitTo, matchRule, scope);
+	}
+
+	protected TestSearchResults search(String patternString, int searchFor,
+			int limitTo, int matchRule, final IDLTKSearchScope scope)
+			throws CoreException {
 		if (patternString.indexOf('*') != -1
 				|| patternString.indexOf('?') != -1) {
 			matchRule |= SearchPattern.R_PATTERN_MATCH;
 		}
-		final IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(getScriptProject(scriptProjectName));
 		final IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
 		final SearchPattern pattern = SearchPattern.createPattern(
 				patternString, searchFor, limitTo, matchRule, toolkit);
