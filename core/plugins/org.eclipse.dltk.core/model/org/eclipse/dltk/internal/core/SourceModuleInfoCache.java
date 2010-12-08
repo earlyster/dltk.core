@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ElementChangedEvent;
-import org.eclipse.dltk.core.IElementCacheListener;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
@@ -24,37 +23,29 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.core.util.LRUCache;
 
 /**
  * Used to cache some source module information. All information related to
  * source module are removed, then source module are changed.
  * 
  * @author haiodo
- * 
  */
-public class SourceModuleInfoCache implements ISourceModuleInfoCache {
-	private final ElementCache cache;
+public class SourceModuleInfoCache extends OverflowingLRUCache implements
+		ISourceModuleInfoCache {
 	static long allAccess = 0;
 	static long miss = 0;
 	static long closes = 0;
 
 	public SourceModuleInfoCache() {
-		// set the size of the caches in function of the maximum amount of
-		// memory available
-		// long maxMemory = Runtime.getRuntime().freeMemory();
-		// if max memory is infinite, set the ratio to 4d which corresponds to
-		// the 256MB that Eclipse defaults to
-		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=111299)
-		double ratio = 50; // 128000000
+		super(ModelCache.DEFAULT_ROOT_SIZE * 50);
+		setLoadFactor(0.90);
+	}
 
-		this.cache = new ElementCache(
-				(int) (ModelCache.DEFAULT_ROOT_SIZE * ratio));
-		this.cache.setLoadFactor(0.90);
-		this.cache.addListener(new IElementCacheListener() {
-			public void close(Object element) {
-				closes++;
-			}
-		});
+	@Override
+	protected boolean close(LRUCacheEntry entry) {
+		++closes;
+		return true;
 	}
 
 	public void start() {
@@ -67,20 +58,21 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 
 	private final ISourceModuleInfo cacheGet(ISourceModule module) {
 		allAccess++;
-		final SoftReference ref = (SoftReference) cache.get(module);
+		@SuppressWarnings("unchecked")
+		final SoftReference<ISourceModuleInfo> ref = (SoftReference<ISourceModuleInfo>) super
+				.get(module);
 		return ref != null ? (ISourceModuleInfo) ref.get() : null;
 	}
 
-	public ISourceModuleInfo get(ISourceModule module) {
+	public synchronized ISourceModuleInfo get(ISourceModule module) {
 		if (DLTKCore.VERBOSE) {
-			System.out.println("Filling ratio:" + this.cache.fillingRatio()); //$NON-NLS-1$
+			System.out.println("Filling ratio:" + fillingRatio()); //$NON-NLS-1$
 		}
 		ISourceModuleInfo info = cacheGet(module);
 		if (info == null) {
 			miss++;
 			info = new SourceModuleInfo();
-			cache.put(module, new SoftReference(info));
-			cache.ensureSpaceLimit(1, module);
+			put(module, new SoftReference<ISourceModuleInfo>(info));
 			return info;
 		}
 		// this.cache.printStats();
@@ -88,7 +80,7 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 			System.out.println("SourceModuleInfoCache: access:" + allAccess //$NON-NLS-1$
 					+ " ok:" + (100.0f * (allAccess - miss) / allAccess) //$NON-NLS-1$
 					+ "% closes:" + closes); //$NON-NLS-1$
-			System.out.println("Filling ratio:" + this.cache.fillingRatio()); //$NON-NLS-1$
+			System.out.println("Filling ratio:" + fillingRatio()); //$NON-NLS-1$
 		}
 		return info;
 	}
@@ -187,17 +179,21 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 		}
 	}
 
-	public void remove(ISourceModule element) {
+	public synchronized void remove(ISourceModule element) {
 		if (DEBUG) {
 			System.out.println("[Cache] remove " + element.getElementName()); //$NON-NLS-1$
 		}
-		cache.remove(element);
-		cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
+		super.remove(element);
 	}
 
 	private static final boolean DEBUG = false;
 
-	public void clear() {
-		this.cache.flush();
+	public synchronized void clear() {
+		flush();
+	}
+
+	@Override
+	protected LRUCache newInstance(int size, int overflow) {
+		throw new UnsupportedOperationException();
 	}
 }
