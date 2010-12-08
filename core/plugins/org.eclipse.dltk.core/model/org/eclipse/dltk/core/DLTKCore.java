@@ -1623,37 +1623,37 @@ public class DLTKCore extends Plugin {
 
 			case IResource.PROJECT:
 				// internal project
-				return DLTKCore.newProjectEntry(resolvedPath, entry
-						.getAccessRules(), entry.combineAccessRules(), entry
-						.getExtraAttributes(), entry.isExported());
+				return DLTKCore.newProjectEntry(resolvedPath,
+						entry.getAccessRules(), entry.combineAccessRules(),
+						entry.getExtraAttributes(), entry.isExported());
 			case IResource.FILE:
 				// internal binary archive
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
-															 * getResolvedVariablePath(
-															 * entry.
+															 * getResolvedVariablePath
+															 * ( entry.
 															 * getSourceAttachmentPath
 															 * ()),
 															 * getResolvedVariablePath
 															 * (entry.
 															 * getSourceAttachmentRootPath
 															 * ()),
-															 */entry
-						.getAccessRules(), entry.getExtraAttributes(), entry
-						.isExported(), entry.isExternal());
+															 */
+						entry.getAccessRules(), entry.getExtraAttributes(),
+						entry.isExported(), entry.isExternal());
 			case IResource.FOLDER:
 				// internal binary folder
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
-															 * getResolvedVariablePath(
-															 * entry.
+															 * getResolvedVariablePath
+															 * ( entry.
 															 * getSourceAttachmentPath
 															 * ()),
 															 * getResolvedVariablePath
 															 * (entry.
 															 * getSourceAttachmentRootPath
 															 * ()),
-															 */entry
-						.getAccessRules(), entry.getExtraAttributes(), entry
-						.isExported(), entry.isExternal());
+															 */
+						entry.getAccessRules(), entry.getExtraAttributes(),
+						entry.isExported(), entry.isExternal());
 			}
 		}
 		if (target instanceof File) {
@@ -1661,34 +1661,48 @@ public class DLTKCore extends Plugin {
 			if (externalFile != null) {
 				// external binary archive
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
-															 * getResolvedVariablePath(
-															 * entry.
+															 * getResolvedVariablePath
+															 * ( entry.
 															 * getSourceAttachmentPath
 															 * ()),
 															 * getResolvedVariablePath
 															 * (entry.
 															 * getSourceAttachmentRootPath
 															 * ()),
-															 */entry
-						.getAccessRules(), entry.getExtraAttributes(), entry
-						.isExported(), entry.isExternal());
+															 */
+				entry.getAccessRules(), entry.getExtraAttributes(),
+						entry.isExported(), true);
 			} else {
 				// non-existing file
 				if (resolvedPath.isAbsolute()) {
 					return DLTKCore.newLibraryEntry(resolvedPath,/*
-																 * getResolvedVariablePath(
-																 * entry.
+																 * getResolvedVariablePath
+																 * ( entry.
 																 * getSourceAttachmentPath
 																 * ()),
 																 * getResolvedVariablePath
 																 * (entry.
 																 * getSourceAttachmentRootPath
 																 * ()),
-																 */entry
-							.getAccessRules(), entry.getExtraAttributes(),
-							entry.isExported(), entry.isExternal());
+																 */
+							entry.getAccessRules(), entry.getExtraAttributes(),
+							entry.isExported(), true);
 				}
 			}
+		} else if (target instanceof IFileHandle) {
+			// external binary archive
+			return DLTKCore.newLibraryEntry(resolvedPath,/*
+														 * getResolvedVariablePath(
+														 * entry.
+														 * getSourceAttachmentPath
+														 * ()),
+														 * getResolvedVariablePath
+														 * (entry.
+														 * getSourceAttachmentRootPath
+														 * ()),
+														 */
+			entry.getAccessRules(), entry.getExtraAttributes(),
+					entry.isExported(), true);
 		}
 		return null;
 	}

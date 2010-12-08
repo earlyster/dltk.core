@@ -46,13 +46,14 @@ import org.eclipse.dltk.internal.core.util.Util;
  * A Java-specific scope for searching relative to one or more script elements.
  */
 public class DLTKSearchScope extends AbstractSearchScope {
-	private ArrayList elements;
+	private ArrayList<IModelElement> elements;
 
 	/*
 	 * The paths of the resources in this search scope (or the classpath
 	 * entries' paths if the resources are projects)
 	 */
-	private ArrayList projectPaths = new ArrayList(); // container paths
+	private ArrayList<String> projectPaths = new ArrayList<String>(); // container
+																		// paths
 	// projects
 	private int[] projectIndexes; // Indexes of projects in list
 	private String[] containerPaths; // path to the container (e.g. /P/src,
@@ -198,12 +199,12 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				}
 				switch (rawEntry.getEntryKind()) {
 				case IBuildpathEntry.BPE_LIBRARY:
+				case IBuildpathEntry.BPE_VARIABLE:
 					if ((includeMask & APPLICATION_LIBRARIES) != 0) {
 						IPath path = entry.getPath();
 						if (pathToAdd == null || pathToAdd.equals(path)) {
 							String pathToString = path.toString();
-							add(
-									projectPath.toString(),
+							add(projectPath.toString(),
 									"", pathToString, false/* not a package */, access); //$NON-NLS-1$
 							addEnclosingProjectOrArchive(path);
 						}
@@ -220,8 +221,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 						IPath path = entry.getPath();
 						if (pathToAdd == null || pathToAdd.equals(path)) {
 							String pathToString = path.toString();
-							add(
-									projectPath.toString(),
+							add(projectPath.toString(),
 									"", pathToString, false/* not a package */, access); //$NON-NLS-1$
 							addEnclosingProjectOrArchive(path);
 						}
@@ -243,13 +243,14 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				if ((includeMask & SOURCES) != 0) {
 					IPath path = entry.getPath();
 					if (pathToAdd == null || pathToAdd.equals(path)) {
-						add(projectPath.toString(), Util
-								.relativePath(path, 1/*
-													 * remove project segment
-													 */), projectPathString,
-								false/*
-									 * not a package
-									 */, access);
+						add(projectPath.toString(),
+								Util.relativePath(path, 1/*
+														 * remove project
+														 * segment
+														 */),
+								projectPathString, false/*
+														 * not a package
+														 */, access);
 					}
 				}
 				break;
@@ -286,14 +287,14 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			if (!root.isExternal()) {
 				IPath rootPath = root.getPath();
 				containerPath = root.getKind() == IProjectFragment.K_SOURCE ? root
-						.getParent().getPath()
-						: rootPath;
+						.getParent().getPath() : rootPath;
 				containerPathToString = containerPath.toString();
 				IResource rootResource = root.getResource();
 				projectPath = root.getScriptProject().getPath().toString();
 				if (rootResource != null && rootResource.isAccessible()) {
-					String relativePath = Util.relativePath(rootResource
-							.getFullPath(), containerPath.segmentCount());
+					String relativePath = Util.relativePath(
+							rootResource.getFullPath(),
+							containerPath.segmentCount());
 					add(projectPath, relativePath, containerPathToString,
 							false/* not a package */, null);
 				} else {
@@ -329,15 +330,15 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				if (resource != null) {
 					if (resource.isAccessible()) {
 						containerPath = root.getKind() == IProjectFragment.K_SOURCE ? root
-								.getParent().getPath()
-								: root.getPath();
+								.getParent().getPath() : root.getPath();
 					} else {
 						// for working copies, get resource container full path
 						containerPath = resource.getParent().getFullPath();
 					}
 					containerPathToString = containerPath.toString();
-					String relativePath = Util.relativePath(resource
-							.getFullPath(), containerPath.segmentCount());
+					String relativePath = Util.relativePath(
+							resource.getFullPath(),
+							containerPath.segmentCount());
 					add(projectPath, relativePath, containerPathToString,
 							true/* package */, null);
 				}
@@ -347,7 +348,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			// remember sub-cu (or sub-class file) script elements
 			if (element instanceof IMember) {
 				if (this.elements == null) {
-					this.elements = new ArrayList();
+					this.elements = new ArrayList<IModelElement>();
 				}
 				this.elements.add(element);
 			}
@@ -355,7 +356,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					.getAncestor(IModelElement.PROJECT_FRAGMENT);
 			projectPath = root.getScriptProject().getPath().toString();
 			String relativePath;
-			if (root.getKind() == IProjectFragment.K_SOURCE) {
+			if (root.getKind() == IProjectFragment.K_SOURCE
+					&& !root.isExternal()) {
 				containerPath = root.getParent().getPath();
 				relativePath = Util
 						.relativePath(getPath(element, false/* full path */), 1/*
@@ -405,8 +407,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		containerPath = normalize(containerPath);
 		relativePath = normalize(relativePath);
 		int length = this.containerPaths.length, index = (containerPath
-				.hashCode() & 0x7FFFFFFF)
-				% length;
+				.hashCode() & 0x7FFFFFFF) % length;
 		String currentRelativePath, currentContainerPath;
 		while ((currentRelativePath = this.relativePaths[index]) != null
 				&& (currentContainerPath = this.containerPaths[index]) != null) {
@@ -492,8 +493,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 		// use the hash to get faster comparison
 		int length = this.containerPaths.length, index = (containerPath
-				.hashCode() & 0x7FFFFFFF)
-				% length;
+				.hashCode() & 0x7FFFFFFF) % length;
 		String currentContainerPath;
 		while ((currentContainerPath = this.containerPaths[index]) != null) {
 			if (currentContainerPath.equals(containerPath)) {
@@ -557,8 +557,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 		if (this.elements != null) {
 			for (int i = 0, length = this.elements.size(); i < length; i++) {
-				IModelElement scopeElement = (IModelElement) this.elements
-						.get(i);
+				IModelElement scopeElement = this.elements.get(i);
 				IModelElement searchedElement = element;
 				while (searchedElement != null) {
 					if (searchedElement.equals(scopeElement))
@@ -598,7 +597,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				return Path.EMPTY;
 			return element.getPath();
 		case IModelElement.SCRIPT_FOLDER:
-			String relativePath = ((IScriptFolder) element).getPath()
+			String relativePath = ((IScriptFolder) element)
+					.getPath()
 					.removeFirstSegments(
 							element.getParent().getPath().segmentCount())
 					.toString() + '/';
@@ -812,7 +812,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	}
 
 	public String toString() {
-		StringBuffer result = new StringBuffer("JavaSearchScope on "); //$NON-NLS-1$
+		StringBuffer result = new StringBuffer("DLTKSearchScope on "); //$NON-NLS-1$
 		if (this.elements != null) {
 			result.append("["); //$NON-NLS-1$
 			for (int i = 0, length = this.elements.size(); i < length; i++) {

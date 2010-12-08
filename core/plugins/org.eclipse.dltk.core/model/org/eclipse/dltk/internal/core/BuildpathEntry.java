@@ -549,7 +549,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 		// ensure path is absolute
 		IPath path = new Path(pathAttr);
 		int kind = kindFromString(kindAttr);
-		if (kind != IBuildpathEntry.BPE_CONTAINER && !path.isAbsolute()) {
+		if (kind != IBuildpathEntry.BPE_VARIABLE
+				&& kind != IBuildpathEntry.BPE_CONTAINER && !path.isAbsolute()) {
 			path = projectPath.append(path);
 		}
 		// exported flag (optional)
@@ -650,6 +651,10 @@ public class BuildpathEntry implements IBuildpathEntry {
 							exclusionPatterns, extraAttributes);
 				}
 			}
+			break;
+		case IBuildpathEntry.BPE_VARIABLE:
+			entry = DLTKCore.newVariableEntry(path,
+					accessRules, extraAttributes, isExported);
 			break;
 		case IBuildpathEntry.BPE_CONTAINER:
 			entry = DLTKCore.newContainerEntry(path, accessRules,
@@ -901,6 +906,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 	static int kindFromString(String kindStr) {
 		if (kindStr.equalsIgnoreCase("prj")) //$NON-NLS-1$
 			return IBuildpathEntry.BPE_PROJECT;
+		if (kindStr.equalsIgnoreCase("var")) //$NON-NLS-1$
+			return IBuildpathEntry.BPE_VARIABLE;
 		if (kindStr.equalsIgnoreCase("con")) //$NON-NLS-1$
 			return IBuildpathEntry.BPE_CONTAINER;
 		if (kindStr.equalsIgnoreCase("src")) //$NON-NLS-1$
@@ -1047,6 +1054,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 			return "src"; //$NON-NLS-1$
 		case IBuildpathEntry.BPE_LIBRARY:
 			return "lib"; //$NON-NLS-1$
+		case IBuildpathEntry.BPE_VARIABLE:
+			return "var"; //$NON-NLS-1$
 		case IBuildpathEntry.BPE_CONTAINER:
 			return "con"; //$NON-NLS-1$
 		default:
