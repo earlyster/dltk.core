@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.dltk.logconsole">
+      <factory class="org.eclipse.dltk.logconsole.ui.DefaultLogConsoleFactory">
+      </factory>
+   </extension>
+   <extension point="org.eclipse.ui.console.consolePageParticipants">
+      <consolePageParticipant
+            class="org.eclipse.dltk.logconsole.ui.LogConsolePageParticipant"
+            id="org.eclipse.dltk.logconsole.ui.LogConsolePageParticipant">
+         <enablement>
+         	<instanceof value="org.eclipse.dltk.logconsole.ui.LogConsoleImpl"/>
+         </enablement>
+      </consolePageParticipant>
+   </extension>
+</plugin>
