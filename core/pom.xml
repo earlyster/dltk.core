@@ -22,6 +22,8 @@
     <module>plugins/org.eclipse.dltk.debug.ui</module>
     <module>plugins/org.eclipse.dltk.formatter</module>
     <module>plugins/org.eclipse.dltk.launching</module>
+    <module>plugins/org.eclipse.dltk.logconsole</module>
+    <module>plugins/org.eclipse.dltk.logconsole.ui</module>
     <module>plugins/org.eclipse.dltk.testing</module>
     <module>plugins/org.eclipse.dltk.ui</module>
     <module>plugins/org.eclipse.dltk.validators.core</module>
