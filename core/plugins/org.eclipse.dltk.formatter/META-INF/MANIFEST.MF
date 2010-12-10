@@ -11,7 +11,7 @@ Export-Package: org.eclipse.dltk.formatter,
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.ui.workbench,
- org.eclipse.dltk.core;bundle-version="2.0.0",
- org.eclipse.dltk.ui;bundle-version="2.0.0"
+ org.eclipse.dltk.core;bundle-version="3.0.0",
+ org.eclipse.dltk.ui;bundle-version="3.0.0"
 Bundle-Activator: org.eclipse.dltk.formatter.DLTKFormatterPlugin
 Bundle-ActivationPolicy: lazy
