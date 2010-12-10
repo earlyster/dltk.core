@@ -29,7 +29,6 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -597,11 +596,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				return Path.EMPTY;
 			return element.getPath();
 		case IModelElement.SCRIPT_FOLDER:
-			String relativePath = ((IScriptFolder) element)
-					.getPath()
-					.removeFirstSegments(
-							element.getParent().getPath().segmentCount())
-					.toString() + '/';
+			String relativePath = element.getElementName() + '/';
 			return getPath(element.getParent(), relativeToRoot).append(
 					new Path(relativePath));
 		case IModelElement.SOURCE_MODULE:
