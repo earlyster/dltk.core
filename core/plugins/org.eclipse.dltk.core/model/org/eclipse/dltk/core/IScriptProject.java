@@ -150,6 +150,20 @@ public interface IScriptProject extends IModelElement, IOpenable, IParent {
 	IProjectFragment getProjectFragment(String zipPath);
 
 	/**
+	 * Returns a project fragment for an external library or a source folder at
+	 * the specified file system path. This is a handle-only method. The
+	 * underlying <code>java.io.File</code> may or may not exist. No resource is
+	 * associated with this local library package fragment root.
+	 * 
+	 * @param path
+	 *            the library's file system path
+	 * @return a package fragment root for the external library at the specified
+	 *         file system path
+	 * @since 3.0
+	 */
+	IProjectFragment getProjectFragment(IPath path);
+
+	/**
 	 * Sets the buildpath of this project using a list of buildpath entries.
 	 * 
 	 * Setting the buildpath to <code>null</code> specifies a default buildpath
