@@ -19,6 +19,7 @@ import org.eclipse.dltk.logconsole.ILogConsole;
 import org.eclipse.dltk.logconsole.ILogConsoleStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
@@ -53,10 +54,7 @@ public class LogConsoleImpl extends IOConsole {
 			outputStream = streams.get(stream);
 			if (outputStream == null) {
 				outputStream = newOutputStream();
-				if (stream == ILogConsole.STDERR) {
-					outputStream.setColor(Display.getDefault().getSystemColor(
-							SWT.COLOR_RED));
-				}
+				setupColor(outputStream, stream);
 			}
 			streams.put(stream, outputStream);
 		}
@@ -65,6 +63,24 @@ public class LogConsoleImpl extends IOConsole {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private void setupColor(final IOConsoleOutputStream outputStream,
+			ILogConsoleStream stream) {
+		if (stream == ILogConsole.STDERR) {
+			final Display current = Display.getCurrent();
+			if (current != null) {
+				outputStream.setColor(current.getSystemColor(SWT.COLOR_RED));
+			} else {
+				PlatformUI.getWorkbench().getDisplay()
+						.asyncExec(new Runnable() {
+							public void run() {
+								outputStream.setColor(Display.getDefault()
+										.getSystemColor(SWT.COLOR_RED));
+							}
+						});
+			}
 		}
 	}
 }
