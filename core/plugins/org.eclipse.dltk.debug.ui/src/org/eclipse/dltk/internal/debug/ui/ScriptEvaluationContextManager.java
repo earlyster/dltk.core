@@ -48,13 +48,13 @@ public class ScriptEvaluationContextManager implements IWindowListener,
 
 	private static ScriptEvaluationContextManager manager;
 
-	private Map pageToContextMap;
+	private Map<IWorkbenchPage, IScriptStackFrame> pageToContextMap;
 
 	private IWorkbenchWindow activeWindow;
 
 	protected ScriptEvaluationContextManager() {
 		DebugUITools.getDebugContextManager().addDebugContextListener(this);
-		pageToContextMap = new HashMap();
+		pageToContextMap = new HashMap<IWorkbenchPage, IScriptStackFrame>();
 	}
 
 	public static void startup() {
@@ -139,7 +139,7 @@ public class ScriptEvaluationContextManager implements IWindowListener,
 	private static IScriptStackFrame getContext(IWorkbenchPage page) {
 		if (manager != null) {
 			if (manager.pageToContextMap != null) {
-				return (IScriptStackFrame) manager.pageToContextMap.get(page);
+				return manager.pageToContextMap.get(page);
 			}
 		}
 		return null;
@@ -189,7 +189,7 @@ public class ScriptEvaluationContextManager implements IWindowListener,
 	 * @return IJavaStackFrame
 	 */
 	public static IScriptStackFrame getEvaluationContext(IWorkbenchWindow window) {
-		List alreadyVisited = new ArrayList();
+		List<IWorkbenchWindow> alreadyVisited = new ArrayList<IWorkbenchWindow>();
 		if (window == null) {
 			window = manager.activeWindow;
 		}
@@ -197,7 +197,7 @@ public class ScriptEvaluationContextManager implements IWindowListener,
 	}
 
 	private static IScriptStackFrame getEvaluationContext(
-			IWorkbenchWindow window, List alreadyVisited) {
+			IWorkbenchWindow window, List<IWorkbenchWindow> alreadyVisited) {
 		IWorkbenchPage activePage = window.getActivePage();
 		IScriptStackFrame frame = null;
 		if (activePage != null) {
