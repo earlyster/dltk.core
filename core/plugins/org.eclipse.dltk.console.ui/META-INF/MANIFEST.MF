@@ -11,12 +11,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.debug.core,
- org.eclipse.dltk.console;bundle-version="1.0.0",
+ org.eclipse.dltk.console;bundle-version="3.0.0",
  org.eclipse.dltk.launching;bundle-version="3.0.0",
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.core.expressions,
  org.eclipse.debug.ui,
- org.eclipse.dltk.core;bundle-version="2.0.0"
+ org.eclipse.dltk.core;bundle-version="3.0.0"
 Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.console.ui,
  org.eclipse.dltk.console.ui.internal
