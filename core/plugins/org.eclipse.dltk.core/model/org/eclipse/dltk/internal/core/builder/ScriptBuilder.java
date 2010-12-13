@@ -23,8 +23,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -40,23 +38,15 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IExternalSourceModule;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelMarker;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IBuildChange;
 import org.eclipse.dltk.core.builder.IBuildState;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
-import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
@@ -68,104 +58,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	public IProject currentProject = null;
 	ScriptProject scriptProject = null;
 	State lastState;
-
-	static class ResourceVisitor implements IResourceDeltaVisitor,
-			IResourceVisitor {
-		final Set<IResource> resources = new HashSet<IResource>();
-		private final IProgressMonitor monitor;
-
-		public ResourceVisitor(IProgressMonitor monitor) {
-			this.monitor = monitor;
-		}
-
-		public boolean visit(IResourceDelta delta) throws CoreException {
-			if (monitor.isCanceled()) {
-				return false;
-			}
-			IResource resource = delta.getResource();
-			if (resource.getType() == IResource.FOLDER) {
-				this.monitor
-						.subTask(Messages.ScriptBuilder_scanningProjectFolder
-								+ resource.getProjectRelativePath().toString());
-			}
-			if (resource.getType() == IResource.FILE) {
-				switch (delta.getKind()) {
-				case IResourceDelta.ADDED:
-				case IResourceDelta.CHANGED:
-					resources.add(resource);
-					break;
-				}
-				return false;
-			}
-			return true;
-		}
-
-		public boolean visit(IResource resource) {
-			if (monitor.isCanceled()) {
-				return false;
-			}
-			if (resource.getType() == IResource.FOLDER) {
-				this.monitor
-						.subTask(Messages.ScriptBuilder_scanningProjectFolder
-								+ resource.getProjectRelativePath().toString());
-			}
-			if (resource.getType() == IResource.FILE) {
-				resources.add(resource);
-				return false;
-			}
-			return true;
-		}
-	}
-
-	static class ExternalModuleVisitor implements IModelElementVisitor {
-		final Set<ISourceModule> elements = new HashSet<ISourceModule>();
-		private final IProgressMonitor monitor;
-
-		public ExternalModuleVisitor(IProgressMonitor monitor) {
-			this.monitor = monitor;
-		}
-
-		/**
-		 * Visit only external source modules, witch we aren't builded yet.
-		 */
-		public boolean visit(IModelElement element) {
-			// monitor.worked(1);
-			if (monitor.isCanceled()) {
-				return false;
-			}
-			if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
-				if (!(element instanceof IProjectFragment && ((IProjectFragment) element)
-						.isExternal())) {
-					return false;
-				}
-				IProjectFragment fragment = (IProjectFragment) element;
-
-				String localPath = EnvironmentPathUtils.getLocalPath(
-						fragment.getPath()).toString();
-				if (!localPath.startsWith("#")) { //$NON-NLS-1$
-					this.monitor
-							.subTask(Messages.ScriptBuilder_scanningExternalFolder
-									+ localPath);
-				}
-			} else if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-				if (element instanceof IExternalSourceModule
-						|| element instanceof BuiltinSourceModule) {
-					elements.add((ISourceModule) element);
-				}
-				return false; // do not enter into source module content.
-			} else if (element.getElementType() == IModelElement.SCRIPT_FOLDER) {
-				IScriptFolder folder = (IScriptFolder) element;
-				String localPath = EnvironmentPathUtils.getLocalPath(
-						folder.getPath()).toString();
-				if (!localPath.startsWith("#")) { //$NON-NLS-1$
-					this.monitor
-							.subTask(Messages.ScriptBuilder_scanningExternalFolder
-									+ localPath);
-				}
-			}
-			return true;
-		}
-	}
 
 	/**
 	 * Hook allowing to initialize some static state before a complete build
