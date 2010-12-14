@@ -117,6 +117,26 @@ public interface IInterpreterInstallType {
 			LibraryLocation[] libraryLocations, IProgressMonitor monitor);
 
 	/**
+	 * Tries to detect an installed interpreter that matches this interpreter
+	 * install type. Implementers should return <code>null</code> if they can't
+	 * assure that a given interpreter install matches this
+	 * IInterpreterInstallType.
+	 * 
+	 * @return The location of an interpreter installation that can be used with
+	 *         this interpreter install type, or <code>null</code> if unable to
+	 *         locate an installed interpreter.
+	 * @since 3.0
+	 */
+	IFileHandle[] detectInstallLocations();
+
+	/**
+	 * Make the name of a detected interpreter stand out
+	 * 
+	 * @since 3.0
+	 */
+	String generateDetectedInterpreterName(IFileHandle install);
+
+	/**
 	 * Used to search interpreters.
 	 * 
 	 * @param installLocation

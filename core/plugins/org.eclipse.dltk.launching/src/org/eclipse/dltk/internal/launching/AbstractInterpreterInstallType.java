@@ -517,6 +517,25 @@ public abstract class AbstractInterpreterInstallType implements
 		return validateInstallLocation(installLocation);
 	}
 
+	/**
+	 * @since 3.0
+	 */
+	public IFileHandle[] detectInstallLocations() {
+		return null;
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public String generateDetectedInterpreterName(IFileHandle install) {
+		String name = install.getName();
+		name = name.trim();
+		if (name.length() == 0) {
+			name = this.getName();
+		}
+		return name;
+	}
+
 	public IStatus validatePossiblyName(IFileHandle installLocation) {
 		String possibleNames[] = getPossibleInterpreterNames();
 

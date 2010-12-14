@@ -64,6 +64,7 @@ import org.eclipse.dltk.internal.launching.DefaultEntryResolver;
 import org.eclipse.dltk.internal.launching.DefaultProjectBuildpathEntry;
 import org.eclipse.dltk.internal.launching.InterpreterContainerInitializer;
 import org.eclipse.dltk.internal.launching.InterpreterDefinitionsContainer;
+import org.eclipse.dltk.internal.launching.InterpreterListener;
 import org.eclipse.dltk.internal.launching.ListenerList;
 import org.eclipse.dltk.internal.launching.RuntimeBuildpathEntry;
 import org.eclipse.dltk.internal.launching.RuntimeBuildpathEntryResolver;
@@ -1853,6 +1854,63 @@ public final class ScriptRuntime {
 		}
 	}
 
+	private static InterpreterStandin detectInterpreterInstall(String natureId,
+			List<IInterpreterInstallType> interpTypes) {
+		// Try to create a interpreter install using the install location
+		for (int i = 0; i < interpTypes.size(); i++) {
+			IInterpreterInstallType interpType = interpTypes.get(i);
+			IFileHandle[] detectedLocations = interpType
+					.detectInstallLocations();
+			if (detectedLocations != null && detectedLocations.length != 0) {
+				// Make sure the interpreter id is unique
+				long unique = System.currentTimeMillis();
+
+				while (interpType
+						.findInterpreterInstall(String.valueOf(unique)) != null) {
+					unique++;
+				}
+
+				// Create a standin for the detected interpreter and add it to
+				// the result collector
+				// TODO (alex) handle all instances
+				String interpID = String.valueOf(unique);
+				InterpreterStandin detected = new InterpreterStandin(
+						interpType, interpID);
+				detected.setInstallLocation(detectedLocations[0]);
+				detected.setName(interpType
+						.generateDetectedInterpreterName(detected
+								.getInstallLocation()));
+				return detected;
+			}
+		}
+		return null;
+	}
+
+	private static Map<String, List<IInterpreterInstallType>> getInterpreterTypesByNature() {
+		Map<String, List<IInterpreterInstallType>> result = new HashMap<String, List<IInterpreterInstallType>>();
+		for (IInterpreterInstallType type : fgInterpreterTypes) {
+			String natureId = type.getNatureId();
+			if (!result.containsKey(natureId)) {
+				result.put(natureId, new ArrayList<IInterpreterInstallType>());
+			}
+			result.get(natureId).add(type);
+		}
+		return result;
+	}
+
+	private static Map<String, List<IInterpreterInstall>> getValidInterpretersByNature(
+			List<IInterpreterInstall> validInterpreters) {
+		Map<String, List<IInterpreterInstall>> result = new HashMap<String, List<IInterpreterInstall>>();
+		for (IInterpreterInstall install : validInterpreters) {
+			String natureId = install.getNatureId();
+			if (!result.containsKey(natureId)) {
+				result.put(natureId, new ArrayList<IInterpreterInstall>());
+			}
+			result.get(natureId).add(install);
+		}
+		return result;
+	}
+
 	/**
 	 * Perform Interpreter type and Interpreter install initialization. Does not
 	 * hold locks while performing change notification.
@@ -1872,6 +1930,48 @@ public final class ScriptRuntime {
 
 					// 2. add persisted Interpreters
 					setPref = addPersistedInterpreters(defs);
+
+					// 3. if there are none, detect interpreters
+					Map<String, List<IInterpreterInstallType>> typesByNature = getInterpreterTypesByNature();
+					Map<String, List<IInterpreterInstall>> interpsByNature = getValidInterpretersByNature(defs
+							.getValidInterpreterList());
+					for (String natureId : typesByNature.keySet()) {
+						if (!interpsByNature.containsKey(natureId)
+								|| interpsByNature.get(natureId).isEmpty()) {
+							// calling out to detectInterpreterInstall(nature)
+							// could allow clients to change
+							// Interpreter settings (i.e. call back into change
+							// Interpreter settings).
+							InterpreterListener listener = new InterpreterListener();
+							addInterpreterInstallChangedListener(listener);
+							setPref = true;
+							InterpreterStandin interp = detectInterpreterInstall(
+									natureId, typesByNature.get(natureId));
+							DefaultInterpreterEntry entry = null;
+							if (interp != null) {
+								entry = new DefaultInterpreterEntry(natureId,
+										interp.getEnvironmentId());
+							}
+							removeInterpreterInstallChangedListener(listener);
+							if (!listener.isChanged()) {
+								if (interp != null) {
+									defs.addInterpreter(interp);
+									defs.setDefaultInterpreterInstallCompositeID(
+											entry,
+											getCompositeIdFromInterpreter(interp));
+								}
+							} else {
+								// interpreters were changed - reflect current
+								// settings
+								addPersistedInterpreters(defs);
+								if (entry != null) {
+									defs.setDefaultInterpreterInstallCompositeID(
+											entry,
+											fgDefaultInterpreterId.get(entry));
+								}
+							}
+						}
+					}
 
 					// 4. load contributed Interpreter installs
 					addInterpreterExtensions(defs);
