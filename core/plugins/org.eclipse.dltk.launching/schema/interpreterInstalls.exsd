@@ -76,7 +76,7 @@
          <attribute name="home" type="string" use="required">
             <annotation>
                <documentation>
-                  Path to the executable file for this interpreter install. Paths must be absolute and may use string substitution variables such as ${eclipse_home}.
+                  Path to the executable file for this interpreter install. If no bundle attributed is specified then path must be absolute and may use string substitution variables such as ${eclipse_home}, if bundle attribute is specified the path is related to that bundle.
                </documentation>
             </annotation>
          </attribute>
@@ -91,6 +91,13 @@
             <annotation>
                <documentation>
                   Default interpreter arguments used when launching this interpreter install as they should appear on the command line.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="bundle" type="string">
+            <annotation>
+               <documentation>
+                  The optional attribute to specify if home is relative to this bundle (use empty string or dot to select current bundle). Without this attribute the home is treated as local file system path.
                </documentation>
             </annotation>
          </attribute>

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
@@ -70,6 +71,8 @@ import org.eclipse.dltk.internal.launching.RuntimeBuildpathEntry;
 import org.eclipse.dltk.internal.launching.RuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.internal.launching.RuntimeBuildpathProvider;
 import org.eclipse.dltk.internal.launching.ScriptSourceLookupUtil;
+import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Bundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -1777,7 +1780,7 @@ public final class ScriptRuntime {
 						final IEnvironment localEnv = EnvironmentManager
 								.getLocalEnvironment();
 
-						IFileHandle homeFile = localEnv.getFile(new Path(
+						IFileHandle homeFile = localEnv.getFile(toPath(element,
 								substitute(home)));
 						if (homeFile.exists()) {
 							// adjust for relative path names
@@ -1852,6 +1855,29 @@ public final class ScriptRuntime {
 				DLTKLaunchingPlugin.log(e);
 			}
 		}
+	}
+
+	private static IPath toPath(IConfigurationElement element, String path)
+			throws CoreException {
+		String bundleId = element.getAttribute("bundle");
+		if (bundleId != null) {
+			if (bundleId.equals(".")) {
+				bundleId = element.getContributor().getName();
+			}
+			final Bundle bundle = Platform.getBundle(bundleId);
+			if (bundle != null) {
+				try {
+					final File bundleFile = FileLocator.getBundleFile(bundle);
+					final IPath bundlePath = new Path(
+							bundleFile.getCanonicalPath());
+					return bundlePath.append(new Path(path));
+				} catch (IOException e) {
+					abort(NLS.bind("Error resolving {0} bundle location",
+							bundleId), e);
+				}
+			}
+		}
+		return new Path(path);
 	}
 
 	private static InterpreterStandin detectInterpreterInstall(String natureId,
