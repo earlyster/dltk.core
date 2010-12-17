@@ -12,6 +12,10 @@ package org.eclipse.dltk.internal.ui.actions.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -49,6 +53,9 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.QuickMenuCreator;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.operations.UndoRedoActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -156,19 +163,10 @@ public class RefactorActionGroup extends ActionGroup {
 	private final List<SelectionDispatchAction> fActions = new ArrayList<SelectionDispatchAction>();
 	private final List<ContributedRefactoringAction> fContributedActions = new ArrayList<ContributedRefactoringAction>();
 
-	//	private static final String QUICK_MENU_ID= "org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"; //$NON-NLS-1$
+	private static final String QUICK_MENU_ID = "org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"; //$NON-NLS-1$
 
-	// private class RefactorQuickAccessAction extends DLTKQuickMenuAction {
-	// public RefactorQuickAccessAction(SourceModuleEditor editor) {
-	// super(editor, QUICK_MENU_ID);
-	// }
-	// protected void fillMenu(IMenuManager menu) {
-	// fillQuickMenu(menu);
-	// }
-	// }
-
-	// private RefactorQuickAccessAction fQuickAccessAction;
-	// private IKeyBindingService fKeyBindingService;
+	private IHandlerActivation fQuickAccessHandlerActivation;
+	private IHandlerService fHandlerService;
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
@@ -194,6 +192,7 @@ public class RefactorActionGroup extends ActionGroup {
 				.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup = new UndoRedoActionGroup(part.getViewSite(),
 				workspaceContext, true);
+		installQuickAccessAction();
 	}
 
 	/**
@@ -206,6 +205,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public RefactorActionGroup(Page page) {
 		this(page.getSite());
+		installQuickAccessAction();
 	}
 
 	/**
@@ -365,6 +365,8 @@ public class RefactorActionGroup extends ActionGroup {
 		// fKeyBindingService= editor.getEditorSite().getKeyBindingService();
 		// fKeyBindingService.registerAction(fQuickAccessAction);
 
+		installQuickAccessAction();
+
 		stats.endRun();
 	}
 
@@ -458,6 +460,27 @@ public class RefactorActionGroup extends ActionGroup {
 		// }
 
 		stats.endRun();
+	}
+
+	private void installQuickAccessAction() {
+		fHandlerService = (IHandlerService) fSite
+				.getService(IHandlerService.class);
+		if (fHandlerService != null) {
+			final QuickMenuCreator creator = new QuickMenuCreator() {
+				protected void fillMenu(IMenuManager menu) {
+					fillQuickMenu(menu);
+				}
+			};
+			IHandler handler = new AbstractHandler() {
+				public Object execute(ExecutionEvent event)
+						throws ExecutionException {
+					creator.createMenu();
+					return null;
+				}
+			};
+			fQuickAccessHandlerActivation = fHandlerService.activateHandler(
+					QUICK_MENU_ID, handler);
+		}
 	}
 
 	private void initAction(SelectionDispatchAction action,
@@ -716,33 +739,28 @@ public class RefactorActionGroup extends ActionGroup {
 				.getDocument(fEditor.getEditorInput());
 	}
 
-	// private void fillQuickMenu(IMenuManager menu) {
-	// if (fEditor != null) {
-	// IModelElement element= SelectionConverter.getInput(fEditor);
-	// if (element == null || !ActionUtil.isOnBuildPath(element)) {
-	// menu.add(fNoActionAvailable);
-	// return;
-	// }
-	// ITextSelection textSelection=
-	// (ITextSelection)fEditor.getSelectionProvider().getSelection();
-	// ModelTextSelection javaSelection= new ModelTextSelection(
-	// getEditorInput(), getDocument(), textSelection.getOffset(),
-	// textSelection.getLength());
-	//
-	// for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-	// ((SelectionDispatchAction)iter.next()).update(javaSelection);
-	// }
-	// fillRefactorMenu(menu);
-	// for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-	// ((SelectionDispatchAction)iter.next()).update(textSelection);
-	// }
-	//
-	// } else {
-	// ISelection selection= fSite.getSelectionProvider().getSelection();
-	// for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-	// ((SelectionDispatchAction)iter.next()).update(selection);
-	// }
-	// fillRefactorMenu(menu);
-	// }
-	// }
+	private void fillQuickMenu(IMenuManager menu) {
+		if (fEditor != null) {
+			IModelElement element = SelectionConverter.getInput(fEditor);
+			if (element == null || !ActionUtil.isOnBuildPath(element)) {
+				menu.add(fNoActionAvailable);
+				return;
+			}
+			ITextSelection textSelection = (ITextSelection) fEditor
+					.getSelectionProvider().getSelection();
+			ModelTextSelection scriptSelection = new ModelTextSelection(
+					getEditorInput(), getDocument(), textSelection.getOffset(),
+					textSelection.getLength());
+			for (SelectionDispatchAction action : fActions)
+				action.update(scriptSelection);
+			fillRefactorMenu(menu);
+			for (SelectionDispatchAction action : fActions)
+				action.update(textSelection);
+		} else {
+			ISelection selection = fSite.getSelectionProvider().getSelection();
+			for (SelectionDispatchAction action : fActions)
+				action.update(selection);
+			fillRefactorMenu(menu);
+		}
+	}
 }
