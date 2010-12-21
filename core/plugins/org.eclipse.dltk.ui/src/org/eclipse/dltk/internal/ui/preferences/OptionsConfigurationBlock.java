@@ -126,10 +126,14 @@ public abstract class OptionsConfigurationBlock {
 				REBUILD_COUNT_KEY, fRebuildCount);
 	}
 
+	protected PreferenceKey[] getPreferenceKeys() {
+		return fAllKeys;
+	}
+
 	public boolean hasProjectSpecificOptions(IProject project) {
 		if (project != null) {
 			IScopeContext projectContext = new ProjectScope(project);
-			PreferenceKey[] allKeys = fAllKeys;
+			PreferenceKey[] allKeys = getPreferenceKeys();
 			for (int i = 0; i < allKeys.length; i++) {
 				if (allKeys[i].getStoredValue(projectContext, fManager) != null) {
 					return true;
@@ -197,9 +201,10 @@ public abstract class OptionsConfigurationBlock {
 		 * can cause an illegal state exception - probably due to the fact that
 		 * key binding is different from the jdt implementation
 		 */
-		for (int i = 0; i < fAllKeys.length; i++) {
+		PreferenceKey[] allKeys = getPreferenceKeys();
+		for (int i = 0; i < allKeys.length; i++) {
 			try {
-				PreferenceKey key = fAllKeys[i];
+				PreferenceKey key = allKeys[i];
 				String oldVal = key.getStoredValue(currContext, null);
 				String val = key.getStoredValue(currContext, fManager);
 				if (val == null) {
@@ -231,17 +236,18 @@ public abstract class OptionsConfigurationBlock {
 	public void useProjectSpecificSettings(boolean enable) {
 		boolean hasProjectSpecificOption = fDisabledProjectSettings == null;
 		if (enable != hasProjectSpecificOption && fProject != null) {
+			PreferenceKey[] allKeys = getPreferenceKeys();
 			if (enable) {
-				for (int i = 0; i < fAllKeys.length; i++) {
-					PreferenceKey curr = fAllKeys[i];
+				for (int i = 0; i < allKeys.length; i++) {
+					PreferenceKey curr = allKeys[i];
 					String val = fDisabledProjectSettings.get(curr);
 					curr.setStoredValue(fLookupOrder[0], val, fManager);
 				}
 				fDisabledProjectSettings = null;
 			} else {
 				fDisabledProjectSettings = new HashMap<PreferenceKey, String>();
-				for (int i = 0; i < fAllKeys.length; i++) {
-					PreferenceKey curr = fAllKeys[i];
+				for (int i = 0; i < allKeys.length; i++) {
+					PreferenceKey curr = allKeys[i];
 					String oldSetting = curr.getStoredValue(fLookupOrder,
 							false, fManager);
 					fDisabledProjectSettings.put(curr, oldSetting);
@@ -332,8 +338,9 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	public void performDefaults() {
-		for (int i = 0; i < fAllKeys.length; i++) {
-			PreferenceKey curr = fAllKeys[i];
+		PreferenceKey[] allKeys = getPreferenceKeys();
+		for (int i = 0; i < allKeys.length; i++) {
+			PreferenceKey curr = allKeys[i];
 			String origValue = curr
 					.getStoredValue(fLookupOrder, true, fManager);
 			setValue(curr, origValue);

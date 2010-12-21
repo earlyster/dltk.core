@@ -1,6 +1,8 @@
 package org.eclipse.dltk.ui.preferences;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
@@ -20,6 +22,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		implements IPreferenceDelegate {
+
+	private List<PreferenceKey> keys = new ArrayList<PreferenceKey>();
 
 	private ControlBindingManager bindManager;
 
@@ -48,11 +52,13 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	protected final void bindControl(Button button, PreferenceKey key,
 			Control[] dependencies) {
 		bindManager.bindControl(button, key, dependencies);
+		keys.add(key);
 	}
 
 	protected final void bindControl(Text textBox, PreferenceKey key,
 			IFieldValidator validator) {
 		bindManager.bindControl(textBox, key, validator);
+		keys.add(key);
 	}
 
 	/**
@@ -61,6 +67,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 */
 	protected final void bindControl(Combo combo, PreferenceKey key) {
 		bindManager.bindControl(combo, key);
+		keys.add(key);
 	}
 
 	/**
@@ -70,6 +77,23 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	protected final void bindControl(Combo combo, PreferenceKey key,
 			String[] itemValues) {
 		bindManager.bindControl(combo, key, itemValues);
+		keys.add(key);
+	}
+
+	@Override
+	protected PreferenceKey[] getPreferenceKeys() {
+		PreferenceKey[] prefKeys = super.getPreferenceKeys();
+		if (keys.size() > 0) {
+			PreferenceKey[] allKeys = new PreferenceKey[prefKeys.length
+					+ keys.size()];
+			System.arraycopy(prefKeys, 0, allKeys, 0, prefKeys.length);
+			int counter = prefKeys.length;
+			for (PreferenceKey preferenceKey : keys) {
+				allKeys[counter++] = preferenceKey;
+			}
+			prefKeys = allKeys;
+		}
+		return prefKeys;
 	}
 
 	/**
