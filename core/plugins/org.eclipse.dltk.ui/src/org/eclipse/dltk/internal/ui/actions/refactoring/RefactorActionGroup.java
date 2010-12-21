@@ -252,9 +252,11 @@ public class RefactorActionGroup extends ActionGroup {
 			if (delegate != null) {
 				final ContributedRefactoringAction action = new ContributedRefactoringAction(
 						fEditor, delegate);
-				action.setId(descriptor.getAttribute("id"));
+				String id = descriptor.getAttribute("id");
+				action.setId(id);
 				action.setText(descriptor.getAttribute("label"));
-				initAction(action, selection, null);
+				initUpdatingAction(action, provider, selection, id);
+				editor.setAction(id, action);
 				fContributedActions.add(action);
 			}
 		}
@@ -519,6 +521,8 @@ public class RefactorActionGroup extends ActionGroup {
 				.setGlobalActionHandler(DLTKActionConstants.MOVE, fMoveAction);
 		actionBars.setGlobalActionHandler(DLTKActionConstants.RENAME,
 				fRenameAction);
+		for (ContributedRefactoringAction action : fContributedActions)
+			actionBars.setGlobalActionHandler(action.getId(), action);
 		// actionBars.setGlobalActionHandler(DLTKActionConstants.MODIFY_PARAMETERS,
 		// fModifyParametersAction);
 		// actionBars.setGlobalActionHandler(DLTKActionConstants.PULL_UP,
@@ -592,6 +596,9 @@ public class RefactorActionGroup extends ActionGroup {
 		// disposeAction(fSelfEncapsulateField, provider);
 		disposeAction(fMoveAction, provider);
 		disposeAction(fRenameAction, provider);
+		for (ContributedRefactoringAction action : fContributedActions) {
+			disposeAction(action, provider);
+		}
 		// disposeAction(fModifyParametersAction, provider);
 		// disposeAction(fPullUpAction, provider);
 		// disposeAction(fPushDownAction, provider);
@@ -611,9 +618,9 @@ public class RefactorActionGroup extends ActionGroup {
 		// disposeAction(fInferTypeArgumentsAction, provider);
 		// disposeAction(fConvertLocalToFieldAction, provider);
 		// disposeAction(fConvertAnonymousToNestedAction, provider);
-		// if (fQuickAccessAction != null && fKeyBindingService != null) {
-		// fKeyBindingService.unregisterAction(fQuickAccessAction);
-		// }
+		if (fQuickAccessHandlerActivation != null && fHandlerService != null) {
+			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
+		}
 		if (fUndoRedoActionGroup != null) {
 			fUndoRedoActionGroup.dispose();
 		}
