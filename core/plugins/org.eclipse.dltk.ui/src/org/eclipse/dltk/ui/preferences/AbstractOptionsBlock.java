@@ -83,7 +83,9 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	@Override
 	protected PreferenceKey[] getPreferenceKeys() {
 		PreferenceKey[] prefKeys = super.getPreferenceKeys();
-		if (keys.size() > 0) {
+		// keys != null shouldnt happen but this can be called from the
+		// constructor, needs to be refactored a bit.
+		if (keys != null && keys.size() > 0) {
 			PreferenceKey[] allKeys = new PreferenceKey[prefKeys.length
 					+ keys.size()];
 			System.arraycopy(prefKeys, 0, allKeys, 0, prefKeys.length);
