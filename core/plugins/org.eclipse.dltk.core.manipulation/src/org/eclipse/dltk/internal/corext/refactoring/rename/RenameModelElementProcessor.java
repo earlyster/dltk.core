@@ -357,4 +357,9 @@ public abstract class RenameModelElementProcessor extends ScriptRenameProcessor 
 		return descriptor;
 	}
 
+	@Override
+	public boolean needsSavedEditors() {
+		return false;
+	}
+
 }
