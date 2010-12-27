@@ -54,6 +54,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -159,6 +161,7 @@ public abstract class AbstractInfoView extends ViewPart implements
 	private GotoInputAction fGotoInputAction;
 	/** Counts the number of background computation requests. */
 	private volatile int fComputeCount;
+	private IContextActivation fContextActivation;
 	/**
 	 * Background color.
 	 * 
@@ -237,6 +240,12 @@ public abstract class AbstractInfoView extends ViewPart implements
 		createActions();
 		createContextMenu();
 		fillActionBars(getViewSite().getActionBars());
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 		PlatformUI.getWorkbench().getHelpSystem()
 				.setHelp(getControl(), getHelpContextId());
 	}
@@ -479,6 +488,13 @@ public abstract class AbstractInfoView extends ViewPart implements
 	final public void dispose() {
 		// cancel possible running computation
 		fComputeCount++;
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		getSite().getWorkbenchWindow().getPartService()
 				.removePartListener(fPartListener);
 		ISelectionProvider provider = getSelectionProvider();

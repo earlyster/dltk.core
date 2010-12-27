@@ -863,6 +863,12 @@
             parentId="org.eclipse.ui.textEditorScope"
             id="org.eclipse.dltk.ui.scriptEditorScope">
       </context>
+      <context
+            name="%context.viewScope.name"
+            description="%context.viewScope.description"
+            parentId="org.eclipse.ui.contexts.window"
+            id="org.eclipse.dltk.ui.context.views">
+      </context>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">

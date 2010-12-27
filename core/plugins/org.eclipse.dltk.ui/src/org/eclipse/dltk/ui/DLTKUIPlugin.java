@@ -114,6 +114,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * 
 	 */
 	public static final String ID_BUILDPATH_VARIABLES_PREFERENCE_PAGE = "org.eclipse.dltk.ui.preferences.BuildpathVariablesPreferencePage"; //$NON-NLS-1$
+	public static final String CONTEXT_VIEWS = "org.eclipse.dltk.ui.context.views"; //$NON-NLS-1$
 	// The shared instance.
 	private static DLTKUIPlugin plugin;
 

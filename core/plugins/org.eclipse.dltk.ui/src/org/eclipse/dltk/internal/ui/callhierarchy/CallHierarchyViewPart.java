@@ -84,6 +84,8 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -164,6 +166,7 @@ public class CallHierarchyViewPart extends ViewPart implements
 	private boolean fShowCallDetails;
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
+	private IContextActivation fContextActivation;
 
 	public CallHierarchyViewPart() {
 		super();
@@ -417,6 +420,12 @@ public class CallHierarchyViewPart extends ViewPart implements
 		}
 		restoreSplitterRatio();
 		addPartListener();
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	private void restoreSplitterRatio() {
@@ -594,6 +603,13 @@ public class CallHierarchyViewPart extends ViewPart implements
 	 * 
 	 */
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		if (fActionGroups != null) {
 			fActionGroups.dispose();
 		}
