@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.corext.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +44,8 @@ public class SearchResultGroup {
 		return fResource;
 	}
 
-	public SearchMatch[] getSearchResults() {
-		return (SearchMatch[]) fSearchMatches.toArray(new SearchMatch[fSearchMatches.size()]);
+	public List<SearchMatch> getSearchResults() {
+		return Collections.unmodifiableList(fSearchMatches);
 	}
 
 	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
@@ -56,9 +57,9 @@ public class SearchResultGroup {
 	}
 
 	public ISourceModule getSourceModule(){
-		if (getSearchResults() == null || getSearchResults().length == 0)
+		if (getSearchResults() == null || getSearchResults().size() == 0)
 			return null;
-		return SearchUtils.getSourceModule(getSearchResults()[0]);
+		return SearchUtils.getSourceModule(getSearchResults().get(0));
 	}
 
 	public String toString() {
