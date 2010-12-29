@@ -13,6 +13,7 @@ package org.eclipse.dltk.internal.debug.ui.log;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -40,6 +41,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.ViewPart;
 
 public class ScriptDebugLogView extends ViewPart {
@@ -51,6 +54,7 @@ public class ScriptDebugLogView extends ViewPart {
 	private TextViewer textViewer;
 	private IDocument textDocument;
 	private IPropertyChangeListener fontRegistryChangeListener;
+	private IContextActivation fContextActivation;
 
 	public ScriptDebugLogView() {
 		super();
@@ -123,9 +127,22 @@ public class ScriptDebugLogView extends ViewPart {
 		createMenu();
 		createToolbar();
 		createContextMenu();
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		if (fontRegistryChangeListener != null) {
 			JFaceResources.getFontRegistry().removeListener(
 					fontRegistryChangeListener);

@@ -12,6 +12,7 @@
 package org.eclipse.dltk.debug.ui.display;
 
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -22,6 +23,8 @@ import org.eclipse.ui.SubActionBars;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.PageSite;
 import org.eclipse.ui.part.ViewPart;
@@ -32,6 +35,7 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 
 	private PageSite pageSite;
 	private IPageBookViewPage page;
+	private IContextActivation fContextActivation;
 
 	public void init(IViewSite site) throws PartInitException {
 		super.init(site);
@@ -51,6 +55,13 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 	private static final String KEEP_ON_LAUNCH = "debug.console.keep_on_launch"; //$NON-NLS-1$
 
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		if (page != null || console != null) {
 			final IPreferenceStore preferences = getPreferences();
 			if (console != null) {
@@ -58,8 +69,8 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 						.saveState());
 			}
 			if (page != null) {
-				preferences.setValue(KEEP_ON_LAUNCH, !((DebugConsolePage) page)
-						.isResetOnLaunch());
+				preferences.setValue(KEEP_ON_LAUNCH,
+						!((DebugConsolePage) page).isResetOnLaunch());
 			}
 			DLTKDebugUIPlugin.getDefault().savePluginPreferences();
 		}
@@ -84,6 +95,12 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 		toolBarManager.add(new GroupMarker(IConsoleConstants.OUTPUT_GROUP));
 		toolBarManager.add(new GroupMarker(IConsoleConstants.LAUNCH_GROUP));
 		page.createControl(parent);
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 		((SubActionBars) pageSite.getActionBars()).activate();
 	}
 
