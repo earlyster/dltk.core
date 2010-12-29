@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.DataEntry;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -19,6 +20,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.ViewPart;
 
 public class DLTKPerformanceViewPart extends ViewPart {
@@ -152,6 +155,7 @@ public class DLTKPerformanceViewPart extends ViewPart {
 	}
 
 	private TreeViewer viewer;
+	private IContextActivation fContextActivation;
 
 	public DLTKPerformanceViewPart() {
 	}
@@ -218,10 +222,28 @@ public class DLTKPerformanceViewPart extends ViewPart {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	@Override
 	public void setFocus() {
+	}
+
+	@Override
+	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
+		super.dispose();
 	}
 
 }
