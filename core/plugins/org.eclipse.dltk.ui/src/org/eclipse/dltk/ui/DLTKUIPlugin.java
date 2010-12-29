@@ -58,6 +58,7 @@ import org.eclipse.dltk.internal.ui.editor.ISourceModuleDocumentProvider;
 import org.eclipse.dltk.internal.ui.editor.SourceModuleDocumentProvider;
 import org.eclipse.dltk.internal.ui.editor.WorkingCopyManager;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
+import org.eclipse.dltk.internal.ui.viewsupport.ContextActivator;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BuildpathAttributeConfigurationDescriptors;
 import org.eclipse.dltk.launching.sourcelookup.DBGPSourceModule;
 import org.eclipse.dltk.ui.text.completion.ContentAssistHistory;
@@ -195,6 +196,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		}
 
 		ExecutionContexts.setManager(new UIExecutionContextManager());
+		ContextActivator.getInstance().install();
 	}
 
 	private static class ShutdownCloseRemoteEditorsListener implements

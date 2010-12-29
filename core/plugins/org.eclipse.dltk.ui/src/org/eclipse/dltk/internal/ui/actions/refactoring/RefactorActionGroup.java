@@ -20,6 +20,7 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.PerformanceStats;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.ui.actions.ActionMessages;
 import org.eclipse.dltk.internal.ui.actions.ActionUtil;
@@ -184,15 +185,22 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @param part
 	 *            the view part that owns this action group
+	 * @param toolkit
+	 *            toolkit for language-specific refactorings
 	 */
-	public RefactorActionGroup(IViewPart part) {
-		this(part.getSite());
+	public RefactorActionGroup(IViewPart part, IDLTKLanguageToolkit toolkit) {
+		this(part.getSite(), toolkit);
 
 		IUndoContext workspaceContext = (IUndoContext) ResourcesPlugin
 				.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup = new UndoRedoActionGroup(part.getViewSite(),
 				workspaceContext, true);
 		installQuickAccessAction();
+	}
+
+	@Deprecated
+	public RefactorActionGroup(IViewPart part) {
+		this(part, null);
 	}
 
 	/**
@@ -202,9 +210,12 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @param page
 	 *            the page that owns this action group
+	 * @param toolkit
+	 *            toolkit for language-specific refactorings
+	 * 
 	 */
-	public RefactorActionGroup(Page page) {
-		this(page.getSite());
+	public RefactorActionGroup(Page page, IDLTKLanguageToolkit toolkit) {
+		this(page.getSite(), toolkit);
 		installQuickAccessAction();
 	}
 
@@ -372,10 +383,8 @@ public class RefactorActionGroup extends ActionGroup {
 		stats.endRun();
 	}
 
-	private RefactorActionGroup(IWorkbenchSite site/*
-													 * , IKeyBindingService
-													 * keyBinding
-													 */) {
+	private RefactorActionGroup(IWorkbenchSite site,
+			final IDLTKLanguageToolkit toolkit) {
 
 		final PerformanceStats stats = PerformanceStats.getStats(
 				PERF_REFACTOR_ACTION_GROUP, this);
@@ -392,6 +401,28 @@ public class RefactorActionGroup extends ActionGroup {
 		fRenameAction = new RenameAction(site);
 		initUpdatingAction(fRenameAction, provider, selection,
 				IScriptEditorActionDefinitionIds.RENAME_ELEMENT);
+		if (toolkit != null) {
+			/*final Descriptor<IEditorActionDelegate>[] delegates = new LazyExtensionManager<IEditorActionDelegate>(
+					DLTKUIPlugin.PLUGIN_ID + ".refactoring") {
+				protected boolean isValidElement(IConfigurationElement element) {
+					return "action".equals(element.getName())
+							&& toolkit.getNatureId().equals(
+									element.getAttribute("nature"));
+				}
+			}.getDescriptors();
+			for (Descriptor<IEditorActionDelegate> descriptor : delegates) {
+				final IEditorActionDelegate delegate = descriptor.get();
+				if (delegate != null) {
+					final ContributedRefactoringAction action = new ContributedRefactoringAction(
+							site, delegate);
+					String id = descriptor.getAttribute("id");
+					action.setId(id);
+					action.setText(descriptor.getAttribute("label"));
+					initUpdatingAction(action, provider, selection, id);
+					fContributedActions.add(action);
+				}
+			}*/
+		}
 		//
 		// fModifyParametersAction= new ModifyParametersAction(fSite);
 		// initUpdatingAction(fModifyParametersAction, provider, selection,

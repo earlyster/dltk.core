@@ -1017,6 +1017,23 @@
             commandId="org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            sequence="M2+M3+T"
+            contextId="org.eclipse.dltk.ui.context.views"
+            commandId="org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+T"
+            contextId="org.eclipse.dltk.ui.context.views"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+T"
+            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            commandId="org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             sequence="M2+M3+R"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
             commandId="org.eclipse.dltk.ui.edit.text.script.rename.element"
@@ -1030,7 +1047,24 @@
       <key
             platform="carbon"
             sequence="COMMAND+ALT+R"
-            contextId="org.eclipse.dltk.ui.scriptEditorScope"
+            contextId="org.eclipse.dltk.ui.context.views"
+            commandId="org.eclipse.dltk.ui.edit.text.script.rename.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+R"
+            contextId="org.eclipse.dltk.ui.context.views"
+            commandId="org.eclipse.dltk.ui.edit.text.script.rename.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+R"
+            contextId="org.eclipse.dltk.ui.context.views"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+R"
+            contextId="org.eclipse.dltk.ui.context.views"
             commandId="org.eclipse.dltk.ui.edit.text.script.rename.element"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	</extension>

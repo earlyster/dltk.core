@@ -4,6 +4,7 @@ import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.actions.SelectionDispatchAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
+import org.eclipse.ui.IWorkbenchSite;
 
 public class ContributedRefactoringAction extends SelectionDispatchAction {
 
@@ -14,6 +15,12 @@ public class ContributedRefactoringAction extends SelectionDispatchAction {
 		super(editor.getSite());
 		this.delegate = delegate;
 		delegate.setActiveEditor(this, editor);
+	}
+	
+	protected ContributedRefactoringAction(IWorkbenchSite site,
+			IEditorActionDelegate delegate) {
+		super(site);
+		this.delegate = delegate;
 	}
 
 	@Override

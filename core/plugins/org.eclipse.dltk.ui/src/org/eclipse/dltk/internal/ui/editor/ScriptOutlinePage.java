@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
 import org.eclipse.dltk.internal.ui.dnd.DLTKViewerDragSupport;
 import org.eclipse.dltk.internal.ui.dnd.DLTKViewerDropSupport;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -39,8 +40,8 @@ import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.MembersOrderPreferenceCache;
 import org.eclipse.dltk.ui.ModelElementSorter;
 import org.eclipse.dltk.ui.PreferenceConstants;
-import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
+import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.dltk.ui.actions.MemberFilterActionGroup;
 import org.eclipse.dltk.ui.actions.OpenViewActionGroup;
@@ -635,7 +636,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 			menu.add(new GroupMarker(IContextMenuConstants.GROUP_SHOW));
 			menu.add(new Separator(ICommonMenuConstants.GROUP_EDIT));
-			// menu.add(new Separator(IContextMenuConstants.GROUP_REORGANIZE));
+			menu.add(new Separator(IContextMenuConstants.GROUP_REORGANIZE));
 			// menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			menu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
 			// menu.add(new Separator(IContextMenuConstants.GROUP_BUILD));
@@ -716,9 +717,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				new OpenViewActionGroup(this),
 				// new CCPActionGroup(this),
 				/* new GenerateActionGroup(this), */
-				/*
-				 * new RefactorActionGroup( this),
-				 */
+				new RefactorActionGroup(this, toolkit),
 				new SearchActionGroup(this, toolkit) });
 
 		// register global actions

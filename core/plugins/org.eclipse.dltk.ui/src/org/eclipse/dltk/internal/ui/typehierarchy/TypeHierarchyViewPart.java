@@ -100,6 +100,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
@@ -197,6 +199,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 	private WorkingSetFilterActionGroup fWorkingSetActionGroup;
 	private Job fRestoreStateJob;
+	private IContextActivation fContextActivation;
 
 	protected IPreferenceStore getPreferenceStore() {
 		return DLTKUIPlugin.getDefault().getPreferenceStore();
@@ -594,6 +597,13 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	 * @see IWorkbenchPart#dispose
 	 */
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle
 				.removeChangedListener(fTypeHierarchyLifeCycleListener);
@@ -948,6 +958,12 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(),
 				fSelectAllAction);
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	private void addResizeListener(Composite parent) {

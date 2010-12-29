@@ -68,6 +68,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.ViewPart;
 
 public class ExtendedClassesView extends ViewPart implements
@@ -119,6 +121,7 @@ public class ExtendedClassesView extends ViewPart implements
 
 	private MultiSelectionListViewer browsingPane;
 	private ISelection fLastOpenSelection;
+	private IContextActivation fContextActivation;
 
 	public ExtendedClassesView() {
 		elementChangedListenerImplementation = new IElementChangedListenerImplementation();
@@ -127,6 +130,13 @@ public class ExtendedClassesView extends ViewPart implements
 	}
 
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		super.dispose();
 		DLTKCore
 				.removeElementChangedListener(elementChangedListenerImplementation);
@@ -217,6 +227,12 @@ public class ExtendedClassesView extends ViewPart implements
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		createActions();
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	protected void createActions() {

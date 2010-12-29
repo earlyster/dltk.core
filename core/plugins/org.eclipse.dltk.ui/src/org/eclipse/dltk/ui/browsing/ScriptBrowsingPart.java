@@ -108,6 +108,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
@@ -137,6 +139,7 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	private BuildActionGroup fBuildActionGroup;
 	private ToggleLinkingAction fToggleLinkingAction;
 	protected CompositeActionGroup fActionGroups;
+	private IContextActivation fContextActivation;
 
 	// Filters
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
@@ -377,7 +380,12 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		fillActionBars(getViewSite().getActionBars());
-
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 		setHelp();
 	}
 
@@ -487,6 +495,13 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	}
 
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		if (fViewer != null) {
 			getViewSite().getPage().removePostSelectionListener(this);
 			getViewSite().getPage().removePartListener(fPartListener);

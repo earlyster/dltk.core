@@ -119,6 +119,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
@@ -186,6 +188,7 @@ public class ScriptExplorerPart extends ViewPart implements
 
 	private String fWorkingSetLabel;
 	private IDialogSettings fDialogSettings;
+	private IContextActivation fContextActivation;
 
 	private IPartListener2 fLinkWithEditorListener = new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference partRef) {
@@ -568,6 +571,13 @@ public class ScriptExplorerPart extends ViewPart implements
 	}
 
 	public void dispose() {
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		XMLMemento memento = XMLMemento.createWriteRoot("scriptExplorer"); //$NON-NLS-1$
 		saveState(memento);
 		StringWriter writer = new StringWriter();
@@ -689,6 +699,12 @@ public class ScriptExplorerPart extends ViewPart implements
 		// set yet.
 		setLinkingEnabled(isLinkingEnabled());
 
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 		stats.endRun();
 	}
 
