@@ -53,6 +53,7 @@ import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestRunSession;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.viewsupport.ViewHistory;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -99,6 +100,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.contexts.IContextActivation;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorActionBarContributor;
@@ -291,6 +294,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 	Image fOriginalViewImage;
 	IElementChangedListener fDirtyListener;
+	private IContextActivation fContextActivation;
 
 	// private CTabFolder fTabFolder;
 	private SashForm fSashForm;
@@ -1403,6 +1407,13 @@ public class TestRunnerViewPart extends ViewPart {
 
 	public synchronized void dispose() {
 		fIsDisposed = true;
+		if (fContextActivation != null) {
+			IContextService ctxService = (IContextService) getSite()
+					.getService(IContextService.class);
+			if (ctxService != null) {
+				ctxService.deactivateContext(fContextActivation);
+			}
+		}
 		if (fTestRunSessionListener != null)
 			DLTKTestingPlugin.getModel().removeTestRunSessionListener(
 					fTestRunSessionListener);
@@ -1644,6 +1655,12 @@ public class TestRunnerViewPart extends ViewPart {
 		fTestRunSessionListener = new TestRunSessionListener();
 		DLTKTestingPlugin.getModel().addTestRunSessionListener(
 				fTestRunSessionListener);
+		IContextService ctxService = (IContextService) getSite().getService(
+				IContextService.class);
+		if (ctxService != null) {
+			fContextActivation = ctxService
+					.activateContext(DLTKUIPlugin.CONTEXT_VIEWS);
+		}
 	}
 
 	private void addResizeListener(Composite parent) {
