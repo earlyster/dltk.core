@@ -154,7 +154,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			throw newNotPresentException();
 
 		// add modules from resources
-		HashSet vChildren = new HashSet();
+		HashSet<IModelElement> vChildren = new HashSet<IModelElement>();
 		try {
 			IProjectFragment root = getProjectFragment();
 			IResource[] members = ((IContainer) underlyingResource).members();
@@ -185,19 +185,22 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 
 		// IModelElement[] children = new IModelElement[vChildren.size()];
 		// vChildren.toArray(children);
-		List childrenSet = new ArrayList(vChildren);
+		List<IModelElement> childrenSet = new ArrayList<IModelElement>(
+				vChildren);
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, childrenSet);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].provideModelChanges(this, childrenSet);
+				}
 			}
 		}
-		info.setChildren((IModelElement[]) childrenSet
-				.toArray(new IModelElement[childrenSet.size()]));
+		info.setChildren(childrenSet.toArray(new IModelElement[childrenSet
+				.size()]));
 		return true;
 	}
 
