@@ -125,11 +125,9 @@ public abstract class AbstractAnnotationHover extends
 					}
 				}
 			}
-			if (layer > -1)
-			{
-				if (multi)
-				{
-					message = "Multiply Markers:\n-" + message;
+			if (layer > -1) {
+				if (multi) {
+					message = "Multiple markers:\n-" + message;
 				}
 				return formatMessage(message);
 			}
