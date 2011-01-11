@@ -23,7 +23,8 @@ import org.eclipse.jface.text.templates.TemplateProposal;
  * </p>
  * 
  */
-public final class CompletionProposalComparator implements Comparator {
+public final class CompletionProposalComparator implements
+		Comparator<ICompletionProposal> {
 
 	private boolean fOrderAlphabetically;
 
@@ -46,9 +47,7 @@ public final class CompletionProposalComparator implements Comparator {
 		fOrderAlphabetically = orderAlphabetically;
 	}
 
-	public int compare(Object o1, Object o2) {
-		ICompletionProposal p1 = (ICompletionProposal) o1;
-		ICompletionProposal p2 = (ICompletionProposal) o2;
+	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 
 		if (!fOrderAlphabetically) {
 			int relevanceDif = getRelevance(p2) - getRelevance(p1);
