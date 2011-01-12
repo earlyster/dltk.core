@@ -54,6 +54,11 @@ public class BuiltInProfile extends Profile {
 		return -1;
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + fName + "]";
+	}
+
 	public boolean isProfileToSave() {
 		return false;
 	}
