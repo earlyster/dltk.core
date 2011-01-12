@@ -12,6 +12,7 @@
 package org.eclipse.dltk.ui.formatter;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -22,5 +23,8 @@ public interface IProfileStore {
 			throws CoreException;
 
 	Collection<IProfile> readProfilesFromFile(File file) throws CoreException;
+
+	Collection<IProfile> readProfilesFromStream(InputStream is)
+			throws CoreException;
 
 }

@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.formatter;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.core.DLTKContributionExtensionManager;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -27,7 +28,7 @@ public class ScriptFormatterManager extends DLTKContributionExtensionManager {
 		return instance;
 	}
 
-	private static final String EXTPOINT = DLTKUIPlugin.PLUGIN_ID
+	public static final String EXTPOINT = DLTKUIPlugin.PLUGIN_ID
 			+ ".formatterFactory"; //$NON-NLS-1$
 
 	protected String getContributionElementName() {
@@ -41,6 +42,11 @@ public class ScriptFormatterManager extends DLTKContributionExtensionManager {
 	protected boolean isValidContribution(Object object) {
 		return object instanceof IScriptFormatterFactory
 				&& ((IScriptFormatterFactory) object).isValid();
+	}
+
+	@Override
+	protected boolean isNatureContribution(IConfigurationElement main) {
+		return "engineContribution".equals(main.getName());
 	}
 
 	public static boolean hasFormatterFor(final String natureId) {

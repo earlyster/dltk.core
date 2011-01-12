@@ -115,8 +115,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 			} else {
 				DLTKUIPlugin
 						.logErrorMessage(NLS
-								.bind(
-										FormatterMessages.AbstractFormatterSelectionBlock_noBuiltInProfiles,
+								.bind(FormatterMessages.AbstractFormatterSelectionBlock_noBuiltInProfiles,
 										factory.getId()));
 			}
 			allProfiles.addAll(factory.getCustomProfiles());
@@ -216,6 +215,15 @@ public abstract class AbstractFormatterSelectionBlock extends
 		updatePreview();
 	}
 
+	@Override
+	public void performDefaults() {
+		super.performDefaults();
+		final IProfileManager profileManager = getProfileManager();
+		profileManager.setSelected(profileManager.getSortedProfiles().get(0));
+		updateComboFromProfiles();
+		updateSelection();
+	}
+
 	protected static PreferenceKey[] collectPreferenceKeys(List factories,
 			String natureId, PreferenceKey formatterKey) {
 		List<PreferenceKey> result = new ArrayList<PreferenceKey>();
@@ -245,8 +253,8 @@ public abstract class AbstractFormatterSelectionBlock extends
 
 	protected Composite createDescription(Composite parent,
 			IDLTKContributedExtension contrib) {
-		Composite composite = SWTFactory.createComposite(parent, parent
-				.getFont(), 1, 1, GridData.FILL);
+		Composite composite = SWTFactory.createComposite(parent,
+				parent.getFont(), 1, 1, GridData.FILL);
 
 		String desc = contrib.getDescription();
 		if (desc == null) {
@@ -293,8 +301,8 @@ public abstract class AbstractFormatterSelectionBlock extends
 		data.horizontalSpan = numColumns;
 		profileLabel.setLayoutData(data);
 
-		fProfileCombo = createProfileCombo(group, 3, fPixConv
-				.convertWidthInCharsToPixels(20));
+		fProfileCombo = createProfileCombo(group, 3,
+				fPixConv.convertWidthInCharsToPixels(20));
 		updateComboFromProfiles();
 		fProfileCombo.addSelectionListener(new SelectionListener() {
 
@@ -337,14 +345,12 @@ public abstract class AbstractFormatterSelectionBlock extends
 			protected void doDelete() {
 				IProfileManager profileManager = getProfileManager();
 				IProfile selected = profileManager.getSelected();
-				if (MessageDialog
-						.openQuestion(
-								group.getShell(),
-								FormatterMessages.AbstractFormatterSelectionBlock_confirmRemoveLabel,
-								NLS
-										.bind(
-												FormatterMessages.AbstractFormatterSelectionBlock_confirmRemoveMessage,
-												selected.getName()))) {
+				if (MessageDialog.openQuestion(
+						group.getShell(),
+						FormatterMessages.AbstractFormatterSelectionBlock_confirmRemoveLabel,
+						NLS.bind(
+								FormatterMessages.AbstractFormatterSelectionBlock_confirmRemoveMessage,
+								selected.getName()))) {
 					profileManager.deleteProfile(selected);
 					updateComboFromProfiles();
 					applyPreferences();
@@ -399,8 +405,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 			protected void doImport() {
 				final FileDialog dialog = new FileDialog(group.getShell(),
 						SWT.OPEN);
-				dialog
-						.setText(FormatterMessages.AbstractFormatterSelectionBlock_importProfileLabel);
+				dialog.setText(FormatterMessages.AbstractFormatterSelectionBlock_importProfileLabel);
 				dialog.setFilterExtensions(new String[] { "*.xml" }); //$NON-NLS-1$
 				final String path = dialog.open();
 				if (path == null)
@@ -429,10 +434,9 @@ public abstract class AbstractFormatterSelectionBlock extends
 						.equals(profile.getFormatterId())) {
 					final String title = FormatterMessages.AbstractFormatterSelectionBlock_importProfileLabel;
 					final String message = NLS
-							.bind(
-									FormatterMessages.AbstractFormatterSelectionBlock_notValidFormatter,
-									versioner.getFormatterId(), profile
-											.getFormatterId());
+							.bind(FormatterMessages.AbstractFormatterSelectionBlock_notValidFormatter,
+									versioner.getFormatterId(),
+									profile.getFormatterId());
 					MessageDialog.openError(group.getShell(), title, message);
 					return;
 				}
@@ -492,8 +496,8 @@ public abstract class AbstractFormatterSelectionBlock extends
 					composite,
 					FormatterMessages.AbstractFormatterSelectionBlock_formatterLabel,
 					numColumns);
-			fFactoryCombo = createProfileCombo(composite, numColumns, fPixConv
-					.convertWidthInCharsToPixels(20));
+			fFactoryCombo = createProfileCombo(composite, numColumns,
+					fPixConv.convertWidthInCharsToPixels(20));
 
 			for (int i = 0; i < factories.length; i++) {
 				fFactoryCombo.add(factories[i].getName());
