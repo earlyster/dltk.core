@@ -11,14 +11,19 @@
  *******************************************************************************/
 package org.eclipse.dltk.formatter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -31,6 +36,7 @@ import org.eclipse.dltk.formatter.profile.BuiltInProfile;
 import org.eclipse.dltk.formatter.profile.GeneralProfileVersioner;
 import org.eclipse.dltk.formatter.profile.ProfileManager;
 import org.eclipse.dltk.formatter.profile.ProfileStore;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.formatter.FormatterMessages;
 import org.eclipse.dltk.ui.formatter.IFormatterModifyDialog;
 import org.eclipse.dltk.ui.formatter.IFormatterModifyDialogOwner;
@@ -39,6 +45,7 @@ import org.eclipse.dltk.ui.formatter.IProfileManager;
 import org.eclipse.dltk.ui.formatter.IProfileStore;
 import org.eclipse.dltk.ui.formatter.IProfileVersioner;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
+import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
 
 /**
@@ -68,14 +75,68 @@ public abstract class AbstractScriptFormatterFactory extends
 	}
 
 	public List<IProfile> getBuiltInProfiles() {
-		List<IProfile> profiles = new ArrayList<IProfile>();
+		final List<IProfile> profiles = new ArrayList<IProfile>();
 
-		IProfileVersioner versioner = getProfileVersioner();
-		BuiltInProfile profile = new BuiltInProfile(getDefaultProfileID(),
-				getDefaultProfileName(), loadDefaultSettings(), 1, getId(),
-				versioner.getCurrentVersion());
-
+		final IProfileVersioner versioner = getProfileVersioner();
+		final Map<String, String> defaults = loadDefaultSettings();
+		profiles.addAll(loadContributedProfiles(versioner, defaults));
+		final BuiltInProfile profile = new BuiltInProfile(
+				getDefaultProfileID(), getDefaultProfileName(), defaults, 1000,
+				getId(), versioner.getCurrentVersion());
 		profiles.add(profile);
+		return profiles;
+	}
+
+	private Collection<? extends IProfile> loadContributedProfiles(
+			IProfileVersioner versioner, Map<String, String> defaults) {
+		final IConfigurationElement[] elements = Platform
+				.getExtensionRegistry().getConfigurationElementsFor(
+						ScriptFormatterManager.EXTPOINT);
+		final ProfileStore profileStore = new ProfileStore(versioner, defaults);
+		final List<IProfile> profiles = new ArrayList<IProfile>();
+		for (IConfigurationElement element : elements) {
+			if ("profiles".equals(element.getName())) {
+				final URL url = Platform.getBundle(
+						element.getContributor().getName()).getEntry(
+						element.getAttribute("resource"));
+				if (url == null) {
+					// TODO log
+					continue;
+				}
+				int priority;
+				try {
+					priority = Integer.parseInt(element
+							.getAttribute("priority"));
+				} catch (NumberFormatException e) {
+					priority = 0;
+				}
+				try {
+					final InputStream stream = url.openStream();
+					try {
+						final List<IProfile> loaded = profileStore
+								.readProfilesFromStream(stream);
+						for (IProfile profile : loaded) {
+							if (getId().equals(profile.getFormatterId()))
+								profiles.add(new BuiltInProfile(
+										profile.getID(), profile.getName(),
+										profile.getSettings(), priority,
+										profile.getFormatterId(), profile
+												.getVersion()));
+						}
+					} finally {
+						try {
+							stream.close();
+						} catch (IOException e) {
+							// ignore
+						}
+					}
+				} catch (IOException e) {
+					DLTKUIPlugin.log(e);
+				} catch (CoreException e) {
+					DLTKUIPlugin.log(e);
+				}
+			}
+		}
 		return profiles;
 	}
 
@@ -136,8 +197,9 @@ public abstract class AbstractScriptFormatterFactory extends
 			IPreferencesLookupDelegate delegate) {
 		final PreferenceKey activeProfileKey = getActiveProfileKey();
 		if (activeProfileKey != null) {
-			final String profileId = delegate.getString(activeProfileKey
-					.getQualifier(), activeProfileKey.getName());
+			final String profileId = delegate
+					.getString(activeProfileKey.getQualifier(),
+							activeProfileKey.getName());
 			if (profileId != null && profileId.length() != 0) {
 				for (IProfile profile : getBuiltInProfiles()) {
 					if (profileId.equals(profile.getID())) {
@@ -157,9 +219,7 @@ public abstract class AbstractScriptFormatterFactory extends
 			for (int i = 0; i < keys.length; ++i) {
 				final PreferenceKey prefKey = keys[i];
 				final String key = prefKey.getName();
-				result
-						.put(key, delegate.getString(prefKey.getQualifier(),
-								key));
+				result.put(key, delegate.getString(prefKey.getQualifier(), key));
 			}
 		}
 		return result;

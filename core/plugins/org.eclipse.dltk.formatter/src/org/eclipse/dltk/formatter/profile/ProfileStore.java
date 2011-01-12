@@ -185,7 +185,7 @@ public class ProfileStore implements IProfileStore {
 			}
 			InputStream is = new ByteArrayInputStream(bytes);
 			try {
-				List<IProfile> res = readProfilesFromStream(new InputSource(is));
+				List<IProfile> res = readProfilesFromStream(is);
 				if (res != null) {
 					for (int i = 0; i < res.size(); i++) {
 						versioner.update(res.get(i));
@@ -202,6 +202,11 @@ public class ProfileStore implements IProfileStore {
 		return null;
 	}
 
+	public List<IProfile> readProfilesFromStream(InputStream is)
+			throws CoreException {
+		return readProfilesFromSource(new InputSource(is));
+	}
+
 	/**
 	 * Read the available profiles from the internal XML file and return them as
 	 * collection or <code>null</code> if the file is not a profile file.
@@ -215,7 +220,7 @@ public class ProfileStore implements IProfileStore {
 		try {
 			final FileInputStream reader = new FileInputStream(file);
 			try {
-				return readProfilesFromStream(new InputSource(reader));
+				return readProfilesFromStream(reader);
 			} finally {
 				try {
 					reader.close();
@@ -237,7 +242,7 @@ public class ProfileStore implements IProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	protected List<IProfile> readProfilesFromStream(InputSource inputSource)
+	private List<IProfile> readProfilesFromSource(InputSource inputSource)
 			throws CoreException {
 
 		final ProfileDefaultHandler handler = new ProfileDefaultHandler();
@@ -344,10 +349,10 @@ public class ProfileStore implements IProfileStore {
 			Document document, IProfileVersioner versioner) {
 		final Element element = document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
-		element.setAttribute(XML_ATTRIBUTE_PROFILE_FORMATTER, profile
-				.getFormatterId());
-		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile
-				.getVersion()));
+		element.setAttribute(XML_ATTRIBUTE_PROFILE_FORMATTER,
+				profile.getFormatterId());
+		element.setAttribute(XML_ATTRIBUTE_VERSION,
+				Integer.toString(profile.getVersion()));
 
 		for (Map.Entry<String, String> entry : profile.getSettings().entrySet()) {
 			final String key = entry.getKey();
