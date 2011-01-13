@@ -21,6 +21,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
@@ -88,10 +89,12 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 		return fValidator;
 	}
 
-	protected List filterAndSortProposals(List proposals,
-			IProgressMonitor monitor, ContentAssistInvocationContext context) {
-		ProposalSorterRegistry.getDefault().getCurrentSorter().sortProposals(
-				context, proposals);
+	@Override
+	protected List<ICompletionProposal> filterAndSortProposals(
+			List<ICompletionProposal> proposals, IProgressMonitor monitor,
+			ContentAssistInvocationContext context) {
+		ProposalSorterRegistry.getDefault().getCurrentSorter()
+				.sortProposals(context, proposals);
 		return proposals;
 	}
 
