@@ -27,6 +27,7 @@ Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.debug.ui,
  org.eclipse.dltk.debug.ui.actions,
  org.eclipse.dltk.debug.ui.breakpoints,
+ org.eclipse.dltk.debug.ui.display,
  org.eclipse.dltk.debug.ui.handlers,
  org.eclipse.dltk.debug.ui.interpreters,
  org.eclipse.dltk.debug.ui.launchConfigurations,

@@ -90,12 +90,18 @@ public class DebugConsolePage extends ScriptConsolePage {
 	private void setEnabled(final boolean value) {
 		if (value != this.enabled) {
 			this.enabled = value;
-			inputField.setEditable(value);
+			if (inputField != null)
+				inputField.setEditable(value);
 			getViewer().setEditable(value);
 			final Control control = getViewer().getControl();
 			control.setBackground(value ? null : control.getDisplay()
 					.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		}
+	}
+
+	@Override
+	public Control getControl() {
+		return sash != null ? sash : super.getControl();
 	}
 
 	/*
@@ -160,21 +166,25 @@ public class DebugConsolePage extends ScriptConsolePage {
 	}
 
 	public boolean canExecuteInputField() {
-		return sash.getMaximizedControl() == null
+		return sash != null && sash.getMaximizedControl() == null
 				&& inputField.getText().length() != 0;
 	}
 
 	public void openInputField() {
-		sash.setWeights(new int[] { 30, 70 });
-		sash.setMaximizedControl(null);
-		inputField.setFocus();
+		if (sash != null) {
+			sash.setWeights(new int[] { 30, 70 });
+			sash.setMaximizedControl(null);
+			inputField.setFocus();
+		}
 		updateActions();
 	}
 
 	public void closeInputField() {
-		final Control consoleControl = getControl();
-		sash.setMaximizedControl(consoleControl);
-		consoleControl.setFocus();
+		if (sash != null) {
+			final Control consoleControl = getControl();
+			sash.setMaximizedControl(consoleControl);
+			consoleControl.setFocus();
+		}
 		updateActions();
 	}
 
@@ -185,8 +195,10 @@ public class DebugConsolePage extends ScriptConsolePage {
 	}
 
 	public void executeInputField() {
-		final String input = inputField.getText();
-		((ScriptConsole) getConsole()).executeCommand(input);
+		if (inputField != null) {
+			final String input = inputField.getText();
+			((ScriptConsole) getConsole()).executeCommand(input);
+		}
 	}
 
 	private final Job enableUpdateJob = new Job("Enable update") { //$NON-NLS-1$

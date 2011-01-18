@@ -17,7 +17,7 @@ import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.console.IConsoleView;
 
-public class DebugConsole extends ScriptConsole {
+public class DebugConsole extends ScriptConsole implements IEvaluateConsole {
 
 	/**
 	 * @param consoleName
