@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IImportDeclaration;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.INamespace;
@@ -594,6 +595,9 @@ public class ScriptElementLabels {
 		case IModelElement.PROJECT_FRAGMENT:
 			getProjectFragmentLabel((IProjectFragment) element, flags, buf);
 			break;
+		case IModelElement.LOCAL_VARIABLE:
+			getLocalVariableLabel((ILocalVariable) element, flags, buf);
+			break;
 		default:
 			buf.append(element.getElementName());
 		}
@@ -818,6 +822,20 @@ public class ScriptElementLabels {
 				}
 			} catch (CoreException e) {
 				DLTKCore.error("Failed to append type name to field", e);
+			}
+		}
+	}
+
+	protected void getLocalVariableLabel(ILocalVariable field, long flags,
+			StringBuffer buf) {
+		// qualification
+		buf.append(field.getElementName());
+		if (getFlag(flags, ScriptElementLabels.F_APP_TYPE_SIGNATURE)
+				&& field.exists()) {
+			String type = field.getType();
+			if (type != null) {
+				buf.append(ScriptElementLabels.DECL_STRING);
+				buf.append(type);
 			}
 		}
 	}
