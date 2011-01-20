@@ -9,9 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -40,8 +41,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.DLTKCore;
@@ -487,8 +488,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	private InterpreterDefinitionsContainer getInterpreterDefinitions(String xml) {
 		if (xml.length() > 0) {
 			try {
-				ByteArrayInputStream stream = new ByteArrayInputStream(xml
-						.getBytes("UTF8")); //$NON-NLS-1$
+				Reader stream = new StringReader(xml);
 				return InterpreterDefinitionsContainer
 						.parseXMLIntoContainer(stream);
 			} catch (IOException e) {

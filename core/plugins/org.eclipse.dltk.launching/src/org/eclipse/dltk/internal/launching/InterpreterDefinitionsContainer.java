@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -543,7 +543,7 @@ public class InterpreterDefinitionsContainer {
 	}
 
 	public static InterpreterDefinitionsContainer parseXMLIntoContainer(
-			InputStream inputStream) throws IOException {
+			Reader inputStream) throws IOException {
 		InterpreterDefinitionsContainer container = new InterpreterDefinitionsContainer();
 		parseXMLIntoContainer(inputStream, container);
 		return container;
@@ -583,11 +583,11 @@ public class InterpreterDefinitionsContainer {
 	 *             </ul>
 	 * 
 	 */
-	public static void parseXMLIntoContainer(InputStream inputStream,
+	public static void parseXMLIntoContainer(Reader inputStream,
 			InterpreterDefinitionsContainer container) throws IOException {
 
 		// Wrapper the stream for efficient parsing
-		InputStream stream = new BufferedInputStream(inputStream);
+		BufferedReader stream = new BufferedReader(inputStream);
 
 		// Do the parsing and obtain the top-level node
 		Element config = null;
@@ -736,14 +736,12 @@ public class InterpreterDefinitionsContainer {
 					String subElementName = subElement.getNodeName();
 					if (subElementName.equals(LIBRARY_LOCATION_TAG)) {
 						LibraryLocation loc = getLibraryLocation(subElement);
-						standin
-								.setLibraryLocations(new LibraryLocation[] { loc });
+						standin.setLibraryLocations(new LibraryLocation[] { loc });
 					} else if (subElementName.equals(LIBRARY_LOCATIONS_TAG)) {
 						setLibraryLocations(standin, subElement);
 					} else if (subElementName.equals(ENVIRONMENT_VARIABLE_TAG)) {
 						EnvironmentVariable var = getEnvironmentVariable(subElement);
-						standin
-								.setEnvironmentVariables(new EnvironmentVariable[] { var });
+						standin.setEnvironmentVariables(new EnvironmentVariable[] { var });
 					} else if (subElementName.equals(ENVIRONMENT_VARIABLES_TAG)) {
 						setEnvironmentVariables(standin, subElement);
 					} else if (subElementName.equals(EXTENSIONS_TAG)) {
@@ -784,8 +782,8 @@ public class InterpreterDefinitionsContainer {
 		String interpreterEnvironmentArchive = libLocationElement
 				.getAttribute(LIBRARY_PATH_ATTR);
 		if (interpreterEnvironmentArchive != null) {
-			return new LibraryLocation(Path
-					.fromPortableString(interpreterEnvironmentArchive));
+			return new LibraryLocation(
+					Path.fromPortableString(interpreterEnvironmentArchive));
 		}
 		DLTKLaunchingPlugin
 				.log("Library location element is specified incorrectly."); //$NON-NLS-1$

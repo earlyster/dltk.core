@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -914,8 +914,7 @@ public final class ScriptRuntime {
 		// If the preference was found, load Interpreters from it into memory
 		if (interpreterXMLString.length() > 0) {
 			try {
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(
-						interpreterXMLString.getBytes());
+				Reader inputStream = new StringReader(interpreterXMLString);
 				InterpreterDefinitionsContainer.parseXMLIntoContainer(
 						inputStream, interpreterDefs);
 				return false;
