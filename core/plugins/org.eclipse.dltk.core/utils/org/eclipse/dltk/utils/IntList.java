@@ -84,4 +84,8 @@ public class IntList {
 		return sb.toString();
 	}
 
+	public void clear() {
+		this.length = 0;
+	}
+
 }
