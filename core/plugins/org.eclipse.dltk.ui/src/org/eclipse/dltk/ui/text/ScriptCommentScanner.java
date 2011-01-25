@@ -142,6 +142,16 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		this(manager, store, comment, todoTag, preferences, true);
 	}
 
+	protected ScriptSourceViewerConfiguration fConfiguration;
+
+	public ScriptCommentScanner(ScriptSourceViewerConfiguration configuration,
+			String comment, String todoTag, ITodoTaskPreferences preferences) {
+		this(configuration.getColorManager(), configuration
+				.getPreferenceStore(), comment, todoTag, preferences, false);
+		this.fConfiguration = configuration;
+		initialize();
+	}
+
 	/**
 	 * @since 2.0
 	 */
@@ -149,6 +159,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			String comment, String todoTag, ITodoTaskPreferences preferences,
 			boolean initializeAutomatically) {
 		super(manager, store);
+		fConfiguration = null;
 
 		fTodoToken = todoTag;
 		fDefaultTokenProperty = comment;

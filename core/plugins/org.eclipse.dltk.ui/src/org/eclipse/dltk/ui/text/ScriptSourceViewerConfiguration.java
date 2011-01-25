@@ -133,6 +133,13 @@ public abstract class ScriptSourceViewerConfiguration extends
 		return this.fColorManager;
 	}
 
+	/**
+	 * @since 3.0
+	 */
+	public IPreferenceStore getPreferenceStore() {
+		return fPreferenceStore;
+	}
+
 	public ITextEditor getEditor() {
 		return this.fTextEditor;
 	}
