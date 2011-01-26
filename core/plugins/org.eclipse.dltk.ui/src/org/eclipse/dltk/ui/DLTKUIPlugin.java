@@ -191,12 +191,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		try {
 			PlatformUI.getWorkbench().addWorkbenchListener(
 					new ShutdownCloseRemoteEditorsListener());
+			ContextActivator.getInstance().install();
 		} catch (IllegalStateException e) {
 			// IGNORE: workbench has not been created yet.
 		}
 
 		ExecutionContexts.setManager(new UIExecutionContextManager());
-		ContextActivator.getInstance().install();
 	}
 
 	private static class ShutdownCloseRemoteEditorsListener implements
