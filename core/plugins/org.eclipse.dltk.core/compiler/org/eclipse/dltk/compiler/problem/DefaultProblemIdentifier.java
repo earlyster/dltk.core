@@ -50,6 +50,13 @@ public enum DefaultProblemIdentifier implements IProblemIdentifier {
 		return manager;
 	}
 
+	public static IProblemIdentifier decode(int id) {
+		if (id == 0 || id == -1) {
+			return null;
+		}
+		return new ProblemIdentifierInt(id);
+	}
+
 	public static IProblemIdentifier decode(String id) {
 		if (id != null && id.length() != 0) {
 			final int pos = id.indexOf(SEPARATOR);
