@@ -24,7 +24,7 @@ public class InternalDLTKLanguageManager {
 			+ ".binaryElementParsers"; //$NON-NLS-1$
 	private final static String SOURCE_PARSERS_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".sourceParsers"; //$NON-NLS-1$
-	private final static String PROBLEM_FACTORY_EXTPOINT = DLTKCore.PLUGIN_ID
+	public final static String PROBLEM_FACTORY_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".problemFactory"; //$NON-NLS-1$
 	private final static String COMPLETION_ENGINE_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".completionEngine"; //$NON-NLS-1$
@@ -46,7 +46,13 @@ public class InternalDLTKLanguageManager {
 	private static PriorityClassDLTKExtensionManager binaryElementParsersManager = new NewInstanceClassBasedDLTKExtensionManager(
 			BINARY_ELEMENT_PARSERS_EXTPOINT);
 	private static PriorityClassDLTKExtensionManager problemFactoryManager = new PriorityClassDLTKExtensionManager(
-			PROBLEM_FACTORY_EXTPOINT);
+			PROBLEM_FACTORY_EXTPOINT) {
+		@Override
+		protected boolean isValidConfigurationElement(
+				IConfigurationElement element) {
+			return "problemFactory".equals(element.getName());
+		}
+	};
 
 	private static PriorityClassDLTKExtensionManager selectionEngineManager = new NewInstanceClassBasedDLTKExtensionManager(
 			SELECTION_ENGINE_EXTPOINT);

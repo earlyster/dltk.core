@@ -31,7 +31,7 @@ public class DefaultProblem extends CategorizedProblem {
 
 	private String fileName;
 
-	private int id;
+	private IProblemIdentifier id;
 
 	private int startPosition, endPosition, line, column;
 
@@ -49,9 +49,9 @@ public class DefaultProblem extends CategorizedProblem {
 
 	public static final Object[] EMPTY_VALUES = {};
 
-	public DefaultProblem(String originatingFileName, String message, int id,
-			String[] stringArguments, int severity, int startPosition,
-			int endPosition, int line, int column) {
+	public DefaultProblem(String originatingFileName, String message,
+			IProblemIdentifier id, String[] stringArguments, int severity,
+			int startPosition, int endPosition, int line, int column) {
 		this.fileName = originatingFileName;
 		this.message = message;
 		this.id = id;
@@ -63,15 +63,24 @@ public class DefaultProblem extends CategorizedProblem {
 		this.column = column;
 	}
 
+	@Deprecated
 	public DefaultProblem(String originatingFileName, String message, int id,
 			String[] stringArguments, int severity, int startPosition,
 			int endPosition, int line) {
-		this(originatingFileName, message, id, stringArguments, severity,
+		this(originatingFileName, message, identifierFromInt(id),
+				stringArguments, severity, startPosition, endPosition, line, 0);
+	}
+
+	@Deprecated
+	public DefaultProblem(String message, int id, String[] stringArguments,
+			int severity, int startPosition, int endPosition, int line) {
+		this(NONAME, message, identifierFromInt(id), stringArguments, severity,
 				startPosition, endPosition, line, 0);
 	}
 
-	public DefaultProblem(String message, int id, String[] stringArguments,
-			int severity, int startPosition, int endPosition, int line) {
+	public DefaultProblem(String message, IProblemIdentifier id,
+			String[] stringArguments, int severity, int startPosition,
+			int endPosition, int line) {
 		this(NONAME, message, id, stringArguments, severity, startPosition,
 				endPosition, line, 0);
 	}
@@ -175,7 +184,7 @@ public class DefaultProblem extends CategorizedProblem {
 	 * @see org.eclipse.dltk.core.compiler.IProblem#getID()
 	 * @return int
 	 */
-	public int getID() {
+	public IProblemIdentifier getID() {
 		return this.id;
 	}
 
@@ -348,10 +357,9 @@ public class DefaultProblem extends CategorizedProblem {
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append("Pb"); //$NON-NLS-1$
-		final int maskedId = this.id & IProblem.IgnoreCategoriesMask;
-		if (maskedId != 0) {
+		if (this.id != null) {
 			sb.append('#');
-			sb.append(maskedId);
+			sb.append(this.id.name());
 		}
 		sb.append(' ');
 		sb.append(line);
@@ -383,7 +391,7 @@ public class DefaultProblem extends CategorizedProblem {
 		result = prime * result + endPosition;
 		result = prime * result
 				+ ((fileName == null) ? 0 : fileName.hashCode());
-		result = prime * result + id;
+		result = prime * result + (id == null ? 0 : id.hashCode());
 		result = prime * result + line;
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
 		result = prime * result + severity;
@@ -411,7 +419,10 @@ public class DefaultProblem extends CategorizedProblem {
 				return false;
 		} else if (!fileName.equals(other.fileName))
 			return false;
-		if (id != other.id)
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
 			return false;
 		if (line != other.line)
 			return false;
@@ -425,5 +436,12 @@ public class DefaultProblem extends CategorizedProblem {
 		if (startPosition != other.startPosition)
 			return false;
 		return true;
+	}
+
+	private static IProblemIdentifier identifierFromInt(int id) {
+		if (id == 0 || id == -1) {
+			return null;
+		}
+		return new ProblemIdentifierInt(id);
 	}
 }

@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+
 /**
  * Description of a problem, as detected by the compiler or some of the
  * underlying technology reusing the compiler. A problem provides access to:
@@ -42,7 +43,7 @@ public interface IProblem {
 	 * 
 	 * @return the problem id
 	 */
-	int getID();
+	IProblemIdentifier getID();
 
 	/**
 	 * Answer a localized, human-readable message string which describes the
@@ -154,7 +155,7 @@ public interface IProblem {
 	int Documentation = 0x80000000;
 
 	// detected task
-	int Task = Internal + 450;
+	IProblemIdentifier Task = DefaultProblemIdentifier.TASK;
 
 	/**
 	 * Mask to use in order to filter out the category portion of the problem

@@ -11,25 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-/**
- * The problem identifier. Use <code>enum</code> to implement it and
- * {@link org.eclipse.dltk.utils.EnumNLS} to load localized messages from
- * <code>.properties</code> files.
- */
-public interface IProblemIdentifier {
+public class DefaultProblemIdentifierFactory implements
+		IProblemIdentifierFactory {
 
-	/**
-	 * Returns the identifier of the bundle contributing this identifier
-	 * 
-	 * @return
-	 */
-	String contributor();
-
-	/**
-	 * Returns the short identifier of the problem
-	 * 
-	 * @return
-	 */
-	String name();
+	public IProblemIdentifier valueOf(String localName)
+			throws IllegalArgumentException {
+		return DefaultProblemIdentifier.valueOf(localName);
+	}
 
 }

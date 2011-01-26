@@ -168,4 +168,10 @@
             uri="http://eclipse.org/dltk/cache_model">
       </package>
    </extension>
+   <extension point="org.eclipse.dltk.core.problemFactory">
+   <problemIdentifierFactory
+         class="org.eclipse.dltk.compiler.problem.DefaultProblemIdentifierFactory"
+         namespace="org.eclipse.dltk.compiler.problem.DefaultProblemIdentifier">
+   </problemIdentifierFactory>
+   </extension>
 </plugin>

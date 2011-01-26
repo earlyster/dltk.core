@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.dltk.core">
+<schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="sourceElementParsers" name="Source Element Parsers"/>
+         <meta.schema plugin="org.eclipse.dltk.core" id="problemFactory" name="problemFactory"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]
@@ -11,10 +11,16 @@
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
-         <sequence minOccurs="0" maxOccurs="unbounded">
+         <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="problemFactory"/>
-         </sequence>
+            <element ref="problemIdentifierFactory"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -76,6 +82,28 @@
       </complexType>
    </element>
 
+   <element name="problemIdentifierFactory">
+      <complexType>
+         <attribute name="namespace" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.compiler.problem.IProblemIdentifierFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
       <appInfo>
          <meta.section type="since"/>
@@ -112,13 +140,5 @@
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="copyright"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
 
 </schema>

@@ -32,7 +32,10 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	}
 
 	public void reportProblem(IProblem problem) {
-		problems.add(problem);
+		if (!problems.contains(problem)) {
+			// FIXME (alex) duplicates happen because of AST caching
+			problems.add(problem);
+		}
 	}
 
 	public void reportTask(String message, int lineNumber, int priority,
@@ -110,7 +113,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			return null;
 		}
 
-		public int getID() {
+		public IProblemIdentifier getID() {
 			return IProblem.Task;
 		}
 
@@ -240,8 +243,9 @@ public class ProblemCollector extends AbstractProblemReporter implements
 							((TaskInfo) problem).getPriority());
 				}
 			}
-			if (problem.getID() != 0) {
-				m.setAttribute(IScriptModelMarker.ID, problem.getID());
+			if (problem.getID() != null) {
+				m.setAttribute(IScriptModelMarker.ID,
+						DefaultProblemIdentifier.encode(problem.getID()));
 			}
 			final String[] arguments = problem.getArguments();
 			if (arguments != null && arguments.length != 0) {
@@ -250,5 +254,4 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			}
 		}
 	}
-
 }
