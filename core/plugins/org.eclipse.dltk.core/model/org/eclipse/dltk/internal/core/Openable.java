@@ -28,6 +28,7 @@ import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.codeassist.ISelectionRequestor;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.core.BufferChangedEvent;
 import org.eclipse.dltk.core.CompletionRequestor;
@@ -541,8 +542,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		if (!thread.execute(timeout)) {
 			Thread.interrupted();
 			requestor.completionFailure(new DefaultProblem(
-					"Compution of proposals is to long. Please try again. ", 0,
-					null, ProblemSeverities.Warning, 0, 0, 0));
+					"Compution of proposals is to long. Please try again. ",
+					IProblemIdentifier.NULL, null, ProblemSeverities.Warning,
+					0, 0, 0));
 			requestor.clear();
 		}
 	}

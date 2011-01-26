@@ -18,6 +18,8 @@ package org.eclipse.dltk.compiler.problem;
  */
 public interface IProblemIdentifier {
 
+	static IProblemIdentifier NULL = null;
+
 	/**
 	 * Returns the identifier of the bundle contributing this identifier
 	 * 
