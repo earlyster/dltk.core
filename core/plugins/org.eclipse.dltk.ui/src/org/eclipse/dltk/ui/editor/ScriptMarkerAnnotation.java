@@ -14,10 +14,11 @@ package org.eclipse.dltk.ui.editor;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.dltk.compiler.problem.DefaultProblemIdentifier;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.core.CorrectionEngine;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IScriptModelMarker;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -49,13 +50,13 @@ public class ScriptMarkerAnnotation extends MarkerAnnotation implements IScriptA
 	/*
 	 * @see IJavaAnnotation#getId()
 	 */
-	public int getId() {
+	public IProblemIdentifier getId() {
 		IMarker marker= getMarker();
 		if (marker == null  || !marker.exists())
-			return -1;
+			return null;
 
 		if (isProblem())
-			return marker.getAttribute(IScriptModelMarker.ID, -1);
+			return DefaultProblemIdentifier.getProblemId(marker);
 
 //		if (TASK_ANNOTATION_TYPE.equals(getAnnotationType())) {
 //			try {
@@ -67,7 +68,7 @@ public class ScriptMarkerAnnotation extends MarkerAnnotation implements IScriptA
 //			}
 //		}
 
-		return -1;
+		return null;
 	}
 
 	/*

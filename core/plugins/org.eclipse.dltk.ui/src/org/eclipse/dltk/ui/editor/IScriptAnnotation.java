@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.editor;
 import java.util.Iterator;
 
 import org.eclipse.dltk.compiler.problem.CategorizedProblem;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.core.ISourceModule;
 
 /**
@@ -111,7 +112,7 @@ public interface IScriptAnnotation {
 	 * 
 	 * @return returns the problem id or <code>-1</code>
 	 */
-	int getId();
+	IProblemIdentifier getId();
 
 	/**
 	 * Returns the marker type associated to this problem or

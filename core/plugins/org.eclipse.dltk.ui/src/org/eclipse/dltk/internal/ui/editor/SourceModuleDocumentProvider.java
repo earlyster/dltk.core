@@ -49,6 +49,7 @@ import org.eclipse.dltk.compiler.problem.CategorizedProblem;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -349,7 +350,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		/*
 		 * @see IJavaAnnotation#getId()
 		 */
-		public int getId() {
+		public IProblemIdentifier getId() {
 			return fProblem.getID();
 		}
 
