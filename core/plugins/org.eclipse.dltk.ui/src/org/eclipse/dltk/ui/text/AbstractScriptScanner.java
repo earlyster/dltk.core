@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.ui.ColorPreferenceConverter;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -55,7 +56,8 @@ import org.eclipse.swt.widgets.Display;
  * are used to retrieve whether the token is rendered in underline.
  * </p>
  */
-public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
+public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner
+		implements ITokenContainer {
 
 	private IColorManager fColorManager;
 	private IPreferenceStore fPreferenceStore;
@@ -152,19 +154,23 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
 		fNeedsLazyColorLoading = Display.getCurrent() == null;
 		for (int i = 0; i < length; i++) {
-			if (fNeedsLazyColorLoading)
-				addTokenWithProxyAttribute(fPropertyNamesColor[i],
-						fPropertyNamesBold[i], fPropertyNamesItalic[i],
-						fPropertyNamesStrikethrough[i],
-						fPropertyNamesUnderline[i]);
-			else
-				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i],
-						fPropertyNamesItalic[i],
-						fPropertyNamesStrikethrough[i],
-						fPropertyNamesUnderline[i]);
+			createToken(i);
 		}
 
 		initializeRules();
+	}
+
+	protected void createToken(int index) {
+		if (fNeedsLazyColorLoading)
+			addTokenWithProxyAttribute(fPropertyNamesColor[index],
+					fPropertyNamesBold[index], fPropertyNamesItalic[index],
+					fPropertyNamesStrikethrough[index],
+					fPropertyNamesUnderline[index]);
+		else
+			addToken(fPropertyNamesColor[index], fPropertyNamesBold[index],
+					fPropertyNamesItalic[index],
+					fPropertyNamesStrikethrough[index],
+					fPropertyNamesUnderline[index]);
 	}
 
 	protected String getBoldKey(String colorKey) {
@@ -278,9 +284,32 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 		return new TextAttribute(color, null, style);
 	}
 
-	protected Token getToken(String key) {
+	public Token getToken(String key) {
 		doResolveProxyAttributes();
-		return fTokenMap.get(key);
+		Token token = fTokenMap.get(key);
+		if (token == null) {
+			final int index = fPropertyNamesColor.length;
+			fPropertyNamesColor = resize(fPropertyNamesColor, index, key);
+			fPropertyNamesBold = resize(fPropertyNamesBold, index,
+					getBoldKey(key));
+			fPropertyNamesItalic = resize(fPropertyNamesItalic, index,
+					getItalicKey(key));
+			fPropertyNamesStrikethrough = resize(fPropertyNamesStrikethrough,
+					index, getStrikethroughKey(key));
+			fPropertyNamesUnderline = resize(fPropertyNamesUnderline, index,
+					getUnderlineKey(key));
+			createToken(index);
+			token = fTokenMap.get(key);
+			Assert.isNotNull(token);
+		}
+		return token;
+	}
+
+	private static String[] resize(String[] old, int index, String value) {
+		final String[] result = new String[index + 1];
+		System.arraycopy(old, 0, result, 0, old.length);
+		result[index] = value;
+		return result;
 	}
 
 	private void initializeRules() {

@@ -35,11 +35,18 @@ public class ColoringConfigurationModelCollector extends
 		final String name;
 		final String key;
 		final String category;
+		final EnablementStyle enablementStyle;
 
-		public Item(String name, String key, String category) {
+		public Item(String name, String key, String category,
+				EnablementStyle enablementStyle) {
 			this.name = name;
 			this.key = key;
 			this.category = category;
+			this.enablementStyle = enablementStyle;
+		}
+
+		boolean canEnable() {
+			return enablementStyle != EnablementStyle.ALWAYS_ON;
 		}
 
 	}
@@ -48,18 +55,21 @@ public class ColoringConfigurationModelCollector extends
 
 	public void addPreference(IColoringPreferenceKey key, String name,
 			RGB color, EnablementStyle enablementStyle, FontStyle... fontStyles) {
-		entries.add(new Item(name, key.getColorKey(), category));
+		entries.add(new Item(name, key.getColorKey(), category, enablementStyle));
 	}
 
 	public String[][] getColorListModel() {
-		final String[][] result = new String[entries.size()][3];
+		final String[][] result = new String[entries.size()][];
 		for (int i = 0; i < entries.size(); ++i) {
 			final Item entry = entries.get(i);
+			result[i] = new String[entry.canEnable() ? 4 : 3];
 			result[i][0] = entry.name;
 			result[i][1] = entry.key;
 			result[i][2] = entry.category;
+			if (entry.canEnable()) {
+				result[i][3] = entry.enablementStyle.name();
+			}
 		}
 		return result;
 	}
-
 }

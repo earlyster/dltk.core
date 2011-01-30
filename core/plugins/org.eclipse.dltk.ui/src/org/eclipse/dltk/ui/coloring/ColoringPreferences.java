@@ -11,10 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.coloring;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.internal.ui.coloring.DefaultPreferenceRequestor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.graphics.RGB;
 
 /**
  * @since 3.0
@@ -36,6 +38,30 @@ public class ColoringPreferences {
 	public static IColoringPreferenceProvider[] getProviders(String natureId) {
 		return (IColoringPreferenceProvider[]) new NatureExtensionManager(
 				DLTKUIPlugin.PLUGIN_ID + ".coloring",
-				IColoringPreferenceProvider.class).getInstances(natureId);
+				IColoringPreferenceProvider.class) {
+			@Override
+			protected boolean isValidElement(IConfigurationElement element) {
+				return "coloring".equals(element.getName());
+			}
+		}.getInstances(natureId);
 	}
+
+	public static IKeywordColorProvider[] getKeywordColorProviders(
+			String natureId) {
+		return (IKeywordColorProvider[]) new NatureExtensionManager(
+				DLTKUIPlugin.PLUGIN_ID + ".coloring",
+				IKeywordColorProvider.class) {
+			@Override
+			protected boolean isValidElement(IConfigurationElement element) {
+				return "keywordColor".equals(element.getName());
+			}
+
+			@Override
+			protected Object[] createEmptyResult() {
+				return new IKeywordColorProvider[0];
+			}
+		}.getInstances(natureId);
+	}
+
+	public static final RGB BLACK = new RGB(0, 0, 0);
 }

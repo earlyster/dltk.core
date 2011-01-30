@@ -10,6 +10,8 @@
 
 package org.eclipse.dltk.ui.preferences;
 
+import static org.eclipse.dltk.ui.PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -282,6 +284,11 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 					categorys.add(cat);
 				}
 			}
+			for (HighlightingColorListItem item : fListModel) {
+				if (!categorys.contains(item.getCategory())) {
+					categorys.add(item.getCategory());
+				}
+			}
 			return categorys.toArray();
 		}
 
@@ -431,10 +438,24 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		for (int i = 0, n = model.length; i < n; i++) {
 			final String colorKey = model[i][1];
 			if (colorKeys.add(colorKey)) {
-				fListModel.add(new HighlightingColorListItem(model[i][0],
-						colorKey, colorKey + BOLD, colorKey + ITALIC, colorKey
-								+ STRIKETHROUGH, colorKey + UNDERLINE,
-						model[i][2]));
+				if (model[i].length == 3) {
+					fListModel.add(new HighlightingColorListItem(model[i][0],
+							colorKey, colorKey + BOLD, colorKey + ITALIC,
+							colorKey + STRIKETHROUGH, colorKey + UNDERLINE,
+							model[i][2]));
+				} else {
+					fListModel
+							.add(new SemanticHighlightingColorListItem(
+									model[i][0],
+									colorKey,
+									colorKey + BOLD,
+									colorKey + ITALIC,
+									colorKey + STRIKETHROUGH,
+									colorKey + UNDERLINE,
+									model[i][2],
+									colorKey
+											+ EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX));
+				}
 			}
 		}
 		final SemanticHighlighting[] highlightings = getSemanticHighlightings();
@@ -633,6 +654,9 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 					return 1;
 				if (sCommentsCategory.equals(element))
 					return 2;
+				// custom category
+				if (element instanceof String)
+					return 3;
 				// to sort semantic settings after partition based ones:
 				// if (element instanceof SemanticHighlightingColorListItem)
 				// return 1;
