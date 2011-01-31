@@ -9,18 +9,25 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.ui.text;
+package org.eclipse.dltk.ui.coloring;
 
+import org.eclipse.dltk.ui.text.ITokenFactory;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 
-/**
- * The interface to provide color {@link IToken}s by the internal key.
- * Implementation is provided by {@link AbstractScriptScanner}.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
- */
-public interface ITokenContainer {
+public interface ITextRuleProvider {
 
-	IToken getToken(String key);
+	/**
+	 * Creates {@link IRule} for the specified document content type.
+	 * 
+	 * @param contentType
+	 *            the document content type to create rules for
+	 * @param tokenFactory
+	 *            token factory to return {@link IToken} by its internal
+	 *            identifier
+	 * 
+	 * @return
+	 */
+	IRule[] getRules(String contentType, ITokenFactory tokenFactory);
 
 }

@@ -23,6 +23,9 @@ import org.eclipse.swt.graphics.RGB;
  */
 public class ColoringPreferences {
 
+	private static final String EXTENSION_POINT = DLTKUIPlugin.PLUGIN_ID
+			+ ".coloring";
+
 	public static void initializeDefaults(IPreferenceStore store,
 			String natureId) {
 		final IColoringPreferenceProvider[] providers = getProviders(natureId);
@@ -35,32 +38,55 @@ public class ColoringPreferences {
 		}
 	}
 
+	private static NatureExtensionManager<IColoringPreferenceProvider> preferenceProviderManager = null;
+
 	public static IColoringPreferenceProvider[] getProviders(String natureId) {
-		return (IColoringPreferenceProvider[]) new NatureExtensionManager(
-				DLTKUIPlugin.PLUGIN_ID + ".coloring",
-				IColoringPreferenceProvider.class) {
-			@Override
-			protected boolean isValidElement(IConfigurationElement element) {
-				return "coloring".equals(element.getName());
-			}
-		}.getInstances(natureId);
+		if (preferenceProviderManager == null) {
+			preferenceProviderManager = new NatureExtensionManager<IColoringPreferenceProvider>(
+					EXTENSION_POINT, IColoringPreferenceProvider.class) {
+				@Override
+				protected boolean isValidElement(IConfigurationElement element) {
+					return "coloring".equals(element.getName());
+				}
+			};
+		}
+		return preferenceProviderManager.getInstances(natureId);
 	}
+
+	private static NatureExtensionManager<IKeywordColorProvider> keywordColorProviderManager = null;
 
 	public static IKeywordColorProvider[] getKeywordColorProviders(
 			String natureId) {
-		return (IKeywordColorProvider[]) new NatureExtensionManager(
-				DLTKUIPlugin.PLUGIN_ID + ".coloring",
-				IKeywordColorProvider.class) {
-			@Override
-			protected boolean isValidElement(IConfigurationElement element) {
-				return "keywordColor".equals(element.getName());
-			}
+		if (keywordColorProviderManager == null) {
+			keywordColorProviderManager = new NatureExtensionManager<IKeywordColorProvider>(
+					EXTENSION_POINT, IKeywordColorProvider.class) {
+				@Override
+				protected boolean isValidElement(IConfigurationElement element) {
+					return "keywordColor".equals(element.getName());
+				}
 
-			@Override
-			protected Object[] createEmptyResult() {
-				return new IKeywordColorProvider[0];
-			}
-		}.getInstances(natureId);
+				@Override
+				protected IKeywordColorProvider[] createEmptyResult() {
+					return new IKeywordColorProvider[0];
+				}
+			};
+		}
+		return keywordColorProviderManager.getInstances(natureId);
+	}
+
+	private static NatureExtensionManager<ITextRuleProvider> textRuleProviderManager = null;
+
+	public static ITextRuleProvider[] getTextRules(String natureId) {
+		if (textRuleProviderManager == null) {
+			textRuleProviderManager = new NatureExtensionManager<ITextRuleProvider>(
+					EXTENSION_POINT, ITextRuleProvider.class) {
+				@Override
+				protected boolean isValidElement(IConfigurationElement element) {
+					return "textRules".equals(element.getName());
+				}
+			};
+		}
+		return textRuleProviderManager.getInstances(natureId);
 	}
 
 	public static final RGB BLACK = new RGB(0, 0, 0);

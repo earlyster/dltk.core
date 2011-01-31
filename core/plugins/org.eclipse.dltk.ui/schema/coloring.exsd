@@ -20,6 +20,7 @@
          <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="coloring"/>
             <element ref="keywordColor"/>
+            <element ref="textRules"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -94,6 +95,38 @@
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.coloring.IKeywordColorProvider"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.language/language/@nature"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="priority" type="string" use="default" value="0">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="textRules">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.coloring.ITextRuleProvider"/>
                </appInfo>
             </annotation>
          </attribute>

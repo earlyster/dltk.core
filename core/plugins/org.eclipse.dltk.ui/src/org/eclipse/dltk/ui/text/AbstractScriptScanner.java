@@ -57,7 +57,7 @@ import org.eclipse.swt.widgets.Display;
  * </p>
  */
 public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner
-		implements ITokenContainer {
+		implements ITokenFactory {
 
 	private IColorManager fColorManager;
 	private IPreferenceStore fPreferenceStore;
