@@ -20,10 +20,12 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantDescriptor;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.osgi.util.NLS;
 
-public class BuildParticipantManager extends NatureExtensionManager {
+public class BuildParticipantManager extends
+		NatureExtensionManager<BuildParticipantDescriptor> {
 
 	private static final String EXT_POINT = DLTKCore.PLUGIN_ID
 			+ ".buildParticipant"; //$NON-NLS-1$
@@ -97,7 +99,7 @@ public class BuildParticipantManager extends NatureExtensionManager {
 	 */
 	public static IBuildParticipant[] getBuildParticipants(
 			IScriptProject project, String natureId) {
-		final BuildParticipantDescriptor[] descriptors = (BuildParticipantDescriptor[]) getInstance()
+		final BuildParticipantDescriptor[] descriptors = getInstance()
 				.getInstances(natureId);
 		if (descriptors == null || descriptors.length == 0) {
 			return NO_PARTICIPANTS;

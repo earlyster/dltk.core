@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.osgi.util.NLS;
 
-public class NatureExtensionManager {
+public class NatureExtensionManager<E> {
 
 	private final String extensionPoint;
 	protected final String classAttr = "class"; //$NON-NLS-1$
@@ -33,7 +33,7 @@ public class NatureExtensionManager {
 	 * @param extensionPoint
 	 * @param elementType
 	 */
-	public NatureExtensionManager(String extensionPoint, Class<?> elementType) {
+	public NatureExtensionManager(String extensionPoint, Class<E> elementType) {
 		this(extensionPoint, elementType, null);
 	}
 
@@ -122,14 +122,14 @@ public class NatureExtensionManager {
 	 * @return
 	 * @throws CoreException
 	 */
-	public Object[] getInstances(String natureId) {
+	public E[] getInstances(String natureId) {
 		initialize();
-		final Object[] nature = filter(getByNature(natureId), natureId);
-		final Object[] all = universalNatureId != null ? filter(
+		final E[] nature = filter(getByNature(natureId), natureId);
+		final E[] all = universalNatureId != null ? filter(
 				getByNature(universalNatureId), natureId) : null;
 		if (nature != null) {
 			if (all != null) {
-				final Object[] result = createArray(all.length + nature.length);
+				final E[] result = createArray(all.length + nature.length);
 				// ssanders: Ensure that global items are included first,
 				// because nature items may depend on them running first
 				System.arraycopy(all, 0, result, 0, all.length);
@@ -148,7 +148,7 @@ public class NatureExtensionManager {
 	/**
 	 * @since 3.0
 	 */
-	protected Object[] filter(Object[] objects, String natureId) {
+	protected E[] filter(E[] objects, String natureId) {
 		return objects;
 	}
 
@@ -168,15 +168,16 @@ public class NatureExtensionManager {
 		return resultArray;
 	}
 
-	protected Object[] createEmptyResult() {
+	protected E[] createEmptyResult() {
 		return null;
 	}
 
 	/**
 	 * @since 3.0
 	 */
-	protected Object[] createArray(int length) {
-		return (Object[]) Array.newInstance(elementType, length);
+	@SuppressWarnings("unchecked")
+	protected E[] createArray(int length) {
+		return (E[]) Array.newInstance(elementType, length);
 	}
 
 	protected boolean isInstance(Object e) {
@@ -187,25 +188,24 @@ public class NatureExtensionManager {
 		return isInstance(e);
 	}
 
-	private Object[] getByNature(String natureId) {
+	@SuppressWarnings("unchecked")
+	private E[] getByNature(String natureId) {
 		final Object ext = extensions.get(natureId);
 		if (ext != null) {
 			if (ext instanceof Object[]) {
-				return (Object[]) ext;
+				return (E[]) ext;
 			} else if (ext instanceof List) {
-				@SuppressWarnings("unchecked")
 				final List<Object> elements = (List<Object>) ext;
-				final List<Object> result = new ArrayList<Object>(
-						elements.size());
+				final List<E> result = new ArrayList<E>(elements.size());
 				for (int i = 0; i < elements.size(); ++i) {
 					final Object element = elements.get(i);
 					if (isInstance(element)) {
-						result.add(element);
+						result.add((E) element);
 					} else {
 						try {
 							final Object instance = createInstanceByDescriptor(element);
 							if (instance != null && isValidInstance(instance)) {
-								result.add(instance);
+								result.add((E) instance);
 							}
 						} catch (Exception e) {
 							final String msg = NLS
@@ -215,7 +215,7 @@ public class NatureExtensionManager {
 						}
 					}
 				}
-				final Object[] resultArray = createArray(result.size());
+				final E[] resultArray = createArray(result.size());
 				result.toArray(resultArray);
 				extensions.put(natureId, resultArray);
 				return resultArray;

@@ -29,7 +29,8 @@ public enum DefaultProblemIdentifier implements IProblemIdentifier {
 		return DLTKCore.PLUGIN_ID;
 	}
 
-	private static class Manager extends NatureExtensionManager {
+	private static class Manager extends
+			NatureExtensionManager<IProblemIdentifierFactory> {
 
 		public Manager() {
 			super(InternalDLTKLanguageManager.PROBLEM_FACTORY_EXTPOINT,
@@ -61,7 +62,7 @@ public enum DefaultProblemIdentifier implements IProblemIdentifier {
 		if (id != null && id.length() != 0) {
 			final int pos = id.indexOf(SEPARATOR);
 			if (pos >= 0) {
-				IProblemIdentifierFactory[] factories = (IProblemIdentifierFactory[]) getManager()
+				IProblemIdentifierFactory[] factories = getManager()
 						.getInstances(id.substring(0, pos));
 				if (factories != null) {
 					final String localName = id.substring(pos + 1);
