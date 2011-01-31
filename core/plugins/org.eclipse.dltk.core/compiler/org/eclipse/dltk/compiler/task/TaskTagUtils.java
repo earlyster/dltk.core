@@ -51,7 +51,6 @@ public abstract class TaskTagUtils {
 	public static List<TodoTask> getDefaultTags() {
 		final List<TodoTask> defaultTags = new ArrayList<TodoTask>();
 		defaultTags.add(new TodoTask("FIXME", TodoTask.PRIORITY_HIGH)); //$NON-NLS-1$
-		defaultTags.add(new TodoTask("OPTIMIZE", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		defaultTags.add(new TodoTask("TODO", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		defaultTags.add(new TodoTask("XXX", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		return defaultTags;
@@ -59,10 +58,16 @@ public abstract class TaskTagUtils {
 
 	@Deprecated
 	public static void initializeDefaultValues(Preferences store) {
+		initializeDefaultValues(store, null);
+	}
+
+	@Deprecated
+	public static void initializeDefaultValues(Preferences store,
+			List<TodoTask> taskTags) {
 		store.setDefault(ITodoTaskPreferences.ENABLED, true);
 		store.setDefault(ITodoTaskPreferences.CASE_SENSITIVE, true);
 		store.setDefault(ITodoTaskPreferences.TAGS,
-				encodeTaskTags(getDefaultTags()));
+				encodeTaskTags(taskTags != null ? taskTags : getDefaultTags()));
 	}
 
 	public static void initializeDefaultValues(IEclipsePreferences prefs) {
