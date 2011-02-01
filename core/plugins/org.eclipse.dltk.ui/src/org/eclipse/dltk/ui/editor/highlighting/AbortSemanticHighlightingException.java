@@ -11,25 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.editor.highlighting;
 
-import org.eclipse.dltk.compiler.env.IModuleSource;
+public class AbortSemanticHighlightingException extends RuntimeException {
 
-public interface ISemanticHighlighter {
-
-	/**
-	 * Returns highlighting keys used by this highlighter.
-	 * 
-	 * @return
-	 */
-	String[] getHighlightingKeys();
-
-	/**
-	 * Performs the highlighting of the specified <code>code</code> and reports
-	 * positions to be highlighted to the specified <code>requestor</code>.
-	 * 
-	 * @param code
-	 * @param requestor
-	 * @throws AbortSemanticHighlightingException
-	 */
-	void process(IModuleSource code, ISemanticHighlightingRequestor requestor);
+	private static final long serialVersionUID = 1L;
 
 }

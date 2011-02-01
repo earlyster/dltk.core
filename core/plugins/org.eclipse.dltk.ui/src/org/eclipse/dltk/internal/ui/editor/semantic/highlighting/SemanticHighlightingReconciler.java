@@ -28,10 +28,9 @@ import org.eclipse.dltk.internal.ui.text.IScriptReconcilingListener;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.editor.highlighting.HighlightedPosition;
 import org.eclipse.dltk.ui.editor.highlighting.HighlightingStyle;
-import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlightingUpdater;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlightingUpdater.UpdateResult;
 import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
-import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter.UpdateResult;
-import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.TextPresentation;
@@ -93,7 +92,7 @@ public class SemanticHighlightingReconciler implements
 	 * {@link #reconciled(ModuleDeclaration, boolean, IProgressMonitor)}
 	 */
 	private HighlightingStyle[] fJobHighlightings;
-	private ISemanticHighlighter positionUpdater;
+	private ISemanticHighlightingUpdater positionUpdater;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#
@@ -205,17 +204,15 @@ public class SemanticHighlightingReconciler implements
 	}
 
 	public void install(ScriptEditor editor, ISourceViewer sourceViewer,
+			ISemanticHighlightingUpdater fHighlightingUpdater,
 			SemanticHighlightingPresenter presenter,
 			SemanticHighlighting[] semanticHighlightings,
 			HighlightingStyle[] highlightings) {
 		fPresenter = presenter;
 		fSemanticHighlightings = semanticHighlightings;
 		fHighlightings = highlightings;
-		ScriptTextTools textTools = editor.getTextTools();
-		if (textTools != null) {
-			this.positionUpdater = textTools.getSemanticPositionUpdater();
-			this.positionUpdater.initialize(fPresenter, fHighlightings);
-		}
+		this.positionUpdater = fHighlightingUpdater;
+		this.positionUpdater.initialize(fPresenter, fHighlightings);
 
 		fEditor = editor;
 		fSourceViewer = sourceViewer;
@@ -277,8 +274,8 @@ public class SemanticHighlightingReconciler implements
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
 						final ISourceModule code = DLTKUIPlugin.getDefault()
-								.getWorkingCopyManager().getWorkingCopy(
-										fEditor.getEditorInput());
+								.getWorkingCopyManager()
+								.getWorkingCopy(fEditor.getEditorInput());
 						reconciled(code, false, monitor);
 						synchronized (fJobLock) {
 							// allow the job to be gc'ed

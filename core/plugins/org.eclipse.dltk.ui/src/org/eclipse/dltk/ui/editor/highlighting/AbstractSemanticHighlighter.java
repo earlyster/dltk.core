@@ -15,15 +15,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.text.Position;
 
 /**
- * Abstract implementation of the {@link ISemanticHighlighter}.
+ * Abstract implementation of the {@link ISemanticHighlightingUpdater}.
  * 
  * Descendant classes should override
  * {@link #doHighlighting(org.eclipse.dltk.compiler.env.ISourceModule)} and call
@@ -35,15 +37,19 @@ import org.eclipse.jface.text.Position;
  * method.
  */
 public abstract class AbstractSemanticHighlighter implements
-		ISemanticHighlighter, ISemanticHighlightingRequestor {
+		ISemanticHighlightingUpdater, ISemanticHighlightingRequestor {
 
 	private IHighlightedPositionFactory positionFactory;
-	private HighlightingStyle[] highlightingStyles;
+	private Map<String, HighlightingStyle> highlightingStyles = new HashMap<String, HighlightingStyle>();
 
 	public void initialize(IHighlightedPositionFactory factory,
 			HighlightingStyle[] styles) {
 		this.positionFactory = factory;
-		this.highlightingStyles = styles;
+		this.highlightingStyles.clear();
+		for (HighlightingStyle style : styles) {
+			this.highlightingStyles.put(style.getSemaHighlighting()
+					.getPreferenceKey(), style);
+		}
 	}
 
 	private final List<HighlightedPosition> newPositions = new ArrayList<HighlightedPosition>();
@@ -86,12 +92,15 @@ public abstract class AbstractSemanticHighlighter implements
 	protected abstract boolean doHighlighting(IModuleSource code)
 			throws Exception;
 
-	public void addPosition(int start, int end, int highlightingIndex) {
+	public void addPosition(int start, int end, String highlightingKey) {
 		final int len = end - start;
 		if (len <= 0) {
 			return;
 		}
-		final HighlightingStyle hl = highlightingStyles[highlightingIndex];
+		final HighlightingStyle hl = highlightingStyles.get(highlightingKey);
+		if (hl == null) {
+			return;
+		}
 		for (int i = 0, size = oldPositions.size(); i < size; ++i) {
 			final HighlightedPosition p = oldPositions.get(i);
 			if (p != null && p.isEqual(start, len, hl)) {

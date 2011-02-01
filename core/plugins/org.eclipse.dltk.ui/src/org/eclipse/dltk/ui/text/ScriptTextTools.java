@@ -9,10 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text;
 
+import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.ContributedSemanticHighlighter;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlightingUpdater;
 import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.templates.TemplateVariableProcessor;
+import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
@@ -161,11 +165,35 @@ public abstract class ScriptTextTools implements IPartitioningProvider {
 		}
 	}
 
+	@Deprecated
 	public SemanticHighlighting[] getSemanticHighlightings() {
 		return new SemanticHighlighting[0];
 	}
 
-	public ISemanticHighlighter getSemanticPositionUpdater() {
+	@Deprecated
+	protected final void getSemanticPositionUpdater() {
+	}
+
+	private static NatureExtensionManager<ISemanticHighlighter> highlighterManager = null;
+
+	public ISemanticHighlightingUpdater getSemanticPositionUpdater(
+			String natureId) {
+		if (highlighterManager == null) {
+			highlighterManager = new NatureExtensionManager<ISemanticHighlighter>(
+					DLTKUIPlugin.PLUGIN_ID + ".highlighting",
+					ISemanticHighlighter.class) {
+				@Override
+				protected void saveInstances(String natureId,
+						ISemanticHighlighter[] resultArray) {
+					// DON'T SAVE and always create new instances
+				}
+			};
+		}
+		final ISemanticHighlighter[] highlighters = highlighterManager
+				.getInstances(natureId);
+		if (highlighters != null && highlighters.length != 0) {
+			return new ContributedSemanticHighlighter(natureId, highlighters);
+		}
 		return null;
 	}
 

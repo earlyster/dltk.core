@@ -36,6 +36,7 @@ import org.eclipse.dltk.ui.PreferencesAdapter;
 import org.eclipse.dltk.ui.coloring.ColoringPreferences;
 import org.eclipse.dltk.ui.coloring.IColoringCategoryConstants;
 import org.eclipse.dltk.ui.coloring.IColoringPreferenceProvider;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlightingUpdater;
 import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
@@ -936,15 +937,15 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	private void installSemanticHighlighting() {
 		final ScriptTextTools textTools = getTextTools();
 		if (fSemanticHighlightingManager == null && textTools != null) {
-			fSemanticHighlightingManager = new SemanticHighlightingManager() {
-				@Override
-				protected ScriptTextTools getTextTools() {
-					return textTools;
-				}
-			};
-			fSemanticHighlightingManager.install(
-					(ScriptSourceViewer) fPreviewViewer, fColorManager,
-					getPreferenceStore());
+			final ISemanticHighlightingUpdater updater = textTools
+					.getSemanticPositionUpdater(getNatureId());
+			if (updater != null) {
+				fSemanticHighlightingManager = new SemanticHighlightingManager(
+						updater);
+				fSemanticHighlightingManager.install(
+						(ScriptSourceViewer) fPreviewViewer, fColorManager,
+						getPreferenceStore());
+			}
 		}
 	}
 

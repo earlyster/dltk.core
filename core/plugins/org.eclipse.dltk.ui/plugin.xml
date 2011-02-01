@@ -24,6 +24,7 @@
    <extension-point id="openDelegate" name="Open Delegate" schema="schema/openDelegate.exsd"/>
    <extension-point id="refactoring" name="Refactoring" schema="schema/refactoring.exsd"/>
    <extension-point id="search" name="search" schema="schema/search.exsd"/>
+   <extension-point id="highlighting" name="Semantic Highlighter" schema="schema/highlighting.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">

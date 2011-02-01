@@ -79,6 +79,7 @@ import org.eclipse.dltk.ui.actions.OpenEditorActionGroup;
 import org.eclipse.dltk.ui.actions.OpenViewActionGroup;
 import org.eclipse.dltk.ui.actions.SearchActionGroup;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlightingUpdater;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.internal.ScriptFormattingContextProperties;
@@ -3207,15 +3208,19 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fReconcilingListeners.remove(semanticHighlightingReconciler);
 	}
 
-	protected SemanticHighlightingManager fSemanticManager;
+	private SemanticHighlightingManager fSemanticManager;
 
 	private void installSemanticHighlighting() {
 		ScriptTextTools textTools = getTextTools();
 		if (fSemanticManager == null && textTools != null) {
-			fSemanticManager = new SemanticHighlightingManager();
-			fSemanticManager.install(this,
-					(ScriptSourceViewer) getSourceViewer(),
-					textTools.getColorManager(), getPreferenceStore());
+			final ISemanticHighlightingUpdater updater = textTools
+					.getSemanticPositionUpdater(getNatureId());
+			if (updater != null) {
+				fSemanticManager = new SemanticHighlightingManager(updater);
+				fSemanticManager.install(this,
+						(ScriptSourceViewer) getSourceViewer(),
+						textTools.getColorManager(), getPreferenceStore());
+			}
 		}
 	}
 

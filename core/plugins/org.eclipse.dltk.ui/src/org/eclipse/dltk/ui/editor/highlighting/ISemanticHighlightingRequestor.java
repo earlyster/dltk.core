@@ -13,6 +13,6 @@ package org.eclipse.dltk.ui.editor.highlighting;
 
 public interface ISemanticHighlightingRequestor {
 
-	void addPosition(int start, int end, int highlightingIndex);
+	void addPosition(int start, int end, String highlightingKey);
 
 }
