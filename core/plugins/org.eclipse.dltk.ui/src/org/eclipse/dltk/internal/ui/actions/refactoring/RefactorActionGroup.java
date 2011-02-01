@@ -669,7 +669,8 @@ public class RefactorActionGroup extends ActionGroup {
 		// if (fQuickAccessAction != null) {
 		// menuText= fQuickAccessAction.addShortcut(menuText);
 		// }
-		IMenuManager refactorSubmenu = new MenuManager(menuText, MENU_ID);
+		MenuManager refactorSubmenu = new MenuManager(menuText, MENU_ID);
+		refactorSubmenu.setActionDefinitionId(QUICK_MENU_ID);
 		if (fEditor != null) {
 			IModelElement element = SelectionConverter.getInput(fEditor);
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
