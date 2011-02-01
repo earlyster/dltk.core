@@ -568,8 +568,8 @@
             name="%ActionDefinition.removeBlockComment.name">
       </command>
       <command
-            name="%ActionDefinition.addJavadocComment.name"
-            description="%ActionDefinition.addJavadocComment.description"
+            name="%ActionDefinition.addScriptdocComment.name"
+            description="%ActionDefinition.addScriptdocComment.description"
             categoryId="org.eclipse.dltk.ui.category.source"
             id="org.eclipse.dltk.ui.edit.text.script.add.javadoc.comment">
       </command>
