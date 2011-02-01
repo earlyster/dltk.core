@@ -217,11 +217,15 @@ public class NatureExtensionManager<E> {
 				}
 				final E[] resultArray = createArray(result.size());
 				result.toArray(resultArray);
-				extensions.put(natureId, resultArray);
+				saveInstances(natureId, resultArray);
 				return resultArray;
 			}
 		}
 		return null;
+	}
+
+	protected void saveInstances(String natureId, final E[] resultArray) {
+		extensions.put(natureId, resultArray);
 	}
 
 	/**
