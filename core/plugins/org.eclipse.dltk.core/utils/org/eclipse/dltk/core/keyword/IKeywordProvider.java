@@ -14,7 +14,12 @@ package org.eclipse.dltk.core.keyword;
 import org.eclipse.dltk.core.ISourceModule;
 
 /**
- * Keyword provider
+ * Keyword provider.
+ * 
+ * <p>
+ * Implementations of this interface should be contributed via
+ * <code>org.eclipse.dltk.core.keywords</code> extension point.
+ * </p>
  * 
  * @since 3.0
  */
