@@ -409,8 +409,7 @@ public class MixinModel {
 	 */
 	public ISourceModule[] findModules(String key, IProgressMonitor monitor) {
 		RequestCacheEntry entry = findFromMixin(key, monitor);
-		return (ISourceModule[]) entry.modules
-				.toArray(new ISourceModule[entry.modules.size()]);
+		return entry.modules.toArray(new ISourceModule[entry.modules.size()]);
 	}
 
 	/**
