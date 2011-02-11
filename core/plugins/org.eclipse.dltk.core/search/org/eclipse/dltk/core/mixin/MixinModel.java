@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,8 +82,10 @@ public class MixinModel {
 	/**
 	 * modules required to be reparsed
 	 */
-	private Set modulesToReparse = new HashSet();
-	public long removes = 1;
+	private Set<ISourceModule> modulesToReparse = new HashSet<ISourceModule>();
+
+	// boolean, for the atomicity of it
+	public boolean removes = true;
 
 	/**
 	 * Creates workspace instance
@@ -129,7 +130,7 @@ public class MixinModel {
 		if (notExistKeysCache.contains(key)) {
 			return null;
 		}
-		if (removes == 0) {
+		if (!removes) {
 			if (cache.get(key) == null) {
 				return null;
 			}
@@ -244,11 +245,8 @@ public class MixinModel {
 		result.add(element);
 		existKeysCache.add(element.key);
 		notExistKeysCache.remove(element.key);
-		IMixinElement[] children = (IMixinElement[]) element.children
-				.toArray(new IMixinElement[element.children.size()]);
-		for (int i = 0; i < children.length; i++) {
-			addKeyToSet(result, (MixinElement) children[i], pattern);
-		}
+		for (MixinElement child : element.children)
+			addKeyToSet(result, child, pattern);
 	}
 
 	private RequestCacheEntry findFromMixin(String pattern,
@@ -260,7 +258,7 @@ public class MixinModel {
 		}
 		// Set modules = new HashSet();
 		if (entry == null || entry.expireTime < System.currentTimeMillis()) {
-			Map keys = new HashMap();
+			Map<ISourceModule, Set<String>> keys = new HashMap<ISourceModule, Set<String>>();
 			ISourceModule[] containedModules = null;
 			entry = new RequestCacheEntry();
 			try {
@@ -274,11 +272,10 @@ public class MixinModel {
 			entry.modules = new HashSet<ISourceModule>(
 					Arrays.asList(containedModules));
 			entry.prefix = pattern;
-			Collection values = keys.values();
+			Collection<Set<String>> values = keys.values();
 			entry.keys = new HashSet<String>();
-			for (Iterator iterator = values.iterator(); iterator.hasNext();) {
-				Set vals = (Set) iterator.next();
-				entry.keys.addAll(vals);
+			for (Set<String> strs : values) {
+				entry.keys.addAll(strs);
 			}
 			if (!monitor.isCanceled()) {
 				synchronized (this) {
@@ -317,7 +314,7 @@ public class MixinModel {
 
 	public boolean keyExists(String key) {
 		// TODO: For this version we cache all information, so should be 0.
-		if (removes == 0) {
+		if (!removes) {
 			return this.cache.get(key) != null;
 		}
 		MixinElement e = (MixinElement) this.cache.get(key);
@@ -360,8 +357,8 @@ public class MixinModel {
 			}
 			return;
 		}
-		for (int i = 0; i < containedModules.length; ++i) {
-			reportModule(containedModules[i]);
+		for (ISourceModule module : containedModules) {
+			reportModule(module);
 		}
 		// mark selected element and all subelements as finished.
 		markElementAsFinal(element);
@@ -369,8 +366,8 @@ public class MixinModel {
 
 	private synchronized void markElementAsFinal(MixinElement element) {
 		element.bFinal = true;
-		for (Iterator i = element.children.iterator(); i.hasNext();) {
-			markElementAsFinal((MixinElement) i.next());
+		for (MixinElement child : element.children) {
+			markElementAsFinal(child);
 		}
 	}
 
@@ -495,7 +492,7 @@ public class MixinModel {
 			}
 			if (delta.getKind() == IModelElementDelta.ADDED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					if (modulesToReparse.add(element)) {
+					if (modulesToReparse.add((ISourceModule) element)) {
 						reportModule((ISourceModule) element);
 					}
 				}
@@ -504,10 +501,7 @@ public class MixinModel {
 			}
 
 			if ((delta.getFlags() & IModelElementDelta.F_CHILDREN) != 0) {
-				IModelElementDelta[] affectedChildren = delta
-						.getAffectedChildren();
-				for (int i = 0; i < affectedChildren.length; i++) {
-					IModelElementDelta child = affectedChildren[i];
+				for (IModelElementDelta child : delta.getAffectedChildren()) {
 					processDelta(child);
 				}
 			} else if (delta.getKind() == IModelElementDelta.REMOVED
@@ -597,13 +591,12 @@ public class MixinModel {
 		if (DEBUG) {
 			log("remove " + element.getElementName()); //$NON-NLS-1$
 		}
-		if (this.elementToMixinCache.containsKey(element)) {
+		List<MixinElement> mixinCache = elementToMixinCache.get(element);
+		if (mixinCache != null) {
 			removeFromRequestCache(element);
 
-			List<MixinElement> elements = this.elementToMixinCache.get(element);
-			for (int i = 0; i < elements.size(); ++i) {
-				removes++;
-				MixinElement mixin = elements.get(i);
+			for (MixinElement mixin : mixinCache) {
+				removes = true;
 				existKeysCache.remove(mixin.key);
 				notExistKeysCache.remove(mixin.key);
 				mixin.bFinal = false;
@@ -648,7 +641,6 @@ public class MixinModel {
 
 	private void removeFromRequestCache(ISourceModule element) {
 		// Clear requests cache.
-		List<String> keysToRemove = new ArrayList<String>();
 		@SuppressWarnings("unchecked")
 		Enumeration<RequestCacheEntry> enumeration = this.requestCache
 				.elements();
@@ -656,12 +648,10 @@ public class MixinModel {
 			RequestCacheEntry entry = enumeration.nextElement();
 			if (entry.modules != null) {
 				if (entry.modules.contains(element)) {
-					keysToRemove.add(entry.prefix);
+					// we can do it now
+					this.requestCache.remove(entry.prefix);
 				}
 			}
-		}
-		for (String key : keysToRemove) {
-			this.requestCache.remove(key);
 		}
 	}
 
@@ -676,16 +666,14 @@ public class MixinModel {
 
 	private final ListenerList mixinObjectInitializeListeners = new ListenerList();
 
-	private class MixinElement implements IMixinElement, IInternalMixinElement {
+	private final class MixinElement implements IMixinElement,
+			IInternalMixinElement {
 		private String key;
 		private boolean bFinal = false;
 		private List<ISourceModule> sourceModules = new ArrayList<ISourceModule>();
-		private Map<ISourceModule, Object> sourceModuleToObject = new HashMap<ISourceModule, Object>();
+		private Map<ISourceModule, List<Object>> sourceModuleToObject = new HashMap<ISourceModule, List<Object>>();
 
-		/**
-		 * List of Strings.
-		 */
-		private Set<IMixinElement> children = new HashSet<IMixinElement>();
+		private Set<MixinElement> children = new HashSet<MixinElement>();
 
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -700,37 +688,28 @@ public class MixinModel {
 			return this.key.hashCode();
 		}
 
-		public MixinElement(String key) {
-			this.key = key;
-		}
+		/*
+		 * public MixinElement(String key) { this.key = key; }
+		 */
 
 		public String toString() {
 			return this.getLastKeySegment() + " final[" + this.bFinal + "]" //$NON-NLS-1$ //$NON-NLS-2$
 					+ this.children + " "; //$NON-NLS-1$
 		}
 
-		public MixinElement(ElementInfo info, ISourceModule module) {
-			this(info.key, currentModule);
-			addInfo(info, module);
-		}
+		/*
+		 * public MixinElement(ElementInfo info, ISourceModule module) {
+		 * this(info.key, currentModule); addInfo(info, module); }
+		 */
 
 		void addInfo(ElementInfo info, ISourceModule module) {
 			if (info.object != null) {
-				final Object object = this.sourceModuleToObject.get(module);
-				if (object != null) {
-					if (object instanceof List) {
-						((List) object).add(info.object);
-					} else {
-						List<Object> list = new ArrayList<Object>();
-						list.add(object);
-						list.add(info.object);
-						this.sourceModuleToObject.put(module, list);
-					}
-				} else {
-					List<Object> list = new ArrayList<Object>();
-					list.add(info.object);
+				List<Object> list = this.sourceModuleToObject.get(module);
+				if (list == null) {
+					list = new ArrayList<Object>();
 					this.sourceModuleToObject.put(module, list);
 				}
+				list.add(info.object);
 			}
 		}
 
@@ -798,31 +777,20 @@ public class MixinModel {
 
 		public Object[] getObjects(ISourceModule module) {
 			this.validate();
-			Object o = this.sourceModuleToObject.get(module);
-			if (o instanceof List) {
-
-				Object[] objs = ((List) o).toArray();
-				for (int i = 0; i < objs.length; i++) {
-					notifyInitializeListener(this, module, objs[i]);
-				}
-				return objs;
+			List<Object> list = this.sourceModuleToObject.get(module);
+			Object[] objs = list.toArray();
+			for (Object obj : objs) {
+				notifyInitializeListener(this, module, obj);
 			}
-			if (o != null) {
-				notifyInitializeListener(this, module, o);
-				return new Object[] { o };
-			}
-			return new Object[0];
+			return objs;
 		}
 
 		public Object[] getAllObjects() {
 			this.validate();
-			HashSet objects = new HashSet();
-			for (Iterator iterator = this.sourceModules.iterator(); iterator
-					.hasNext();) {
-				ISourceModule module = (ISourceModule) iterator.next();
-				Object[] objs = this.getObjects(module);
-				for (int j = 0; j < objs.length; ++j) {
-					objects.add(objs[j]);
+			Set<Object> objects = new HashSet<Object>();
+			for (ISourceModule module : sourceModules) {
+				for (Object obj : this.getObjects(module)) {
+					objects.add(obj);
 				}
 			}
 			return objects.toArray();
@@ -835,19 +803,18 @@ public class MixinModel {
 		public void close() {
 			existKeysCache.remove(key);
 			notExistKeysCache.remove(key);
-			removes++;
+			removes = true;
 			this.bFinal = false;
 			for (int i = 0; i < sourceModules.size(); i++) {
-				Object module = sourceModules.get(i);
-				List list = (List) elementToMixinCache.get(module);
+				ISourceModule module = sourceModules.get(i);
+				List<MixinElement> list = elementToMixinCache.get(module);
 				if (list != null) {
 					list.remove(this);
 					if (list.size() == 0) {
 						elementToMixinCache.remove(module);
 					}
 				}
-				if (!modulesToReparse.contains(module)
-						&& elementToMixinCache.containsKey(module)) {
+				if (elementToMixinCache.containsKey(module)) {
 					modulesToReparse.add(module);
 				}
 			}
@@ -863,7 +830,7 @@ public class MixinModel {
 				if (parent != null) {
 					existKeysCache.remove(parent.key);
 					notExistKeysCache.remove(parent.key);
-					removes++;
+					removes = true;
 					parent.children.remove(element);
 					parent.bFinal = false;
 					element = parent;
@@ -882,7 +849,7 @@ public class MixinModel {
 		}
 	};
 
-	private class MixinRequestor implements IMixinRequestor {
+	private final class MixinRequestor implements IMixinRequestor {
 		public void reportElement(ElementInfo info) {
 			// if( DLTKCore.VERBOSE_MIXIN ) {
 			// System.out.println("Append mixin:" + info.key);
@@ -900,9 +867,7 @@ public class MixinModel {
 			if (list.length != 1) {
 				for (int i = 0; i < list.length - 1; ++i) {
 					MixinElement parent = getCreateEmpty(element.getParentKey());
-					if (!parent.children.contains(element)) {
-						parent.children.add(element);
-					}
+					parent.children.add(element);
 					addElementToModules(parent);
 					element = parent;
 				}
@@ -922,21 +887,20 @@ public class MixinModel {
 	}
 
 	public void makeAllModuleElementsFinal(ISourceModule module) {
-		if (this.elementToMixinCache.containsKey(module)) {
-			List<MixinElement> elements = this.elementToMixinCache.get(module);
-			for (int i = 0; i < elements.size(); ++i) {
-				removes++;
-				MixinElement mixin = (MixinElement) elements.get(i);
+		List<MixinElement> elements = this.elementToMixinCache.get(module);
+		if (elements != null) {
+			for (MixinElement mixin : elements) {
+				removes = true;
 				mixin.bFinal = true;
 			}
 		}
 	}
 
 	public void makeAllElementsFinalIfNoCacheRemoves() {
-		if (removes != 0) {
+		if (removes) {
 			return;
 		}
-		Enumeration elements = cache.elements();
+		Enumeration<?> elements = cache.elements();
 		while (elements.hasMoreElements()) {
 			MixinElement e = (MixinElement) elements.nextElement();
 			e.bFinal = true;
@@ -945,7 +909,7 @@ public class MixinModel {
 	}
 
 	public void setRemovesToZero() {
-		removes = 0;
+		removes = false;
 	}
 
 	public synchronized void clearKeysCache(String key) {
