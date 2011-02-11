@@ -4,12 +4,12 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.IElementRequestor.ElementInfo;
 import org.eclipse.dltk.compiler.IElementRequestor.FieldInfo;
 import org.eclipse.dltk.compiler.IElementRequestor.ImportInfo;
 import org.eclipse.dltk.compiler.IElementRequestor.MethodInfo;
 import org.eclipse.dltk.compiler.IElementRequestor.TypeInfo;
+import org.eclipse.dltk.compiler.ISourceElementRequestor;
 
 public class StructureModelProcessor extends AbstractDataLoader implements
 		IStructureConstants {
@@ -49,6 +49,9 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 					break;
 				case TAG_ENTER_FIELD:
 					enterField();
+					break;
+				case TAG_UPDATE_FIELD:
+					updateField();
 					break;
 				case TAG_ENTER_FIELD_DUPL:
 					enterFieldCheckDuplicates();
@@ -203,6 +206,16 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 			FieldInfo info = new FieldInfo();
 			readFieldInfo(info);
 			this.requestor.enterField(info);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void updateField() {
+		try {
+			FieldInfo info = new FieldInfo();
+			readFieldInfo(info);
+			this.requestor.updateField(info, in.readInt());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

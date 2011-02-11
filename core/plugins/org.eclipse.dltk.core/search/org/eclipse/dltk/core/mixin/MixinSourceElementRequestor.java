@@ -164,6 +164,9 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		requestor.reportElement(elInfo);
 	}
 
+	public void updateField(FieldInfo fieldInfo, int flags) {
+	}
+
 	/**
 	 * @since 2.0
 	 */

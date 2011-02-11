@@ -41,6 +41,9 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	public void enterField(FieldInfo info) {
 	}
 
+	public void updateField(FieldInfo fieldInfo, int flags) {
+	}
+
 	/**
 	 * @since 2.0
 	 */

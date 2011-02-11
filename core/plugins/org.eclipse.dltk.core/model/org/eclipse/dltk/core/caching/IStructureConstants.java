@@ -31,4 +31,10 @@ public interface IStructureConstants {
 
 	int TAG_ENTER_NAMESPACE = 21;
 	int TAG_EXIT_NAMESPACE = 22;
+
+	/**
+	 * @since 3.0
+	 */
+	static final int TAG_UPDATE_FIELD = 23;
+
 }

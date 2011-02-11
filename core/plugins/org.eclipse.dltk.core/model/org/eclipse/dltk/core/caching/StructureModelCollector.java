@@ -125,6 +125,17 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	public void updateField(FieldInfo fieldInfo, int flags) {
+		this.baseRequestor.updateField(fieldInfo, flags);
+		try {
+			writeTag(TAG_UPDATE_FIELD);
+			writeFieldInfo(fieldInfo);
+			out.writeInt(flags);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void writeFieldInfo(FieldInfo info) throws IOException {
 		writeElementInfo(info);
 	}
