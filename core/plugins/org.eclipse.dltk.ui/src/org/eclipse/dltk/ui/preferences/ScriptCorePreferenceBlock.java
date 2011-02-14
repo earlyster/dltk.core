@@ -26,6 +26,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.ui.PreferenceConstants;
+import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
@@ -93,10 +94,14 @@ final class ScriptCorePreferenceBlock extends
 	}
 
 	private Combo cacheCombo;
+	private static final String[] names = new String[] { "Warning", "Error" };
+	private static final String[] ids = new String[] { "warning", "error" };
+
+	private Combo circularBuildPathCombo;
 
 	public Control createControl(Composite parent) {
-		Composite composite = SWTFactory.createComposite(parent, parent
-				.getFont(), 1, 1, GridData.FILL_BOTH);
+		Composite composite = SWTFactory.createComposite(parent,
+				parent.getFont(), 1, 1, GridData.FILL_BOTH);
 
 		Group coreGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_coreOptions, 2, 1,
@@ -115,11 +120,10 @@ final class ScriptCorePreferenceBlock extends
 				GridData.FILL_HORIZONTAL);
 
 		bindControl(
-				SWTFactory
-						.createCheckButton(
-								editorGroup,
-								PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems,
-								2),
+				SWTFactory.createCheckButton(
+						editorGroup,
+						PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems,
+						2),
 				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS);
 		// Connection timeout
 		SWTFactory.createLabel(editorGroup,
@@ -140,6 +144,17 @@ final class ScriptCorePreferenceBlock extends
 								Messages.EditorPreferencePage_ResourceShowError_InvalidResourceName),
 				PreferenceConstants.RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME);
 
+		Group builderGroup = SWTFactory.createGroup(composite,
+				Messages.ScriptCorePreferenceBlock_Builder_Options, 2, 1,
+				GridData.FILL_HORIZONTAL);
+
+		SWTFactory
+				.createLabel(
+						builderGroup,
+						Messages.ScriptCorePreferenceBlock_Builder_CircularDependencies,
+						1);
+		circularBuildPathCombo = SWTFactory.createCombo(builderGroup,
+				SWT.READ_ONLY | SWT.BORDER, 0, names);
 		createReIndex(composite);
 
 		return composite;
@@ -191,8 +206,8 @@ final class ScriptCorePreferenceBlock extends
 		}
 	}
 
-	protected List createOverlayKeys() {
-		ArrayList overlayKeys = new ArrayList();
+	protected List<OverlayKey> createOverlayKeys() {
+		ArrayList<OverlayKey> overlayKeys = new ArrayList<OverlayKey>();
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
@@ -209,12 +224,30 @@ final class ScriptCorePreferenceBlock extends
 		super.initialize();
 		initializeCacheField(DLTKCore.getPlugin().getPluginPreferences()
 				.getString(DLTKCore.FILE_CACHE));
+		initializeBuildPathField(DLTKCore.getPlugin().getPluginPreferences()
+				.getString(DLTKCore.CORE_CIRCULAR_BUILDPATH));
+
 	}
 
 	public void performDefaults() {
 		super.performDefaults();
 		initializeCacheField(DLTKCore.getPlugin().getPluginPreferences()
 				.getDefaultString(DLTKCore.FILE_CACHE));
+		
+		initializeBuildPathField(DLTKCore.getPlugin().getPluginPreferences()
+				.getDefaultString(DLTKCore.CORE_CIRCULAR_BUILDPATH));
+	}
+
+	/**
+	 * @param defaultCircularBuildPath
+	 */
+	private void initializeBuildPathField(String defaultCircularBuildPath) {
+		for (int i = 0; i < ids.length; i++) {
+			if (ids[i].equals(defaultCircularBuildPath)) {
+				circularBuildPathCombo.select(i);
+				break;
+			}
+		}
 	}
 
 	protected void initializeFields() {
@@ -230,6 +263,16 @@ final class ScriptCorePreferenceBlock extends
 			final String value = cacheEntries[cacheIndex].id;
 			if (!value.equals(prefs.getString(DLTKCore.FILE_CACHE))) {
 				prefs.setValue(DLTKCore.FILE_CACHE, value);
+			}
+		}
+		final int buildPathIndex = circularBuildPathCombo.getSelectionIndex();
+		if (buildPathIndex >= 0 && buildPathIndex < ids.length) {
+			final Preferences prefs = DLTKCore.getDefault()
+					.getPluginPreferences();
+			final String value = ids[buildPathIndex];
+			if (!value
+					.equals(prefs.getString(DLTKCore.CORE_CIRCULAR_BUILDPATH))) {
+				prefs.setValue(DLTKCore.CORE_CIRCULAR_BUILDPATH, value);
 			}
 		}
 		DLTKCore.getDefault().savePluginPreferences();
