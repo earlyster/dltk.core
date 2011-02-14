@@ -11,13 +11,13 @@ package org.eclipse.dltk.core.mixin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -64,6 +64,7 @@ public class MixinModel {
 			.valueOf(IIndexConstants.SEPARATOR);
 
 	private static final int CACHE_LIMIT = 250000;
+	private static final int KEYS_CACHE_LIMIT = 500000;
 
 	private final MixinCache cache;
 
@@ -84,6 +85,8 @@ public class MixinModel {
 	 */
 	private Set<ISourceModule> modulesToReparse = new HashSet<ISourceModule>();
 
+	// true if exists, false if doesn't
+	private Map<String, Boolean> knownKeysCache = new ConcurrentHashMap<String, Boolean>();
 	// boolean, for the atomicity of it
 	public boolean removes = true;
 
@@ -127,25 +130,32 @@ public class MixinModel {
 		if (DLTKCore.VERBOSE) {
 			System.out.println("MixinModel.get(" + key + ')'); //$NON-NLS-1$
 		}
-		if (notExistKeysCache.contains(key)) {
+		if (knownKeysCache.get(key) == Boolean.FALSE) {
 			return null;
 		}
-		if (!removes) {
-			if (cache.get(key) == null) {
-				return null;
+		MixinElement element = null;
+		synchronized (cache) {
+			element = (MixinElement) cache.get(key);
+			if (element == null) {
+				if (!removes) {
+					return null;
+				} else {
+					element = new MixinElement(key, currentModule);
+					cache.put(key, element);
+					cache.ensureSpaceLimit(1, element);
+				}
 			}
 		}
-		MixinElement element = getCreateEmpty(key);
 		if (DLTKCore.VERBOSE) {
 			System.out.println("Filling ratio:" + this.cache.fillingRatio()); //$NON-NLS-1$
 			this.cache.printStats();
 		}
 		buildElementTree(element);
 		if (element.isFinal() && element.sourceModules.size() > 0) {
-			existKeysCache.add(key);
+			knownKeysCache.put(key, Boolean.TRUE);
 			return element;
 		}
-		notExistKeysCache.add(key);
+		knownKeysCache.put(key, Boolean.FALSE);
 		synchronized (this.cache) {
 			cache.remove(element.key);
 			cache.resetSpaceLimit(CACHE_LIMIT, element);
@@ -235,7 +245,7 @@ public class MixinModel {
 		return result.toArray(new IMixinElement[result.size()]);
 	}
 
-	private synchronized void addKeyToSet(Set<MixinElement> result,
+	private void addKeyToSet(Set<MixinElement> result,
 			MixinElement element, String pattern) {
 		// Skip all not matched keys
 		if (!CharOperation.match(pattern.toCharArray(),
@@ -243,8 +253,7 @@ public class MixinModel {
 			return;
 		}
 		result.add(element);
-		existKeysCache.add(element.key);
-		notExistKeysCache.remove(element.key);
+		knownKeysCache.put(element.key, Boolean.TRUE);
 		for (MixinElement child : element.children)
 			addKeyToSet(result, child, pattern);
 	}
@@ -253,7 +262,8 @@ public class MixinModel {
 			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		RequestCacheEntry entry;
-		synchronized (this) {
+		// TODO make it all work with keys clashing
+		synchronized (requestCache) {
 			entry = (RequestCacheEntry) requestCache.get(pattern);
 		}
 		// Set modules = new HashSet();
@@ -272,13 +282,12 @@ public class MixinModel {
 			entry.modules = new HashSet<ISourceModule>(
 					Arrays.asList(containedModules));
 			entry.prefix = pattern;
-			Collection<Set<String>> values = keys.values();
 			entry.keys = new HashSet<String>();
-			for (Set<String> strs : values) {
+			for (Set<String> strs : keys.values()) {
 				entry.keys.addAll(strs);
 			}
 			if (!monitor.isCanceled()) {
-				synchronized (this) {
+				synchronized (requestCache) {
 					this.requestCache.put(pattern, entry);
 				}
 			}
@@ -309,9 +318,6 @@ public class MixinModel {
 		return entry.keys.toArray(new String[entry.keys.size()]);
 	}
 
-	private Set<String> existKeysCache = new HashSet<String>();
-	private Set<String> notExistKeysCache = new HashSet<String>();
-
 	public boolean keyExists(String key) {
 		// TODO: For this version we cache all information, so should be 0.
 		if (!removes) {
@@ -321,27 +327,16 @@ public class MixinModel {
 		if (e != null && e.sourceModules.size() > 0) {
 			return true;
 		}
-		if (existKeysCache.contains(key)) {
-			return true;
-		}
-		if (notExistKeysCache.contains(key)) {
-			return false;
-		}
-		boolean exist = get(key) != null;
+		Boolean cached = knownKeysCache.get(key);
+		if (cached != null)
+			return cached;
+		boolean exists = get(key) != null;
 		// System.out.println("1");
-		if (exist) {
-			if (existKeysCache.size() > 500000) {
-				existKeysCache.clear();
-			}
-			existKeysCache.add(key);
-		} else {
-			if (notExistKeysCache.size() > 500000) {
-				notExistKeysCache.clear();
-			}
-			notExistKeysCache.add(key);
+		if (knownKeysCache.size() > KEYS_CACHE_LIMIT) {
+			knownKeysCache.clear();
 		}
-
-		return exist;
+		knownKeysCache.put(key, exists);
+		return exists;
 	}
 
 	private void buildElementTree(MixinElement element) {
@@ -424,7 +419,7 @@ public class MixinModel {
 	 * @return
 	 */
 	private synchronized MixinElement getCreateEmpty(String key) {
-		MixinElement element = (MixinElement) MixinModel.this.cache.get(key);
+		MixinElement element = (MixinElement) cache.get(key);
 		if (element == null) {
 			element = new MixinElement(key, currentModule);
 			this.cache.put(key, element);
@@ -496,7 +491,7 @@ public class MixinModel {
 						reportModule((ISourceModule) element);
 					}
 				}
-				MixinModel.this.notExistKeysCache.clear();
+				knownKeysCache.clear();
 				requestCache.flush();
 			}
 
@@ -597,8 +592,7 @@ public class MixinModel {
 
 			for (MixinElement mixin : mixinCache) {
 				removes = true;
-				existKeysCache.remove(mixin.key);
-				notExistKeysCache.remove(mixin.key);
+				knownKeysCache.remove(mixin.key);
 				mixin.bFinal = false;
 				mixin.sourceModules.remove(element);
 				mixin.sourceModuleToObject.remove(element);
@@ -801,8 +795,7 @@ public class MixinModel {
 		}
 
 		public void close() {
-			existKeysCache.remove(key);
-			notExistKeysCache.remove(key);
+			knownKeysCache.remove(key);
 			removes = true;
 			this.bFinal = false;
 			for (int i = 0; i < sourceModules.size(); i++) {
@@ -828,9 +821,8 @@ public class MixinModel {
 			while (parentKey != null) {
 				MixinElement parent = (MixinElement) cache.get(parentKey);
 				if (parent != null) {
-					existKeysCache.remove(parent.key);
-					notExistKeysCache.remove(parent.key);
 					removes = true;
+					knownKeysCache.remove(parent.key);
 					parent.children.remove(element);
 					parent.bFinal = false;
 					element = parent;
@@ -854,8 +846,7 @@ public class MixinModel {
 			// if( DLTKCore.VERBOSE_MIXIN ) {
 			// System.out.println("Append mixin:" + info.key);
 			// }
-			existKeysCache.add(info.key);
-			notExistKeysCache.remove(info.key);
+			knownKeysCache.put(info.key, Boolean.TRUE);
 			String[] list = info.key.split("\\" //$NON-NLS-1$
 					+ IMixinRequestor.MIXIN_NAME_SEPARATOR);
 			MixinElement element = getCreateEmpty(info.key);
@@ -913,15 +904,13 @@ public class MixinModel {
 	}
 
 	public synchronized void clearKeysCache(String key) {
-		existKeysCache.remove(key);
-		notExistKeysCache.remove(key);
+		knownKeysCache.remove(key);
 		requestCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
 	}
 
 	public synchronized void clearKeysCache() {
-		existKeysCache.clear();
-		notExistKeysCache.clear();
+		knownKeysCache.clear();
 		requestCache.flush();
 	}
 
@@ -949,8 +938,7 @@ public class MixinModel {
 	protected synchronized void clear() {
 		cache.flush();
 		elementToMixinCache.clear();
-		existKeysCache.clear();
-		notExistKeysCache.clear();
+		knownKeysCache.clear();
 		modulesToReparse.clear();
 		requestCache.flush();
 	}
