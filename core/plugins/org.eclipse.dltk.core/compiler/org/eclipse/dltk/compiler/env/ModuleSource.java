@@ -16,6 +16,7 @@ import org.eclipse.dltk.core.IModelElement;
 
 public class ModuleSource implements IModuleSource {
 
+	private final IModelElement modelElement;
 	private final String filename;
 	private String string;
 	private char[] charArray;
@@ -30,12 +31,30 @@ public class ModuleSource implements IModuleSource {
 
 	public ModuleSource(String filename, char[] content) {
 		assert content != null;
+		this.modelElement = null;
 		this.filename = filename;
 		this.charArray = content;
 	}
 
 	public ModuleSource(String filename, String content) {
 		assert content != null;
+		this.modelElement = null;
+		this.filename = filename;
+		this.string = content;
+	}
+
+	public ModuleSource(String filename, IModelElement modelElement,
+			char[] content) {
+		assert content != null;
+		this.modelElement = modelElement;
+		this.filename = filename;
+		this.charArray = content;
+	}
+
+	public ModuleSource(String filename, IModelElement modelElement,
+			String content) {
+		assert content != null;
+		this.modelElement = modelElement;
 		this.filename = filename;
 		this.string = content;
 	}
@@ -59,7 +78,7 @@ public class ModuleSource implements IModuleSource {
 	}
 
 	public IModelElement getModelElement() {
-		return null;
+		return modelElement;
 	}
 
 }
