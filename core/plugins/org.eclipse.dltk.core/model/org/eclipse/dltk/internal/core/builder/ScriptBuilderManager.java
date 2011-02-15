@@ -10,7 +10,11 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +74,30 @@ public class ScriptBuilderManager extends
 		return "builder".equals(element.getName()); //$NON-NLS-1$
 	}
 
+	static int priorityOf(IConfigurationElement element) {
+		final String priority = element.getAttribute("priority");
+		if (priority != null) {
+			try {
+				return Integer.parseInt(priority);
+			} catch (NumberFormatException e) {
+				// ignore & fall thru
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	protected void initializeDescriptors(List<Object> descriptors) {
+		Collections.sort(descriptors, new Comparator<Object>() {
+
+			public int compare(Object o1, Object o2) {
+				final IConfigurationElement e1 = (IConfigurationElement) o1;
+				final IConfigurationElement e2 = (IConfigurationElement) o2;
+				return priorityOf(e2) - priorityOf(e1);
+			}
+		});
+	}
+
 	@Override
 	protected IScriptBuilder[] filter(IScriptBuilder[] objects, String natureId) {
 		if (objects != null) {
@@ -89,6 +117,34 @@ public class ScriptBuilderManager extends
 			}
 		}
 		return objects;
+	}
+
+	protected final Map<Object, Integer> priorities = new IdentityHashMap<Object, Integer>();
+
+	@Override
+	protected Object createInstanceByDescriptor(Object descriptor)
+			throws CoreException {
+		final Object instance = super.createInstanceByDescriptor(descriptor);
+		priorities
+				.put(instance, priorityOf((IConfigurationElement) descriptor));
+		return instance;
+	}
+
+	@Override
+	protected IScriptBuilder[] merge(IScriptBuilder[] all,
+			IScriptBuilder[] nature) {
+		final IScriptBuilder[] result = super.merge(all, nature);
+		Arrays.sort(result, new Comparator<IScriptBuilder>() {
+			int priority(IScriptBuilder builder) {
+				Integer value = priorities.get(builder);
+				return value != null ? value.intValue() : 0;
+			}
+
+			public int compare(IScriptBuilder o1, IScriptBuilder o2) {
+				return priority(o2) - priority(o1);
+			}
+		});
+		return result;
 	}
 
 	/**

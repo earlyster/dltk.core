@@ -124,6 +124,7 @@
          point="org.eclipse.dltk.core.builder">
       <builder
             class="org.eclipse.dltk.internal.core.builder.StandardScriptBuilder"
+            priority="10"
             nature="#">
       </builder>
    </extension>

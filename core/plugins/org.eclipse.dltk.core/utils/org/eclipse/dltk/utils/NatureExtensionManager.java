@@ -129,12 +129,7 @@ public class NatureExtensionManager<E> {
 				getByNature(universalNatureId), natureId) : null;
 		if (nature != null) {
 			if (all != null) {
-				final E[] result = createArray(all.length + nature.length);
-				// ssanders: Ensure that global items are included first,
-				// because nature items may depend on them running first
-				System.arraycopy(all, 0, result, 0, all.length);
-				System.arraycopy(nature, 0, result, all.length, nature.length);
-				return result;
+				return merge(all, nature);
 			} else {
 				return nature;
 			}
@@ -143,6 +138,15 @@ public class NatureExtensionManager<E> {
 		} else {
 			return createEmptyResult();
 		}
+	}
+
+	protected E[] merge(final E[] all, final E[] nature) {
+		final E[] result = createArray(all.length + nature.length);
+		// ssanders: Ensure that global items are included first,
+		// because nature items may depend on them running first
+		System.arraycopy(all, 0, result, 0, all.length);
+		System.arraycopy(nature, 0, result, all.length, nature.length);
+		return result;
 	}
 
 	/**
