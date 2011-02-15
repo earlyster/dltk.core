@@ -684,6 +684,8 @@ public class MixinModel {
 
 	private final ListenerList mixinObjectInitializeListeners = new ListenerList();
 
+	private static final Object[] NO_OBJECTS = new Object[0];
+
 	private final class MixinElement implements IMixinElement,
 			IInternalMixinElement {
 		private String key;
@@ -804,6 +806,8 @@ public class MixinModel {
 			this.validate();
 			synchronized (MixinModel.this) {
 				List<Object> list = this.sourceModuleToObject.get(module);
+				if (list == null)
+					return NO_OBJECTS;
 				Object[] objs = list.toArray();
 				for (Object obj : objs) {
 					notifyInitializeListener(this, module, obj);
