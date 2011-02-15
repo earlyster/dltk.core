@@ -56,8 +56,8 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 			if (fragment != null) {
 				if (!path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
 					final IndexRequest request = new ExternalProjectFragmentRequest(
-							this, fragment, DLTKLanguageManager
-									.getLanguageToolkit(fragment));
+							this, fragment,
+							DLTKLanguageManager.getLanguageToolkit(fragment));
 					requestIfNotWaiting(request);
 				}
 			} else {
@@ -65,8 +65,8 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 						Messages.MixinIndexer_unknownProjectFragment, path));
 			}
 		} catch (Exception e) {
-			DLTKCore.error(NLS.bind(Messages.MixinIndexer_indexLibraryError,
-					path), e);
+			DLTKCore.error(
+					NLS.bind(Messages.MixinIndexer_indexLibraryError, path), e);
 		}
 	}
 
@@ -89,8 +89,8 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 			return;
 		}
 		requestIfNotWaiting(new ExternalProjectFragmentRequest(this,
-				fragmentToIndex, DLTKLanguageManager
-						.getLanguageToolkit(project)));
+				fragmentToIndex,
+				DLTKLanguageManager.getLanguageToolkit(project)));
 	}
 
 	public void indexSourceModule(ISourceModule module,
