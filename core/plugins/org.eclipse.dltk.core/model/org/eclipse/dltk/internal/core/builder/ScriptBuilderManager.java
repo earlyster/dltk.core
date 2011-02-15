@@ -20,7 +20,8 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 
-public class ScriptBuilderManager extends NatureExtensionManager {
+public class ScriptBuilderManager extends
+		NatureExtensionManager<IScriptBuilder> {
 
 	private ScriptBuilderManager() {
 		super(LANGUAGE_EXTPOINT, IScriptBuilder.class, "#"); //$NON-NLS-1$
@@ -70,12 +71,12 @@ public class ScriptBuilderManager extends NatureExtensionManager {
 	}
 
 	@Override
-	protected Object[] filter(Object[] objects, String natureId) {
+	protected IScriptBuilder[] filter(IScriptBuilder[] objects, String natureId) {
 		if (objects != null) {
 			final List<String> disable = disabled.get(natureId);
 			if (disable != null) {
-				final List<Object> output = new ArrayList<Object>();
-				for (Object object : objects) {
+				final List<IScriptBuilder> output = new ArrayList<IScriptBuilder>();
+				for (IScriptBuilder object : objects) {
 					if (!disable.contains(object.getClass().getName())) {
 						output.add(object);
 					}
@@ -98,10 +99,10 @@ public class ScriptBuilderManager extends NatureExtensionManager {
 	 * @throws CoreException
 	 */
 	public static IScriptBuilder[] getScriptBuilders(String natureId) {
-		return (IScriptBuilder[]) getManager().getInstances(natureId);
+		return getManager().getInstances(natureId);
 	}
 
 	public static IScriptBuilder[] getAllScriptBuilders() {
-		return (IScriptBuilder[]) getManager().getAllInstances();
+		return getManager().getAllInstances();
 	}
 }
