@@ -152,18 +152,18 @@ public class NatureExtensionManager<E> {
 		return objects;
 	}
 
-	public Object[] getAllInstances() {
+	public E[] getAllInstances() {
 		initialize();
-		List<Object> result = new ArrayList<Object>();
+		List<E> result = new ArrayList<E>();
 		for (Iterator<String> i = extensions.keySet().iterator(); i.hasNext();) {
-			Object[] natureInstances = getByNature(i.next());
+			E[] natureInstances = getByNature(i.next());
 			if (natureInstances != null) {
 				for (int j = 0; j < natureInstances.length; ++j) {
 					result.add(natureInstances[j]);
 				}
 			}
 		}
-		final Object[] resultArray = createArray(result.size());
+		final E[] resultArray = createArray(result.size());
 		result.toArray(resultArray);
 		return resultArray;
 	}
