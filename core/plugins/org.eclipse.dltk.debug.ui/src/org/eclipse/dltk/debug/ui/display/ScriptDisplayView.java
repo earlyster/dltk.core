@@ -308,6 +308,9 @@ public class ScriptDisplayView extends PageBookView implements IConsoleView,
 		pageRecord.dispose();
 		console.removePropertyChangeListener(this);
 
+		if (console instanceof AbstractConsole)
+			((AbstractConsole) console).destroy();
+
 		// empty cross-reference cache
 		fPartToConsole.remove(part);
 		fConsoleToPart.remove(console);
