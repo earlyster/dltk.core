@@ -11,7 +11,8 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.testing.util.NumberUtils;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 
-public final class TestingEngineManager extends NatureExtensionManager {
+public final class TestingEngineManager extends
+		NatureExtensionManager<ITestingEngine> {
 
 	private static final String EXTENSION_POINT = DLTKTestingPlugin.PLUGIN_ID
 			+ ".engine"; //$NON-NLS-1$
@@ -44,7 +45,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 		return new Descriptor(confElement, priority);
 	}
 
-	private final Comparator descriptorComparator = new Comparator() {
+	private final Comparator<Object> descriptorComparator = new Comparator<Object>() {
 
 		public int compare(Object o1, Object o2) {
 			Descriptor descriptor1 = (Descriptor) o1;
@@ -54,7 +55,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 
 	};
 
-	protected void initializeDescriptors(List descriptors) {
+	protected void initializeDescriptors(List<Object> descriptors) {
 		Collections.sort(descriptors, descriptorComparator);
 	}
 
@@ -64,7 +65,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 		return super.createInstanceByDescriptor(engineDescriptor.element);
 	}
 
-	protected Object[] createEmptyResult() {
+	protected ITestingEngine[] createEmptyResult() {
 		return new ITestingEngine[0];
 	}
 
@@ -78,7 +79,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 	}
 
 	public static ITestingEngine[] getEngines(String natureId) {
-		return (ITestingEngine[]) getInstance().getInstances(natureId);
+		return getInstance().getInstances(natureId);
 	}
 
 	/**
@@ -90,8 +91,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 	 */
 	public static ITestingEngine getEngine(String engineId) {
 		if (engineId != null) {
-			final ITestingEngine[] engines = (ITestingEngine[]) getInstance()
-					.getAllInstances();
+			final ITestingEngine[] engines = getInstance().getAllInstances();
 			for (int i = 0; i < engines.length; ++i) {
 				final ITestingEngine engine = engines[i];
 				if (engineId.equals(engine.getId())) {
