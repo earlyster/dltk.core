@@ -37,17 +37,21 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			this.valid = true;
 		}
 
-		@SuppressWarnings("unchecked")
 		public synchronized E get() {
 			if (instance != null) {
 				return instance;
 			} else if (!valid) {
 				return null;
 			}
+			instance = create();
+			return instance;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected E create() {
 			try {
-				instance = (E) configurationElement
+				return (E) configurationElement
 						.createExecutableExtension(manager.classAttr);
-				return instance;
 			} catch (CoreException e) {
 				valid = false;
 				manager.remove(this);
