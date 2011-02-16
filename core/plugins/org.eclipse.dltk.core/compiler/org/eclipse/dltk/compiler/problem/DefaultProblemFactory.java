@@ -16,18 +16,25 @@ import org.eclipse.dltk.core.DLTKCore;
 
 public class DefaultProblemFactory implements IProblemFactory {
 
-	public String getProblemMarker() {
-		return DefaultProblem.MARKER_TYPE_PROBLEM;
+	public String getMarkerType(IProblem problem) {
+		if (problem.getID() instanceof IProblemIdentifierExtension) {
+			return ((IProblemIdentifierExtension) problem.getID())
+					.getMarkerType();
+		}
+		return problem.isTask() ? getTaskMarkerType() : getProblemMarkerType();
 	}
 
-	public String getTaskMarker() {
+	protected String getProblemMarkerType() {
+		return DefaultProblem.MARKER_TYPE_TASK;
+	}
+
+	protected String getTaskMarkerType() {
 		return DefaultProblem.MARKER_TYPE_TASK;
 	}
 
 	public IMarker createMarker(IResource resource, IProblem problem)
 			throws CoreException {
-		final String markerType = problem.isTask() ? getTaskMarker()
-				: getProblemMarker();
+		final String markerType = getMarkerType(problem);
 		return resource.createMarker(markerType);
 	}
 

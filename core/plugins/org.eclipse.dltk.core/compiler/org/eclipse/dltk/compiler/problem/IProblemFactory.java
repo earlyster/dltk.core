@@ -26,12 +26,7 @@ public interface IProblemFactory {
 	/**
 	 * @since 3.0
 	 */
-	String getProblemMarker();
-
-	/**
-	 * @since 3.0
-	 */
-	String getTaskMarker();
+	String getMarkerType(IProblem problem);
 
 	/**
 	 * @param resource
