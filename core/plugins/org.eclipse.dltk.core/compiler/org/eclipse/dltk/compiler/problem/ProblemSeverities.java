@@ -17,4 +17,5 @@ public final class ProblemSeverities {
 	public static final ProblemSeverity Ignore = ProblemSeverity.IGNORE;
 	public static final ProblemSeverity Warning = ProblemSeverity.WARNING;
 	public static final ProblemSeverity Error = ProblemSeverity.ERROR;
+	public static final ProblemSeverity Info = ProblemSeverity.INFO;
 }
