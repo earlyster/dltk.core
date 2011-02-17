@@ -304,7 +304,7 @@ public class DefaultProblem extends CategorizedProblem {
 	 * @return boolean
 	 */
 	public boolean isError() {
-		return this.severity == ProblemSeverities.Error;
+		return this.severity == ProblemSeverity.ERROR;
 	}
 
 	/*
@@ -313,7 +313,7 @@ public class DefaultProblem extends CategorizedProblem {
 	 * @return boolean
 	 */
 	public boolean isWarning() {
-		return this.severity == ProblemSeverities.Warning;
+		return this.severity == ProblemSeverity.WARNING;
 	}
 
 	public void setOriginatingFileName(String fileName) {

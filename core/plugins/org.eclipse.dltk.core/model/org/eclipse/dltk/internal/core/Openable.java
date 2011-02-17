@@ -29,7 +29,7 @@ import org.eclipse.dltk.codeassist.ISelectionRequestor;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
-import org.eclipse.dltk.compiler.problem.ProblemSeverities;
+import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.eclipse.dltk.core.BufferChangedEvent;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
@@ -543,7 +543,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			Thread.interrupted();
 			requestor.completionFailure(new DefaultProblem(
 					"Compution of proposals is to long. Please try again. ",
-					IProblemIdentifier.NULL, null, ProblemSeverities.Warning,
+					IProblemIdentifier.NULL, null, ProblemSeverity.WARNING,
 					0, 0, 0));
 			requestor.clear();
 		}
