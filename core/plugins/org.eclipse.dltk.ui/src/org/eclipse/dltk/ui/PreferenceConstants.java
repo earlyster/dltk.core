@@ -445,7 +445,7 @@ public class PreferenceConstants {
 				false);
 		store.setDefault(
 				PreferenceConstants.CODEASSIST_CATEGORY_ORDER,
-				"org.eclipse.dltk.ui.spellingProposalCategory:65545\0org.eclipse.dltk.ui.scriptTypeProposalCategory:65540\0org.eclipse.dltk.ui.scriptNoTypeProposalCategory:65539\0org.eclipse.dltk.ui.textProposalCategory:65541\0org.eclipse.dltk.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
+				"org.eclipse.dltk.javascript.ui.javascriptDocProposalCategory:65546\0org.eclipse.dltk.ui.spellingProposalCategory:65545\0org.eclipse.dltk.ui.scriptTypeProposalCategory:65540\0org.eclipse.dltk.ui.scriptNoTypeProposalCategory:65539\0org.eclipse.dltk.ui.textProposalCategory:65541\0org.eclipse.dltk.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER,
 				"org.eclipse.dltk.ui.RelevanceSorter"); //$NON-NLS-1$
