@@ -82,11 +82,19 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 	 * @seeorg.eclipse.jface.text.contentassist.IContentAssistProcessor#
 	 * getContextInformationValidator()
 	 */
+	// should be final? breaks api?
 	public IContextInformationValidator getContextInformationValidator() {
 		if (fValidator == null) {
-			fValidator = new ScriptParameterListValidator();
+			fValidator = createContextInformationValidator();
 		}
 		return fValidator;
+	}
+
+	/**
+	 * 
+	 */
+	protected IContextInformationValidator createContextInformationValidator() {
+		return new ScriptParameterListValidator();
 	}
 
 	@Override
