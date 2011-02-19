@@ -287,7 +287,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		Set<ICompletionProposal> proposalSet = new HashSet<ICompletionProposal>();
 		List<CompletionProposalCategory> providers = getCategories();
 		for (CompletionProposalCategory cat : providers) {
-			@SuppressWarnings("unchecked")
 			List<ICompletionProposal> computed = cat
 					.computeCompletionProposals(context, fPartition,
 							new SubProgressMonitor(monitor, 1));
@@ -355,7 +354,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 		List<CompletionProposalCategory> providers = getCategories();
 		for (CompletionProposalCategory cat : providers) {
-			@SuppressWarnings("unchecked")
 			List<IContextInformation> computed = cat.computeContextInformation(
 					context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
