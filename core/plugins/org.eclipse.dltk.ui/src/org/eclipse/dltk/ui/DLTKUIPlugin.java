@@ -307,11 +307,18 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	private IWorkbenchPage internalGetActivePage() {
-		IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
+		final IWorkbench workbench;
+		try {
+			workbench = getWorkbench();
+		} catch (IllegalStateException e) {
+			// Workbench has not been created yet - can happen in tests
+			return null;
+		}
+		final IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
 		if (window == null) {
 			return null;
 		}
-		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		return workbench.getActiveWorkbenchWindow().getActivePage();
 	}
 
 	/**
@@ -727,8 +734,11 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 							ExternalProjectFragment fragment = (ExternalProjectFragment) element;
 
 							try {
-								if (filePath.removeLastSegments(1).toFile()
-										.getCanonicalPath().startsWith(
+								if (filePath
+										.removeLastSegments(1)
+										.toFile()
+										.getCanonicalPath()
+										.startsWith(
 												fragment.getPath().toFile()
 														.getCanonicalPath()) == true) {
 									IPath folderPath = new Path(filePath
