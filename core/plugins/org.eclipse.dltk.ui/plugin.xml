@@ -130,6 +130,7 @@
             id="org.eclipse.dltk.ui.ExternalSourceModuleEditorInputFactory">
       </factory>
    </extension>
+<!--
  <extension point="org.eclipse.ui.ide.markerSupport">
       <markerTypeCategory name="%markerCategory.problem">
          <markerTypeReference id="org.eclipse.dltk.core.problem"/>
@@ -199,7 +200,7 @@
      <markerAttributeGrouping markerType="org.eclipse.dltk.core.buildpath_problem"
         defaultGroupingEntry="org.eclipse.dltk.ui.category.buildpath"/>
    </extension> 
-
+-->
 	<extension
 	       point="org.eclipse.ui.views">
 		<category
