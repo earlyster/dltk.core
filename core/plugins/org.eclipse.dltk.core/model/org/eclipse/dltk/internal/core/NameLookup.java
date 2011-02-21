@@ -332,7 +332,7 @@ public class NameLookup {
 			} else {
 				IProjectFragment[] roots = (IProjectFragment[]) value;
 				for (int i = 0; i < roots.length; i++) {
-					IProjectFragment root = (IProjectFragment) roots[i];
+					IProjectFragment root = roots[i];
 					ISourceModule cu = findSourceModule(pkgName, cuName, root);
 					if (cu != null)
 						return cu;
@@ -539,8 +539,7 @@ public class NameLookup {
 				IProjectFragment[] roots = (IProjectFragment[]) value;
 				IScriptFolder[] result = new IScriptFolder[roots.length];
 				for (int i = 0; i < roots.length; i++) {
-					result[i] = ((IProjectFragment) roots[i])
-							.getScriptFolder(toPath(splittedName));
+					result[i] = roots[i].getScriptFolder(toPath(splittedName));
 				}
 				return result;
 			}
@@ -865,7 +864,7 @@ public class NameLookup {
 						for (int j = 0, length2 = roots.length; j < length2; j++) {
 							if (requestor.isCanceled())
 								return;
-							IProjectFragment root = (IProjectFragment) roots[j];
+							IProjectFragment root = roots[j];
 							requestor.acceptScriptFolder(root
 									.getScriptFolder(toPath(pkgName)));
 						}
@@ -884,7 +883,7 @@ public class NameLookup {
 					for (int i = 0, length = roots.length; i < length; i++) {
 						if (requestor.isCanceled())
 							return;
-						IProjectFragment root = (IProjectFragment) roots[i];
+						IProjectFragment root = roots[i];
 						requestor.acceptScriptFolder(root
 								.getScriptFolder(toPath(splittedName)));
 					}
