@@ -394,13 +394,16 @@ public class NameLookup {
 				.findMember(path);
 		if (possibleFragment == null) {
 			// external jar
+			final boolean isFullPath = EnvironmentPathUtils.isFull(path);
 			for (int i = 0; i < this.projectFragments.length; i++) {
 				IProjectFragment root = this.projectFragments[i];
 				if (!root.isExternal() || root.isBuiltin()) {
 					continue;
 				}
-				IPath rootPath = EnvironmentPathUtils.getLocalPath(root
-						.getPath());
+				IPath rootPath = root.getPath();
+				if (!isFullPath) {
+					rootPath = EnvironmentPathUtils.getLocalPath(rootPath);
+				}
 				int matchingCount = rootPath.matchingFirstSegments(path);
 				if (matchingCount != 0
 						&& equals(rootPath.getDevice(), path.getDevice())) {
@@ -444,14 +447,12 @@ public class NameLookup {
 						}
 						if (defaultPkgRoot instanceof IProjectFragment
 								&& defaultPkgRoot.equals(root))
-							return ((IProjectFragment) root)
-									.getScriptFolder(Path.EMPTY);
+							return root.getScriptFolder(Path.EMPTY);
 						else {
 							IProjectFragment[] roots = (IProjectFragment[]) defaultPkgRoot;
 							for (int i = 0; i < roots.length; i++) {
 								if (roots[i].equals(root)) {
-									return ((IProjectFragment) root)
-											.getScriptFolder(Path.EMPTY);
+									return root.getScriptFolder(Path.EMPTY);
 								}
 							}
 						}
