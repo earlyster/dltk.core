@@ -42,7 +42,7 @@ public class DocumentationUtils {
 		return null;
 	}
 
-	private static String readAll(Reader rd) {
+	public static String readAll(Reader rd) {
 		final StringBuilder buffer = new StringBuilder();
 		char[] readBuffer = new char[2048];
 		try {

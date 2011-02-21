@@ -12,20 +12,16 @@ package org.eclipse.dltk.ui.documentation;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.utils.AdaptUtils;
+import org.eclipse.dltk.utils.NatureExtensionManager;
 
 /**
  * Helper needed to get access to script documentation.
@@ -36,61 +32,41 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
  */
 public class ScriptDocumentationAccess {
 	private static final String DOCUMENTATION_PROVIDERS_EXTENSION_POINT = "org.eclipse.dltk.ui.scriptDocumentationProviders"; //$NON-NLS-1$
-	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
-	private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
-	private static IScriptDocumentationProvider[] documentationProviders = null;
-	private static Map<IScriptDocumentationProvider, String> providerNatures = new HashMap<IScriptDocumentationProvider, String>();
+
+	private static final NatureExtensionManager<IScriptDocumentationProvider> providers = new NatureExtensionManager<IScriptDocumentationProvider>(
+			DOCUMENTATION_PROVIDERS_EXTENSION_POINT,
+			IScriptDocumentationProvider.class) {
+		@Override
+		protected void initializeDescriptors(java.util.List<Object> descriptors) {
+			Collections.sort(descriptors, new Comparator<Object>() {
+				int priority(IConfigurationElement element) {
+					try {
+						return Integer.parseInt(element
+								.getAttribute("priority"));
+					} catch (NumberFormatException e) {
+						return 0;
+					}
+				}
+
+				public int compare(Object o1, Object o2) {
+					return priority((IConfigurationElement) o2)
+							- priority((IConfigurationElement) o1);
+				}
+			});
+		}
+
+		@Override
+		protected IScriptDocumentationProvider[] createEmptyResult() {
+			return new IScriptDocumentationProvider[0];
+		}
+	};
 
 	private ScriptDocumentationAccess() {
 		// do not instantiate
 	}
 
-	/**
-	 * Creates {@link IScriptDocumentationProvider} objects from configuration
-	 * elements.
-	 */
-	private static IScriptDocumentationProvider[] createProviders(
-			IConfigurationElement[] elements) {
-		List<IScriptDocumentationProvider> result = new ArrayList<IScriptDocumentationProvider>(
-				elements.length);
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement element = elements[i];
-			try {
-				IScriptDocumentationProvider pr = (IScriptDocumentationProvider) element
-						.createExecutableExtension(ATTR_CLASS);
-				result.add(pr);
-				providerNatures.put(pr, element.getAttribute(ATTR_NATURE));
-			} catch (CoreException e) {
-				DLTKUIPlugin.log(e);
-			}
-		}
-		return result.toArray(new IScriptDocumentationProvider[result.size()]);
-	}
-
-	/**
-	 * Returns all contributed documentation documentationProviders.
-	 */
-	private static IScriptDocumentationProvider[] getContributedProviders() {
-		if (documentationProviders == null) {
-			IExtensionRegistry registry = Platform.getExtensionRegistry();
-			IConfigurationElement[] elements = registry
-					.getConfigurationElementsFor(DOCUMENTATION_PROVIDERS_EXTENSION_POINT);
-			providerNatures.clear();
-			documentationProviders = createProviders(elements);
-		}
-		return documentationProviders;
-	}
-
-	private static List<IScriptDocumentationProvider> getProviders(String nature) {
-		final List<IScriptDocumentationProvider> result = new ArrayList<IScriptDocumentationProvider>();
-		final IScriptDocumentationProvider[] providers = getContributedProviders();
-		for (IScriptDocumentationProvider p : providers) {
-			final String pNature = providerNatures.get(p);
-			if (pNature == null || !pNature.equals(nature))
-				continue;
-			result.add(p);
-		}
-		return result;
+	private static IScriptDocumentationProvider[] getProviders(String nature) {
+		return providers.getInstances(nature);
 	}
 
 	private static interface Operation {
@@ -194,13 +170,32 @@ public class ScriptDocumentationAccess {
 		return merge(nature, new Operation2() {
 			public IDocumentationResponse getInfo(
 					IScriptDocumentationProvider provider) {
-				if (member instanceof IMember) {
-					final IMember m = (IMember) member;
-					return DocumentationUtils.wrap(member, context, provider
-							.getInfo(m, true, true));
-				} else if (provider instanceof IScriptDocumentationProviderExtension2) {
+				if (provider instanceof IScriptDocumentationProviderExtension2) {
 					final IScriptDocumentationProviderExtension2 ext = (IScriptDocumentationProviderExtension2) provider;
-					return ext.getDocumentationFor(member);
+					final IDocumentationResponse response = ext
+							.getDocumentationFor(member);
+					if (response != null && response.getTitle() == null) {
+						final IScriptDocumentationTitleAdapter titleAdapter = AdaptUtils
+								.getAdapter(context,
+										IScriptDocumentationTitleAdapter.class);
+						if (titleAdapter != null) {
+							final String title = titleAdapter.getTitle(member);
+							if (title != null && title.length() != 0) {
+								return new DocumentationResponseDelegate(
+										response) {
+									@Override
+									public String getTitle() {
+										return title;
+									}
+								};
+							}
+						}
+					}
+					return response;
+				} else if (member instanceof IMember) {
+					final IMember m = (IMember) member;
+					return DocumentationUtils.wrap(member, context,
+							provider.getInfo(m, true, true));
 				} else {
 					return null;
 				}
