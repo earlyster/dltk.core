@@ -140,12 +140,9 @@ public class NameLookup {
 		long start = -1;
 		if (VERBOSE) {
 			Util.verbose(" BUILDING NameLoopkup"); //$NON-NLS-1$
-			Util
-					.verbose(" -> pkg roots size: " + (ProjectFragments == null ? 0 : ProjectFragments.length)); //$NON-NLS-1$
-			Util
-					.verbose(" -> pkgs size: " + (ScriptFolders == null ? 0 : ScriptFolders.size())); //$NON-NLS-1$
-			Util
-					.verbose(" -> working copy size: " + (workingCopies == null ? 0 : workingCopies.length)); //$NON-NLS-1$
+			Util.verbose(" -> pkg roots size: " + (ProjectFragments == null ? 0 : ProjectFragments.length)); //$NON-NLS-1$
+			Util.verbose(" -> pkgs size: " + (ScriptFolders == null ? 0 : ScriptFolders.size())); //$NON-NLS-1$
+			Util.verbose(" -> working copy size: " + (workingCopies == null ? 0 : workingCopies.length)); //$NON-NLS-1$
 			start = System.currentTimeMillis();
 		}
 		this.projectFragments = ProjectFragments;
@@ -191,12 +188,11 @@ public class NameLookup {
 							} else {
 								IType[] existingTypes = (IType[]) existing;
 								int existingTypeLength = existingTypes.length;
-								System
-										.arraycopy(
-												existingTypes,
-												0,
-												existingTypes = new IType[existingTypeLength + 1],
-												0, existingTypeLength);
+								System.arraycopy(
+										existingTypes,
+										0,
+										existingTypes = new IType[existingTypeLength + 1],
+										0, existingTypeLength);
 								existingTypes[existingTypeLength] = type;
 								typeMap.put(typeName, existingTypes);
 							}
@@ -236,12 +232,11 @@ public class NameLookup {
 							}
 						}
 						if (containsRoot) {
-							System
-									.arraycopy(
-											roots,
-											0,
-											roots = new IProjectFragment[rootLength + 1],
-											0, rootLength);
+							System.arraycopy(
+									roots,
+									0,
+									roots = new IProjectFragment[rootLength + 1],
+									0, rootLength);
 							roots[rootLength] = root;
 							this.scriptFolders.put(pkgName, roots);
 						}
@@ -252,8 +247,7 @@ public class NameLookup {
 
 		this.rootToResolvedEntries = rootToResolvedEntries;
 		if (VERBOSE) {
-			Util
-					.verbose(" -> spent: " + (System.currentTimeMillis() - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+			Util.verbose(" -> spent: " + (System.currentTimeMillis() - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -643,8 +637,8 @@ public class NameLookup {
 			if (accessRuleSet != null) {
 				// TODO (philippe) improve char[] <-> String conversions to
 				// avoid performing them on the fly
-				char[][] packageChars = CharOperation.splitOn('.', packageName
-						.toCharArray());
+				char[][] packageChars = CharOperation.splitOn('.',
+						packageName.toCharArray());
 				char[] typeChars = typeName.toCharArray();
 				accessRestriction = accessRuleSet
 						.getViolatedRestriction(CharOperation.concatWith(
@@ -1021,8 +1015,8 @@ public class NameLookup {
 						if (requestor.isCanceled())
 							return;
 						IModelElement cu = compilationUnits[i];
-						if (!cu.getElementName().toLowerCase().startsWith(
-								cuPrefix))
+						if (!cu.getElementName().toLowerCase()
+								.startsWith(cuPrefix))
 							continue;
 						try {
 							IType[] types = ((ISourceModule) cu).getTypes();
@@ -1040,8 +1034,7 @@ public class NameLookup {
 		} finally {
 			if (VERBOSE)
 				this.timeSpentInSeekTypesInSourcePackage += System
-						.currentTimeMillis()
-						- start;
+						.currentTimeMillis() - start;
 		}
 	}
 
@@ -1072,11 +1065,11 @@ public class NameLookup {
 			if (requestor.isCanceled())
 				return false;
 			IType memberType = types[i];
-			if (memberType.getElementName().toLowerCase().startsWith(
-					memberPrefix))
+			if (memberType.getElementName().toLowerCase()
+					.startsWith(memberPrefix))
 				if (isMemberTypePrefix) {
-					String subPrefix = prefix.substring(firstDot + 1, prefix
-							.length());
+					String subPrefix = prefix.substring(firstDot + 1,
+							prefix.length());
 					return seekTypesInType(subPrefix, subPrefix.indexOf('.'),
 							memberType, requestor, acceptFlags);
 				} else {
