@@ -96,6 +96,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -1869,15 +1870,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		IInformationControlCreator informationControlCreator = new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
 				boolean cutDown = false;
-				int style = cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
+				//int style = cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
 				// return new DefaultInformationControl(shell, SWT.RESIZE
 				// | SWT.TOOL, style, new HTMLTextPresenter(cutDown));
 				if (BrowserInformationControl.isAvailable(shell))
-					return new BrowserInformationControl(shell, SWT.RESIZE
-							| SWT.TOOL, style);
+					return new BrowserInformationControl(shell,
+							JFaceResources.DIALOG_FONT, true);
 				else
-					return new DefaultInformationControl(shell, SWT.RESIZE
-							| SWT.TOOL, style, new HTMLTextPresenter(cutDown));
+					return new DefaultInformationControl(shell,
+							new HTMLTextPresenter(cutDown));
 			}
 		};
 

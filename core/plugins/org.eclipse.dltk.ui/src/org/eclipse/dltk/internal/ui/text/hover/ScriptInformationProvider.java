@@ -13,6 +13,7 @@ import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
 import org.eclipse.dltk.ui.text.hover.IScriptEditorTextHover;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
@@ -21,7 +22,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
@@ -129,14 +129,12 @@ public class ScriptInformationProvider implements IInformationProvider,
 
 				public IInformationControl doCreateInformationControl(
 						Shell parent) {
-					int shellStyle = SWT.RESIZE | SWT.TOOL;
-					int style = SWT.V_SCROLL | SWT.H_SCROLL;
 					if (BrowserInformationControl.isAvailable(parent))
 						return new BrowserInformationControl(parent,
-								shellStyle, style);
+								JFaceResources.DIALOG_FONT, true);
 					else
 						return new DefaultInformationControl(parent,
-								shellStyle, style, new HTMLTextPresenter(false));
+								new HTMLTextPresenter(false));
 				}
 			};
 		}
