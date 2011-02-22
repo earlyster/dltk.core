@@ -1248,6 +1248,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		case IModelElement.FIELD:
 		case IModelElement.METHOD:
 			IType declaringClass = ((IMember) parent).getDeclaringType();
+			if (declaringClass == null)
+				return null;
 			return CharOperation.arrayConcat(
 					enclosingTypeNames(declaringClass), new char[][] {
 							declaringClass.getElementName().toCharArray(),
