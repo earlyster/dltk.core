@@ -107,7 +107,7 @@ public class CoreUtility {
 	private static final class BuildJob extends Job {
 		private final IProject fProject;
 
-		private BuildJob(String name, IProject project) {
+		public BuildJob(String name, IProject project) {
 			super(name);
 			fProject = project;
 		}
