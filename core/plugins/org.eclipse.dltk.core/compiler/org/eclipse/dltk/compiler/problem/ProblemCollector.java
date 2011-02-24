@@ -74,6 +74,11 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return problems.toString();
+	}
+
 	protected static class TaskInfo extends CategorizedProblem {
 
 		private final String message;
