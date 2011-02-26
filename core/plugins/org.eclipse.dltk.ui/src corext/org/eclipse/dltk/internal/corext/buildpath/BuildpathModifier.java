@@ -1498,7 +1498,7 @@ public class BuildpathModifier {
 			IPath[] excludedPath = (IPath[]) entry
 					.getAttribute(BPListElement.EXCLUSION);
 			IPath[] newExcludedPath = new IPath[excludedPath.length + 1];
-			name = completeName(project, name);
+			name = completeName(fullPath, name);
 			IPath path = new Path(name);
 			if (!contains(path, excludedPath,
 					new SubProgressMonitor(monitor, 2))) {
@@ -1920,10 +1920,13 @@ public class BuildpathModifier {
 	/**
 	 * Add a '/' at the end of the name if it does not end with extension.
 	 * 
+	 * XXX this method does nothing, use {@link #completeName(IPath, String)}
+	 * 
 	 * @param name
 	 *            append '/' at the end if necessary
 	 * @return modified string
 	 */
+	@Deprecated
 	private static String completeName(String name) {
 		if (DLTKCore.DEBUG) {
 			System.err.println("Add Buildpath name completion here"); //$NON-NLS-1$
@@ -1939,16 +1942,41 @@ public class BuildpathModifier {
 	/**
 	 * Add a '/' at the end of the name if it does not end with extension.
 	 * 
+	 * XXX this method incorrectly finds from project, use
+	 * {@link #completeName(IPath, String)}
+	 * 
 	 * @param project
 	 *            - the project containing the resource
 	 * @param name
 	 *            - name of the resource append '/' at the end if necessary
 	 * @return modified string
 	 */
+	@Deprecated
 	private static String completeName(IScriptProject project, String name) {
 		// Try to locate the resource in the workspace
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot()
 				.findMember(project.getElementName() + "/" + name); //$NON-NLS-1$
+		// If the resource is a folder and does not end with "/" add it
+		if (resource != null && resource.getType() == IResource.FOLDER
+				&& !name.endsWith("/")) { //$NON-NLS-1$
+			name = name + "/"; //$NON-NLS-1$
+		}
+		return name;
+	}
+
+	/**
+	 * Add a '/' at the end of the name if it maps to a folder.
+	 * 
+	 * @param fullPath
+	 *            - the project containing the resource
+	 * @param name
+	 *            - name of the resource append '/' at the end if necessary
+	 * @return modified string
+	 */
+	private static String completeName(IPath fullPath, String name) {
+		// Try to locate the resource in the workspace
+		IResource resource = ResourcesPlugin.getWorkspace().getRoot()
+				.findMember(fullPath); //$NON-NLS-1$
 		// If the resource is a folder and does not end with "/" add it
 		if (resource != null && resource.getType() == IResource.FOLDER
 				&& !name.endsWith("/")) { //$NON-NLS-1$
