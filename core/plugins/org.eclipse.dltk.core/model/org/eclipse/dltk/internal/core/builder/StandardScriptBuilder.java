@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,6 +68,11 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			buildNatureModules(change.getScriptProject(),
 					change.getBuildType(),
 					change.getSourceModules(IProjectChange.DEFAULT), monitor);
+		}
+		final List<IFile> resourceChanges = change
+				.getResources(IProjectChange.DEFAULT);
+		if (!resourceChanges.isEmpty()) {
+			buildResources(resourceChanges, new SubProgressMonitor(monitor, 10));
 		}
 	}
 
@@ -246,26 +251,24 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		}
 	}
 
-	public IStatus buildResources(IScriptProject project,
-			List<IResource> resources, IProgressMonitor monitor, int buildType) {
-		final IProgressMonitor sub = new SubProgressMonitor(monitor,
-				resources.size() * 2);
+	protected IStatus buildResources(List<IFile> resources,
+			IProgressMonitor monitor) {
 		try {
-			sub.beginTask(Util.EMPTY_STRING, resources.size());
+			monitor.beginTask(Util.EMPTY_STRING, resources.size());
 			try {
-				for (Iterator<IResource> i = resources.iterator(); i.hasNext();) {
-					final IResource resource = i.next();
-					final String template = Messages.ValidatorBuilder_clearingResourceMarkers;
-					sub.subTask(NLS.bind(template, resource.getName()));
+				for (final IFile resource : resources) {
+					monitor.subTask(NLS.bind(
+							Messages.ValidatorBuilder_clearingResourceMarkers,
+							resource.getName()));
 					problemFactory.deleteMarkers(resource);
-					sub.worked(1);
+					monitor.worked(1);
 				}
 			} catch (CoreException e) {
 				final String msg = Messages.ValidatorBuilder_errorDeleteResourceMarkers;
 				DLTKCore.error(msg, e);
 			}
 		} finally {
-			sub.done();
+			monitor.done();
 		}
 		return Status.OK_STATUS;
 	}
