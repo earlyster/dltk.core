@@ -345,8 +345,8 @@ public class BuildpathModifier {
 			throws CoreException {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
-		IBuildpathEntry[] selected = query.doQuery(project, project
-				.getRawBuildpath());
+		IBuildpathEntry[] selected = query.doQuery(project,
+				project.getRawBuildpath());
 		List addedEntries = new ArrayList();
 		try {
 			monitor.beginTask(
@@ -444,10 +444,9 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_RemoveFromBuildpath,
-							elements.size() + 1);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_RemoveFromBuildpath,
+					elements.size() + 1);
 			List existingEntries = getExistingEntries(project);
 			List resultElements = new ArrayList();
 
@@ -502,9 +501,9 @@ public class BuildpathModifier {
 					} else {
 						archiveRemoved = true;
 						BuildPathContainer container = (BuildPathContainer) element;
-						existingEntries.remove(BPListElement
-								.createFromExisting(container
-										.getBuildpathEntry(), project));
+						existingEntries
+								.remove(BPListElement.createFromExisting(
+										container.getBuildpathEntry(), project));
 					}
 				}
 				if (res != null) {
@@ -661,10 +660,9 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_RemoveInclusion,
-							10);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_RemoveInclusion,
+					10);
 
 			List existingEntries = getExistingEntries(project);
 			for (int i = 0; i < scriptElements.size(); i++) {
@@ -760,19 +758,18 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_EditInclusionExclusionFilters,
-							4);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_EditInclusionExclusionFilters,
+					4);
 			List existingEntries = getExistingEntries(project);
 			BPListElement entry = getListElement(element.getPath(),
 					existingEntries);
 			if (entry != null) {
 				if (query.doQuery(entry, false)) {
-					entry.setAttribute(BPListElement.INCLUSION, query
-							.getInclusionPattern());
-					entry.setAttribute(BPListElement.EXCLUSION, query
-							.getExclusionPattern());
+					entry.setAttribute(BPListElement.INCLUSION,
+							query.getInclusionPattern());
+					entry.setAttribute(BPListElement.EXCLUSION,
+							query.getExclusionPattern());
 					updateBuildpath(existingEntries, project,
 							new SubProgressMonitor(monitor, 4));
 					return element;
@@ -891,8 +888,8 @@ public class BuildpathModifier {
 					&& element.getEntryKind() == entry.getEntryKind())
 				return (BPListElement) elements.get(i);
 		}
-		BPListElement newElement = BPListElement.createFromExisting(entry, root
-				.getScriptProject());
+		BPListElement newElement = BPListElement.createFromExisting(entry,
+				root.getScriptProject());
 		elements.add(newElement);
 		return newElement;
 	}
@@ -1014,18 +1011,18 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_ContainsPath,
-							4);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_ContainsPath, 4);
 			IProjectFragment root = (IProjectFragment) selection
 					.getAncestor(IModelElement.PROJECT_FRAGMENT);
 			IBuildpathEntry entry = root.getRawBuildpathEntry();
 			if (entry == null)
 				return false;
-			return contains(selection.getPath().removeFirstSegments(
-					root.getPath().segmentCount()), entry
-					.getInclusionPatterns(), new SubProgressMonitor(monitor, 2));
+			return contains(
+					selection.getPath().removeFirstSegments(
+							root.getPath().segmentCount()),
+					entry.getInclusionPatterns(), new SubProgressMonitor(
+							monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -1039,8 +1036,7 @@ public class BuildpathModifier {
 	 * @param project
 	 *            the script project
 	 * @return <code>true</code> if the resource is excluded, <code>
-	 * false</code>
-	 *         otherwise
+	 * false</code> otherwise
 	 * @throws ModelException
 	 */
 	public static boolean isExcluded(IResource resource, IScriptProject project)
@@ -1052,8 +1048,8 @@ public class BuildpathModifier {
 		fragmentName = completeName(project, fragmentName);
 		IBuildpathEntry entry = root.getRawBuildpathEntry();
 		return entry != null
-				&& contains(new Path(fragmentName), entry
-						.getExclusionPatterns(), null);
+				&& contains(new Path(fragmentName),
+						entry.getExclusionPatterns(), null);
 	}
 
 	/**
@@ -1162,10 +1158,9 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_ExamineInputFilters,
-							4);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_ExamineInputFilters,
+					4);
 			IProjectFragment root = getFragmentRoot(resource, project,
 					new SubProgressMonitor(monitor, 4));
 			if (root != null) {
@@ -1180,9 +1175,8 @@ public class BuildpathModifier {
 
 	/**
 	 * Check whether the input paramenter of type <code>
-	 * IProjectFragment</code> has
-	 * either it's inclusion or exclusion filter or both set (that means they
-	 * are not empty).
+	 * IProjectFragment</code> has either it's inclusion or exclusion filter or
+	 * both set (that means they are not empty).
 	 * 
 	 * @param root
 	 *            the fragment root to be inspected
@@ -1340,10 +1334,9 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_RemoveFromBuildpath,
-							1);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_RemoveFromBuildpath,
+					1);
 			IBuildpathEntry entry = root.getRawBuildpathEntry();
 			BPListElement elem = BPListElement.createFromExisting(entry,
 					project);
@@ -1395,8 +1388,8 @@ public class BuildpathModifier {
 						hasChange = true;
 					}
 				}
-				element.setAttribute(BPListElement.EXCLUSION, exlusionList
-						.toArray(new IPath[exlusionList.size()]));
+				element.setAttribute(BPListElement.EXCLUSION,
+						exlusionList.toArray(new IPath[exlusionList.size()]));
 			}
 
 			IPath[] inclusion = (IPath[]) element
@@ -1410,8 +1403,8 @@ public class BuildpathModifier {
 						hasChange = true;
 					}
 				}
-				element.setAttribute(BPListElement.INCLUSION, inclusionList
-						.toArray(new IPath[inclusionList.size()]));
+				element.setAttribute(BPListElement.INCLUSION,
+						inclusionList.toArray(new IPath[inclusionList.size()]));
 			}
 			if (hasChange) {
 				result.add(element);
@@ -1465,9 +1458,11 @@ public class BuildpathModifier {
 						includedPath.length);
 				newIncludedPath[includedPath.length] = relPath;
 				entry.setAttribute(BPListElement.INCLUSION, newIncludedPath);
-				entry.setAttribute(BPListElement.EXCLUSION, remove(relPath,
-						(IPath[]) entry.getAttribute(BPListElement.EXCLUSION),
-						new SubProgressMonitor(monitor, 2)));
+				entry.setAttribute(
+						BPListElement.EXCLUSION,
+						remove(relPath, (IPath[]) entry
+								.getAttribute(BPListElement.EXCLUSION),
+								new SubProgressMonitor(monitor, 2)));
 			}
 		} finally {
 			monitor.done();
@@ -1511,9 +1506,11 @@ public class BuildpathModifier {
 						excludedPath.length);
 				newExcludedPath[excludedPath.length] = path;
 				entry.setAttribute(BPListElement.EXCLUSION, newExcludedPath);
-				entry.setAttribute(BPListElement.INCLUSION, remove(path,
-						(IPath[]) entry.getAttribute(BPListElement.INCLUSION),
-						new SubProgressMonitor(monitor, 4)));
+				entry.setAttribute(
+						BPListElement.INCLUSION,
+						remove(path, (IPath[]) entry
+								.getAttribute(BPListElement.INCLUSION),
+								new SubProgressMonitor(monitor, 4)));
 			}
 			result = fullPath == null ? null : getResource(fullPath, project);
 		} finally {
@@ -1641,10 +1638,9 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_RemoveInclusion,
-							10);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_RemoveInclusion,
+					10);
 			String name = getName(scriptElement.getPath(), entry.getPath());
 
 			IPath[] includedPath = (IPath[]) entry
@@ -1685,15 +1681,15 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_RemoveExclusion,
-							10);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_RemoveExclusion,
+					10);
 			String name = getName(resource.getFullPath(), entry.getPath());
 			IPath[] excludedPath = (IPath[]) entry
 					.getAttribute(BPListElement.EXCLUSION);
-			IPath[] newExcludedPath = remove(new Path(completeName(project,
-					name)), excludedPath, new SubProgressMonitor(monitor, 3));
+			IPath[] newExcludedPath = remove(
+					new Path(completeName(project, name)), excludedPath,
+					new SubProgressMonitor(monitor, 3));
 			entry.setAttribute(BPListElement.EXCLUSION, newExcludedPath);
 		} finally {
 			monitor.done();
@@ -1720,10 +1716,8 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.BuildpathModifier_Monitor_ResetFilters,
-							3);
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_ResetFilters, 3);
 
 			List exclusionList = getFoldersOnBP(element.getPath(), project,
 					new SubProgressMonitor(monitor, 2));
@@ -1813,9 +1807,7 @@ public class BuildpathModifier {
 			if (!status.isOK())
 				throw new ModelException(status);
 
-			project
-					.setRawBuildpath(entries,
-							new SubProgressMonitor(monitor, 2));
+			project.setRawBuildpath(entries, new SubProgressMonitor(monitor, 2));
 			fireEvent(newEntries);
 		} finally {
 			monitor.done();
@@ -1834,9 +1826,7 @@ public class BuildpathModifier {
 			if (!status.isOK())
 				throw new ModelException(status);
 
-			project
-					.setRawBuildpath(entries,
-							new SubProgressMonitor(monitor, 2));
+			project.setRawBuildpath(entries, new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -1902,8 +1892,7 @@ public class BuildpathModifier {
 	 * @param monitor
 	 *            progress monitor, can be <code>null</code>
 	 * @return <code>true</code> if there is an occurrence, <code>
-	 * false</code>
-	 *         otherwise
+	 * false</code> otherwise
 	 */
 	private static boolean contains(IPath path, IPath[] paths,
 			IProgressMonitor monitor) {
@@ -1970,9 +1959,8 @@ public class BuildpathModifier {
 
 	/**
 	 * Removes <code>path</code> out of the set of given <code>
-	 * paths</code>. If the
-	 * path is not contained, then the initially provided array of paths is
-	 * returned.
+	 * paths</code>. If the path is not contained, then the initially provided
+	 * array of paths is returned.
 	 * 
 	 * Only the first occurrence will be removed.
 	 * 
@@ -2014,10 +2002,9 @@ public class BuildpathModifier {
 	 * prefix of those folders path entry, that is, all folders which are a
 	 * subfolder of <code>path</code>.
 	 * 
-	 * For example, if <code>path</code>=/MyProject/src 
-	 * then all folders having a path like /MyProject/src/*,
-	 * where * can be any valid string are returned if
-	 * they are also on the project's build path.
+	 * For example, if <code>path</code>=/MyProject/src then all folders having
+	 * a path like /MyProject/src/*, where * can be any valid string are
+	 * returned if they are also on the project's build path.
 	 * 
 	 * @param path
 	 *            absolute path
@@ -2045,7 +2032,8 @@ public class BuildpathModifier {
 	}
 
 	/**
-	 * Returns a string corresponding to the <code>path</code> with the <code>rootPath<code>'s number of segments
+	 * Returns a string corresponding to the <code>path</code> with the
+	 * <code>rootPath<code>'s number of segments
 	 * removed
 	 * 
 	 * @param path
@@ -2140,8 +2128,7 @@ public class BuildpathModifier {
 				&& !project.getPath().equals(path)) {
 			rootStatus
 					.setError(Messages
-							.format(
-									NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName,
+							.format(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName,
 									validate.getMessage()));
 			throw new CoreException(rootStatus);
 		} else {
