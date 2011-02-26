@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
@@ -39,6 +40,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelMarker;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IBuildChange;
@@ -153,6 +155,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						if (DEBUG)
 							log("Performing full build since deltas are missing after incremental request"); //$NON-NLS-1$
 						fullBuild(monitor);
+					} else if (isProjectConfigChange(delta)) {
+						if (DEBUG)
+							log("Performing full build since .project/.buildpath change"); //$NON-NLS-1$
+						fullBuild(monitor);
 					} else {
 						if (DEBUG)
 							log("Performing incremental build"); //$NON-NLS-1$
@@ -187,6 +193,26 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		monitor.done();
 		return requiredProjects;
+	}
+
+	private static boolean isProjectConfigChange(IResourceDelta projectDelta) {
+		final String[] filenames = {
+				IScriptProjectFilenames.BUILDPATH_FILENAME,
+				IScriptProjectFilenames.PROJECT_FILENAME };
+		for (String filename : filenames) {
+			final IResourceDelta delta = projectDelta.findMember(new Path(
+					filename));
+			if (delta != null) {
+				switch (delta.getKind()) {
+				case IResourceDelta.ADDED:
+				case IResourceDelta.REMOVED:
+					return true;
+				case IResourceDelta.CHANGED:
+					return (delta.getFlags() & (IResourceDelta.CONTENT | IResourceDelta.ENCODING)) != 0;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
