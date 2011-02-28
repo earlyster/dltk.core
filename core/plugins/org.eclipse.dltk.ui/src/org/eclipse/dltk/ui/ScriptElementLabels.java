@@ -680,7 +680,8 @@ public class ScriptElementLabels {
 		}
 		buf.append(module.getElementName());
 
-		if (getFlag(flags, CU_POST_QUALIFIED)) {
+		if (getFlag(flags, CU_POST_QUALIFIED)
+				&& !((IScriptFolder) module.getParent()).isRootFolder()) {
 			buf.append(CONCAT_STRING);
 			getScriptFolderLabel((IScriptFolder) module.getParent(), flags
 					& QUALIFIER_FLAGS, buf);

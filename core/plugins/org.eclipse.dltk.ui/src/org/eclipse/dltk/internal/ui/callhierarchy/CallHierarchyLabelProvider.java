@@ -28,7 +28,11 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 //	
 //    private static final long TEXTFLAGS= DEFAULT_TEXTFLAGS | FULLY_QUALIFIED | ScriptElementLabels.P_POST_QUALIFIED | ScriptElementLabels.P_COMPRESSED;// | ScriptElementLabels.M_FULLY_QUALIFIED | ScriptElementLabels.PREPEND_ROOT_PATH;
 //    private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | ScriptElementImageProvider.SMALL_ICONS;
-	private static final long TEXTFLAGS= DEFAULT_TEXTFLAGS | ScriptElementLabels.ALL_POST_QUALIFIED | ScriptElementLabels.P_COMPRESSED;
+	private static final long TEXTFLAGS = DEFAULT_TEXTFLAGS
+			| ScriptElementLabels.ALL_POST_QUALIFIED
+			| ScriptElementLabels.P_COMPRESSED
+			| ScriptElementLabels.APPEND_FILE
+			| ScriptElementLabels.APPEND_ROOT_PATH;
     private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | ScriptElementImageProvider.SMALL_ICONS;
 
     private ILabelDecorator fDecorator;
