@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.eclipse.dltk.core.tests.Skip;
 import org.eclipse.dltk.core.tests.TestSupport;
 
 /**
@@ -196,6 +197,20 @@ public abstract class SuiteOfTestCases extends TestCase {
 	 */
 	public boolean notYetImplemented() {
 		return TestSupport.notYetImplemented(this);
+	}
+
+	@Override
+	public void run(TestResult result) {
+		try {
+			final Method runMethod = getClass().getMethod(getName(),
+					(Class[]) null);
+			if (runMethod.getAnnotation(Skip.class) != null) {
+				return;
+			}
+		} catch (NoSuchMethodException e) {
+			// shouldn't happen, fall thru
+		}
+		super.run(result);
 	}
 
 }
