@@ -21,9 +21,15 @@ import org.eclipse.dltk.ui.preferences.PreferenceKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
@@ -84,8 +90,8 @@ public abstract class OptionsConfigurationBlock {
 			fDisabledProjectSettings = new HashMap<PreferenceKey, String>();
 			for (int i = 0; i < allKeys.length; i++) {
 				PreferenceKey curr = allKeys[i];
-				fDisabledProjectSettings.put(curr, curr.getStoredValue(
-						fLookupOrder, false, fManager));
+				fDisabledProjectSettings.put(curr,
+						curr.getStoredValue(fLookupOrder, false, fManager));
 			}
 		}
 
@@ -292,8 +298,8 @@ public abstract class OptionsConfigurationBlock {
 			IPreferenceChangeRebuildPrompt prompt = getPreferenceChangeRebuildPrompt(
 					fProject == null, changedOptions);
 			if (prompt != null) {
-				MessageDialog dialog = new MessageDialog(getShell(), prompt
-						.getTitle(), null, prompt.getMessage(),
+				MessageDialog dialog = new MessageDialog(getShell(),
+						prompt.getTitle(), null, prompt.getMessage(),
 						MessageDialog.QUESTION, new String[] {
 								IDialogConstants.YES_LABEL,
 								IDialogConstants.NO_LABEL,
@@ -383,4 +389,51 @@ public abstract class OptionsConfigurationBlock {
 	protected void statusChanged(IStatus status) {
 		fContext.statusChanged(status);
 	}
+
+	protected ExpandableComposite createStyleSection(Composite parent,
+			String label, int nColumns) {
+		ExpandableComposite excomposite = new ExpandableComposite(parent,
+				SWT.NONE, ExpandableComposite.TWISTIE
+						| ExpandableComposite.CLIENT_INDENT);
+		excomposite.setText(label);
+		excomposite.setExpanded(false);
+		excomposite.setFont(JFaceResources.getFontRegistry().getBold(
+				JFaceResources.DIALOG_FONT));
+		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL,
+				true, false, nColumns, 1));
+		excomposite.addExpansionListener(new ExpansionAdapter() {
+			public void expansionStateChanged(ExpansionEvent e) {
+				expandedStateChanged((ExpandableComposite) e.getSource());
+			}
+		});
+		// fExpandedComposites.add(excomposite);
+		makeScrollableCompositeAware(excomposite);
+		return excomposite;
+	}
+
+	private void makeScrollableCompositeAware(Control control) {
+		ScrolledPageContent parentScrolledComposite = getParentScrolledComposite(control);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.adaptChild(control);
+		}
+	}
+
+	protected ScrolledPageContent getParentScrolledComposite(Control control) {
+		Control parent = control.getParent();
+		while (!(parent instanceof ScrolledPageContent) && parent != null) {
+			parent = parent.getParent();
+		}
+		if (parent instanceof ScrolledPageContent) {
+			return (ScrolledPageContent) parent;
+		}
+		return null;
+	}
+
+	protected final void expandedStateChanged(ExpandableComposite expandable) {
+		ScrolledPageContent parentScrolledComposite = getParentScrolledComposite(expandable);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.reflow(true);
+		}
+	}
+
 }
