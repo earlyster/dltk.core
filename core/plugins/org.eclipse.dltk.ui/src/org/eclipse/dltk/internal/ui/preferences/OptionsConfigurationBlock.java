@@ -20,6 +20,7 @@ import org.eclipse.dltk.ui.preferences.IPreferenceChangeRebuildPrompt;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -406,9 +407,34 @@ public abstract class OptionsConfigurationBlock {
 				expandedStateChanged((ExpandableComposite) e.getSource());
 			}
 		});
-		// fExpandedComposites.add(excomposite);
+		fExpandedComposites.add(excomposite);
 		makeScrollableCompositeAware(excomposite);
 		return excomposite;
+	}
+
+	private List<ExpandableComposite> fExpandedComposites = new ArrayList<ExpandableComposite>();
+
+	private static final String SETTINGS_EXPANDED = "expanded"; //$NON-NLS-1$
+
+	protected void restoreSectionExpansionStates(IDialogSettings settings) {
+		for (int i = 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite excomposite = fExpandedComposites.get(i);
+			if (settings == null) {
+				excomposite.setExpanded(i == 0); // only expand the first node
+													// by default
+			} else {
+				excomposite.setExpanded(settings.getBoolean(SETTINGS_EXPANDED
+						+ String.valueOf(i)));
+			}
+		}
+	}
+
+	protected void storeSectionExpansionStates(IDialogSettings settings) {
+		for (int i = 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite curr = fExpandedComposites.get(i);
+			settings.put(SETTINGS_EXPANDED + String.valueOf(i),
+					curr.isExpanded());
+		}
 	}
 
 	private void makeScrollableCompositeAware(Control control) {
