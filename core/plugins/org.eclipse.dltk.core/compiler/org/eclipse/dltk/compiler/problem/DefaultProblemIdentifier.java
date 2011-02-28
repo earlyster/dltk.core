@@ -42,6 +42,11 @@ public enum DefaultProblemIdentifier implements IProblemIdentifier {
 			return "problemIdentifierFactory".equals(element.getName());
 		}
 
+		@Override
+		protected String getCategoryAttributeName() {
+			return "namespace";
+		}
+
 	}
 
 	private static synchronized Manager getManager() {
