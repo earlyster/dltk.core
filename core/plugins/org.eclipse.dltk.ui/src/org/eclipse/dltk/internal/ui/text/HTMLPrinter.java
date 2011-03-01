@@ -197,7 +197,7 @@ public class HTMLPrinter {
 	public static void addSmallHeader(StringBuffer buffer, String header) {
 		if (header != null) {
 			buffer.append("<h5>"); //$NON-NLS-1$
-			buffer.append(header);
+			buffer.append(TextUtils.escapeHTML(header));
 			buffer.append("</h5>"); //$NON-NLS-1$
 		}
 	}
