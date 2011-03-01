@@ -134,8 +134,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 				public int compare(Object a, Object b) {
 					IModelElementDelta deltaA = (IModelElementDelta) a;
 					IModelElementDelta deltaB = (IModelElementDelta) b;
-					return deltaA.getElement().getElementName().compareTo(
-							deltaB.getElement().getElementName());
+					return deltaA.getElement().getElementName()
+							.compareTo(deltaB.getElement().getElementName());
 				}
 			};
 			org.eclipse.dltk.internal.core.util.Util.sort(elementDeltas,
@@ -246,7 +246,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		}
 	}
 
-	protected IProject setUpProject(final String projectName)
+	public IProject setUpProject(final String projectName)
 			throws CoreException, IOException {
 		return setUpProjectTo(projectName, projectName);
 	}
@@ -282,8 +282,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	 */
 	public ISourceModule getSourceModule(String projectName, String rootPath,
 			IPath path) throws ModelException {
-		IScriptFolder folder = getScriptFolder(projectName, rootPath, path
-				.removeLastSegments(1));
+		IScriptFolder folder = getScriptFolder(projectName, rootPath,
+				path.removeLastSegments(1));
 		if (folder == null) {
 			return null;
 		}
@@ -377,6 +377,10 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		super.setUpSuite();
 
 		// ensure autobuilding is turned off
+		disableAutoBulid();
+	}
+
+	public static void disableAutoBulid() throws CoreException {
 		IWorkspaceDescription description = getWorkspace().getDescription();
 		if (description.isAutoBuilding()) {
 			description.setAutoBuilding(false);
@@ -608,7 +612,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		return folder;
 	}
 
-	protected void deleteProject(String projectName) throws CoreException {
+	public void deleteProject(String projectName) throws CoreException {
 		IProject project = this.getProject(projectName);
 		if (project.exists() && !project.isOpen()) { // force opening so that
 			// project can be
@@ -718,8 +722,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 			if (this.displayName)
 				System.out.println(getName() + " actual result is:");
 			System.out.println(org.eclipse.dltk.core.tests.util.Util
-					.displayString(actual, this.tabs)
-					+ this.endChar);
+					.displayString(actual, this.tabs) + this.endChar);
 		}
 		assertEquals(message, expected, actual);
 	}
@@ -729,8 +732,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 			public int compare(Object a, Object b) {
 				IResource resourceA = (IResource) a;
 				IResource resourceB = (IResource) b;
-				return resourceA.getFullPath().toString().compareTo(
-						resourceB.getFullPath().toString());
+				return resourceA.getFullPath().toString()
+						.compareTo(resourceB.getFullPath().toString());
 			}
 		};
 		Util.sort(resources, comparer);
@@ -867,8 +870,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 			return delta;
 		}
 		for (int i = 0; i < delta.getAffectedChildren().length; i++) {
-			IModelElementDelta child = searchForDelta(element, delta
-					.getAffectedChildren()[i]);
+			IModelElementDelta child = searchForDelta(element,
+					delta.getAffectedChildren()[i]);
 			if (child != null) {
 				return child;
 			}
@@ -882,8 +885,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	public void assertCreation(IModelElement[] newElements) {
 		for (int i = 0; i < newElements.length; i++) {
 			IModelElement newElement = newElements[i];
-			assertTrue("Element should be present after creation", newElement
-					.exists());
+			assertTrue("Element should be present after creation",
+					newElement.exists());
 		}
 	}
 
@@ -904,8 +907,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		IModelElement elementToDelete = null;
 		for (int i = 0; i < elementsToDelete.length; i++) {
 			elementToDelete = elementsToDelete[i];
-			assertTrue("Element must be present to be deleted", elementToDelete
-					.exists());
+			assertTrue("Element must be present to be deleted",
+					elementToDelete.exists());
 		}
 
 		getScriptModel().delete(elementsToDelete, false, null);
