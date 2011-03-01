@@ -45,6 +45,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IBuildChange;
 import org.eclipse.dltk.core.builder.IBuildState;
+import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -409,6 +410,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 				builder.build(buildChange, buildState, monitor);
 			}
+			updateExternalFolderLocations(buildChange);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
 		} catch (CoreException e) {
@@ -474,6 +476,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 				builder.build(buildChange, buildState, monitor);
 			}
+			updateExternalFolderLocations(buildChange);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
 		} catch (CoreException e) {
@@ -482,6 +485,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			resetBuilders(builders, monitor);
 			monitor.done();
 		}
+	}
+
+	private void updateExternalFolderLocations(IBuildChange buildChange)
+			throws CoreException {
+		this.lastState.externalFolderLocations.clear();
+		this.lastState.externalFolderLocations.addAll(buildChange
+				.getExternalPaths(IProjectChange.DEFAULT));
 	}
 
 	/**
