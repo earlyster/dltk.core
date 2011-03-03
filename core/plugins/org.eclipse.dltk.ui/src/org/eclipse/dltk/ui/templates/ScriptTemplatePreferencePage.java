@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.templates;
 
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -124,26 +125,92 @@ public abstract class ScriptTemplatePreferencePage extends
 
 		if (selection.size() == 1
 				&& selection.getFirstElement() instanceof TemplatePersistenceData) {
-			TemplatePersistenceData data = (TemplatePersistenceData) selection
+			final TemplatePersistenceData data = (TemplatePersistenceData) selection
 					.getFirstElement();
-			Template template = data.getTemplate();
-			String contextId = template.getContextTypeId();
-
-			IDocument doc = viewer.getDocument();
-
-			String start = null;
-			if ("rdoc".equals(contextId)) { //$NON-NLS-1$
-				start = "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
-			} else
-				start = ""; //$NON-NLS-1$
-
-			doc.set(start + template.getPattern());
-			int startLen = start.length();
-			viewer.setDocument(doc, startLen, doc.getLength() - startLen);
-
+			final Template template = data.getTemplate();
+			final IViewerInputUpdater updater = getViewerInputUpdater(viewer,
+					template);
+			if (updater != null) {
+				updater.updateInput(viewer, template);
+			} else {
+				final IDocument doc = viewer.getDocument();
+				doc.set(template.getPattern());
+				viewer.setDocument(doc, 0, doc.getLength());
+			}
 		} else {
-			viewer.getDocument().set(""); //$NON-NLS-1$
+			viewer.getDocument().set(Util.EMPTY_STRING);
 		}
+	}
+
+	/**
+	 * {@link SourceViewer} content updater by the specified {@link Template}
+	 * content
+	 */
+	protected static interface IViewerInputUpdater {
+
+		/**
+		 * Updates the <code>viewer</code> content
+		 * 
+		 * @param viewer
+		 * @param template
+		 */
+		void updateInput(SourceViewer viewer, Template template);
+
+	}
+
+	/**
+	 * {@link IViewerInputUpdater} implementation adding hidden prefix and
+	 * suffix to the template content. Can be used to "javadoc" style comments,
+	 * so template content is colored like inside "javadoc", but prefix and
+	 * suffix strings are invisible.
+	 */
+	protected static class ViewerInputDecorations implements
+			IViewerInputUpdater {
+		private final String prefix;
+		private final String suffix;
+
+		public ViewerInputDecorations(String prefix, String suffix) {
+			this.prefix = prefix;
+			this.suffix = suffix;
+		}
+
+		public void updateInput(SourceViewer viewer, Template template) {
+			StringBuilder sb = new StringBuilder();
+			final int offset;
+			if (prefix != null) {
+				sb.append(prefix);
+				offset = prefix.length();
+			} else {
+				offset = 0;
+			}
+			sb.append(template.getPattern());
+			final int endOffset;
+			if (suffix != null) {
+				sb.append(suffix);
+				endOffset = suffix.length();
+			} else {
+				endOffset = 0;
+			}
+			final IDocument doc = viewer.getDocument();
+			doc.set(sb.toString());
+			viewer.setDocument(doc, offset, doc.getLength() - offset
+					- endOffset);
+		}
+
+	}
+
+	/**
+	 * Returns the {@link IViewerInputUpdater} for the specified template or
+	 * <code>null</code> if template content should be used directly without any
+	 * modifications.
+	 * 
+	 * @param viewer
+	 * @param template
+	 * @return
+	 */
+	protected IViewerInputUpdater getViewerInputUpdater(SourceViewer viewer,
+			Template template) {
+		return null;
 	}
 
 	protected boolean isShowFormatterSetting() {
