@@ -84,7 +84,7 @@ public class ScriptCompletionProposal extends
 
 	@Override
 	protected boolean isValidPrefix(String prefix) {
-		String word = getReplacementString();
+		String word = getDisplayString();
 		if (isInScriptdoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx == 0) {
