@@ -199,8 +199,7 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given type proposal
 	 */
 	protected String createTypeProposalLabel(CompletionProposal typeProposal) {
-		String fullName = typeProposal.getName();
-		return createTypeProposalLabel(fullName);
+		return createTypeProposalLabel(typeProposal.getName());
 	}
 
 	protected String createTypeProposalLabel(String fullName) {
