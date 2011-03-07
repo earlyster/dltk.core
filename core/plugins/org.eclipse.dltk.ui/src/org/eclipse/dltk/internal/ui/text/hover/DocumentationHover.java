@@ -23,7 +23,6 @@ import org.eclipse.dltk.ui.documentation.IDocumentationResponse;
 import org.eclipse.dltk.ui.documentation.IScriptDocumentationTitleAdapter;
 import org.eclipse.dltk.ui.documentation.ScriptDocumentationAccess;
 import org.eclipse.dltk.ui.documentation.TextDocumentationResponse;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -206,7 +205,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 						: LABEL_FLAGS;
 				String label = ScriptElementLabels.getDefault()
 						.getElementLabel(member, flags);
-				return TextUtils.escapeHTML(label);
+				return label;
 			} else {
 				return null;
 			}
