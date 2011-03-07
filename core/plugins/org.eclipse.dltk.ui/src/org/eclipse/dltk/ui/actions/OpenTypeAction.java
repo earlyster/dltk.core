@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 public abstract class OpenTypeAction extends Action implements
 		IWorkbenchWindowActionDelegate {
@@ -44,12 +45,7 @@ public abstract class OpenTypeAction extends Action implements
 	protected abstract IDLTKUILanguageToolkit getUILanguageToolkit();
 
 	public void run() {
-		Shell parent = DLTKUIPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog2 dialog = new OpenTypeSelectionDialog2(parent,
-				true, PlatformUI.getWorkbench().getProgressService(), null,
-				IDLTKSearchConstants.TYPE, this.getUILanguageToolkit());
-		dialog.setTitle(getOpenTypeDialogTitle());
-		dialog.setMessage(getOpenTypeDialogMessage());
+		SelectionDialog dialog = createDialog();
 
 		int result = dialog.open();
 		if (result != IDialogConstants.OK_ID)
@@ -68,6 +64,16 @@ public abstract class OpenTypeAction extends Action implements
 				}
 			}
 		}
+	}
+
+	protected SelectionDialog createDialog() {
+		final Shell parent = DLTKUIPlugin.getActiveWorkbenchShell();
+		OpenTypeSelectionDialog2 dialog = new OpenTypeSelectionDialog2(parent,
+				true, PlatformUI.getWorkbench().getProgressService(), null,
+				IDLTKSearchConstants.TYPE, this.getUILanguageToolkit());
+		dialog.setTitle(getOpenTypeDialogTitle());
+		dialog.setMessage(getOpenTypeDialogMessage());
+		return dialog;
 	}
 
 	protected String getOpenTypeErrorMessage() {
