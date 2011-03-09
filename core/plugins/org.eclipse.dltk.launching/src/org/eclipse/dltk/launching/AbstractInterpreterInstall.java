@@ -91,6 +91,10 @@ public abstract class AbstractInterpreterInstall implements
 		return fId;
 	}
 
+	public String getNatureId() {
+		return fType.getNatureId();
+	}
+
 	public String getName() {
 		return fName;
 	}
@@ -280,8 +284,9 @@ public abstract class AbstractInterpreterInstall implements
 	 */
 	protected void abort(String message, Throwable exception, int code)
 			throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, DLTKLaunchingPlugin
-				.getUniqueIdentifier(), code, message, exception));
+		throw new CoreException(new Status(IStatus.ERROR,
+				DLTKLaunchingPlugin.getUniqueIdentifier(), code, message,
+				exception));
 	}
 
 	// IBuiltinModuleProvider
