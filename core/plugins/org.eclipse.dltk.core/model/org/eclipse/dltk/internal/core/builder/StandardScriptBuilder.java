@@ -61,9 +61,7 @@ public class StandardScriptBuilder implements IScriptBuilder {
 	public void build(IBuildChange change, IBuildState state,
 			IProgressMonitor monitor) throws CoreException {
 		// TODO progress reporting
-		buildExternalElements(change.getScriptProject(),
-				change.getExternalModules(IProjectChange.DEFAULT), monitor,
-				change.getBuildType());
+		buildExternalElements(change, monitor);
 		if (toolkit != null) {
 			buildNatureModules(change.getScriptProject(),
 					change.getBuildType(),
@@ -89,19 +87,19 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		}
 	}
 
-	private void buildExternalElements(IScriptProject project,
-			List<ISourceModule> externalElements, IProgressMonitor monitor,
-			int buildType) {
+	private void buildExternalElements(IBuildChange change,
+			IProgressMonitor monitor) throws CoreException {
+		final int buildType = change.getBuildType();
 		beginBuild(buildType, monitor);
 		final List<IBuildParticipantExtension2> extensions = selectExtension(IBuildParticipantExtension2.class);
 
 		if (extensions != null) {
+			final List<ISourceModule> externalElements = change
+					.getExternalModules(IProjectChange.DEFAULT);
 			int remainingWork = externalElements.size();
-			for (Iterator<ISourceModule> j = externalElements.iterator(); j
-					.hasNext();) {
+			for (final ISourceModule module : externalElements) {
 				if (monitor.isCanceled())
 					return;
-				final ISourceModule module = j.next();
 				monitor.subTask(NLS.bind(
 						Messages.ValidatorBuilder_buildExternalModuleSubTask,
 						String.valueOf(remainingWork), module.getElementName()));
