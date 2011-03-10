@@ -149,7 +149,8 @@ public interface IFileHandle {
 	boolean isFile();
 
 	/**
-	 * Return last modified time
+	 * Return last modified time, or <code>0L</code> if the file does not exist
+	 * or if an I/O error occurs
 	 * 
 	 * @return last modified time
 	 */
