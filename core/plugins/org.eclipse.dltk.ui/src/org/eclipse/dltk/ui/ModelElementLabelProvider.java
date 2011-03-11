@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.viewsupport.StorageLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -236,7 +237,7 @@ public class ModelElementLabelProvider extends LabelProvider {
 			return result;
 		}
 
-		if (element instanceof IStorage) 
+		if (element instanceof IStorage || element instanceof ISourceModule)
 			return fStorageLabelProvider.getImage(element);
 
 		return result;
