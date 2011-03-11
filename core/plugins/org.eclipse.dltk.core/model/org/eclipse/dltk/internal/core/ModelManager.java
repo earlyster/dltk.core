@@ -26,8 +26,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -56,11 +56,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
@@ -740,9 +740,9 @@ public class ModelManager implements ISaveParticipant {
 					return project.getProjectFragment(resource);
 				} else if (rootPath.isPrefixOf(resourcePath)) {
 					BuildpathEntry bpe = (BuildpathEntry) entry;
-					if (!Util.isExcluded(resource, bpe
-							.fullInclusionPatternChars(), bpe
-							.fullExclusionPatternChars())) {
+					if (!Util.isExcluded(resource,
+							bpe.fullInclusionPatternChars(),
+							bpe.fullExclusionPatternChars())) {
 						/*
 						 * given we have a resource child of the root, it cannot
 						 * be a ZIP fragment
@@ -859,8 +859,7 @@ public class ModelManager implements ISaveParticipant {
 		synchronized (this.perWorkingCopyInfos) {
 			ISourceModule[] primaryWCs = addPrimary
 					&& owner != DefaultWorkingCopyOwner.PRIMARY ? getWorkingCopies(
-					DefaultWorkingCopyOwner.PRIMARY, false)
-					: null;
+					DefaultWorkingCopyOwner.PRIMARY, false) : null;
 			Map workingCopyToInfos = (Map) this.perWorkingCopyInfos.get(owner);
 			if (workingCopyToInfos == null)
 				return primaryWCs;
@@ -881,8 +880,8 @@ public class ModelManager implements ISaveParticipant {
 								primaryWorkingCopy, res);
 					} else {
 						validSrcModule = Util.isValidSourceModule(
-								primaryWorkingCopy, primaryWorkingCopy
-										.getPath());
+								primaryWorkingCopy,
+								primaryWorkingCopy.getPath());
 					}
 					if (validSrcModule) {
 						ISourceModule workingCopy = new SourceModule(
@@ -933,9 +932,8 @@ public class ModelManager implements ISaveParticipant {
 			info.triedRead = true;
 			try {
 				if (monitor != null)
-					monitor.subTask(Messages
-							.bind(Messages.build_readStateProgress, project
-									.getName()));
+					monitor.subTask(Messages.bind(
+							Messages.build_readStateProgress, project.getName()));
 				info.savedState = readState(project);
 			} catch (CoreException e) {
 				e.printStackTrace();
@@ -1212,8 +1210,9 @@ public class ModelManager implements ISaveParticipant {
 							public void run(IProgressMonitor progress)
 									throws CoreException {
 								ISavedState savedState = workspace
-										.addSaveParticipant(DLTKCore
-												.getPlugin(), ModelManager.this);
+										.addSaveParticipant(
+												DLTKCore.getPlugin(),
+												ModelManager.this);
 								if (savedState != null) {
 									// the event type coming from the saved
 									// state is always POST_AUTO_BUILD
@@ -1297,17 +1296,15 @@ public class ModelManager implements ISaveParticipant {
 				IEclipsePreferences.PreferenceChangeEvent event) {
 			String propertyName = event.getKey();
 			if (propertyName.startsWith(BP_CONTAINER_PREFERENCES_PREFIX)) {
-				recreatePersistedContainer(propertyName, (String) event
-						.getNewValue(), false);
+				recreatePersistedContainer(propertyName,
+						(String) event.getNewValue(), false);
 			} else if (propertyName
 					.startsWith(BP_USERLIBRARY_PREFERENCES_PREFIX)) {
 				String libName = propertyName
 						.substring(BP_USERLIBRARY_PREFERENCES_PREFIX.length());
 				UserLibraryManager manager = ModelManager
 						.getUserLibraryManager();
-				manager
-						.updateUserLibrary(libName, (String) event
-								.getNewValue());
+				manager.updateUserLibrary(libName, (String) event.getNewValue());
 			}
 		}
 	}
@@ -1389,10 +1386,9 @@ public class ModelManager implements ISaveParticipant {
 											 * elements
 											 */);
 			} catch (IOException e) {
-				Util
-						.log(
-								e,
-								"Could not recreate persisted container: \n" + containerString); //$NON-NLS-1$
+				Util.log(
+						e,
+						"Could not recreate persisted container: \n" + containerString); //$NON-NLS-1$
 				entries = ScriptProject.INVALID_BUILDPATH;
 			}
 			if (entries != ScriptProject.INVALID_BUILDPATH) {
@@ -1979,15 +1975,10 @@ public class ModelManager implements ISaveParticipant {
 			IBuildpathContainer container,
 			final BuildpathContainerInitializer initializer) {
 		if (container == CONTAINER_INITIALIZATION_IN_PROGRESS) {
-			Util
-					.verbose("CPContainer INIT - FAILED (initializer did not initialize container)\n" + //$NON-NLS-1$
-							"	project: " //$NON-NLS-1$
-							+ project.getElementName()
-							+ '\n'
-							+ "	container path: " //$NON-NLS-1$
-							+ containerPath
-							+ '\n'
-							+ "	initializer: " + initializer); //$NON-NLS-1$
+			Util.verbose("CPContainer INIT - FAILED (initializer did not initialize container)\n" + //$NON-NLS-1$
+					"	project: " //$NON-NLS-1$
+					+ project.getElementName() + '\n' + "	container path: " //$NON-NLS-1$
+					+ containerPath + '\n' + "	initializer: " + initializer); //$NON-NLS-1$
 		} else {
 			Util.verbose("CPContainer INIT - FAILED (see exception above)\n" + //$NON-NLS-1$
 					"	project: " //$NON-NLS-1$
@@ -2013,10 +2004,8 @@ public class ModelManager implements ISaveParticipant {
 			if (previousContainer != null) {
 				if (ModelManager.BP_RESOLVE_VERBOSE) {
 					StringBuffer buffer = new StringBuffer();
-					buffer
-							.append("CPContainer INIT - reentering access to project container during its initialization, will see previous value\n"); //$NON-NLS-1$ 
-					buffer
-							.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
+					buffer.append("CPContainer INIT - reentering access to project container during its initialization, will see previous value\n"); //$NON-NLS-1$ 
+					buffer.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
 					buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 					buffer.append("	previous value: "); //$NON-NLS-1$
 					buffer.append(previousContainer.getDescription());
@@ -2352,8 +2341,8 @@ public class ModelManager implements ISaveParticipant {
 			IndexManager manager = this.indexManager;
 			if (manager != null
 			// don't force initialization of workspace scope as we could be
-					// shutting down
-					// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=93941)
+			// shutting down
+			// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=93941)
 					&& this.workspaceScope != null) {
 				manager.cleanUpIndexes();
 			}
@@ -2447,8 +2436,8 @@ public class ModelManager implements ISaveParticipant {
 			}
 			throw new CoreException(new Status(IStatus.ERROR,
 					DLTKCore.PLUGIN_ID, Platform.PLUGIN_ERROR, Messages.bind(
-							Messages.build_cannotSaveState, info.project
-									.getName()), e));
+							Messages.build_cannotSaveState,
+							info.project.getName()), e));
 		} catch (IOException e) {
 			try {
 				file.delete();
@@ -2457,8 +2446,8 @@ public class ModelManager implements ISaveParticipant {
 			}
 			throw new CoreException(new Status(IStatus.ERROR,
 					DLTKCore.PLUGIN_ID, Platform.PLUGIN_ERROR, Messages.bind(
-							Messages.build_cannotSaveState, info.project
-									.getName()), e));
+							Messages.build_cannotSaveState,
+							info.project.getName()), e));
 		}
 		if (ScriptBuilder.DEBUG) {
 			t = System.currentTimeMillis() - t;
@@ -2521,10 +2510,9 @@ public class ModelManager implements ISaveParticipant {
 						}
 					} catch (ModelException e) {
 						// could not encode entry: will not persist
-						Util
-								.log(
-										e,
-										"Could not persist container " + containerPath + " for project " + project.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						Util.log(
+								e,
+								"Could not persist container " + containerPath + " for project " + project.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					if (containerString != null)
 						containersToSave.put(containerPath, containerString);
@@ -2754,9 +2742,8 @@ public class ModelManager implements ISaveParticipant {
 				Util.log(e, "Unable to read variable and containers file"); //$NON-NLS-1$
 		} catch (RuntimeException e) {
 			if (file.exists())
-				Util
-						.log(e,
-								"Unable to read variable and containers file (file is corrupt)"); //$NON-NLS-1$
+				Util.log(e,
+						"Unable to read variable and containers file (file is corrupt)"); //$NON-NLS-1$
 		} finally {
 			if (in != null) {
 				try {
