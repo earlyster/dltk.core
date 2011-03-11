@@ -633,6 +633,17 @@ public interface IScriptProject extends IModelElement, IOpenable, IParent {
 	 */
 	IBuildpathEntry[] readRawBuildpath();
 
+	/**
+	 * Returns all of the existing project fragments that exist on the
+	 * buildpath, in the order they are defined by the buildpath.
+	 * 
+	 * @return all of the existing project fragments that exist on the buildpath
+	 * @exception ModelException
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its corresponding resource
+	 */
+	IProjectFragment[] getAllProjectFragments() throws ModelException;
+
 	public Object[] getForeignResources() throws ModelException;
 
 	/**

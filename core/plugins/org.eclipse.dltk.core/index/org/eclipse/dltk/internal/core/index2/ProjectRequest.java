@@ -23,7 +23,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
-import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
  * Request for indexing project
@@ -46,8 +45,7 @@ public class ProjectRequest extends AbstractIndexRequest {
 	}
 
 	protected void run() throws CoreException {
-		final IProjectFragment[] fragments = ((ScriptProject) project)
-				.getAllProjectFragments();
+		final IProjectFragment[] fragments = project.getAllProjectFragments();
 
 		final Set<ISourceModule> sourceModules = new HashSet<ISourceModule>();
 		for (final IProjectFragment fragment : fragments) {

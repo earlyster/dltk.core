@@ -27,7 +27,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IBuildChange;
 import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
-import org.eclipse.dltk.internal.core.ScriptProject;
 
 public class IncrementalBuildChange extends IncrementalProjectChange implements
 		IBuildChange {
@@ -75,7 +74,7 @@ public class IncrementalBuildChange extends IncrementalProjectChange implements
 		if (externalPaths == null) {
 			externalPaths = new ArrayList<IPath>();
 			externalFragments = new ArrayList<IProjectFragment>();
-			final IProjectFragment[] allFragments = ((ScriptProject) getScriptProject())
+			final IProjectFragment[] allFragments = getScriptProject()
 					.getAllProjectFragments();
 			for (int i = 0; i < allFragments.length; i++) {
 				final IProjectFragment fragment = allFragments[i];

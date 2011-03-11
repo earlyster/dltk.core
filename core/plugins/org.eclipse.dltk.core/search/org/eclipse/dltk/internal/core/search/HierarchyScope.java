@@ -201,9 +201,9 @@ public class HierarchyScope extends DLTKSearchScope {
 			IScriptProject[] projects = model.getScriptProjects();
 			HashSet visited = new HashSet();
 			for (int i = 0; i < projects.length; i++) {
-				IScriptProject project2 = projects[i];
-				ScriptProject project = (ScriptProject) project2;
-				IBuildpathEntry entry = project.getBuildpathEntryFor(rootPath);
+				IScriptProject project = projects[i];
+				IBuildpathEntry entry = ((ScriptProject) project)
+						.getBuildpathEntryFor(rootPath);
 				if (entry != null) {
 					// add the project and its binary pkg fragment roots
 					IProjectFragment[] roots = project.getAllProjectFragments();

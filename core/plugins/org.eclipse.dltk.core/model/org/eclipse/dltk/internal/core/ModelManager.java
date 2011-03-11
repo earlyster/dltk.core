@@ -210,8 +210,7 @@ public class ModelManager implements ISaveParticipant {
 					.getCustomTimeStamps();
 			// Save custom project fragments timestamps.
 			try {
-				ScriptProject scriptProject = (ScriptProject) DLTKCore
-						.create(project);
+				IScriptProject scriptProject = DLTKCore.create(project);
 				IProjectFragment[] fragments = scriptProject
 						.getAllProjectFragments();
 				for (int i = 0; i < fragments.length; i++) {
