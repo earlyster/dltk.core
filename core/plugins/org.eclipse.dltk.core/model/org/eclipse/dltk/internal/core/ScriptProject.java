@@ -70,8 +70,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -2477,12 +2475,6 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 */
 	public IProjectFragment findProjectFragment0(IPath path)
 			throws ModelException {
-		if (!EnvironmentPathUtils.isFull(path)
-				&& (path.segmentCount() == 0 || !path.segment(0).startsWith(
-						IBuildpathEntry.BUILDPATH_SPECIAL))) {
-			path = EnvironmentPathUtils.getFullPath(
-					EnvironmentManager.getEnvironment(this), path);
-		}
 		IProjectFragment[] allRoots = this.getAllProjectFragments();
 		if (!path.isAbsolute()) {
 			if (path.segmentCount() == 0
