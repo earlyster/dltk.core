@@ -100,7 +100,6 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 
 	public void reconciled(ISourceModule workingCopy,
 			IDLTKLanguageToolkit toolkit) {
-		request(new ReconcileSourceModuleRequest(this, workingCopy, toolkit));
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath sourceFolder) {

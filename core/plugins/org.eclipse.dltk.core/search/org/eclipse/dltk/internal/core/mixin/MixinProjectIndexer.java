@@ -14,13 +14,16 @@ package org.eclipse.dltk.internal.core.mixin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.MixinModelRegistry;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexDocument;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
+import org.eclipse.dltk.core.search.indexing.core.ReconcileSourceModuleRequest;
 import org.eclipse.dltk.core.search.indexing.core.RemoveIndexRequest;
 
 public class MixinProjectIndexer extends AbstractProjectIndexer {
@@ -56,5 +59,11 @@ public class MixinProjectIndexer extends AbstractProjectIndexer {
 	public void removeLibrary(IScriptProject project, IPath path) {
 		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(
 				IndexManager.SPECIAL_MIXIN + path.toString())));
+	}
+
+	@Override
+	public void reconciled(ISourceModule workingCopy,
+			IDLTKLanguageToolkit toolkit) {
+		request(new ReconcileSourceModuleRequest(this, workingCopy, toolkit));
 	}
 }
