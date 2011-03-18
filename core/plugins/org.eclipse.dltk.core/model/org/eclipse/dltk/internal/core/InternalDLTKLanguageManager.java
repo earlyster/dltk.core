@@ -10,10 +10,12 @@ package org.eclipse.dltk.internal.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.dltk.codeassist.ICompletionEngine;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.search.matching.IMatchLocator;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
+import org.eclipse.dltk.utils.PriorityNatureExtensionManager;
 
 public class InternalDLTKLanguageManager {
 	private final static String LANGUAGE_EXTPOINT = DLTKCore.PLUGIN_ID
@@ -56,8 +58,14 @@ public class InternalDLTKLanguageManager {
 
 	private static PriorityClassDLTKExtensionManager selectionEngineManager = new NewInstanceClassBasedDLTKExtensionManager(
 			SELECTION_ENGINE_EXTPOINT);
-	private static PriorityClassDLTKExtensionManager completionEngineManager = new NewInstanceClassBasedDLTKExtensionManager(
-			COMPLETION_ENGINE_EXTPOINT, true);
+	private static PriorityNatureExtensionManager<ICompletionEngine> completionEngineManager = new PriorityNatureExtensionManager<ICompletionEngine>(
+			COMPLETION_ENGINE_EXTPOINT, ICompletionEngine.class) {
+		@Override
+		protected void saveInstances(String natureId,
+				ICompletionEngine[] resultArray) {
+			// empty
+		}
+	};
 	private static PriorityClassDLTKExtensionManager sourceParsersManager = new NewInstanceClassBasedDLTKExtensionManager(
 			SOURCE_PARSERS_EXTPOINT);
 
@@ -92,7 +100,7 @@ public class InternalDLTKLanguageManager {
 		return selectionEngineManager;
 	}
 
-	public static PriorityClassDLTKExtensionManager getCompletionEngineManager() {
+	public static PriorityNatureExtensionManager<ICompletionEngine> getCompletionEngineManager() {
 		return completionEngineManager;
 	}
 

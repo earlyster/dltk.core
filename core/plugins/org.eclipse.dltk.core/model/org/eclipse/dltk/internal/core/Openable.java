@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
 import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.codeassist.ISelectionRequestor;
-import org.eclipse.dltk.compiler.env.ISourceModule;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
@@ -454,13 +454,13 @@ public abstract class Openable extends ModelElement implements IOpenable,
 	static class CompletionThread extends Thread {
 		final IDLTKLanguageToolkit toolkit;
 		final IScriptProject project;
-		final ISourceModule cu;
+		final IModuleSource cu;
 		final int position;
 		final CompletionRequestor requestor;
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 
 		public CompletionThread(IDLTKLanguageToolkit toolkit,
-				IScriptProject project, ISourceModule cu, int position,
+				IScriptProject project, IModuleSource cu, int position,
 				CompletionRequestor requestor) {
 			super("CompletionThread-" + toolkit.getLanguageName());
 			this.toolkit = toolkit;
@@ -475,11 +475,19 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		@Override
 		public void run() {
 			// code complete
-			final ICompletionEngine engine = DLTKLanguageManager
-					.getCompletionEngine(toolkit.getNatureId());
-			if (engine == null) {
-				return;
+			final ICompletionEngine[] engines = DLTKLanguageManager
+					.getCompletionEngines(toolkit.getNatureId());
+			if (engines != null) {
+				for (ICompletionEngine engine : engines) {
+					run(engine);
+					if (monitor.isCanceled())
+						break;
+				}
 			}
+			done = true;
+		}
+
+		private void run(ICompletionEngine engine) {
 			// engine.setEnvironment(environment);
 			engine.setRequestor(requestor);
 
@@ -488,7 +496,6 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 			engine.setProgressMonitor(monitor);
 			engine.complete(cu, position, 0);
-			done = true;
 		}
 
 		boolean execute(long timeout) {
@@ -510,10 +517,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 	}
 
 	/** Code Completion */
-	protected void codeComplete(
-			final org.eclipse.dltk.compiler.env.ISourceModule cu,
-			final int position, CompletionRequestor requestor,
-			WorkingCopyOwner owner, long timeout) throws ModelException {
+	protected void codeComplete(final IModuleSource cu, final int position,
+			CompletionRequestor requestor, WorkingCopyOwner owner, long timeout)
+			throws ModelException {
 		if (requestor == null) {
 			throw new IllegalArgumentException(
 					Messages.Openable_completionRequesterCannotBeNull);
@@ -543,8 +549,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			Thread.interrupted();
 			requestor.completionFailure(new DefaultProblem(
 					"Compution of proposals is to long. Please try again. ",
-					IProblemIdentifier.NULL, null, ProblemSeverity.WARNING,
-					0, 0, 0));
+					IProblemIdentifier.NULL, null, ProblemSeverity.WARNING, 0,
+					0, 0));
 			requestor.clear();
 		}
 	}

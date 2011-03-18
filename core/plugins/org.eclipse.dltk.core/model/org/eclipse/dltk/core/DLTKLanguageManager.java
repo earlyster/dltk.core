@@ -26,10 +26,10 @@ import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
-import org.eclipse.dltk.core.search.SearchPatternProcessor;
 import org.eclipse.dltk.core.search.DLTKSearchParticipant;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
+import org.eclipse.dltk.core.search.SearchPatternProcessor;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.core.search.matching.IMatchLocator;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
@@ -244,9 +244,15 @@ public class DLTKLanguageManager {
 		return new DefaultProblemFactory();
 	}
 
+	@Deprecated
 	public static ICompletionEngine getCompletionEngine(String natureID) {
-		return (ICompletionEngine) InternalDLTKLanguageManager
-				.getCompletionEngineManager().getObject(natureID);
+		final ICompletionEngine[] engines = getCompletionEngines(natureID);
+		return engines != null ? engines[0] : null;
+	}
+
+	public static ICompletionEngine[] getCompletionEngines(String natureID) {
+		return InternalDLTKLanguageManager.getCompletionEngineManager()
+				.getInstances(natureID);
 	}
 
 	public static ISelectionEngine getSelectionEngine(String natureID) {
