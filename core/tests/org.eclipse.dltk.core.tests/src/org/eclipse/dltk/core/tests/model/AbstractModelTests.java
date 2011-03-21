@@ -415,7 +415,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		return getWorkspace().getRoot();
 	}
 
-	protected static IProject getProject(String project) {
+	public static IProject getProject(String project) {
 		return getWorkspaceRoot().getProject(project);
 	}
 
