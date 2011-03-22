@@ -379,7 +379,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private static final int WORK_SOURCES = 100;
 	private static final int WORK_BUILD = 750;
 
-	private static final String NONAME = ""; //$NON-NLS-1$
+	static final String NONAME = ""; //$NON-NLS-1$
 
 	protected void fullBuild(final IProgressMonitor monitor) {
 		this.lastState = clearLastState();
@@ -421,7 +421,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void resetBuilders(IScriptBuilder[] builders,
+	protected void resetBuilders(IScriptBuilder[] builders,
 			IProgressMonitor monitor) {
 		if (builders != null) {
 			for (int k = 0; k < builders.length; k++) {
@@ -502,7 +502,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 * @throws CoreException
 	 */
-	private IScriptBuilder[] getScriptBuilders() throws CoreException {
+	protected IScriptBuilder[] getScriptBuilders() throws CoreException {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(scriptProject);
 		if (toolkit != null) {
