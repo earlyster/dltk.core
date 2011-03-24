@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
@@ -100,6 +103,18 @@ public enum DefaultProblemIdentifier implements IProblemIdentifier {
 		} else {
 			return null;
 		}
+	}
+
+	public static IProblemIdentifier[] values(String namespace) {
+		final IProblemIdentifierFactory[] factories = getManager()
+				.getInstances(namespace);
+		final List<IProblemIdentifier> result = new ArrayList<IProblemIdentifier>();
+		if (factories != null) {
+			for (IProblemIdentifierFactory factory : factories) {
+				Collections.addAll(result, factory.values());
+			}
+		}
+		return result.toArray(new IProblemIdentifier[result.size()]);
 	}
 
 	private static final Set<String> reportedProblemIds = new HashSet<String>();

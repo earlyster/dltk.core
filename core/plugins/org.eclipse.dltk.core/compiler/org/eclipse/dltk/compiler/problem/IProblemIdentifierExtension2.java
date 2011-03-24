@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 xored software, Inc.
+ * Copyright (c) 2011 NumberFour AG
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,12 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
+ *     NumberFour AG - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-public class DefaultProblemIdentifierFactory implements
-		IProblemIdentifierFactory {
+public interface IProblemIdentifierExtension2 {
 
-	public IProblemIdentifier valueOf(String localName)
-			throws IllegalArgumentException {
-		return DefaultProblemIdentifier.valueOf(localName);
-	}
-
-	public IProblemIdentifier[] values() {
-		return DefaultProblemIdentifier.values();
-	}
+	IProblemIdentifier getPrimeIdentifier();
 
 }

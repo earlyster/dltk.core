@@ -21,4 +21,6 @@ public interface IProblemIdentifierFactory {
 	IProblemIdentifier valueOf(String localName)
 			throws IllegalArgumentException;
 
+	IProblemIdentifier[] values();
+
 }
