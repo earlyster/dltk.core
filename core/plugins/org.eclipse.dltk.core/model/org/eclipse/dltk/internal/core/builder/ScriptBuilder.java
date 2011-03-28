@@ -408,7 +408,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
+				final long start = TRACE ? System.currentTimeMillis() : 0;
 				builder.build(buildChange, buildState, monitor);
+				if (TRACE) {
+					System.out.println(builder.getClass().getName() + " "
+							+ (System.currentTimeMillis() - start) + "ms");
+				}
 			}
 			updateExternalFolderLocations(buildChange);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
@@ -474,7 +479,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
+				final long start = TRACE ? System.currentTimeMillis() : 0;
 				builder.build(buildChange, buildState, monitor);
+				if (TRACE) {
+					System.out.println(builder.getClass().getName() + " "
+							+ (System.currentTimeMillis() - start) + "ms");
+				}
 			}
 			updateExternalFolderLocations(buildChange);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
