@@ -11,11 +11,24 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
+import org.eclipse.core.runtime.IPath;
+
 /**
  * Reserved for future use.
  * 
  * Eventually it will be used to collect dependencies between project sources.
  */
 public interface IBuildState {
+	/**
+	 * @param path
+	 */
+	void recordImportProblem(IPath path);
 
+	/**
+	 * @param path
+	 *            module path
+	 * @param dependency
+	 *            it's dependency
+	 */
+	void recordDependency(IPath path, IPath dependency);
 }

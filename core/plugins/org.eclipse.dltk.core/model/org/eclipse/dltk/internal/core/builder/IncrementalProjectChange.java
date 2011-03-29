@@ -211,11 +211,8 @@ public class IncrementalProjectChange extends AbstractBuildChange implements
 		List<IRenameChange> getRenames() {
 			if (renames == null) {
 				final List<IRenameChange> r = new ArrayList<IRenameChange>();
-				if (projectRenames != null) {
-					for (Map.Entry<IFile, IPath> entry : projectRenames
-							.entrySet()) {
-						r.add(new RenameChange(entry.getValue(), entry.getKey()));
-					}
+				for (Map.Entry<IFile, IPath> entry : entrySet()) {
+					r.add(new RenameChange(entry.getValue(), entry.getKey()));
 				}
 				this.renames = unmodifiableList(r);
 			}
@@ -325,5 +322,34 @@ public class IncrementalProjectChange extends AbstractBuildChange implements
 			lines.add("deletes=" + projectDeletes);
 		}
 		return TextUtils.join(lines, "\n");
+	}
+
+	protected Set<IPath> getChangedPaths() throws CoreException {
+		loadData();
+		final Set<IPath> paths = new HashSet<IPath>();
+		if (projectAdditions != null) {
+			for (IFile file : projectAdditions.getAll()) {
+				paths.add(file.getFullPath());
+			}
+		}
+		if (projectChanges != null) {
+			for (IFile file : projectChanges.getAll()) {
+				paths.add(file.getFullPath());
+			}
+		}
+		if (projectDeletes != null) {
+			final IPath projectPath = project.getFullPath();
+			for (IPath path : projectDeletes) {
+				paths.add(projectPath.append(path));
+			}
+		}
+		if (projectRenames != null) {
+			final IPath projectPath = project.getFullPath();
+			for (IRenameChange rename : projectRenames.getRenames()) {
+				paths.add(projectPath.append(rename.getSource()));
+				paths.add(rename.getTarget().getFullPath());
+			}
+		}
+		return paths;
 	}
 }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -255,6 +256,30 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	protected static class BuildStateStub implements IBuildState {
+		public BuildStateStub() {
+		}
+
+		public void recordImportProblem(IPath path) {
+		}
+
+		public void recordDependency(IPath path, IPath dependency) {
+		}
+	}
+
+	private class BuildState implements IBuildState {
+		public BuildState() {
+		}
+
+		public void recordImportProblem(IPath path) {
+			ScriptBuilder.this.lastState.recordImportProblem(path);
+		}
+
+		public void recordDependency(IPath path, IPath dependency) {
+			ScriptBuilder.this.lastState.recordDependency(path, dependency);
+		}
+	}
+
 	@Override
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		long start = 0;
@@ -279,6 +304,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
+			ModelManager.getModelManager().setLastBuiltState(currentProject,
+					null);
 
 			IScriptBuilder[] builders = getScriptBuilders();
 
@@ -292,7 +319,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			resetBuilders(builders, monitor);
+			resetBuilders(builders, new BuildStateStub(), monitor);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -383,6 +410,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	protected void fullBuild(final IProgressMonitor monitor) {
 		this.lastState = clearLastState();
+		final IBuildState buildState = new BuildState();
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -396,8 +424,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 			final IBuildChange buildChange = new FullBuildChange(
 					currentProject, monitor);
-			final IBuildState buildState = new IBuildState() {
-			};
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -416,21 +442,21 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 			}
 			updateExternalFolderLocations(buildChange);
-			ModelManager.getModelManager().setLastBuiltState(currentProject,
-					this.lastState);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
 		} finally {
-			resetBuilders(builders, monitor);
+			resetBuilders(builders, buildState, monitor);
+			ModelManager.getModelManager().setLastBuiltState(currentProject,
+					this.lastState);
 			monitor.done();
 		}
 	}
 
-	protected void resetBuilders(IScriptBuilder[] builders,
+	protected void resetBuilders(IScriptBuilder[] builders, IBuildState state,
 			IProgressMonitor monitor) {
 		if (builders != null) {
 			for (int k = 0; k < builders.length; k++) {
-				builders[k].endBuild(scriptProject, monitor);
+				builders[k].endBuild(scriptProject, state, monitor);
 			}
 		}
 	}
@@ -449,6 +475,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 
 		this.lastState = newState;
+		final IBuildState buildState = new BuildState();
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -463,8 +490,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IBuildChange buildChange = new IncrementalBuildChange(delta,
 					currentProject, monitor, new ArrayList<IPath>(
 							externalFoldersBefore));
-			final IBuildState buildState = new IBuildState() {
-			};
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -473,7 +498,19 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				if (buildChange.getBuildType() == IScriptBuilder.FULL_BUILD
 						&& buildChange instanceof IncrementalBuildChange) {
 					buildChange = new FullBuildChange(currentProject, monitor);
+					this.lastState.resetDependencies();
 				}
+			}
+			final Set<IPath> queue = new HashSet<IPath>();
+			if (buildChange instanceof IncrementalBuildChange) {
+				final Set<IPath> changes = ((IncrementalBuildChange) buildChange)
+						.getChangedPaths();
+				if (TRACE) {
+					System.out.println("Changes: " + changes);
+				}
+				queue.addAll(this.lastState.importProblems);
+				queue.addAll(this.lastState.dependenciesOf(changes));
+				this.lastState.removeDependenciesFor(changes);
 			}
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
@@ -486,13 +523,44 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 							+ (System.currentTimeMillis() - start) + "ms");
 				}
 			}
+			while (!queue.isEmpty()) {
+				if (TRACE) {
+					System.out.println("Queue: " + queue);
+				}
+				final Set<IPath> nextQueue = new HashSet<IPath>();
+				nextQueue.addAll(this.lastState.importProblems);
+				nextQueue.addAll(this.lastState.dependenciesOf(queue));
+				this.lastState.removeDependenciesFor(queue);
+				final IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+						.getRoot();
+				final List<IFile> files = new ArrayList<IFile>();
+				for (IPath path : queue) {
+					files.add(root.getFile(path));
+				}
+				queue.clear();
+				// TODO prevent cycles
+				// queue.addAll(nextQueue);
+				final BuildChange qChange = new BuildChange(currentProject,
+						delta, files, monitor);
+				for (IScriptBuilder builder : builders) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					final long start = TRACE ? System.currentTimeMillis() : 0;
+					builder.build(qChange, buildState, monitor);
+					if (TRACE) {
+						System.out.println(builder.getClass().getName() + " "
+								+ (System.currentTimeMillis() - start) + "ms");
+					}
+				}
+			}
 			updateExternalFolderLocations(buildChange);
-			ModelManager.getModelManager().setLastBuiltState(currentProject,
-					this.lastState);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
 		} finally {
-			resetBuilders(builders, monitor);
+			resetBuilders(builders, buildState, monitor);
+			ModelManager.getModelManager().setLastBuiltState(currentProject,
+					this.lastState);
 			monitor.done();
 		}
 	}

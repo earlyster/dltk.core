@@ -13,14 +13,18 @@ package org.eclipse.dltk.internal.core.builder;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblemCategory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
+import org.eclipse.dltk.compiler.problem.IProblemIdentifierExtension3;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKCore;
 
 public class BuildProblemReporter extends ProblemCollector {
 
 	private final IProblemFactory problemFactory;
-	private final IResource resource;
+	final IResource resource;
 	private boolean oldMarkersDeleted = false;
 
 	/**
@@ -44,6 +48,17 @@ public class BuildProblemReporter extends ProblemCollector {
 			DLTKCore.error(Messages.BuildProblemReporter_errorUpdatingMarkers,
 					e);
 		}
+	}
+
+	public boolean hasCategory(IProblemCategory category) {
+		for (IProblem problem : getProblems()) {
+			final IProblemIdentifier id = problem.getID();
+			if (id != null && id instanceof IProblemIdentifierExtension3
+					&& ((IProblemIdentifierExtension3) id).belongsTo(category)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

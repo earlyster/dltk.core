@@ -20,6 +20,7 @@ class LocalScriptBuilder extends ScriptBuilder {
 			IProgressMonitor monitor) {
 		this.currentProject = project;
 		this.scriptProject = (ScriptProject) DLTKCore.create(project);
+		final IBuildState buildState = new BuildStateStub();
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -30,9 +31,8 @@ class LocalScriptBuilder extends ScriptBuilder {
 			if (builders == null || builders.length == 0) {
 				return;
 			}
-			IBuildChange buildChange = new BuildChange(project, monitor, files);
-			final IBuildState buildState = new IBuildState() {
-			};
+			IBuildChange buildChange = new BuildChange(project, null, files,
+					monitor);
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -52,7 +52,7 @@ class LocalScriptBuilder extends ScriptBuilder {
 		} catch (CoreException e) {
 			DLTKCore.error(e);
 		} finally {
-			resetBuilders(builders, monitor);
+			resetBuilders(builders, buildState, monitor);
 			monitor.done();
 		}
 	}

@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.compiler.problem.ProblemCategory;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -321,7 +322,8 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		}
 	}
 
-	public void endBuild(IScriptProject project, IProgressMonitor monitor) {
+	public void endBuild(IScriptProject project, IBuildState state,
+			IProgressMonitor monitor) {
 		if (endBuildNeeded) {
 			monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
 			final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
@@ -337,7 +339,12 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		}
 		if (reporters != null) {
 			for (IProblemReporter reporter : reporters) {
-				((BuildProblemReporter) reporter).flush();
+				final BuildProblemReporter buildReporter = (BuildProblemReporter) reporter;
+				if (buildReporter.hasCategory(ProblemCategory.IMPORT)) {
+					state.recordImportProblem(buildReporter.resource
+							.getFullPath());
+				}
+				buildReporter.flush();
 			}
 			reporters = null;
 		}

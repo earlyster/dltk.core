@@ -63,5 +63,6 @@ public interface IScriptBuilder {
 	 * 
 	 * @param project
 	 */
-	void endBuild(IScriptProject project, IProgressMonitor monitor);
+	void endBuild(IScriptProject project, IBuildState state,
+			IProgressMonitor monitor);
 }

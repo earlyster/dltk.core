@@ -28,18 +28,20 @@ import org.eclipse.dltk.core.builder.IScriptBuilder;
 
 class BuildChange extends AbstractBuildChange implements IBuildChange {
 
+	private final IResourceDelta resourceDelta;
 	private final List<IFile> files;
 	private List<ISourceModule> modules;
 	private List<IFile> realResources;
 
-	public BuildChange(IProject project, IProgressMonitor monitor,
-			List<IFile> files) {
+	public BuildChange(IProject project, IResourceDelta resourceDelta,
+			List<IFile> files, IProgressMonitor monitor) {
 		super(project, monitor);
+		this.resourceDelta = resourceDelta;
 		this.files = files;
 	}
 
 	public IResourceDelta getResourceDelta() {
-		return null;
+		return resourceDelta;
 	}
 
 	public List<IPath> getDeletes(int options) throws CoreException {
