@@ -178,7 +178,9 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			return;
 		}
 		int counter = 0;
-		reporters = new ArrayList<IProblemReporter>(modules.size());
+		if (reporters == null) {
+			reporters = new ArrayList<IProblemReporter>(modules.size());
+		}
 		for (Iterator<ISourceModule> j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
 				return;

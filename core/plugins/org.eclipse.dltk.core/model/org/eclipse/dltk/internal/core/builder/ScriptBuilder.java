@@ -509,7 +509,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				if (TRACE) {
 					System.out.println("Changes: " + changes);
 				}
-				queue.addAll(this.lastState.dependenciesOf(changes));
+				queue.addAll(this.lastState.dependenciesOf(changes, true));
 				this.lastState.removeDependenciesFor(changes);
 				processed.addAll(changes);
 				queue.removeAll(processed);
@@ -530,7 +530,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					System.out.println("Queue: " + queue);
 				}
 				final Set<IPath> nextQueue = new HashSet<IPath>();
-				nextQueue.addAll(this.lastState.dependenciesOf(queue));
+				nextQueue.addAll(this.lastState.dependenciesOf(queue, false));
 				this.lastState.removeDependenciesFor(queue);
 				final IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
 						.getRoot();

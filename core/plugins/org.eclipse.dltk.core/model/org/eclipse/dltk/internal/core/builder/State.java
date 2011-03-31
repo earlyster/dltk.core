@@ -257,9 +257,12 @@ public class State {
 		importProblems.removeAll(paths);
 	}
 
-	protected Collection<IPath> dependenciesOf(Set<IPath> paths) {
+	protected Collection<IPath> dependenciesOf(Set<IPath> paths,
+			boolean includeImportProblems) {
 		final Collection<IPath> result = new ArrayList<IPath>();
-		result.addAll(importProblems);
+		if (includeImportProblems) {
+			result.addAll(importProblems);
+		}
 		for (IPath path : paths) {
 			final Set<IPath> deps = dependencies.get(path);
 			if (deps != null) {
