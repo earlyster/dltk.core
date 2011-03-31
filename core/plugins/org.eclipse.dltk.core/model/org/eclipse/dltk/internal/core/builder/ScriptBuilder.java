@@ -501,6 +501,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					this.lastState.resetDependencies();
 				}
 			}
+			final Set<IPath> processed = new HashSet<IPath>();
 			final Set<IPath> queue = new HashSet<IPath>();
 			if (buildChange instanceof IncrementalBuildChange) {
 				final Set<IPath> changes = ((IncrementalBuildChange) buildChange)
@@ -508,9 +509,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				if (TRACE) {
 					System.out.println("Changes: " + changes);
 				}
-				queue.addAll(this.lastState.importProblems);
 				queue.addAll(this.lastState.dependenciesOf(changes));
 				this.lastState.removeDependenciesFor(changes);
+				processed.addAll(changes);
+				queue.removeAll(processed);
 			}
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
@@ -528,7 +530,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					System.out.println("Queue: " + queue);
 				}
 				final Set<IPath> nextQueue = new HashSet<IPath>();
-				nextQueue.addAll(this.lastState.importProblems);
 				nextQueue.addAll(this.lastState.dependenciesOf(queue));
 				this.lastState.removeDependenciesFor(queue);
 				final IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
@@ -537,9 +538,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				for (IPath path : queue) {
 					files.add(root.getFile(path));
 				}
-				queue.clear();
-				// TODO prevent cycles
-				// queue.addAll(nextQueue);
 				final BuildChange qChange = new BuildChange(currentProject,
 						delta, files, monitor);
 				for (IScriptBuilder builder : builders) {
@@ -553,6 +551,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 								+ (System.currentTimeMillis() - start) + "ms");
 					}
 				}
+				processed.addAll(queue);
+				nextQueue.removeAll(processed);
+				queue.clear();
+				// TODO prevent cycles
+				queue.addAll(nextQueue);
 			}
 			updateExternalFolderLocations(buildChange);
 		} catch (CoreException e) {

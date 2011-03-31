@@ -52,7 +52,7 @@ public class State {
 	 */
 	private final Map<IPath, Set<IPath>> dependencies = new HashMap<IPath, Set<IPath>>();
 
-	final Set<IPath> importProblems = new HashSet<IPath>();
+	private final Set<IPath> importProblems = new HashSet<IPath>();
 
 	static final byte SOURCE_FOLDER = 1;
 	static final byte BINARY_FOLDER = 2;
@@ -259,6 +259,7 @@ public class State {
 
 	protected Collection<IPath> dependenciesOf(Set<IPath> paths) {
 		final Collection<IPath> result = new ArrayList<IPath>();
+		result.addAll(importProblems);
 		for (IPath path : paths) {
 			final Set<IPath> deps = dependencies.get(path);
 			if (deps != null) {
