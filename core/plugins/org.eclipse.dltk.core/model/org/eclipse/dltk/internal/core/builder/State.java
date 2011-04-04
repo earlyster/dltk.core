@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -233,6 +234,7 @@ public class State {
 
 	protected void recordDependency(IPath path, IPath dependency) {
 		Assert.isLegal(scriptProjectName.equals(path.segment(0)));
+		Assert.isLegal(!path.equals(dependency));
 		Set<IPath> paths = dependencies.get(dependency);
 		if (paths == null) {
 			paths = new HashSet<IPath>();
@@ -257,7 +259,7 @@ public class State {
 		importProblems.removeAll(paths);
 	}
 
-	protected Collection<IPath> dependenciesOf(Set<IPath> paths,
+	protected Collection<IPath> dependenciesOf(Collection<IPath> paths,
 			boolean includeImportProblems) {
 		final Collection<IPath> result = new ArrayList<IPath>();
 		if (includeImportProblems) {
@@ -268,6 +270,25 @@ public class State {
 			if (deps != null) {
 				result.addAll(deps);
 			}
+		}
+		return result;
+	}
+
+	protected Collection<IPath> allDependenciesOf(Collection<IPath> paths) {
+		final Collection<IPath> result = new HashSet<IPath>();
+		final List<IPath> queue = new ArrayList<IPath>();
+		while (!paths.isEmpty()) {
+			result.addAll(paths);
+			for (IPath path : paths) {
+				final Set<IPath> deps = dependencies.get(path);
+				if (deps != null) {
+					queue.addAll(deps);
+				}
+			}
+			queue.removeAll(result);
+			paths.clear();
+			paths.addAll(queue);
+			queue.clear();
 		}
 		return result;
 	}

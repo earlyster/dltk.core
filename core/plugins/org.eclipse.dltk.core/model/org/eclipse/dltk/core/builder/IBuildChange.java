@@ -48,7 +48,7 @@ public interface IBuildChange extends IProjectChange {
 	 * 
 	 * @return
 	 */
-	// IProjectChange[] getRequiredProjectChanges();
+	IProjectChange[] getRequiredProjectChanges();
 
 	/**
 	 * Adds the specified resource to this change. Returns <code>true</code> if

@@ -99,7 +99,7 @@ public class FullBuildChange extends AbstractBuildChange implements
 	}
 
 	public IProjectChange[] getRequiredProjectChanges() {
-		return new IProjectChange[0];
+		return NO_PROJECT_CHANGES;
 	}
 
 	private List<IFile> projectResources = null;

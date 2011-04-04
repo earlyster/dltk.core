@@ -31,17 +31,15 @@ import org.eclipse.dltk.core.builder.IScriptBuilder;
 public class IncrementalBuildChange extends IncrementalProjectChange implements
 		IBuildChange {
 
-	public IncrementalBuildChange(IResourceDelta delta, IProject project,
-			IProgressMonitor monitor) {
-		this(delta, project, monitor, Collections.<IPath> emptyList());
-	}
-
-	public IncrementalBuildChange(IResourceDelta delta, IProject project,
+	public IncrementalBuildChange(IResourceDelta delta,
+			IProjectChange[] projectChanges, IProject project,
 			IProgressMonitor monitor, List<IPath> oldExternalFolders) {
 		super(delta, project, monitor);
 		this.oldExternalFolders = oldExternalFolders;
+		this.projectChanges = projectChanges;
 	}
 
+	private final IProjectChange[] projectChanges;
 	private final List<IPath> oldExternalFolders;
 
 	private int buildType = IScriptBuilder.INCREMENTAL_BUILD;
@@ -59,8 +57,7 @@ public class IncrementalBuildChange extends IncrementalProjectChange implements
 	}
 
 	public IProjectChange[] getRequiredProjectChanges() {
-		// TODO Auto-generated method stub
-		return new IProjectChange[0];
+		return projectChanges;
 	}
 
 	public boolean addChangedResource(IFile file) throws CoreException {

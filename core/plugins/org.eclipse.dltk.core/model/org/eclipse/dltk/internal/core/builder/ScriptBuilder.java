@@ -13,6 +13,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -141,6 +142,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
+		IProject[] requiredProjects = getRequiredProjects(true);
 		try {
 			if (kind == FULL_BUILD) {
 				if (DEBUG)
@@ -164,14 +166,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					} else {
 						if (DEBUG)
 							log("Performing incremental build"); //$NON-NLS-1$
-						incrementalBuild(delta, monitor);
+						incrementalBuild(delta, requiredProjects, monitor);
 					}
 				}
 			}
 		} catch (OperationCanceledException e) {
 			// TODO what?
 		}
-		IProject[] requiredProjects = getRequiredProjects(true);
 		long endTime = 0;
 		if (DEBUG || TRACE) {
 			endTime = System.currentTimeMillis();
@@ -462,7 +463,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	}
 
 	protected void incrementalBuild(IResourceDelta delta,
-			IProgressMonitor monitor) throws CoreException {
+			IProject[] requiredProjects, IProgressMonitor monitor)
+			throws CoreException {
 		State newState = new State(this);
 
 		final Set<IPath> externalFoldersBefore;
@@ -487,9 +489,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (builders == null || builders.length == 0) {
 				return;
 			}
-			IBuildChange buildChange = new IncrementalBuildChange(delta,
-					currentProject, monitor, new ArrayList<IPath>(
-							externalFoldersBefore));
+			IBuildChange buildChange = createBuildChange(delta,
+					requiredProjects, externalFoldersBefore, monitor);
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -507,9 +508,22 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				final Set<IPath> changes = ((IncrementalBuildChange) buildChange)
 						.getChangedPaths();
 				if (TRACE) {
-					System.out.println("Changes: " + changes);
+					System.out.println("  Changes: " + changes);
 				}
 				queue.addAll(this.lastState.dependenciesOf(changes, true));
+				for (IProjectChange projectChange : buildChange
+						.getRequiredProjectChanges()) {
+					Collection<IPath> projectChanges = ((IncrementalProjectChange) projectChange)
+							.getChangedPaths();
+					final State projectState = getLastState(
+							projectChange.getProject(), monitor);
+					if (projectState != null) {
+						projectChanges = projectState
+								.allDependenciesOf(projectChanges);
+					}
+					queue.addAll(this.lastState.dependenciesOf(projectChanges,
+							false));
+				}
 				this.lastState.removeDependenciesFor(changes);
 				processed.addAll(changes);
 				queue.removeAll(processed);
@@ -527,7 +541,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 			while (!queue.isEmpty()) {
 				if (TRACE) {
-					System.out.println("Queue: " + queue);
+					System.out.println("  Queue: " + queue);
 				}
 				final Set<IPath> nextQueue = new HashSet<IPath>();
 				nextQueue.addAll(this.lastState.dependenciesOf(queue, false));
@@ -566,6 +580,27 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					this.lastState);
 			monitor.done();
 		}
+	}
+
+	private IBuildChange createBuildChange(IResourceDelta delta,
+			IProject[] requiredProjects,
+			final Set<IPath> externalFoldersBefore, IProgressMonitor monitor) {
+		final List<IProjectChange> projectChanges = new ArrayList<IProjectChange>();
+		for (IProject project : requiredProjects) {
+			final IResourceDelta projectDelta = getDelta(project);
+			if (projectDelta == null) {
+				return new FullBuildChange(currentProject, monitor);
+			}
+			if (projectDelta.getKind() != IResourceDelta.NO_CHANGE) {
+				projectChanges.add(new IncrementalProjectChange(projectDelta,
+						project, monitor));
+			}
+		}
+		return new IncrementalBuildChange(
+				delta,
+				projectChanges.toArray(new IProjectChange[projectChanges.size()]),
+				currentProject, monitor, new ArrayList<IPath>(
+						externalFoldersBefore));
 	}
 
 	private void updateExternalFolderLocations(IBuildChange buildChange)

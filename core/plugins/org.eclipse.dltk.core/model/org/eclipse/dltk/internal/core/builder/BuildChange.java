@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IBuildChange;
+import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IRenameChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 
@@ -102,6 +103,10 @@ class BuildChange extends AbstractBuildChange implements IBuildChange {
 	public List<ISourceModule> getExternalModules(int options)
 			throws CoreException {
 		return Collections.emptyList();
+	}
+
+	public IProjectChange[] getRequiredProjectChanges() {
+		return NO_PROJECT_CHANGES;
 	}
 
 }

@@ -126,4 +126,6 @@ public abstract class AbstractBuildChange implements IProjectChange {
 		return getScriptProject().isOnBuildpath(resource);
 	}
 
+	protected static final IProjectChange[] NO_PROJECT_CHANGES = new IProjectChange[0];
+
 }
