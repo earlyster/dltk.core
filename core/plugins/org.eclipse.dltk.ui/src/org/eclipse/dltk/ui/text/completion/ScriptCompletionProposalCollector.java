@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.internal.ui.text.completion.ScriptCompletionProposalFactoryRegistry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -245,7 +246,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		return CompletionProposalLabelProviderRegistry.create(getNatureId());
 	}
 
-	protected CompletionProposalLabelProvider getLabelProvider() {
+	public CompletionProposalLabelProvider getLabelProvider() {
 		if (fLabelProvider == null) {
 			fLabelProvider = createLabelProvider();
 		}
@@ -386,7 +387,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 *            the proposal to compute the relevance for
 	 * @return the relevance for <code>proposal</code>
 	 */
-	protected int computeRelevance(CompletionProposal proposal) {
+	public int computeRelevance(CompletionProposal proposal) {
 		final int baseRelevance = proposal.getRelevance() * 16;
 		switch (proposal.getKind()) {
 		case CompletionProposal.LABEL_REF:
@@ -438,6 +439,17 @@ public abstract class ScriptCompletionProposalCollector extends
 	 */
 	protected IScriptCompletionProposal createScriptCompletionProposal(
 			CompletionProposal proposal) {
+		final IScriptCompletionProposalFactory[] factories = ScriptCompletionProposalFactoryRegistry
+				.getFactories(getNatureId());
+		if (factories != null) {
+			for (IScriptCompletionProposalFactory factory : factories) {
+				final IScriptCompletionProposal scriptProposal = factory
+						.create(this, proposal);
+				if (scriptProposal != null) {
+					return scriptProposal;
+				}
+			}
+		}
 		switch (proposal.getKind()) {
 		case CompletionProposal.KEYWORD:
 			return createKeywordProposal(proposal);
@@ -520,7 +532,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 *            <code>null</code>
 	 * @return the image corresponding to <code>descriptor</code>
 	 */
-	protected final Image getImage(ImageDescriptor descriptor) {
+	public final Image getImage(ImageDescriptor descriptor) {
 		return (descriptor == null) ? null : fRegistry.get(descriptor);
 	}
 
@@ -826,5 +838,9 @@ public abstract class ScriptCompletionProposalCollector extends
 		fScriptProposals.clear();
 		fKeywords.clear();
 		fSuggestedMethodNames.clear();
+	}
+
+	public IScriptProject getScriptProject() {
+		return fScriptProject;
 	}
 }

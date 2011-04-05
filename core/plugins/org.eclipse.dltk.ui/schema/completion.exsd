@@ -19,6 +19,7 @@
       <complexType>
          <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="proposalLabelProvider"/>
+            <element ref="proposalFactory"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -64,6 +65,31 @@ and must have a public 0-argument constructor.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.dltk.ui.text.completion.CompletionProposalLabelProvider:"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  DLTK Language Toolkit ID.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.language/language/@nature"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="proposalFactory">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.text.completion.IScriptCompletionProposalFactory"/>
                </appInfo>
             </annotation>
          </attribute>

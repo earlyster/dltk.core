@@ -198,7 +198,7 @@ public class CompletionProposalLabelProvider {
 	 *            the method proposal to display
 	 * @return the display label for the given type proposal
 	 */
-	protected String createTypeProposalLabel(CompletionProposal typeProposal) {
+	public String createTypeProposalLabel(CompletionProposal typeProposal) {
 		return createTypeProposalLabel(typeProposal.getName());
 	}
 
@@ -371,7 +371,7 @@ public class CompletionProposalLabelProvider {
 						.getFlags()), proposal);
 	}
 
-	protected ImageDescriptor createTypeImageDescriptor(
+	public ImageDescriptor createTypeImageDescriptor(
 			CompletionProposal proposal) {
 		// boolean isInterfaceOrAnnotation= Flags.isInterface(flags) ||
 		// Flags.isAnnotation(flags);
