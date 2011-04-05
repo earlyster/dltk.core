@@ -18,7 +18,7 @@ import org.eclipse.dltk.utils.NatureExtensionManager;
 public class CompletionProposalLabelProviderRegistry {
 
 	public static CompletionProposalLabelProvider create(String natureId) {
-		final NatureExtensionManager manager = new NatureExtensionManager(
+		final NatureExtensionManager<CompletionProposalLabelProvider> manager = new NatureExtensionManager<CompletionProposalLabelProvider>(
 				DLTKUIPlugin.PLUGIN_ID + ".completion",
 				CompletionProposalLabelProvider.class) {
 			@Override
