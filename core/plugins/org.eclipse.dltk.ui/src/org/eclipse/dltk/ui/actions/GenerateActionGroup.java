@@ -162,7 +162,6 @@ public class GenerateActionGroup extends ActionGroup {
 		action = new IndentAction(
 				DLTKEditorMessages.getBundleForConstructedKeys(),
 				"Indent.", fEditor, true); //$NON-NLS-1$
-		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.INDENT);
 		fEditor.setAction(DLTKActionConstants.INDENT_ON_TAB, action);
 		fEditor.markAsStateDependentAction(DLTKActionConstants.INDENT_ON_TAB,
 				true);
