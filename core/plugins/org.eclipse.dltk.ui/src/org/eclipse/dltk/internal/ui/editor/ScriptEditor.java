@@ -789,7 +789,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				stores.toArray(new IPreferenceStore[stores.size()]));
 	}
 
-	protected IPreferenceStore getScriptPreferenceStore() {
+	public IPreferenceStore getScriptPreferenceStore() {
 		IDLTKLanguageToolkit toolkit = getLanguageToolkit();
 		if (toolkit != null) {
 			IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
@@ -2250,6 +2250,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				if (textWidget.getTabs() != tabWidth)
 					textWidget.setTabs(tabWidth);
 				return;
+			}
+			if (PreferenceConstants.EDITOR_SMART_TAB.equals(property)) {
+				if (getPreferenceStore().getBoolean(
+						PreferenceConstants.EDITOR_SMART_TAB)) {
+					setActionActivationCode(DLTKActionConstants.INDENT_ON_TAB,
+							SWT.TAB, -1, SWT.NONE);
+				} else {
+					removeActionActivationCode(DLTKActionConstants.INDENT_ON_TAB);
+				}
 			}
 
 			if (isFoldingPropertyEvent(property)

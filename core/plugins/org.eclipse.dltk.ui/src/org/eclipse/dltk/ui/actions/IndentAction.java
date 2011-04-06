@@ -15,16 +15,21 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.ScriptUtils;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.ui.CodeFormatterConstants;
 import org.eclipse.dltk.ui.formatter.FormatterException;
 import org.eclipse.dltk.ui.formatter.IScriptFormatter;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterExtension;
 import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
+import org.eclipse.dltk.ui.text.util.AutoEditUtils;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -34,12 +39,14 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 /**
@@ -51,6 +58,12 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 public class IndentAction extends TextEditorAction {
 
 	/**
+	 * Whether this is the action invoked by TAB. When <code>true</code>,
+	 * indentation behaves differently to accommodate normal TAB operation.
+	 */
+	private final boolean fIsTabAction;
+
+	/**
 	 * Creates a new instance.
 	 * 
 	 * @param bundle
@@ -59,9 +72,13 @@ public class IndentAction extends TextEditorAction {
 	 *            the prefix to use for keys in <code>bundle</code>
 	 * @param editor
 	 *            the text editor
+	 * @param isTabAction
+	 *            whether the action should insert tabs if over the indentation
 	 */
-	public IndentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
+	public IndentAction(ResourceBundle bundle, String prefix,
+			ITextEditor editor, boolean isTabAction) {
 		super(bundle, prefix, editor);
+		fIsTabAction = isTabAction;
 	}
 
 	private IProject getProject() {
@@ -88,14 +105,47 @@ public class IndentAction extends TextEditorAction {
 		final IDocument document = getDocument();
 		if (document != null) {
 			try {
-				int offset = selection.getOffset();
-				int length = selection.getLength();
-				int startLine = document.getLineOfOffset(offset);
+				final int offset = selection.getOffset();
+				final int length = selection.getLength();
+				final int startLine = document.getLineOfOffset(offset);
 				int lastLine = document.getLineOfOffset(offset + length);
 				if (lastLine > startLine) {
 					if (document.getLineOffset(lastLine) == offset + length) {
 						--lastLine;
 					}
+				}
+				if (fIsTabAction) {
+					if (startLine != lastLine) {
+						// don't support multiple lines for now
+						return;
+					}
+					final String line = getLine(document, startLine);
+					String indent = getIndent(line);
+					final int lineStart = document.getLineOffset(startLine);
+					if (offset >= lineStart
+							&& offset <= lineStart + indent.length()) {
+						final String prevIndent = getPrevIndent(document,
+								startLine);
+						if (prevIndent != null
+								&& !indent.startsWith(prevIndent)) {
+							// current indent is less then previous line indent
+							document.replace(lineStart, indent.length(),
+									prevIndent);
+							selectAndReveal(lineStart + prevIndent.length(), 0);
+							return;
+						}
+						if (lineStart + indent.length() == offset) {
+							// if we are right before the text start then just
+							// insert a tab
+							String tab = getTabEquivalent(indent);
+							document.replace(offset, 0, tab);
+							selectAndReveal(offset + tab.length(), 0);
+							return;
+						}
+						// move caret to the text
+						selectAndReveal(lineStart + indent.length(), 0);
+					}
+					return;
 				}
 				final IProject project = getProject();
 				final IScriptFormatterFactory factory = ScriptFormatterManager
@@ -215,7 +265,140 @@ public class IndentAction extends TextEditorAction {
 	public void update() {
 		super.update();
 		if (isEnabled())
-			setEnabled(canModifyEditor() && !getSelection().isEmpty());
+			if (fIsTabAction)
+				setEnabled(canModifyEditor() && isSmartMode()
+						&& isValidSelection());
+			else
+				setEnabled(canModifyEditor() && !getSelection().isEmpty());
+	}
+
+	/**
+	 * Returns if the current selection is valid, i.e. whether it is empty and
+	 * the caret in the whitespace at the start of a line, or covers multiple
+	 * lines.
+	 * 
+	 * @return <code>true</code> if the selection is valid for an indent
+	 *         operation
+	 */
+	private boolean isValidSelection() {
+		ITextSelection selection = getSelection();
+		if (selection.isEmpty())
+			return false;
+		int offset = selection.getOffset();
+		int length = selection.getLength();
+		IDocument document = getDocument();
+		if (document == null)
+			return false;
+		try {
+			IRegion firstLine = document.getLineInformationOfOffset(offset);
+			int lineOffset = firstLine.getOffset();
+			// either the selection has to be empty and the caret in the WS at
+			// the line start
+			// or the selection has to extend over multiple lines
+			if (length == 0)
+				return document.get(lineOffset, offset - lineOffset).trim()
+						.length() == 0;
+			else
+				// return lineOffset + firstLine.getLength() < offset + length;
+				return false; // only enable for empty selections for now
+		} catch (BadLocationException e) {
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the smart preference state.
+	 * 
+	 * @return <code>true</code> if smart mode is on, <code>false</code>
+	 *         otherwise
+	 */
+	private boolean isSmartMode() {
+		ITextEditor editor = getTextEditor();
+		if (editor instanceof ITextEditorExtension3)
+			return ((ITextEditorExtension3) editor).getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+		return false;
+	}
+
+	/**
+	 * Selects the given range on the editor.
+	 * 
+	 * @param newOffset
+	 *            the selection offset
+	 * @param newLength
+	 *            the selection range
+	 */
+	private void selectAndReveal(int newOffset, int newLength) {
+		Assert.isTrue(newOffset >= 0);
+		Assert.isTrue(newLength >= 0);
+		ITextEditor editor = getTextEditor();
+		if (editor instanceof ScriptEditor) {
+			ISourceViewer viewer = ((ScriptEditor) editor).getViewer();
+			if (viewer != null)
+				viewer.setSelectedRange(newOffset, newLength);
+		} else
+			// this is too intrusive, but will never get called anyway
+			getTextEditor().selectAndReveal(newOffset, newLength);
+	}
+
+	/**
+	 * Returns a tab equivalent, either as a tab character or as spaces,
+	 * depending on the editor and formatter preferences.
+	 * 
+	 * @return a string representing one tab in the editor, never
+	 *         <code>null</code>
+	 */
+	private String getTabEquivalent(String indent) {
+		final ITextEditor editor = getTextEditor();
+		if (!(editor instanceof ScriptEditor)) {
+			return "\t";
+		}
+		final IPreferenceStore prefs = ((ScriptEditor) editor)
+				.getScriptPreferenceStore();
+		String tab;
+		if (CodeFormatterConstants.SPACE.equals(prefs
+				.getString(CodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+			final int tabSize = prefs
+					.getInt(CodeFormatterConstants.FORMATTER_TAB_SIZE);
+			int wsLen = whiteSpaceLength(indent, tabSize);
+			tab = AutoEditUtils.getNSpaces(tabSize - (wsLen % tabSize));
+		} else
+			tab = "\t"; //$NON-NLS-1$
+		return tab;
+	}
+
+	/**
+	 * Returns the size in characters of a string. All characters count one,
+	 * tabs count the editor's preference for the tab display
+	 * 
+	 * @param indent
+	 *            the string to be measured.
+	 * @param project
+	 *            the project to retrieve the indentation settings from,
+	 *            <b>null</b> for workspace settings
+	 * @return the size in characters of a string
+	 */
+	private static int whiteSpaceLength(String indent, int tabSize) {
+		if (indent == null)
+			return 0;
+		else {
+			int size = 0;
+			int l = indent.length();
+			for (int i = 0; i < l; i++)
+				size += indent.charAt(i) == '\t' ? tabSize : 1;
+			return size;
+		}
+	}
+
+	private String getPrevIndent(IDocument document, int n)
+			throws BadLocationException {
+		for (; --n >= 0;) {
+			final String prevLine = getLine(document, n);
+			if (prevLine.trim().length() != 0) {
+				// TODO adjust indent e.g. after "{"
+				return getIndent(prevLine);
+			}
+		}
+		return null;
 	}
 
 	/**

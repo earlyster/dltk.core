@@ -91,6 +91,8 @@ public class DLTKActionConstants {
 	 *
 	 */
 	public static final String INDENT= "org.eclipse.dltk.ui.actions.Indent"; //$NON-NLS-1$
+
+	public static final String INDENT_ON_TAB = "org.eclipse.dltk.ui.actions.IndentOnTab"; //$NON-NLS-1$
 	
 	/**
 	 * Source menu: name of standard Shift Right action

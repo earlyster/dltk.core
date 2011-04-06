@@ -13,6 +13,7 @@ package org.eclipse.dltk.ui.actions;
 import org.eclipse.dltk.internal.ui.actions.DLTKQuickMenuAction;
 import org.eclipse.dltk.internal.ui.editor.DLTKEditorMessages;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -21,6 +22,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -151,11 +153,26 @@ public class GenerateActionGroup extends ActionGroup {
 	private void installIndentAction() {
 		Action action = new IndentAction(
 				DLTKEditorMessages.getBundleForConstructedKeys(),
-				"Indent.", fEditor); //$NON-NLS-1$
+				"Indent.", fEditor, false); //$NON-NLS-1$
 		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.INDENT);
 		fEditor.setAction(DLTKActionConstants.INDENT, action);
 		fEditor.markAsStateDependentAction(DLTKActionConstants.INDENT, true);
 		fEditor.markAsSelectionDependentAction(DLTKActionConstants.INDENT, true);
+
+		action = new IndentAction(
+				DLTKEditorMessages.getBundleForConstructedKeys(),
+				"Indent.", fEditor, true); //$NON-NLS-1$
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.INDENT);
+		fEditor.setAction(DLTKActionConstants.INDENT_ON_TAB, action);
+		fEditor.markAsStateDependentAction(DLTKActionConstants.INDENT_ON_TAB,
+				true);
+		fEditor.markAsSelectionDependentAction(
+				DLTKActionConstants.INDENT_ON_TAB, true);
+		if (fEditor.getScriptPreferenceStore().getBoolean(
+				PreferenceConstants.EDITOR_SMART_TAB)) {
+			fEditor.setActionActivationCode(DLTKActionConstants.INDENT_ON_TAB,
+					SWT.TAB, -1, SWT.NONE);
+		}
 	}
 
 	@Override
