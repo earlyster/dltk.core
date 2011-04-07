@@ -145,6 +145,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 			slash = CharOperation.indexOf(SEPARATOR, key, start);
 			if (start == slash) {
 				this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
+			} else if (slash == start + 1 && key[start] == ZERO_CHAR) {
+				enclosingTypeNames = ONE_ZERO_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
 						start, slash);

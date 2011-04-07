@@ -946,9 +946,11 @@ public class BasicSearchEngine {
 				// documentPathFilter.add(fullPath);
 				// Filter unexpected types
 				TypeDeclarationPattern record = (TypeDeclarationPattern) indexRecord;
-				if (record.enclosingTypeNames == IIndexConstants.ONE_ZERO_CHAR) {
-					return true; // filter out local and anonymous classes
-				}
+				// FIXME (alex) filter out local and anonymous classes
+				// if (record.enclosingTypeNames ==
+				// IIndexConstants.ONE_ZERO_CHAR) {
+				// return true; // filter out local and anonymous classes
+				// }
 				switch (copiesLength) {
 				case 0:
 					break;

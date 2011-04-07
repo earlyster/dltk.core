@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
@@ -23,6 +24,7 @@ import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
@@ -229,6 +231,11 @@ public class TypeNameMatchRequestorWrapper implements
 		}
 		String simpleName = simpleNames[length];
 		ISourceModule unit = pkgFragment.getSourceModule(simpleName);
+		if (enclosingTypeNames == IIndexConstants.ONE_ZERO_CHAR) {
+			final TypeFinder finder = new TypeFinder(simpleTypeName);
+			unit.accept(finder);
+			return finder.type;
+		}
 		int etnLength = enclosingTypeNames == null ? 0
 				: enclosingTypeNames.length;
 		String containerTypeName = (etnLength == 0) ? simpleTypeName
@@ -255,6 +262,29 @@ public class TypeNameMatchRequestorWrapper implements
 			}
 		}
 		return type;
+	}
+
+	static class TypeFinder implements IModelElementVisitor {
+		IType type;
+		final String simpleTypeName;
+
+		public TypeFinder(String simpleTypeName) {
+			this.simpleTypeName = simpleTypeName;
+		}
+
+		public boolean visit(IModelElement element) {
+			if (type == null) {
+				if (element.getElementType() == IModelElement.TYPE
+						&& simpleTypeName.equals(element.getElementName())) {
+					type = (IType) element;
+					return false;
+				}
+				return true;
+			} else {
+				return false;
+			}
+		}
+
 	}
 
 	private IType resolveType(IType parentType, char[][] enclosingTypeNames,
