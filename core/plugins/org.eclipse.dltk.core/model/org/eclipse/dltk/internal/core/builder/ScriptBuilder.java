@@ -60,6 +60,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	public static final boolean DEBUG = DLTKCore.DEBUG_SCRIPT_BUILDER;
 	public static final boolean TRACE = DLTKCore.TRACE_SCRIPT_BUILDER;
 
+	private static final int TRACE_BUILDER_MIN_ELAPSED_TIME = 10;
+
 	public IProject currentProject = null;
 	ScriptProject scriptProject = null;
 	State lastState;
@@ -257,19 +259,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	protected static class BuildStateStub implements IBuildState {
-		public BuildStateStub() {
-		}
-
-		public void recordImportProblem(IPath path) {
-		}
-
-		public void recordDependency(IPath path, IPath dependency) {
-		}
-	}
-
-	private class BuildState implements IBuildState {
-		public BuildState() {
+	private class BuildState extends AbstractBuildState {
+		public BuildState(String projectName) {
+			super(projectName);
 		}
 
 		public void recordImportProblem(IPath path) {
@@ -320,7 +312,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			resetBuilders(builders, new BuildStateStub(), monitor);
+			resetBuilders(builders,
+					new BuildStateStub(currentProject.getName()), monitor);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -411,7 +404,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	protected void fullBuild(final IProgressMonitor monitor) {
 		this.lastState = clearLastState();
-		final IBuildState buildState = new BuildState();
+		final IBuildState buildState = new BuildState(currentProject.getName());
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -438,8 +431,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				final long start = TRACE ? System.currentTimeMillis() : 0;
 				builder.build(buildChange, buildState, monitor);
 				if (TRACE) {
-					System.out.println(builder.getClass().getName() + " "
-							+ (System.currentTimeMillis() - start) + "ms");
+					final long elapsed = System.currentTimeMillis() - start;
+					if (elapsed > TRACE_BUILDER_MIN_ELAPSED_TIME) {
+						System.out.println(builder.getClass().getName() + " "
+								+ elapsed + "ms");
+					}
 				}
 			}
 			updateExternalFolderLocations(buildChange);
@@ -462,6 +458,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	private static class DependencyBuildChange extends BuildChange {
+
+		public DependencyBuildChange(IProject project, IResourceDelta delta,
+				List<IFile> files, IProgressMonitor monitor) {
+			super(project, delta, files, monitor);
+		}
+
+		@Override
+		public boolean isDependencyBuild() {
+			return true;
+		}
+
+	}
+
 	protected void incrementalBuild(IResourceDelta delta,
 			IProject[] requiredProjects, IProgressMonitor monitor)
 			throws CoreException {
@@ -477,7 +487,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 
 		this.lastState = newState;
-		final IBuildState buildState = new BuildState();
+		final BuildState buildState = new BuildState(currentProject.getName());
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -535,8 +545,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				final long start = TRACE ? System.currentTimeMillis() : 0;
 				builder.build(buildChange, buildState, monitor);
 				if (TRACE) {
-					System.out.println(builder.getClass().getName() + " "
-							+ (System.currentTimeMillis() - start) + "ms");
+					final long elapsed = System.currentTimeMillis() - start;
+					if (elapsed > TRACE_BUILDER_MIN_ELAPSED_TIME) {
+						System.out.println(builder.getClass().getName() + " "
+								+ elapsed + "ms");
+					}
 				}
 			}
 			while (!queue.isEmpty()) {
@@ -552,8 +565,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				for (IPath path : queue) {
 					files.add(root.getFile(path));
 				}
-				final BuildChange qChange = new BuildChange(currentProject,
-						delta, files, monitor);
+				buildState.resetStructuralChanges();
+				final DependencyBuildChange qChange = new DependencyBuildChange(
+						currentProject, delta, files, monitor);
 				for (IScriptBuilder builder : builders) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -561,8 +575,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					final long start = TRACE ? System.currentTimeMillis() : 0;
 					builder.build(qChange, buildState, monitor);
 					if (TRACE) {
-						System.out.println(builder.getClass().getName() + " "
-								+ (System.currentTimeMillis() - start) + "ms");
+						final long elapsed = System.currentTimeMillis() - start;
+						if (elapsed > TRACE_BUILDER_MIN_ELAPSED_TIME) {
+							System.out.println(builder.getClass().getName()
+									+ " " + elapsed + "ms");
+						}
 					}
 				}
 				processed.addAll(queue);

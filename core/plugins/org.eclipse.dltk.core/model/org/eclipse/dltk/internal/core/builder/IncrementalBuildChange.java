@@ -56,6 +56,10 @@ public class IncrementalBuildChange extends IncrementalProjectChange implements
 		this.buildType = buildType;
 	}
 
+	public boolean isDependencyBuild() {
+		return false;
+	}
+
 	public IProjectChange[] getRequiredProjectChanges() {
 		return projectChanges;
 	}

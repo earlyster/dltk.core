@@ -91,6 +91,10 @@ class BuildChange extends AbstractBuildChange implements IBuildChange {
 		this.buildType = buildType;
 	}
 
+	public boolean isDependencyBuild() {
+		return false;
+	}
+
 	public boolean addChangedResource(IFile file) throws CoreException {
 		// TODO Auto-generated method stub
 		return false;

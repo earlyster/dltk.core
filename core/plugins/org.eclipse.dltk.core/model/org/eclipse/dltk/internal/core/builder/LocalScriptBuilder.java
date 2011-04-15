@@ -31,7 +31,7 @@ class LocalScriptBuilder extends ScriptBuilder {
 			IProgressMonitor monitor) {
 		this.currentProject = project;
 		this.scriptProject = (ScriptProject) DLTKCore.create(project);
-		final IBuildState buildState = new BuildStateStub();
+		final IBuildState buildState = new BuildStateStub(project.getName());
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(

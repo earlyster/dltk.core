@@ -98,6 +98,10 @@ public class FullBuildChange extends AbstractBuildChange implements
 		}
 	}
 
+	public boolean isDependencyBuild() {
+		return false;
+	}
+
 	public IProjectChange[] getRequiredProjectChanges() {
 		return NO_PROJECT_CHANGES;
 	}

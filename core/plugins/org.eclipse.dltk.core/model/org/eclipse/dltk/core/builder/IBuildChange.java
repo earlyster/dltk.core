@@ -43,6 +43,8 @@ public interface IBuildChange extends IProjectChange {
 	 */
 	void setBuildType(int buildType);
 
+	boolean isDependencyBuild();
+
 	/**
 	 * Returns changes in required projects
 	 * 

@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
+import java.util.Set;
+
 import org.eclipse.core.runtime.IPath;
 
 /**
@@ -31,4 +33,20 @@ public interface IBuildState {
 	 *            it's dependency
 	 */
 	void recordDependency(IPath path, IPath dependency);
+
+	/**
+	 * Records the structural change at the specified path
+	 * 
+	 * @param path
+	 */
+	void recordStructuralChange(IPath path);
+
+	/**
+	 * Returns the currently collected set of structural changes. The set is
+	 * unmodifiable.
+	 * 
+	 * @return
+	 */
+	Set<IPath> getStructuralChanges();
+
 }
