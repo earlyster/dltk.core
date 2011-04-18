@@ -20,6 +20,10 @@ public class SourceRange implements ISourceRange {
 		this.length = length;
 	}
 
+	public SourceRange(ISourceRange range) {
+		this(range.getOffset(), range.getLength());
+	}
+
 	public int getLength() {
 		return length;
 	}
@@ -31,7 +35,19 @@ public class SourceRange implements ISourceRange {
 	@Override
 	public String toString() {
 		int end = getOffset() + getLength() - 1;
-		return "[" + getOffset() + "," + end + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "[" + getOffset() + ".." + end + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	public int hashCode() {
+		return length ^ offset;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof ISourceRange) {
+			final ISourceRange other = (ISourceRange) obj;
+			return other.getOffset() == offset && other.getLength() == length;
+		}
+		return false;
 	}
 
 	/**
