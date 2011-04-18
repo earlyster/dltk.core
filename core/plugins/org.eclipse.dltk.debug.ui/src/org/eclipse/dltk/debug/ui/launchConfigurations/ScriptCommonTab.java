@@ -31,6 +31,7 @@ import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
@@ -45,7 +46,9 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -60,6 +63,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -74,7 +79,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
@@ -97,28 +101,13 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 
 	/**
-	 * Provides a persistible dialog for selecting the shared project location
+	 * Constant representing the id of the {@link IDialogSettings} location for
+	 * the {@link ContainerSelectionDialog} used on this tab
 	 */
-	class SharedLocationSelectionDialog extends ContainerSelectionDialog {
-		private final String SETTINGS_ID = IDebugUIConstants.PLUGIN_ID
-				+ ".SHARED_LAUNCH_CONFIGURATON_DIALOG"; //$NON-NLS-1$
-
-		public SharedLocationSelectionDialog(Shell parentShell,
-				IContainer initialRoot, boolean allowNewContainerName,
-				String message) {
-			super(parentShell, initialRoot, allowNewContainerName, message);
-		}
-
-		protected IDialogSettings getDialogBoundsSettings() {
-			IDialogSettings settings = DebugUIPlugin.getDefault()
-					.getDialogSettings();
-			IDialogSettings section = settings.getSection(SETTINGS_ID);
-			if (section == null) {
-				section = settings.addNewSection(SETTINGS_ID);
-			}
-			return section;
-		}
-	}
+	private final String SHARED_LAUNCH_CONFIGURATON_DIALOG = IDebugUIConstants.PLUGIN_ID
+			+ ".SHARED_LAUNCH_CONFIGURATON_DIALOG"; //$NON-NLS-1$
+	private final String WORKSPACE_SELECTION_DIALOG = IDebugUIConstants.PLUGIN_ID
+			+ ".WORKSPACE_SELECTION_DIALOG"; //$NON-NLS-1$
 
 	/**
 	 * This attribute exists solely for the purpose of making sure that invalid
@@ -171,7 +160,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	 */
 	private ModifyListener fBasicModifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent evt) {
-			updateLaunchConfigurationDialog();
+			scheduleUpdateJob();
 		}
 	};
 
@@ -199,6 +188,21 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		createEncodingComponent(comp);
 		createOutputCaptureComponent(comp);
 		createLaunchInBackgroundComponent(comp);
+	}
+
+	/**
+	 * @return the {@link IDialogSettings} to pass into the
+	 *         {@link ContainerSelectionDialog}
+	 * @since 3.6
+	 */
+	IDialogSettings getDialogBoundsSettings(String id) {
+		IDialogSettings settings = DebugUIPlugin.getDefault()
+				.getDialogSettings();
+		IDialogSettings section = settings.getSection(id);
+		if (section == null) {
+			section = settings.addNewSection(id);
+		}
+		return section;
 	}
 
 	/**
@@ -336,13 +340,20 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 				dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
 				dialog.setComparator(new ResourceComparator(
 						ResourceComparator.NAME));
+				dialog.setDialogBoundsSettings(
+						getDialogBoundsSettings(WORKSPACE_SELECTION_DIALOG),
+						Dialog.DIALOG_PERSISTSIZE);
 				if (dialog.open() == IDialogConstants.OK_ID) {
 					IResource resource = (IResource) dialog.getFirstResult();
-					String arg = resource.getFullPath().toString();
-					String fileLoc = VariablesPlugin.getDefault()
-							.getStringVariableManager()
-							.generateVariableExpression("workspace_loc", arg); //$NON-NLS-1$
-					fFileText.setText(fileLoc);
+					if (resource != null) {
+						String arg = resource.getFullPath().toString();
+						String fileLoc = VariablesPlugin
+								.getDefault()
+								.getStringVariableManager()
+								.generateVariableExpression(
+										"workspace_loc", arg); //$NON-NLS-1$
+						fFileText.setText(fileLoc);
+					}
 				}
 			}
 		});
@@ -438,7 +449,8 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 				LaunchConfigurationsMessages.CommonTab_1, 2, 1,
 				GridData.FILL_BOTH);
 
-		fDefaultEncodingButton = createRadioButton(group, ""); //$NON-NLS-1$
+		fDefaultEncodingButton = createRadioButton(group,
+				IInternalDebugCoreConstants.EMPTY_STRING);
 		GridData gd = new GridData(SWT.BEGINNING, SWT.NORMAL, true, false);
 		gd.horizontalSpan = 2;
 		fDefaultEncodingButton.setLayoutData(gd);
@@ -448,7 +460,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		fAltEncodingButton.setLayoutData(new GridData(
 				GridData.HORIZONTAL_ALIGN_BEGINNING));
 
-		fEncodingCombo = new Combo(group, SWT.READ_ONLY);
+		fEncodingCombo = new Combo(group, SWT.NONE);
 		fEncodingCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEncodingCombo.setFont(parent.getFont());
 		List allEncodings = IDEEncoding.getIDEEncodings();
@@ -480,6 +492,35 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		fAltEncodingButton.addSelectionListener(listener);
 		fDefaultEncodingButton.addSelectionListener(listener);
 		fEncodingCombo.addSelectionListener(listener);
+		fEncodingCombo.addKeyListener(new KeyAdapter() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see
+			 * org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt
+			 * .events.KeyEvent)
+			 */
+			public void keyReleased(KeyEvent e) {
+				scheduleUpdateJob();
+			}
+		});
+	}
+
+	/**
+	 * Returns whether or not the given encoding is valid.
+	 * 
+	 * @param enc
+	 *            the encoding to validate
+	 * @return <code>true</code> if the encoding is valid, <code>false</code>
+	 *         otherwise
+	 */
+	private boolean isValidEncoding(String enc) {
+		try {
+			return Charset.isSupported(enc);
+		} catch (IllegalCharsetNameException e) {
+			// This is a valid exception
+			return false;
+		}
 	}
 
 	/**
@@ -524,7 +565,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	}
 
 	private String getDefaultSharedConfigLocation(ILaunchConfiguration config) {
-		String path = ""; //$NON-NLS-1$
+		String path = IInternalDebugCoreConstants.EMPTY_STRING;
 		try {
 			IResource[] res = config.getMappedResources();
 			if (res != null) {
@@ -558,12 +599,15 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	private void handleSharedLocationButtonSelected() {
 		String currentContainerString = fSharedLocationText.getText();
 		IContainer currentContainer = getContainer(currentContainerString);
-		SharedLocationSelectionDialog dialog = new SharedLocationSelectionDialog(
+		ContainerSelectionDialog dialog = new ContainerSelectionDialog(
 				getShell(),
 				currentContainer,
 				false,
 				LaunchConfigurationsMessages.CommonTab_Select_a_location_for_the_launch_configuration_13);
 		dialog.showClosedProjects(false);
+		dialog.setDialogBoundsSettings(
+				getDialogBoundsSettings(SHARED_LAUNCH_CONFIGURATON_DIALOG),
+				Dialog.DIALOG_PERSISTSIZE);
 		dialog.open();
 		Object[] results = dialog.getResult();
 		if ((results != null) && (results.length > 0)
@@ -602,7 +646,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		fSharedLocationText
 				.setText(getDefaultSharedConfigLocation(configuration));
 		if (isShared) {
-			String containerName = ""; //$NON-NLS-1$
+			String containerName = IInternalDebugCoreConstants.EMPTY_STRING;
 			IFile file = configuration.getFile();
 			if (file != null) {
 				IContainer parent = file.getParent();
@@ -884,29 +928,12 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		if (fAltEncodingButton.getSelection()) {
 			if (fEncodingCombo.getSelectionIndex() == -1) {
 				if (!isValidEncoding(fEncodingCombo.getText().trim())) {
-					setErrorMessage(LaunchConfigurationsMessages.CommonTab_15);
+					setErrorMessage(DLTKLaunchConfigurationsMessages.commonTab_EncodingNotSupported);
 					return false;
 				}
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Returns whether or not the given encoding is valid.
-	 * 
-	 * @param enc
-	 *            the encoding to validate
-	 * @return <code>true</code> if the encoding is valid, <code>false</code>
-	 *         otherwise
-	 */
-	private boolean isValidEncoding(String enc) {
-		try {
-			return Charset.isSupported(enc);
-		} catch (IllegalCharsetNameException e) {
-			// This is a valid exception
-			return false;
-		}
 	}
 
 	/**
@@ -986,7 +1013,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 				configuration, fLaunchInBackgroundButton.getSelection(), true);
 		String encoding = null;
 		if (fAltEncodingButton.getSelection()) {
-			encoding = fEncodingCombo.getText();
+			encoding = fEncodingCombo.getText().trim();
 		}
 		configuration.setAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
 		boolean captureOutput = false;

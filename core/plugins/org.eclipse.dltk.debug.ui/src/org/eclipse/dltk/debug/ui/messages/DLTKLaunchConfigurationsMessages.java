@@ -45,6 +45,8 @@ public class DLTKLaunchConfigurationsMessages extends NLS {
 	public static String remoteTab_scriptSourceFolders;
 	public static String ScriptLaunchConfigurationTab_debugOptions;
 
+	public static String commonTab_EncodingNotSupported;
+
 	private DLTKLaunchConfigurationsMessages() {
 		// dont instatiate
 	}
