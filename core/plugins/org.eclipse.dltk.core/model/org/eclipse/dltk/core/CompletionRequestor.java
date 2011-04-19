@@ -70,12 +70,15 @@ public abstract class CompletionRequestor {
 		// do nothing
 	}
 
+	public static final int ALL = 1 << 31;
+	private static final int ALL_BITSET = Integer.MAX_VALUE;
+
 	/**
 	 * Returns whether the given kind of completion proposal is ignored.
 	 * 
 	 * @param completionProposalKind
 	 *            one of the kind constants declared on
-	 *            <code>CompletionProposal</code>
+	 *            <code>CompletionProposal</code> or {@link #ALL}
 	 * @return <code>true</code> if the given kind of completion proposal is
 	 *         ignored by this requestor, and <code>false</code> if it is of
 	 *         interest
@@ -83,6 +86,9 @@ public abstract class CompletionRequestor {
 	 * @see CompletionProposal#getKind()
 	 */
 	public final boolean isIgnored(int completionProposalKind) {
+		if (completionProposalKind == ALL) {
+			return this.ignoreSet == ALL_BITSET;
+		}
 		if (completionProposalKind < CompletionProposal.FIRST_KIND
 				|| completionProposalKind > CompletionProposal.LAST_KIND) {
 			throw new IllegalArgumentException(
@@ -96,7 +102,7 @@ public abstract class CompletionRequestor {
 	 * 
 	 * @param completionProposalKind
 	 *            one of the kind constants declared on
-	 *            <code>CompletionProposal</code>
+	 *            <code>CompletionProposal</code> or {@link #ALL}
 	 * @param ignore
 	 *            <code>true</code> if the given kind of completion proposal is
 	 *            ignored by this requestor, and <code>false</code> if it is of
@@ -105,6 +111,10 @@ public abstract class CompletionRequestor {
 	 * @see CompletionProposal#getKind()
 	 */
 	public final void setIgnored(int completionProposalKind, boolean ignore) {
+		if (completionProposalKind == ALL) {
+			this.ignoreSet = ignore ? ALL_BITSET : 0;
+			return;
+		}
 		if (completionProposalKind < CompletionProposal.FIRST_KIND
 				|| completionProposalKind > CompletionProposal.LAST_KIND) {
 			throw new IllegalArgumentException(

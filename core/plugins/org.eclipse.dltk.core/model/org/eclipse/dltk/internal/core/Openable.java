@@ -480,6 +480,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			if (engines != null) {
 				for (ICompletionEngine engine : engines) {
 					run(engine);
+					if (requestor.isIgnored(CompletionRequestor.ALL)) {
+						break;
+					}
 					if (monitor.isCanceled())
 						break;
 				}
