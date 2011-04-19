@@ -176,7 +176,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * @return invocationContext the invocation context
 	 * 
 	 */
-	protected final ScriptContentAssistInvocationContext getInvocationContext() {
+	public final ScriptContentAssistInvocationContext getInvocationContext() {
 		if (fInvocationContext == null) {
 			setInvocationContext(createScriptContentAssistInvocationContext(getSourceModule()));
 		}
