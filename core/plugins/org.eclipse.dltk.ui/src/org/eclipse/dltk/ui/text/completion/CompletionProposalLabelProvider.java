@@ -206,7 +206,7 @@ public class CompletionProposalLabelProvider {
 		int qIndex = findSimpleNameStart(fullName);
 
 		StringBuffer buf = new StringBuffer();
-		buf.append(fullName, qIndex, fullName.length() - qIndex);
+		buf.append(fullName, qIndex, fullName.length());
 		if (qIndex > 0) {
 			buf.append(ScriptElementLabels.CONCAT_STRING);
 			buf.append(fullName, 0, qIndex - 1);
