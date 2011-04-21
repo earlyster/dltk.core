@@ -36,12 +36,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -1391,33 +1388,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		monitor.beginTask("", 100); //$NON-NLS-1$
 
 		try {
-			final IProgressMonitor subMonitor1 = getSubProgressMonitor(monitor,
-					50);
-
-			try {
-				SafeRunner.run(new ISafeRunnable() {
-					public void run() {
-						try {
-							info.fCopy.reconcile(false, null, subMonitor1);
-						} catch (ModelException ex) {
-							handleException(ex);
-						} catch (OperationCanceledException ex) {
-							// do not log this
-						}
-					}
-
-					public void handleException(Throwable ex) {
-						IStatus status = new Status(
-								IStatus.ERROR,
-								DLTKUIPlugin.PLUGIN_ID,
-								IStatus.OK,
-								"Error in DLTK Core during reconcile while saving", ex); //$NON-NLS-1$
-						DLTKUIPlugin.getDefault().getLog().log(status);
-					}
-				});
-			} finally {
-				subMonitor1.done();
-			}
 
 			IDocument document = info.fTextFileBuffer.getDocument();
 			IResource resource = info.fCopy.getResource();
@@ -1437,25 +1407,18 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			if (!resource.exists()) {
 				// underlying resource has been deleted, just recreate file,
 				// ignore the rest
-				IProgressMonitor subMonitor2 = getSubProgressMonitor(monitor,
-						50);
-				try {
-					createFileFromDocument(subMonitor2, (IFile) resource,
-							document);
-				} finally {
-					subMonitor2.done();
-				}
+				createFileFromDocument(monitor, (IFile) resource, document);
 				return;
 			}
 
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
 
-			IProgressMonitor subMonitor3 = getSubProgressMonitor(monitor, 50);
+			IProgressMonitor subMonitor = getSubProgressMonitor(monitor, 100);
 			try {
 				fIsAboutToSave = true;
 				info.fCopy.commitWorkingCopy(isSynchronized || overwrite,
-						subMonitor3);
+						subMonitor);
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -1466,7 +1429,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				throw x;
 			} finally {
 				fIsAboutToSave = false;
-				subMonitor3.done();
+				subMonitor.done();
 			}
 
 			// If here, the dirty state of the editor will change to "not
