@@ -808,7 +808,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		String completion = typeProposal.getCompletion();
 		int replaceStart = typeProposal.getReplaceStart();
 		int length = typeProposal.getReplaceEnd()
-				- typeProposal.getReplaceStart() + 1;
+				- typeProposal.getReplaceStart();
 		Image image = getImage(getLabelProvider().createTypeImageDescriptor(
 				typeProposal));
 
