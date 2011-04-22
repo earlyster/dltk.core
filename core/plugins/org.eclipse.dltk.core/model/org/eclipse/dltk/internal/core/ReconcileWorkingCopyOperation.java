@@ -57,7 +57,6 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			// make working copy consistent if needed and compute AST if needed
 			makeConsistent(workingCopy, requestor);
 			// report delta
-			this.deltaBuilder.buildDeltas();
 			ModelElementDelta delta = this.deltaBuilder.delta;
 			if (delta != null) {
 				addReconcileDelta(workingCopy, delta);
@@ -77,6 +76,7 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 		if (!workingCopy.isConsistent()) {
 			// make working copy consistent
 			workingCopy.makeConsistent(this.progressMonitor);
+			this.deltaBuilder.buildDeltas();
 			ProjectIndexerManager.reconciled(workingCopy);
 		} else if (forceProblemDetection && problemRequestor.isActive()) {
 			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(
