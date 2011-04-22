@@ -238,7 +238,7 @@ public abstract class AbstractScriptCompletionProposal implements
 	 * 
 	 * @return the additional proposal info, or <code>null</code> if none exists
 	 */
-	protected ProposalInfo getProposalInfo() {
+	public ProposalInfo getProposalInfo() {
 		return fProposalInfo;
 	}
 
