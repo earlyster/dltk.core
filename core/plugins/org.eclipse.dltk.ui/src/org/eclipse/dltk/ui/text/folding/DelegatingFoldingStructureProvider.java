@@ -743,9 +743,11 @@ public class DelegatingFoldingStructureProvider implements
 					+ " additions=" + additions.size() + " deletions="
 					+ deletions.size() + " updates=" + updates.size());
 		}
-		ctx.getModel().modifyAnnotations(
-				deletions.toArray(new Annotation[deletions.size()]), additions,
-				updates.toArray(new Annotation[updates.size()]));
+		if (!(deletions.isEmpty() && additions.isEmpty() && updated.isEmpty())) {
+			ctx.getModel().modifyAnnotations(
+					deletions.toArray(new Annotation[deletions.size()]),
+					additions, updates.toArray(new Annotation[updates.size()]));
+		}
 	}
 
 	private boolean computeFoldingStructure(
