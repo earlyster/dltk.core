@@ -238,8 +238,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fEditor = editor;
 
 		fGroupName = groupName;
-		ISelectionProvider provider = editor.getSelectionProvider();
-		ISelection selection = provider.getSelection();
+		ISelection selection = editor.getSelectionProvider().getSelection();
 
 		fRenameAction = new RenameAction(editor);
 		initAction(fRenameAction, selection,
@@ -266,7 +265,7 @@ public class RefactorActionGroup extends ActionGroup {
 				String id = descriptor.getAttribute("id");
 				action.setId(id);
 				action.setText(descriptor.getAttribute("label"));
-				initUpdatingAction(action, provider, selection, id);
+				initAction(action, selection, id);
 				editor.setAction(id, action);
 				fContributedActions.add(action);
 			}
