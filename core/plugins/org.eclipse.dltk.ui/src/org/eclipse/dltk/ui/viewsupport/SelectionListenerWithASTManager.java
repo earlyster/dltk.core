@@ -16,13 +16,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
@@ -53,17 +53,17 @@ public class SelectionListenerWithASTManager {
 	}
 
 	private final static class PartListenerGroup {
-		private ITextEditor fPart;
+		protected final ITextEditor fPart;
 		private ISelectionListener fPostSelectionListener;
 		private ISelectionChangedListener fSelectionListener;
 		private Job fCurrentJob;
-		private ListenerList fAstListeners;
+		protected final ListenerList fAstListeners;
 		/**
 		 * Lock to avoid having more than one calculateAndInform job in
 		 * parallel. Only jobs may synchronize on this as otherwise deadlocks
 		 * are possible.
 		 */
-		private final Object fJobLock = new Object();
+		protected final Object fJobLock = new Object();
 
 		public PartListenerGroup(ITextEditor editorPart) {
 			fPart = editorPart;
@@ -145,27 +145,58 @@ public class SelectionListenerWithASTManager {
 			if (!(input instanceof ISourceModule)) {
 				return;
 			}
-			final ISourceModule typeRoot = (ISourceModule) input;
-
-			fCurrentJob = new Job(
-					DLTKUIMessages.SelectionListenerWithASTManager_job_title) {
-				public IStatus run(IProgressMonitor monitor) {
-					if (monitor == null) {
-						monitor = new NullProgressMonitor();
-					}
-					synchronized (fJobLock) {
-						return calculateASTandInform(typeRoot, selection,
-								monitor);
-					}
-				}
-			};
-			fCurrentJob.setPriority(Job.DECORATE);
-			fCurrentJob.setSystem(true);
+			fCurrentJob = new ASTJob(this, (ISourceModule) input, selection);
 			fCurrentJob.schedule();
 		}
 
-		protected final IStatus calculateASTandInform(ISourceModule input,
-				ITextSelection selection, IProgressMonitor monitor) {
+	}
+
+	protected static class ASTJob extends Job {
+
+		private final PartListenerGroup owner;
+		private final ISourceModule input;
+		private final ITextSelection selection;
+
+		public ASTJob(PartListenerGroup owner, ISourceModule module,
+				ITextSelection selection) {
+			super(DLTKUIMessages.SelectionListenerWithASTManager_job_title);
+			this.owner = owner;
+			this.input = module;
+			this.selection = selection;
+			setPriority(Job.DECORATE);
+			setSystem(true);
+		}
+
+		@Override
+		protected void canceling() {
+			synchronized (this) {
+				wasCancel = true;
+			}
+		}
+
+		private boolean wasCancel;
+
+		@Override
+		public IStatus run(IProgressMonitor monitor) {
+			try {
+				if (!input.isConsistent()) {
+					synchronized (this) {
+						if (!wasCancel) {
+							schedule(1000);
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			} catch (ModelException e) {
+				// never happens, fall thru
+			}
+			synchronized (owner.fJobLock) {
+				// The monitor is never null
+				return calculateASTandInform(monitor);
+			}
+		}
+
+		protected final IStatus calculateASTandInform(IProgressMonitor monitor) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
@@ -175,14 +206,11 @@ public class SelectionListenerWithASTManager {
 						.parse(input, null);
 
 				if (astRoot != null && !monitor.isCanceled()) {
-					Object[] listeners;
-					synchronized (PartListenerGroup.this) {
-						listeners = fAstListeners.getListeners();
-					}
+					Object[] listeners = owner.fAstListeners.getListeners();
 					for (int i = 0; i < listeners.length; i++) {
 						((ISelectionListenerWithAST) listeners[i])
-								.selectionChanged(fPart, selection, input,
-										astRoot);
+								.selectionChanged(owner.fPart, selection,
+										input, astRoot);
 						if (monitor.isCanceled()) {
 							return Status.CANCEL_STATUS;
 						}
