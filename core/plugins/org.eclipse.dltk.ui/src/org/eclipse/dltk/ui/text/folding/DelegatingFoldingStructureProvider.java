@@ -56,6 +56,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class DelegatingFoldingStructureProvider implements
 		IFoldingStructureProvider, IFoldingStructureProviderExtension {
 
+	private static final boolean DEBUG = false;
+
 	/**
 	 * A context that contains the information needed to compute the folding
 	 * structure of an {@link ISourceModule}. Computed folding regions are
@@ -157,10 +159,10 @@ public class DelegatingFoldingStructureProvider implements
 	/**
 	 * A {@link ProjectionAnnotation} for code.
 	 */
-	protected static final class ScriptProjectionAnnotation extends
+	private static final class ScriptProjectionAnnotation extends
 			ProjectionAnnotation {
 
-		private final AnnotationKey stamp;
+		final AnnotationKey stamp;
 
 		/**
 		 * Creates a new projection annotation.
@@ -224,6 +226,9 @@ public class DelegatingFoldingStructureProvider implements
 	 * Matches comments.
 	 */
 	private static final class CommentFilter implements Filter {
+		public CommentFilter() {
+		}
+
 		public boolean match(ScriptProjectionAnnotation annotation) {
 			if (annotation.getKind().isComment()
 					&& !annotation.isMarkedDeleted()) {
@@ -237,6 +242,9 @@ public class DelegatingFoldingStructureProvider implements
 	 * Matches members.
 	 */
 	private static final class MemberFilter implements Filter {
+		public MemberFilter() {
+		}
+
 		public boolean match(ScriptProjectionAnnotation annotation) {
 			if (!annotation.isMarkedDeleted()
 					&& annotation.getElement() instanceof IMember) {
@@ -436,6 +444,9 @@ public class DelegatingFoldingStructureProvider implements
 	}
 
 	private class ElementChangedListener implements IElementChangedListener {
+		public ElementChangedListener() {
+		}
+
 		/*
 		 * @see
 		 * org.eclipse.dltk.core.IElementChangedListener#elementChanged(org.
@@ -633,9 +644,46 @@ public class DelegatingFoldingStructureProvider implements
 		return EditorUtility.getEditorInputModelElement(fEditor, false);
 	}
 
-	private synchronized void update(FoldingStructureComputationContext ctx) {
+	static class Lock {
+
+		private boolean locked;
+
+		/**
+		 * Tries to lock and returns <code>true</code> if attempt was successful
+		 */
+		synchronized boolean lock() {
+			if (!locked) {
+				locked = true;
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/**
+		 * Unlocks
+		 */
+		synchronized void unlock() {
+			locked = false;
+		}
+
+	}
+
+	private final Lock lock = new Lock();
+
+	protected void update(FoldingStructureComputationContext ctx) {
 		if (ctx == null)
 			return;
+		if (lock.lock()) {
+			try {
+				update0(ctx);
+			} finally {
+				lock.unlock();
+			}
+		}
+	}
+
+	private void update0(FoldingStructureComputationContext ctx) {
 		Map<Annotation, Position> additions = new HashMap<Annotation, Position>();
 		List<Annotation> deletions = new ArrayList<Annotation>();
 		List<Annotation> updates = new ArrayList<Annotation>();
@@ -689,6 +737,11 @@ public class DelegatingFoldingStructureProvider implements
 			int size = list.size();
 			for (int i = 0; i < size; i++)
 				deletions.add(list.get(i).annotation);
+		}
+		if (DEBUG) {
+			System.out.println(getClass().getSimpleName() + ".update:"
+					+ " additions=" + additions.size() + " deletions="
+					+ deletions.size() + " updates=" + updates.size());
 		}
 		ctx.getModel().modifyAnnotations(
 				deletions.toArray(new Annotation[deletions.size()]), additions,
