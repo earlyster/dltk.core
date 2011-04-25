@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IBuffer;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.ISourceRange;
@@ -29,7 +30,8 @@ import org.eclipse.dltk.internal.core.SourceRefElement;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class UnresolvedElement extends SourceRefElement {
+public class UnresolvedElement extends SourceRefElement implements
+		ILocalVariable {
 
 	private final String name;
 	private final int start, end;
@@ -181,6 +183,14 @@ public class UnresolvedElement extends SourceRefElement {
 			boolean showResolvedInfo) {
 		buffer.append(tabString(tab));
 		toStringName(buffer);
+	}
+
+	public ISourceRange getNameRange() {
+		return getSourceRange();
+	}
+
+	public String getType() {
+		return null;
 	}
 
 }
