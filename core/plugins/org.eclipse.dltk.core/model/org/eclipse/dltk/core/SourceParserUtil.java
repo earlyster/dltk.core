@@ -4,10 +4,10 @@ import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclarationWrapper;
 import org.eclipse.dltk.ast.parser.ASTCacheManager;
 import org.eclipse.dltk.ast.parser.IASTCache;
+import org.eclipse.dltk.ast.parser.IASTCache.ASTCacheEntry;
 import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
-import org.eclipse.dltk.ast.parser.IASTCache.ASTCacheEntry;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
@@ -95,8 +95,8 @@ public class SourceParserUtil {
 		if (moduleDeclaration == null) {
 			p1.renew();
 			ISourceParser sourceParser = DLTKLanguageManager.getSourceParser(
-					module.getScriptProject().getProject(), toolkit
-							.getNatureId());
+					module.getScriptProject().getProject(),
+					toolkit.getNatureId());
 			if (sourceParser != null) {
 				// if (sourceParser instanceof ISourceParserExtension) {
 				// ((ISourceParserExtension) sourceParser).setFlags(flags);
@@ -180,8 +180,8 @@ public class SourceParserUtil {
 			IProblemReporter reporter, int flags) {
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
-		return getModuleDeclaration(module, reporter, sourceModuleInfoCache
-				.get(module), flags);
+		return getModuleDeclaration(module, reporter,
+				sourceModuleInfoCache.get(module), flags);
 	}
 
 	@Deprecated
@@ -263,6 +263,26 @@ public class SourceParserUtil {
 			} else {
 				info.remove(errorKey);
 			}
+		}
+	}
+
+	/**
+	 * Checks if module is {@link IOpenable#isConsistent()} and resets cached
+	 * AST for it if not
+	 * 
+	 * @param module
+	 */
+	public static void verify(ISourceModule module) {
+		final boolean consistent;
+		try {
+			consistent = module.isConsistent();
+		} catch (ModelException e) {
+			// ignore
+			return;
+		}
+		if (!consistent) {
+			ModelManager.getModelManager().getSourceModuleInfoCache()
+					.remove(module);
 		}
 	}
 
