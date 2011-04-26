@@ -366,7 +366,8 @@ public class ModelManager implements ISaveParticipant {
 	/**
 	 * Set of elements which are out of sync with their buffers.
 	 */
-	protected HashSet elementsOutOfSynchWithBuffers = new HashSet(11);
+	protected HashSet<Openable> elementsOutOfSynchWithBuffers = new HashSet<Openable>(
+			11);
 	/**
 	 * Holds the state used for delta processing.
 	 */
@@ -441,7 +442,7 @@ public class ModelManager implements ISaveParticipant {
 	/**
 	 * Returns the set of elements which are out of synch with their buffers.
 	 */
-	protected HashSet getElementsOutOfSynchWithBuffers() {
+	protected HashSet<Openable> getElementsOutOfSynchWithBuffers() {
 		return this.elementsOutOfSynchWithBuffers;
 	}
 

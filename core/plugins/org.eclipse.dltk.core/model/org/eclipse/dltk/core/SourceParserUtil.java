@@ -267,26 +267,6 @@ public class SourceParserUtil {
 	}
 
 	/**
-	 * Checks if module is {@link IOpenable#isConsistent()} and resets cached
-	 * AST for it if not
-	 * 
-	 * @param module
-	 */
-	public static void verify(ISourceModule module) {
-		final boolean consistent;
-		try {
-			consistent = module.isConsistent();
-		} catch (ModelException e) {
-			// ignore
-			return;
-		}
-		if (!consistent) {
-			ModelManager.getModelManager().getSourceModuleInfoCache()
-					.remove(module);
-		}
-	}
-
-	/**
 	 * Performance testing only
 	 */
 	public static void disableCache() {

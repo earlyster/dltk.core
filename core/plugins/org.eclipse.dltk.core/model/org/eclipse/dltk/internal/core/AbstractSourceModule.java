@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.BufferChangedEvent;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
@@ -388,6 +389,15 @@ public abstract class AbstractSourceModule extends Openable implements
 
 		return !ModelManager.getModelManager()
 				.getElementsOutOfSynchWithBuffers().contains(this);
+	}
+
+	@Override
+	public void bufferChanged(BufferChangedEvent event) {
+		super.bufferChanged(event);
+		if (!event.getBuffer().isClosed()) {
+			ModelManager.getModelManager().getSourceModuleInfoCache()
+					.remove(this);
+		}
 	}
 
 	/*
