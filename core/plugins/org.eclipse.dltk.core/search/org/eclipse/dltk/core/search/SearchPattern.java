@@ -18,6 +18,7 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.ScannerHelper;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.ILocalVariable;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -26,7 +27,6 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISearchPatternProcessor.ITypePattern;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.model.LocalVariable;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
@@ -1119,7 +1119,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 					maskedLimitTo, matchRule, toolkit);
 			break;
 		case IModelElement.LOCAL_VARIABLE:
-			searchPattern = new LocalVariablePattern((LocalVariable) element,
+			searchPattern = new LocalVariablePattern((ILocalVariable) element,
 					maskedLimitTo, matchRule, toolkit);
 			break;
 		}
