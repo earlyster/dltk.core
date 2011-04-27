@@ -415,8 +415,8 @@ public class Util {
 		// line delimiter in project preference
 		IScopeContext[] scopeContext;
 		if (project != null) {
-			scopeContext = new IScopeContext[] { new ProjectScope(project
-					.getProject()) };
+			scopeContext = new IScopeContext[] { new ProjectScope(
+					project.getProject()) };
 			lineSeparator = Platform.getPreferencesService().getString(
 					Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null,
 					scopeContext);
@@ -557,9 +557,9 @@ public class Util {
 					}
 					IStatus status = new Status(IStatus.WARNING,
 							DLTKCore.PLUGIN_ID, NLS.bind(
-									Messages.Util_errorReceivingFile, file
-											.getFullPath(), String
-											.valueOf(tryCount)), e);
+									Messages.Util_errorReceivingFile,
+									file.getFullPath(),
+									String.valueOf(tryCount)), e);
 					DLTKCore.getDefault().getLog().log(status);
 				}
 			}
@@ -735,8 +735,8 @@ public class Util {
 			if (EnvironmentPathUtils.isFull(path)) {
 				path = EnvironmentPathUtils.getLocalPath(path);
 			}
-			return toolkit.validateSourcePackage(path, EnvironmentManager
-					.getEnvironment(parent));
+			return toolkit.validateSourcePackage(path,
+					EnvironmentManager.getEnvironment(parent));
 		}
 		return false;
 	}
@@ -1281,28 +1281,46 @@ public class Util {
 		return result;
 	}
 
+	/**
+	 * Returns whether the local file system supports accessing and modifying
+	 * the given attribute.
+	 */
+	protected static boolean isAttributeSupported(int attribute) {
+		return (EFS.getLocalFileSystem().attributes() & attribute) != 0;
+	}
+
+	/**
+	 * Returns whether the local file system supports accessing and modifying
+	 * the read only flag.
+	 */
+	public static boolean isReadOnlySupported() {
+		return isAttributeSupported(EFS.ATTRIBUTE_READ_ONLY);
+	}
+
 	public static boolean isReadOnly(IResource resource) {
-		if (resource != null) {
+		if (isReadOnlySupported()) {
 			ResourceAttributes resourceAttributes = resource
 					.getResourceAttributes();
 			if (resourceAttributes == null)
 				return false; // not supported on this platform for this
-			// resource
+								// resource
 			return resourceAttributes.isReadOnly();
 		}
-		return true;
+		return false;
 	}
 
 	public static void setReadOnly(IResource resource, boolean readOnly) {
-		ResourceAttributes resourceAttributes = resource
-				.getResourceAttributes();
-		if (resourceAttributes == null)
-			return; // not supported on this platform for this resource
-		resourceAttributes.setReadOnly(readOnly);
-		try {
-			resource.setResourceAttributes(resourceAttributes);
-		} catch (CoreException e) {
-			// ignore
+		if (isReadOnlySupported()) {
+			ResourceAttributes resourceAttributes = resource
+					.getResourceAttributes();
+			if (resourceAttributes == null)
+				return; // not supported on this platform for this resource
+			resourceAttributes.setReadOnly(readOnly);
+			try {
+				resource.setResourceAttributes(resourceAttributes);
+			} catch (CoreException e) {
+				// ignore
+			}
 		}
 	}
 
