@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -236,18 +235,10 @@ public class ModifyingResourceTests extends AbstractModelTests {
 	}
 
 	public void setReadOnly(IResource resource, boolean readOnly) throws CoreException {
-		ResourceAttributes resourceAttributes = resource.getResourceAttributes();
-		if (resourceAttributes != null) {
-			resourceAttributes.setReadOnly(readOnly);
-			resource.setResourceAttributes(resourceAttributes);
-		}
+		org.eclipse.dltk.internal.core.util.Util.setReadOnly(resource, readOnly);
 	}
 
 	public boolean isReadOnly(IResource resource) throws CoreException {
-		ResourceAttributes resourceAttributes = resource.getResourceAttributes();
-		if (resourceAttributes != null) {
-			return resourceAttributes.isReadOnly();
-		}
-		return false;
+		return org.eclipse.dltk.internal.core.util.Util.isReadOnly(resource);
 	}
 }
