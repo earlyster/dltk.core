@@ -105,7 +105,7 @@ public class OccurrencesFinder {
 
 	public OccurrencesFinder(ScriptEditor editor) {
 		this.editor = editor;
-		final NatureExtensionManager occurrencesFinderManager = new NatureExtensionManager(
+		final NatureExtensionManager<IOccurrencesFinder> occurrencesFinderManager = new NatureExtensionManager<IOccurrencesFinder>(
 				DLTKUIPlugin.PLUGIN_ID + ".search", IOccurrencesFinder.class);
 		finders = (IOccurrencesFinder[]) occurrencesFinderManager
 				.getInstances(editor.getLanguageToolkit().getNatureId());
