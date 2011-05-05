@@ -72,7 +72,7 @@ public class ModelElementHyperlinkDetector implements IHyperlinkDetector {
 			IDocument document = fTextEditor.getDocumentProvider().getDocument(
 					fTextEditor.getEditorInput());
 			IRegion wordRegion = ScriptWordFinder.findWord(document, offset);
-			if (wordRegion == null)
+			if (wordRegion == null || wordRegion.getLength() == 0)
 				return null;
 
 			final Object[] elements = SelectionConverter
