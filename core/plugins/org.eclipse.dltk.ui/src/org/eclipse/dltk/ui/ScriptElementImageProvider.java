@@ -385,18 +385,17 @@ public class ScriptElementImageProvider {
 	}
 
 	public static ImageDescriptor getMethodImageDescriptor(int flags) {
-		if ((flags & Modifiers.AccPrivate) != 0) {
+		if (Flags.isPrivate(flags)) {
 			return DLTKPluginImages.DESC_METHOD_PRIVATE;
 		}
-
-		if ((flags & Modifiers.AccProtected) != 0) {
+		if (Flags.isProtected(flags)) {
 			return DLTKPluginImages.DESC_METHOD_PROTECTED;
 		}
-
-		if ((flags & Modifiers.AccDefault) != 0) {
-			return DLTKPluginImages.DESC_METHOD_DEFAULT;
+		if (Flags.isPublic(flags)) {
+			return DLTKPluginImages.DESC_METHOD_PUBLIC;
 		}
-
+		// TODO (alex) it has been public by default for years
+		// switch to DESC_METHOD_DEFAULT eventually
 		return DLTKPluginImages.DESC_METHOD_PUBLIC;
 	}
 
