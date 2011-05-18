@@ -11,12 +11,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import org.eclipse.core.resources.IProjectDescription;
+
 /**
  * @since 2.0
  */
 public interface IScriptProjectFilenames {
 
-	public static final String PROJECT_FILENAME = ".project"; //$NON-NLS-1$
+	public static final String PROJECT_FILENAME = IProjectDescription.DESCRIPTION_FILE_NAME;
 
 	/**
 	 * Name of file containing project buildpath
