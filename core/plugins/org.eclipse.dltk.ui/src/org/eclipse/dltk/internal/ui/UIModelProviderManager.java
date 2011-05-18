@@ -147,15 +147,19 @@ public class UIModelProviderManager {
 				if (requires == null) {
 					@SuppressWarnings("unchecked")
 					final T obj = (T) manager.getInitObject(info);
-					result.add(obj);
-					added.add(info.getConfig().getAttribute(ID));
+					if (obj != null) {
+						result.add(obj);
+						added.add(info.getConfig().getAttribute(ID));
+					}
 				} else {
 					requires = requires.trim();
 					if (added.contains(requires)) {
 						@SuppressWarnings("unchecked")
 						final T obj = (T) manager.getInitObject(info);
-						result.add(obj);
-						added.add(info.getConfig().getAttribute(ID));
+						if (obj != null) {
+							result.add(obj);
+							added.add(info.getConfig().getAttribute(ID));
+						}
 					} else if (allIds.contains(requires)) { // Dependency exist
 						// Add element to end of process
 						toProcess.add(info);
@@ -164,8 +168,10 @@ public class UIModelProviderManager {
 						// Dependency doesn't exists so add to results
 						@SuppressWarnings("unchecked")
 						final T obj = (T) manager.getInitObject(info);
-						result.add(obj);
-						added.add(info.getConfig().getAttribute(ID));
+						if (obj != null) {
+							result.add(obj);
+							added.add(info.getConfig().getAttribute(ID));
+						}
 					}
 				}
 			}
