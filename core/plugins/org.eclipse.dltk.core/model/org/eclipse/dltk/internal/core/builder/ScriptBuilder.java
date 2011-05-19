@@ -552,7 +552,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			while (!queue.isEmpty()) {
+			while (!buildState.getStructuralChanges().isEmpty()
+					&& !queue.isEmpty()) {
 				if (TRACE) {
 					System.out.println("  Queue: " + queue);
 				}
