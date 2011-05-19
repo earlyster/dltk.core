@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.task.ITaskReporter;
@@ -19,7 +20,7 @@ import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class ExternalModuleBuildContext extends AbstractBuildContext implements
-		IProblemReporter, ITaskReporter {
+		IProblemReporter, ITaskReporter, IAdaptable {
 
 	/**
 	 * @param module

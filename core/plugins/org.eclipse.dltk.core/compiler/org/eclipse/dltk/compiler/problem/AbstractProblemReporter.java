@@ -11,13 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 /**
  * The abstract implementation of {@link IProblemReporter} to simplify code in
  * tests, etc.
  */
-public abstract class AbstractProblemReporter implements IProblemReporter {
+public abstract class AbstractProblemReporter implements IProblemReporter,
+		IAdaptable {
 
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		return null;
 	}
 

@@ -11,11 +11,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 /**
  * The {@link IProblemReporter} implementation which forwards all methods call
  * to the instance passed in the constructor.
  */
-public class ProblemReporterProxy implements IProblemReporter {
+public class ProblemReporterProxy implements IProblemReporter, IAdaptable {
 
 	private final IProblemReporter original;
 
@@ -32,9 +34,9 @@ public class ProblemReporterProxy implements IProblemReporter {
 		}
 	}
 
-	public Object getAdapter(Class adapter) {
-		if (original != null) {
-			return original.getAdapter(adapter);
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+		if (original != null && original instanceof IAdaptable) {
+			return ((IAdaptable) original).getAdapter(adapter);
 		}
 		return null;
 	}

@@ -9,9 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-import org.eclipse.core.runtime.IAdaptable;
-
-public interface IProblemReporter extends IAdaptable {
+public interface IProblemReporter {
 
 	void reportProblem(IProblem problem);
 

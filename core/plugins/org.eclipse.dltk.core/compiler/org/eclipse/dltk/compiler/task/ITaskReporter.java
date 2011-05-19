@@ -12,13 +12,12 @@
 package org.eclipse.dltk.compiler.task;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
 
 /**
  * The interface to create <i>tasks</i> for the attached resource. At any given
  * moment this object operates on single {@link IResource}.
  */
-public interface ITaskReporter extends IAdaptable {
+public interface ITaskReporter {
 
 	/**
 	 * Creates new task for the attached resource.
