@@ -36,9 +36,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -60,6 +63,7 @@ import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
+import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -68,12 +72,15 @@ import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.editor.ScriptMarkerAnnotation;
 import org.eclipse.dltk.ui.editor.SourceModuleAnnotationModelEvent;
+import org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener;
+import org.eclipse.dltk.ui.editor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.dltk.ui.text.ScriptAnnotationUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
@@ -88,6 +95,7 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -1059,7 +1067,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	 * 
 	 * 
 	 */
-	private final Map fFakeCUMapForMissingInfo = new HashMap();
+	private final Map<Object, SourceModuleInfo> fFakeCUMapForMissingInfo = new HashMap<Object, SourceModuleInfo>();
 
 	public SourceModuleDocumentProvider() {
 
@@ -1105,8 +1113,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			SourceModuleInfo info = (SourceModuleInfo) fileInfo;
 			return info.fCopy;
 		}
-		SourceModuleInfo cuInfo = (SourceModuleInfo) fFakeCUMapForMissingInfo
-				.get(element);
+		SourceModuleInfo cuInfo = fFakeCUMapForMissingInfo.get(element);
 		if (cuInfo != null)
 			return cuInfo.fCopy;
 
@@ -1416,9 +1423,50 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
 
-			IProgressMonitor subMonitor = getSubProgressMonitor(monitor, 100);
+			IProgressMonitor subMonitor = null;
 			try {
 				fIsAboutToSave = true;
+
+				IPostSaveListener[] listeners = DLTKUIPlugin.getDefault()
+						.getSaveParticipantRegistry()
+						.getEnabledPostSaveListeners(info.fCopy);
+
+				CoreException changedRegionException = null;
+				boolean needsChangedRegions = false;
+				try {
+					if (listeners.length > 0)
+						needsChangedRegions = SaveParticipantRegistry
+								.isChangedRegionsRequired(info.fCopy, listeners);
+				} catch (CoreException ex) {
+					changedRegionException = ex;
+				}
+
+				IRegion[] changedRegions = null;
+				if (needsChangedRegions) {
+					try {
+						changedRegions = EditorUtility
+								.calculateChangedLineRegions(
+										info.fTextFileBuffer,
+										getSubProgressMonitor(monitor, 20));
+					} catch (CoreException ex) {
+						changedRegionException = ex;
+					} finally {
+						subMonitor = getSubProgressMonitor(monitor, 50);
+					}
+				} else
+					subMonitor = getSubProgressMonitor(monitor,
+							listeners.length > 0 ? 70 : 100);
+
+				info.fCopy.commitWorkingCopy(isSynchronized || overwrite,
+						subMonitor);
+				if (listeners.length > 0)
+					notifyPostSaveListeners(info, changedRegions, listeners,
+							getSubProgressMonitor(monitor, 30));
+
+				if (changedRegionException != null) {
+					throw changedRegionException;
+				}
+
 				info.fCopy.commitWorkingCopy(isSynchronized || overwrite,
 						subMonitor);
 			} catch (CoreException x) {
@@ -1431,7 +1479,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				throw x;
 			} finally {
 				fIsAboutToSave = false;
-				subMonitor.done();
+				if (subMonitor != null)
+					subMonitor.done();
 			}
 
 			// If here, the dirty state of the editor will change to "not
@@ -1467,8 +1516,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		if (getFileInfo(element) != null)
 			return;
 
-		SourceModuleInfo info = (SourceModuleInfo) fFakeCUMapForMissingInfo
-				.get(element);
+		SourceModuleInfo info = fFakeCUMapForMissingInfo.get(element);
 		if (info == null) {
 			ISourceModule cu = null;
 			if (element instanceof IAdaptable) {
@@ -1516,7 +1564,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		if (model != null)
 			return model;
 
-		FileInfo info = (FileInfo) fFakeCUMapForMissingInfo.get(element);
+		FileInfo info = fFakeCUMapForMissingInfo.get(element);
 		if (info != null) {
 			if (info.fModel != null)
 				return info.fModel;
@@ -1533,8 +1581,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	 * lang.Object)
 	 */
 	public void disconnect(Object element) {
-		SourceModuleInfo info = (SourceModuleInfo) fFakeCUMapForMissingInfo
-				.get(element);
+		SourceModuleInfo info = fFakeCUMapForMissingInfo.get(element);
 		if (info != null) {
 			if (info.fCount == 1) {
 				fFakeCUMapForMissingInfo.remove(element);
@@ -1770,4 +1817,139 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return super.isReadOnly(element);
 	}
 
+	/**
+	 * Notify post save listeners.
+	 * <p>
+	 * <strong>Note:</strong> Post save listeners are not allowed to save the
+	 * file and they must not assumed to be called in the UI thread i.e. if they
+	 * open a dialog they must ensure it ends up in the UI thread.
+	 * </p>
+	 * 
+	 * @param info
+	 *            compilation unit info
+	 * @param changedRegions
+	 *            the array with the changed regions
+	 * @param listeners
+	 *            the listeners to notify
+	 * @param monitor
+	 *            the progress monitor
+	 * @throws CoreException
+	 *             if something goes wrong
+	 * @see IPostSaveListener
+	 * @since 3.0
+	 */
+	protected void notifyPostSaveListeners(final SourceModuleInfo info,
+			final IRegion[] changedRegions, IPostSaveListener[] listeners,
+			final IProgressMonitor monitor) throws CoreException {
+		final ISourceModule unit = info.fCopy;
+		final IBuffer buffer = unit.getBuffer();
+
+		String message = DLTKEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantProblem;
+		final MultiStatus errorStatus = new MultiStatus(DLTKUIPlugin.PLUGIN_ID,
+				IDLTKStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message,
+				null);
+
+		monitor.beginTask(
+				DLTKEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants,
+				listeners.length * 5);
+		try {
+			for (int i = 0; i < listeners.length; i++) {
+				final IPostSaveListener listener = listeners[i];
+				final String participantName = listener.getName();
+				SafeRunner.run(new ISafeRunnable() {
+					public void run() {
+						try {
+							long stamp = unit.getResource()
+									.getModificationStamp();
+
+							listener.saved(unit, changedRegions,
+									getSubProgressMonitor(monitor, 4));
+
+							if (stamp != unit.getResource()
+									.getModificationStamp()) {
+								String msg = NLS
+										.bind(DLTKEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile,
+												participantName);
+								errorStatus
+										.add(new Status(
+												IStatus.ERROR,
+												DLTKUIPlugin.PLUGIN_ID,
+												IDLTKStatusConstants.EDITOR_POST_SAVE_NOTIFICATION,
+												msg, null));
+							}
+
+							if (buffer.hasUnsavedChanges())
+								buffer.save(getSubProgressMonitor(monitor, 1),
+										true);
+
+						} catch (CoreException ex) {
+							handleException(ex);
+						} finally {
+							monitor.worked(1);
+						}
+					}
+
+					public void handleException(Throwable ex) {
+						String msg = NLS
+								.bind("The save participant ''{0}'' caused an exception: {1}", listener.getId(), ex.toString()); //$NON-NLS-1$
+						DLTKUIPlugin
+								.log(new Status(
+										IStatus.ERROR,
+										DLTKUIPlugin.PLUGIN_ID,
+										IDLTKStatusConstants.EDITOR_POST_SAVE_NOTIFICATION,
+										msg, ex));
+
+						msg = NLS
+								.bind(DLTKEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantFailed,
+										participantName, ex.toString());
+						errorStatus
+								.add(new Status(
+										IStatus.ERROR,
+										DLTKUIPlugin.PLUGIN_ID,
+										IDLTKStatusConstants.EDITOR_POST_SAVE_NOTIFICATION,
+										msg, null));
+
+						// Revert the changes
+						if (buffer.hasUnsavedChanges()) {
+							try {
+								info.fTextFileBuffer
+										.revert(getSubProgressMonitor(monitor,
+												1));
+							} catch (CoreException e) {
+								msg = NLS
+										.bind("Error on revert after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
+								IStatus status = new Status(
+										IStatus.ERROR,
+										DLTKUIPlugin.PLUGIN_ID,
+										IDLTKStatusConstants.EDITOR_POST_SAVE_NOTIFICATION,
+										msg, ex);
+								DLTKUIPlugin.getDefault().getLog().log(status);
+							}
+
+							if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+								AbstractMarkerAnnotationModel markerModel = (AbstractMarkerAnnotationModel) info.fModel;
+								markerModel.resetMarkers();
+							}
+						}
+
+						// XXX: Work in progress 'Save As' case
+						// else if (buffer.hasUnsavedChanges()) {
+						// try {
+						// buffer.save(getSubProgressMonitor(monitor, 1), true);
+						// } catch (JavaModelException e) {
+						//								message= Messages.format("Error reverting changes after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
+						// IStatus status= new Status(IStatus.ERROR,
+						// JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
+						// JavaPlugin.getDefault().getLog().log(status);
+						// }
+						// }
+					}
+				});
+			}
+		} finally {
+			monitor.done();
+			if (!errorStatus.isOK())
+				throw new CoreException(errorStatus);
+		}
+	}
 }

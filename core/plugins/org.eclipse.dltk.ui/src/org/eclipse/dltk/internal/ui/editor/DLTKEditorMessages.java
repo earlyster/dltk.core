@@ -65,6 +65,13 @@ public final class DLTKEditorMessages extends NLS {
 	public static String ScriptEditor_matchingBracketIsOutsideSelectedElement;
 	public static String ScriptEditor_markOccurrences_job_name;
 
+	public static String CompilationUnitDocumentProvider_progressNotifyingSaveParticipants;
+	public static String CompilationUnitDocumentProvider_error_saveParticipantProblem;
+	public static String CompilationUnitDocumentProvider_calculatingChangedRegions_message;
+	public static String CompilationUnitDocumentProvider_error_calculatingChangedRegions;
+	public static String CompilationUnitDocumentProvider_error_saveParticipantSavedFile;
+	public static String CompilationUnitDocumentProvider_error_saveParticipantFailed;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, DLTKEditorMessages.class);
 	}

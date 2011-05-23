@@ -15,6 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.compare.rangedifferencer.IRangeComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -22,6 +29,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IMember;
@@ -33,6 +46,8 @@ import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.DelegatedOpen;
+import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
+import org.eclipse.dltk.internal.ui.text.LineComparator;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
@@ -41,6 +56,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
@@ -574,5 +590,172 @@ public class EditorUtility {
 			return SWT.COMMAND;
 
 		return 0;
+	}
+
+	/**
+	 * Return the regions of all lines which have changed in the given buffer
+	 * since the last save occurred. Each region in the result spans over the
+	 * size of at least one line. If successive lines have changed a region
+	 * spans over the size of all successive lines. The regions include line
+	 * delimiters.
+	 * 
+	 * @param buffer
+	 *            the buffer to compare contents from
+	 * @param monitor
+	 *            to report progress to
+	 * @return the regions of the changed lines
+	 * @throws CoreException
+	 *             if something goes wrong
+	 * @since 3.0
+	 */
+	public static IRegion[] calculateChangedLineRegions(
+			final ITextFileBuffer buffer, final IProgressMonitor monitor)
+			throws CoreException {
+		final IRegion[][] result = new IRegion[1][];
+		final IStatus[] errorStatus = new IStatus[] { Status.OK_STATUS };
+
+		try {
+			SafeRunner.run(new ISafeRunnable() {
+
+				/*
+				 * @see
+				 * org.eclipse.core.runtime.ISafeRunnable#handleException(java
+				 * .lang.Throwable)
+				 */
+				public void handleException(Throwable exception) {
+					DLTKUIPlugin
+							.log(new Status(
+									IStatus.ERROR,
+									DLTKUIPlugin.PLUGIN_ID,
+									IDLTKStatusConstants.EDITOR_CHANGED_REGION_CALCULATION,
+									exception.getLocalizedMessage(), exception));
+					String msg = DLTKEditorMessages.CompilationUnitDocumentProvider_error_calculatingChangedRegions;
+					errorStatus[0] = new Status(
+							IStatus.ERROR,
+							DLTKUIPlugin.PLUGIN_ID,
+							IDLTKStatusConstants.EDITOR_CHANGED_REGION_CALCULATION,
+							msg, exception);
+					result[0] = null;
+				}
+
+				/*
+				 * @see org.eclipse.core.runtime.ISafeRunnable#run()
+				 */
+				public void run() throws Exception {
+					monitor.beginTask(
+							DLTKEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message,
+							20);
+					IFileStore fileStore = buffer.getFileStore();
+
+					ITextFileBufferManager fileBufferManager = FileBuffers
+							.createTextFileBufferManager();
+					fileBufferManager.connectFileStore(fileStore,
+							getSubProgressMonitor(monitor, 15));
+					try {
+						IDocument currentDocument = buffer.getDocument();
+						IDocument oldDocument = ((ITextFileBuffer) fileBufferManager
+								.getFileStoreFileBuffer(fileStore))
+								.getDocument();
+
+						result[0] = getChangedLineRegions(oldDocument,
+								currentDocument);
+					} finally {
+						fileBufferManager.disconnectFileStore(fileStore,
+								getSubProgressMonitor(monitor, 5));
+						monitor.done();
+					}
+				}
+
+				/**
+				 * Return regions of all lines which differ comparing
+				 * <code>oldDocument</code>s content with
+				 * <code>currentDocument</code>s content. Successive lines are
+				 * merged into one region.
+				 * 
+				 * @param oldDocument
+				 *            a document containing the old content
+				 * @param currentDocument
+				 *            a document containing the current content
+				 * @return the changed regions
+				 * @throws BadLocationException
+				 *             if fetching the line information fails
+				 */
+				private IRegion[] getChangedLineRegions(IDocument oldDocument,
+						IDocument currentDocument) throws BadLocationException {
+					/*
+					 * Do not change the type of those local variables. We use
+					 * Object here in order to prevent loading of the Compare
+					 * plug-in at load time of this class.
+					 */
+					Object leftSide = new LineComparator(oldDocument);
+					Object rightSide = new LineComparator(currentDocument);
+
+					RangeDifference[] differences = RangeDifferencer
+							.findDifferences((IRangeComparator) leftSide,
+									(IRangeComparator) rightSide);
+
+					// It holds that:
+					// 1. Ranges are sorted:
+					// forAll r1,r2 element differences: indexOf(r1)<indexOf(r2)
+					// -> r1.rightStart()<r2.rightStart();
+					// 2. Successive changed lines are merged into on
+					// RangeDifference
+					// forAll r1,r2 element differences:
+					// r1.rightStart()<r2.rightStart() ->
+					// r1.rightEnd()<r2.rightStart
+
+					ArrayList<IRegion> regions = new ArrayList<IRegion>();
+					for (int i = 0; i < differences.length; i++) {
+						RangeDifference curr = differences[i];
+						if (curr.kind() == RangeDifference.CHANGE
+								&& curr.rightLength() > 0) {
+							int startLine = curr.rightStart();
+							int endLine = curr.rightEnd() - 1;
+
+							IRegion startLineRegion = currentDocument
+									.getLineInformation(startLine);
+							if (startLine == endLine) {
+								regions.add(startLineRegion);
+							} else {
+								IRegion endLineRegion = currentDocument
+										.getLineInformation(endLine);
+								int startOffset = startLineRegion.getOffset();
+								int endOffset = endLineRegion.getOffset()
+										+ endLineRegion.getLength();
+								regions.add(new Region(startOffset, endOffset
+										- startOffset));
+							}
+						}
+					}
+
+					return regions.toArray(new IRegion[regions
+							.size()]);
+				}
+			});
+		} finally {
+			if (!errorStatus[0].isOK())
+				throw new CoreException(errorStatus[0]);
+		}
+
+		return result[0];
+	}
+
+	/**
+	 * Creates and returns a new sub-progress monitor for the given parent
+	 * monitor.
+	 * 
+	 * @param monitor
+	 *            the parent progress monitor
+	 * @param ticks
+	 *            the number of work ticks allocated from the parent monitor
+	 * @return the new sub-progress monitor
+	 * @since 3.0
+	 */
+	private static IProgressMonitor getSubProgressMonitor(
+			IProgressMonitor monitor, int ticks) {
+		if (monitor != null)
+			return new SubProgressMonitor(monitor, ticks,
+					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+		return new NullProgressMonitor();
 	}
 }

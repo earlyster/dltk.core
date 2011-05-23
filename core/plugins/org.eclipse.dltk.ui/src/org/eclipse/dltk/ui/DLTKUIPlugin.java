@@ -61,6 +61,7 @@ import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
 import org.eclipse.dltk.internal.ui.viewsupport.ContextActivator;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BuildpathAttributeConfigurationDescriptors;
 import org.eclipse.dltk.launching.sourcelookup.DBGPSourceModule;
+import org.eclipse.dltk.ui.editor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.dltk.ui.text.completion.ContentAssistHistory;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.dltk.ui.viewsupport.ProblemMarkerManager;
@@ -804,4 +805,22 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		return Messages.DLTKUIPlugin_additionalInfo_affordance;
 	}
 
+	/**
+	 * The save participant registry.
+	 * 
+	 * @since 3.0
+	 */
+	private SaveParticipantRegistry fSaveParticipantRegistry;
+
+	/**
+	 * Returns the save participant registry.
+	 * 
+	 * @return the save participant registry, not null
+	 * @since 3.0
+	 */
+	public synchronized SaveParticipantRegistry getSaveParticipantRegistry() {
+		if (fSaveParticipantRegistry == null)
+			fSaveParticipantRegistry = new SaveParticipantRegistry();
+		return fSaveParticipantRegistry;
+	}
 }

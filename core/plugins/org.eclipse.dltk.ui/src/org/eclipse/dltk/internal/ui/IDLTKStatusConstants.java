@@ -11,11 +11,11 @@ package org.eclipse.dltk.internal.ui;
 
 
 /**
- * Defines status codes relevant to the dtlk UI plug-in. When a 
- * Core exception is thrown, it contain a status object describing
- * the cause of the exception. The status objects originating from the
- * dltk UI plug-in use the codes defined in this interface.
-  */
+ * Defines status codes relevant to the dtlk UI plug-in. When a Core exception
+ * is thrown, it contain a status object describing the cause of the exception.
+ * The status objects originating from the dltk UI plug-in use the codes defined
+ * in this interface.
+ */
 public interface IDLTKStatusConstants {
 
 	// DLTK UI status constants start at 10000 to make sure that we don't
@@ -52,4 +52,13 @@ public interface IDLTKStatusConstants {
 	 * save listener.
 	 */
 	public static final int EDITOR_POST_SAVE_NOTIFICATION= 10006;
+
+	/**
+	 * Status constant indication that a problem occurred while calculating
+	 * the changed region during a save.
+	 *
+	 * @see CompilationUnitDocumentProvider
+	 * @since 3.0
+	 */
+	public static final int EDITOR_CHANGED_REGION_CALCULATION= 10007;
  }
