@@ -81,12 +81,17 @@ public class LineComparator implements IRangeComparator {
 	 *             if the line number is invalid
 	 */
 	private Integer getHash(int line) throws BadLocationException {
-		Integer hash = (Integer) fHashes.get(line);
+		Integer hash = null;
+		if (fHashes.size() > line) {
+			hash = (Integer) fHashes.get(line);
+		}
 		if (hash == null) {
 			IRegion lineRegion = fDocument.getLineInformation(line);
 			String lineContents = fDocument.get(lineRegion.getOffset(),
 					lineRegion.getLength());
 			hash = new Integer(computeDJBHash(lineContents));
+			while (fHashes.size() <= line)
+				fHashes.add(null);
 			fHashes.set(line, hash);
 		}
 
