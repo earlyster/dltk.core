@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.text.hover.CompletionHoverControlCreator;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -742,25 +741,12 @@ public abstract class AbstractScriptCompletionProposal implements
 
 	/**
 	 * Returns true if camel case matching is enabled.
-	 * 
-	 * 
 	 */
 	protected boolean isCamelCaseMatching() {
-		IScriptProject project = getProject();
-		String value;
-		if (project == null)
-			value = DLTKCore.getOption(DLTKCore.CODEASSIST_CAMEL_CASE_MATCH);
-		else
-			value = project.getOption(DLTKCore.CODEASSIST_CAMEL_CASE_MATCH,
-					true);
-
+		String value = DLTKCore.getOption(DLTKCore.CODEASSIST_CAMEL_CASE_MATCH);
 		return DLTKCore.ENABLED.equals(value);
 	}
 
-	private IScriptProject getProject() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	protected IPreferenceStore getPreferenceStore() {
 		return DLTKUIPlugin.getDefault().getPreferenceStore();
