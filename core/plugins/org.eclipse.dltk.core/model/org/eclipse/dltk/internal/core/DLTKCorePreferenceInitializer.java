@@ -47,6 +47,8 @@ public class DLTKCorePreferenceInitializer extends
 		defaultOptionsMap.put(DLTKCore.FILE_CACHE, FileCacheStub.ID);
 		defaultOptionsMap.put(DLTKCore.INDEXER_ENABLED, DLTKCore.ENABLED);
 		defaultOptionsMap.put(DLTKCore.BUILDER_ENABLED, DLTKCore.ENABLED);
+		defaultOptionsMap.put(DLTKCore.CODEASSIST_CAMEL_CASE_MATCH,
+				DLTKCore.ENABLED);
 
 		// encoding setting comes from resource plug-in
 		optionNames.add(DLTKCore.CORE_ENCODING);
