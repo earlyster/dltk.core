@@ -11,5 +11,24 @@
   <groupId>org.eclipse.dltk.core</groupId>
   <artifactId>org.eclipse.dltk.formatter.tests</artifactId>
   <version>3.0.0-SNAPSHOT</version>
-  <packaging>eclipse-plugin</packaging>
+  <packaging>eclipse-test-plugin</packaging>
+  <build>
+	  <plugins>
+		  <plugin>
+			  <groupId>org.sonatype.tycho</groupId>
+			  <artifactId>maven-osgi-test-plugin</artifactId>
+			  <version>${tycho-version}</version>
+			  <configuration>
+				  <testSuite>${project.artifactId}</testSuite>
+				  <testClass>org.eclipse.dltk.formatter.tests.AllTests</testClass>
+				  <dependencies>
+					  <dependency>
+						  <type>p2-installable-unit</type>
+						  <artifactId>org.eclipse.platform.feature.group</artifactId>
+					  </dependency>
+				  </dependencies>
+			  </configuration>
+		  </plugin>
+	  </plugins>
+  </build>
 </project>
