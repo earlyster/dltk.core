@@ -11,6 +11,7 @@
 package org.eclipse.dltk.internal.ui.text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -36,7 +37,9 @@ public class LineComparator implements IRangeComparator {
 	 */
 	public LineComparator(IDocument document) {
 		fDocument = document;
-		fHashes = new ArrayList<Integer>(fDocument.getNumberOfLines());
+		// fills the list with nulls
+		Integer[] nulls = new Integer[fDocument.getNumberOfLines()];
+		fHashes = new ArrayList<Integer>(Arrays.asList(nulls));
 	}
 
 	/*
@@ -81,17 +84,12 @@ public class LineComparator implements IRangeComparator {
 	 *             if the line number is invalid
 	 */
 	private Integer getHash(int line) throws BadLocationException {
-		Integer hash = null;
-		if (fHashes.size() > line) {
-			hash = (Integer) fHashes.get(line);
-		}
+		Integer hash = fHashes.get(line);
 		if (hash == null) {
 			IRegion lineRegion = fDocument.getLineInformation(line);
 			String lineContents = fDocument.get(lineRegion.getOffset(),
 					lineRegion.getLength());
 			hash = new Integer(computeDJBHash(lineContents));
-			while (fHashes.size() <= line)
-				fHashes.add(null);
 			fHashes.set(line, hash);
 		}
 
