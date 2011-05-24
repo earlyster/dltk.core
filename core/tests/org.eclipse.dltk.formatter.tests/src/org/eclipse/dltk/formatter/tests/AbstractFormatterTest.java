@@ -22,9 +22,9 @@ import junit.framework.ComparisonFailure;
 import junit.framework.TestCase;
 
 import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.internal.corext.util.Strings;
 import org.eclipse.dltk.ui.formatter.FormatterException;
 import org.eclipse.dltk.ui.formatter.IScriptFormatter;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -85,8 +85,7 @@ public abstract class AbstractFormatterTest extends TestCase {
 	}
 
 	protected static String joinLines(String... lines) {
-		return Strings.concatenate(lines, Util.LINE_SEPARATOR)
-				+ Util.LINE_SEPARATOR;
+		return TextUtils.join(lines, Util.LINE_SEPARATOR) + Util.LINE_SEPARATOR;
 	}
 
 	/**
@@ -136,9 +135,8 @@ public abstract class AbstractFormatterTest extends TestCase {
 						+ ":" + inputLine);
 			} else if (!inputLine.equals(outputLine)) {
 				throw new ComparisonFailure(entryName + ": Comparison failed",
-						input.getLineNumber() + ":" + inputLine, output
-								.getLineNumber()
-								+ ":" + outputLine);
+						input.getLineNumber() + ":" + inputLine,
+						output.getLineNumber() + ":" + outputLine);
 			}
 		}
 	}
