@@ -103,33 +103,36 @@ public class ProjectIndexerManager {
 			} else if (INDEXER_ELEM.equals(element.getName())) {
 				final String id = element.getAttribute(ID_ATTR);
 				if (id == null) {
-					DLTKCore
-							.warn(NLS
-									.bind(
-											"{0} contributed by {1} does not have \"{2}\" attribute", //$NON-NLS-1$
-											new Object[] {
-													INDEXER_ELEM,
-													element.getContributor()
-															.getName(), ID_ATTR }));
+					DLTKCore.warn(NLS
+							.bind("{0} contributed by {1} does not have \"{2}\" attribute", //$NON-NLS-1$
+									new Object[] { INDEXER_ELEM,
+											element.getContributor().getName(),
+											ID_ATTR }));
 					continue;
 				}
 				if (indexers.containsKey(id)) {
-					DLTKCore
-							.warn(NLS
-									.bind(
-											"Duplicate {0} contribution from {1} (previous one is from \"{2}\")", //$NON-NLS-1$
-											new Object[] {
-													INDEXER_ELEM,
-													element.getContributor()
-															.getName(),
-													indexers.get(id).element
-															.getContributor()
-															.getName() }));
+					DLTKCore.warn(NLS
+							.bind("Duplicate {0} contribution from {1} (previous one is from \"{2}\")", //$NON-NLS-1$
+							new Object[] {
+									INDEXER_ELEM,
+									element.getContributor().getName(),
+									indexers.get(id).element.getContributor()
+											.getName() }));
 					continue;
 				}
 				indexers.put(id, new ProjectIndexerDescriptor(id, element));
 			}
 		}
+	}
+
+	private static boolean enabled = true;
+
+	public static boolean isEnabled() {
+		return enabled;
+	}
+
+	public static void setEnabled(boolean value) {
+		enabled = value;
 	}
 
 	/**
@@ -206,6 +209,9 @@ public class ProjectIndexerManager {
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project,
 			boolean checkEnable) {
+		if (!enabled) {
+			return null;
+		}
 		if (checkEnable && !isIndexerEnabled(project.getProject())) {
 			return null;
 		}
@@ -218,6 +224,9 @@ public class ProjectIndexerManager {
 	}
 
 	public static boolean isIndexerEnabled(final IProject project) {
+		if (!enabled) {
+			return false;
+		}
 		return new ProjectScope(project).getNode(DLTKCore.PLUGIN_ID)
 				.getBoolean(DLTKCore.INDEXER_ENABLED, true);
 	}
@@ -338,6 +347,9 @@ public class ProjectIndexerManager {
 	 */
 	public static void indexSourceModule(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
+		if (!enabled) {
+			return;
+		}
 		final IProjectIndexer[] indexers = getIndexers(toolkit.getNatureId());
 		if (indexers != null) {
 			for (int i = 0; i < indexers.length; ++i) {
