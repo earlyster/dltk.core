@@ -11,6 +11,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public enum ProblemCategory implements IProblemCategory {
-	IMPORT
+	IMPORT;
+
+	public Collection<IProblemIdentifier> contents() {
+		return Collections.emptyList();
+	}
 }

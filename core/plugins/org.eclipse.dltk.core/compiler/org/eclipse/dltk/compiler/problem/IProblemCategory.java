@@ -11,6 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-public interface IProblemCategory {
+import java.util.Collection;
 
+public interface IProblemCategory {
+	String name();
+
+	Collection<IProblemIdentifier> contents();
 }

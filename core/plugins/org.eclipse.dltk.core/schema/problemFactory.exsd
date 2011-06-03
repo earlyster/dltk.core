@@ -20,6 +20,7 @@
          <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="problemFactory"/>
             <element ref="problemIdentifierFactory"/>
+            <element ref="problemCategory"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -82,6 +83,40 @@
       </complexType>
    </element>
 
+   <element name="problemCategory">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="nature"/>
+         </appInfo>
+      </annotation>
+      <complexType>
+         <sequence>
+            <element ref="problem" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="scope" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <element name="problemIdentifierFactory">
       <complexType>
          <attribute name="namespace" type="string" use="required">
@@ -102,6 +137,9 @@
             </annotation>
          </attribute>
       </complexType>
+   </element>
+
+   <element name="problem" type="string">
    </element>
 
    <annotation>
