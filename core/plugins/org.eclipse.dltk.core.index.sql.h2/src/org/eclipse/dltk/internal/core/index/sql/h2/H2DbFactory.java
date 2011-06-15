@@ -41,7 +41,7 @@ public class H2DbFactory extends DbFactory {
 	private static final String DB_PASS = ""; //$NON-NLS-1$
 	private JdbcConnectionPool pool;
 
-	public H2DbFactory() throws SQLException {
+	public H2DbFactory() throws Exception {
 		try {
 			Class.forName("org.h2.Driver");
 		} catch (ClassNotFoundException e) {
@@ -92,16 +92,15 @@ public class H2DbFactory extends DbFactory {
 					}
 				}
 			} catch (SQLException e) {
-				SqlIndex
-						.error(
-								"An exception occurred while connecting to a database. Retrying ...",
-								e);
+				SqlIndex.error(
+						"An exception occurred while connecting to a database. Retrying ...",
+						e);
 
 				// remove corrupted DB
 				try {
 					DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME, true);
 
-				} catch (SQLException e1) {
+				} catch (Exception e1) {
 					SqlIndex.error(
 							"An exception has occurred while removing corrupted DB: "
 									+ dbPath.toOSString(), e1);
