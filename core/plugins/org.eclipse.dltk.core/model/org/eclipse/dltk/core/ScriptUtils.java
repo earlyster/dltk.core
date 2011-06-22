@@ -1,10 +1,5 @@
 package org.eclipse.dltk.core;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Plugin;
-
-import org.osgi.framework.Bundle;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -12,8 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Plugin;
+import org.osgi.framework.Bundle;
 
 /**
  * Utility functions useful for interacting with internal scripts that may need
@@ -118,10 +116,8 @@ public abstract class ScriptUtils {
 	 * does not implement neither {@link IScriptLanguageProvider} nor
 	 * {@link IScriptNatureProvider} then <code>null<code> is returned.
 	 * 
-	 * @param natureId
 	 * @param input
-	 * @param defaultValue
-	 * @return
+	 * @return natureId or <code>null</code>
 	 */
 	public static String getNatureId(Object input) {
 		if (input instanceof IScriptNatureProvider) {
@@ -129,6 +125,26 @@ public abstract class ScriptUtils {
 		} else if (input instanceof IScriptLanguageProvider) {
 			return ((IScriptLanguageProvider) input).getLanguageToolkit()
 					.getNatureId();
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieves the toolkit of the specified input object. If the input object
+	 * does not implement neither {@link IScriptLanguageProvider} nor
+	 * {@link IScriptNatureProvider} then <code>null<code> is returned.
+	 * 
+	 * @param input
+	 * @return toolkit or <code>null</code>
+	 * @since 4.0
+	 */
+	public static IDLTKLanguageToolkit getLanguageToolkit(Object input) {
+		if (input instanceof IScriptNatureProvider) {
+			String natureId = ((IScriptNatureProvider) input).getNatureId();
+			return DLTKLanguageManager.getLanguageToolkit(natureId);
+		} else if (input instanceof IScriptLanguageProvider) {
+			return ((IScriptLanguageProvider) input).getLanguageToolkit();
 		} else {
 			return null;
 		}
