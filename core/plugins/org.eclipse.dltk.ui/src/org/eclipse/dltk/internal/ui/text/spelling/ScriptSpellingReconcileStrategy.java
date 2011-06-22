@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text.spelling;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.dltk.compiler.problem.IProblem;
@@ -176,6 +180,7 @@ public class ScriptSpellingReconcileStrategy implements IReconcilingStrategy,
 				ITypedRegion[] partitions = TextUtilities.computePartitioning(
 						fDocument, fPartitioning, region.getOffset(),
 						region.getLength(), false);
+				List<IRegion> lst = new ArrayList<IRegion>(partitions.length);
 				for (int index = 0; index < partitions.length; index++) {
 					if (fProgressMonitor != null
 							&& fProgressMonitor.isCanceled())
@@ -189,10 +194,14 @@ public class ScriptSpellingReconcileStrategy implements IReconcilingStrategy,
 					final IRegion[] regions = fCheckDelegate
 							.computeRegions(partition);
 					if (regions != null) {
-						fSpellingService.check(fDocument, regions,
-								fSpellingContext, fSpellingProblemCollector,
-								fProgressMonitor);
+						Collections.addAll(lst, regions);
 					}
+				}
+				if (lst.size() > 0) {
+					fSpellingService.check(fDocument,
+							lst.toArray(new IRegion[lst.size()]),
+							fSpellingContext, fSpellingProblemCollector,
+							fProgressMonitor);
 				}
 			} catch (BadLocationException e) {
 				// ignore
