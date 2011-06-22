@@ -9,7 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.ScriptUtils;
+import org.eclipse.dltk.internal.ui.text.spelling.ScriptSpellingReconcileStrategy;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.text.spelling.SpellCheckDelegate;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -31,17 +40,34 @@ public class ScriptCompositeReconcilingStrategy extends
 	 *            the document partitioning this strategy uses for configuration
 	 */
 	public ScriptCompositeReconcilingStrategy(ITextEditor editor,
-			String documentPartitioning) {
+			String documentPartitioning, SpellCheckDelegate spellCheckDelegate) {
 		fEditor = editor;
 		fScriptStrategy = new ScriptReconcilingStrategy(editor);
-		setReconcilingStrategies(new IReconcilingStrategy[] { fScriptStrategy });
+		final List<IReconcilingStrategy> strategies = new ArrayList<IReconcilingStrategy>();
+		strategies.add(fScriptStrategy);
+		if (spellCheckDelegate != null) {
+			final IDLTKLanguageToolkit toolkit = ScriptUtils
+					.getLanguageToolkit(editor);
+			if (toolkit != null) {
+				final IContentType contentType = Platform
+						.getContentTypeManager().getContentType(
+								toolkit.getLanguageContentType());
+				if (contentType != null) {
+					strategies.add(new ScriptSpellingReconcileStrategy(editor,
+							documentPartitioning, contentType,
+							spellCheckDelegate));
+				}
+			}
+		}
+		setReconcilingStrategies(strategies
+				.toArray(new IReconcilingStrategy[strategies.size()]));
 	}
 
 	private IProblemRequestorExtension getProblemRequestorExtension() {
 		if (fEditor == null) {
 			return null;
 		}
-		
+
 		IDocumentProvider p = fEditor.getDocumentProvider();
 		if (p == null) {
 			p = DLTKUIPlugin.getDefault().getSourceModuleDocumentProvider();
@@ -79,9 +105,9 @@ public class ScriptCompositeReconcilingStrategy extends
 			super.reconcile(partition);
 		}
 	}
-	
+
 	public void initialReconcile() {
-		IProblemRequestorExtension e= getProblemRequestorExtension();
+		IProblemRequestorExtension e = getProblemRequestorExtension();
 		if (e != null) {
 			try {
 				e.beginReportingSequence();

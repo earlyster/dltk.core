@@ -29,6 +29,7 @@ import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingStrategy;
 import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
+import org.eclipse.dltk.ui.text.spelling.SpellCheckDelegate;
 import org.eclipse.dltk.ui.text.util.AutoEditUtils;
 import org.eclipse.dltk.ui.text.util.TabStyle;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -148,7 +149,8 @@ public abstract class ScriptSourceViewerConfiguration extends
 		final ITextEditor editor = getEditor();
 		if (editor != null && editor.isEditable()) {
 			ScriptCompositeReconcilingStrategy strategy = new ScriptCompositeReconcilingStrategy(
-					editor, getConfiguredDocumentPartitioning(sourceViewer));
+					editor, getConfiguredDocumentPartitioning(sourceViewer),
+					createSpellCheckDelegate());
 			ScriptReconciler reconciler = new ScriptReconciler(editor,
 					strategy, false);
 			reconciler.setIsAllowedToModifyDocument(false);
@@ -573,5 +575,9 @@ public abstract class ScriptSourceViewerConfiguration extends
 				return isShowInOverviewRuler(annotation);
 			}
 		};
+	}
+
+	protected SpellCheckDelegate createSpellCheckDelegate() {
+		return new SpellCheckDelegate();
 	}
 }

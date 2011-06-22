@@ -65,6 +65,7 @@ import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
+import org.eclipse.dltk.internal.ui.text.spelling.SpellingProblems;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -119,6 +120,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 
 public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		implements ISourceModuleDocumentProvider {
@@ -155,7 +157,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	static public class ProblemAnnotation extends Annotation implements
 			IScriptAnnotation, IAnnotationPresentation, IQuickFixableAnnotation {
 
-		public static final String SPELLING_ANNOTATION_TYPE = "org.eclipse.ui.workbench.texteditor.spelling"; //$NON-NLS-1$
+		public static final String SPELLING_ANNOTATION_TYPE = SpellingAnnotation.TYPE;
 
 		// XXX: To be fully correct these constants should be non-static
 		/**
@@ -224,12 +226,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			fProblem = problem;
 			fSourceModule = cu;
 
-			/*
-			 * if (JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID ==
-			 * fProblem.getID()) { setType(SPELLING_ANNOTATION_TYPE); fLayer=
-			 * WARNING_LAYER; } else
-			 */
-			if (fProblem.isTask()) {
+			if (SpellingProblems.SPELLING_PROBLEM == fProblem.getID()) {
+				setType(SPELLING_ANNOTATION_TYPE);
+				fLayer = WARNING_LAYER;
+			} else if (fProblem.isTask()) {
 				setType(ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE);
 				fLayer = TASK_LAYER;
 			} else if (fProblem.isWarning()) {
@@ -689,11 +689,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see IProblemRequestor#acceptProblem(IProblem)
 		 */
 		public void acceptProblem(IProblem problem) {
-			if (fIsHandlingTemporaryProblems) {
-				/*
-				 * || problem.getID() == JavaSpellingReconcileStrategy
-				 * .SPELLING_PROBLEM_ID
-				 */
+			if (fIsHandlingTemporaryProblems
+					|| problem.getID() == SpellingProblems.SPELLING_PROBLEM) {
 				ProblemRequestorState state = fProblemRequestorState.get();
 				if (state != null)
 					state.fReportedProblems.add(problem);
