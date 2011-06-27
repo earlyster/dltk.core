@@ -192,6 +192,11 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 			request.addOption("-o", config.getHitConditionString()); //$NON-NLS-1$
 		}
 
+		String expression = config.getExpression();
+		if (expression != null) {
+			request.setData(expression);
+		}
+
 		communicate(request);
 	}
 
