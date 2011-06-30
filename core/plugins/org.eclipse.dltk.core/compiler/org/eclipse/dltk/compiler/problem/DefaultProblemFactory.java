@@ -25,7 +25,7 @@ public class DefaultProblemFactory implements IProblemFactory {
 	}
 
 	protected String getProblemMarkerType() {
-		return DefaultProblem.MARKER_TYPE_TASK;
+		return DefaultProblem.MARKER_TYPE_PROBLEM;
 	}
 
 	protected String getTaskMarkerType() {
