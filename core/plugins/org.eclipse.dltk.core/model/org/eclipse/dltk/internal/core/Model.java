@@ -43,7 +43,7 @@ public class Model extends Openable implements IScriptModel {
 	 * A set of java.io.Files used as a cache of external files that are known
 	 * to be existing. Note this cache is kept for the whole session.
 	 */
-	public static HashSet existingExternalFiles = new HashSet();
+	public static HashSet<IFileHandle> existingExternalFiles = new HashSet<IFileHandle>();
 
 	/**
 	 * A set of external files ({@link #existingExternalFiles}) which have been
@@ -51,7 +51,7 @@ public class Model extends Openable implements IScriptModel {
 	 * {@link java.io.File#isFile()}. Note this cache is kept for the whole
 	 * session.
 	 */
-	public static HashSet existingExternalConfirmedFiles = new HashSet();
+	public static HashSet<IFileHandle> existingExternalConfirmedFiles = new HashSet<IFileHandle>();
 
 	protected Model() {
 		super(null);
@@ -225,8 +225,8 @@ public class Model extends Openable implements IScriptModel {
 	 * Flushes the cache of external files known to be existing.
 	 */
 	public static void flushExternalFileCache() {
-		existingExternalFiles = new HashSet();
-		existingExternalConfirmedFiles = new HashSet();
+		existingExternalFiles = new HashSet<IFileHandle>();
+		existingExternalConfirmedFiles = new HashSet<IFileHandle>();
 	}
 
 	/**
@@ -350,8 +350,8 @@ public class Model extends Openable implements IScriptModel {
 			ModelElement project = (ModelElement) getScriptProject(projectName);
 			return project.getHandleFromMemento(memento, owner);
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMemento(memento,
-					this, owner);
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					owner);
 		}
 		return null;
 	}
