@@ -930,7 +930,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 
 	public String[] projectPrerequisites(IBuildpathEntry[] entries)
 			throws ModelException {
-		ArrayList prerequisites = new ArrayList();
+		ArrayList<String> prerequisites = new ArrayList<String>();
 		// need resolution
 		entries = getResolvedBuildpath(entries, true, false, null/*
 																 * no reverse
@@ -1282,7 +1282,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 */
 	protected IBuildpathEntry[] decodeBuildpath(String xmlBuildpath,
 			boolean createMarker, boolean logProblems, Map unknownElements) {
-		ArrayList paths = new ArrayList();
+		ArrayList<IBuildpathEntry> paths = new ArrayList<IBuildpathEntry>();
 		try {
 			if (xmlBuildpath == null)
 				return null;
@@ -1355,7 +1355,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 */
 	public IBuildpathEntry[] decodeBuildpath(String xmlBuildpath,
 			Map unknownElements) throws IOException, AssertionFailedException {
-		ArrayList paths = new ArrayList();
+		ArrayList<IBuildpathEntry> paths = new ArrayList<IBuildpathEntry>();
 		StringReader reader = new StringReader(xmlBuildpath);
 		Element cpElement;
 		try {
