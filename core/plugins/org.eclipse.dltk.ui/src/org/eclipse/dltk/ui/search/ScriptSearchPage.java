@@ -16,13 +16,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptUtils;
@@ -296,8 +300,14 @@ public abstract class ScriptSearchPage extends DialogPage implements
 					modelElements, includeInterpreterEnvironment);
 			break;
 		case ISearchPageContainer.SELECTED_PROJECTS_SCOPE: {
+			ArrayList<String> res = new ArrayList<String>();
 			String[] projectNames = getContainer().getSelectedProjectNames();
-			scope = factory.createProjectSearchScope(projectNames,
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			for (int i = 0; i < projectNames.length; i++) {
+				getEnclosingProjects(res, projectNames[i], root);
+			}
+			scope = factory.createProjectSearchScope(
+					res.toArray(new String[res.size()]),
 					includeInterpreterEnvironment, getLanguageToolkit());
 			scopeDescription = factory.getProjectScopeDescription(projectNames,
 					includeInterpreterEnvironment);
@@ -334,6 +344,34 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		DLTKSearchQuery textSearchJob = new DLTKSearchQuery(querySpec);
 		NewSearchUI.runQueryInBackground(textSearchJob);
 		return true;
+	}
+
+	/**
+	 * @param res
+	 * @param projectNames
+	 * @param root
+	 * @param i
+	 */
+	private void getEnclosingProjects(ArrayList<String> res,
+			String projectName, IWorkspaceRoot root) {
+		if (res.contains(projectName))
+			return;
+		IScriptProject project = DLTKCore.create(root.getProject(projectName));
+		if (project.exists()) {
+			res.add(project.getProject().getName());
+			try {
+				IBuildpathEntry[] resolvedBuildpath = project
+						.getResolvedBuildpath(true);
+				for (IBuildpathEntry buildpathEntry : resolvedBuildpath) {
+					if (buildpathEntry.getEntryKind() == IBuildpathEntry.BPE_PROJECT) {
+						getEnclosingProjects(res, buildpathEntry.getPath()
+								.lastSegment(), root);
+					}
+				}
+			} catch (ModelException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private int getLimitTo() {
