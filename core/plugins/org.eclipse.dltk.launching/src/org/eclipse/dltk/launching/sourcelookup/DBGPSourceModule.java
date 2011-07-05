@@ -144,7 +144,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	 * @see AbstractExternalSourceModule#getModuleType()
 	 */
 	protected String getModuleType() {
-		return "DLTK Remote Source Module: "; //$NON-NLS-1$
+		return "DLTK Remote Source Module"; //$NON-NLS-1$
 	}
 
 	/*
