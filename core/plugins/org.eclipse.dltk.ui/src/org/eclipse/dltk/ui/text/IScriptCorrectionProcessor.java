@@ -16,6 +16,9 @@ import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 
 /**
  * Quick assist processor for quick fixes and quick assists.
+ * 
+ * Implementations are contributed via
+ * <code>org.eclipse.dltk.ui.correctionProcessor</code> extension point.
  */
 public interface IScriptCorrectionProcessor {
 
