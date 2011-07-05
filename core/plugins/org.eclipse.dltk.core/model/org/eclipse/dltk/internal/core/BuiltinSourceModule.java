@@ -98,7 +98,7 @@ public class BuiltinSourceModule extends AbstractExternalSourceModule implements
 	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType()
 	 */
 	protected String getModuleType() {
-		return "DLTK Builtin Source Module: "; //$NON-NLS-1$
+		return "DLTK Builtin Source Module"; //$NON-NLS-1$
 	}
 
 	/*

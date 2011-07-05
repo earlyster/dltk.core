@@ -386,7 +386,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	@Override
 	protected String getModuleType() {
-		return "DLTK Source Module: "; //$NON-NLS-1$
+		return "DLTK Source Module"; //$NON-NLS-1$
 	}
 
 	@Override

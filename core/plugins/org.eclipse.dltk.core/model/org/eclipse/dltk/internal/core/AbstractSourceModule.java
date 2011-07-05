@@ -409,7 +409,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint(getModuleType() + getElementName());
+		output.formatPrint(getModuleType() + ": " + getElementName());
 		output.indent();
 		try {
 			IModelElement[] modelElements = this.getChildren();
@@ -431,7 +431,9 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	protected abstract char[] getBufferContent() throws ModelException;
 
-	protected abstract String getModuleType();
+	protected String getModuleType() {
+		return getClass().getSimpleName();
+	}
 
 	protected abstract String getNatureId() throws CoreException;
 

@@ -23,8 +23,8 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
-import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
+import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -150,7 +150,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * ()
 	 */
 	protected String getModuleType() {
-		return "DLTK External Source Moule: "; //$NON-NLS-1$
+		return "DLTK External Source Moule"; //$NON-NLS-1$
 	}
 
 	/*
