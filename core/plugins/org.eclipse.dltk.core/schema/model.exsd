@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.eclipse.dltk.core" id="model" name="model"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          Used to provide some custom element to DLTK strucure model.
       </documentation>
@@ -12,14 +12,15 @@
 
    <element name="extension">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element />
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
+         <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="model"/>
-         </sequence>
+            <element ref="projectFragment"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -39,9 +40,9 @@
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute translatable="true"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -68,9 +69,9 @@
                <documentation>
                   Class implementing IModelProvider to build structure
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.IModelProvider"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="requires" type="string">
@@ -84,10 +85,32 @@ Be aware we are not checking for cyclic dependencies.
       </complexType>
    </element>
 
+   <element name="projectFragment">
+      <complexType>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Class implementing IProjectFragmentFactory to create special implementations of IProjectFragments
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.IProjectFragmentFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          Since 1.0
       </documentation>

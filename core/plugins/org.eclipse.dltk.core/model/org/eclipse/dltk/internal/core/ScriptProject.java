@@ -60,6 +60,7 @@ import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IProjectFragmentFactory;
 import org.eclipse.dltk.core.IRegion;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
@@ -854,6 +855,10 @@ public class ScriptProject extends Openable implements IScriptProject,
 		case IBuildpathEntry.BPE_LIBRARY:
 			if (referringEntry != null && !resolvedEntry.isExported())
 				return;
+			root = delegatedCreateProjectFragment(resolvedEntry);
+			if (root != null) {
+				break;
+			}
 			if (checkExistency) {
 				if (entryPath.segment(0).startsWith(
 						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)
@@ -931,6 +936,25 @@ public class ScriptProject extends Openable implements IScriptProject,
 						((BuildpathEntry) resolvedEntry)
 								.combineWith((BuildpathEntry) referringEntry));
 		}
+	}
+
+	private IProjectFragment delegatedCreateProjectFragment(
+			IBuildpathEntry resolvedEntry) {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		if (toolkit != null) {
+			final IProjectFragmentFactory[] factories = ModelProviderManager
+					.getProjectFragmentFactories(toolkit.getNatureId());
+			if (factories != null) {
+				for (IProjectFragmentFactory factory : factories) {
+					final IProjectFragment fragment = factory.create(this,
+							resolvedEntry);
+					if (fragment != null) {
+						return fragment;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public String[] projectPrerequisites(IBuildpathEntry[] entries)
