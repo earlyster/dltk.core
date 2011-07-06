@@ -43,10 +43,10 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		super(parent);
 		this.path = path;
 
-		elementName = folderPathToString(path);
+		elementName = pathToString(path);
 	}
 
-	private static String folderPathToString(IPath path) {
+	public static String pathToString(IPath path) {
 		final int segmentCount = path.segmentCount();
 		if (segmentCount == 0) {
 			return org.eclipse.dltk.compiler.util.Util.EMPTY_STRING;
@@ -333,12 +333,8 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		if (this.isRootFolder()) {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		} else {
-			if (getProjectFragment() instanceof IProjectFragment) {
-				return ((ScriptFolderInfo) getElementInfo())
-						.getForeignResources(getResource(),
-								(IProjectFragment) getProjectFragment());
-			}
-			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
+			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(
+					getResource(), getProjectFragment());
 		}
 	}
 
