@@ -316,7 +316,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 				}
 			}
 		}
-		Map rawReverseMap = perProjectInfo == null ? null : new HashMap(5);
+		Map<IPath, IBuildpathEntry> rawReverseMap = perProjectInfo == null ? null
+				: new HashMap<IPath, IBuildpathEntry>(5);
 		IBuildpathEntry[] resolvedPath = null;
 		boolean nullOldResolvedCP = perProjectInfo != null
 				&& perProjectInfo.resolvedBuildpath == null;
@@ -373,7 +374,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * @throws ModelException
 	 */
 	public IBuildpathEntry[] getResolvedBuildpath(
-			IBuildpathEntry[] buildpathEntries, boolean ignoreUnresolvedEntry, // if
+			IBuildpathEntry[] buildpathEntries,
+			boolean ignoreUnresolvedEntry, // if
 			// unresolved
 			// entries
 			// are
@@ -382,7 +384,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 			// it
 			// trigger
 			// initializations
-			boolean generateMarkerOnError, Map rawReverseMap) // can be null
+			boolean generateMarkerOnError,
+			Map<IPath, IBuildpathEntry> rawReverseMap) // can be null
 			// if not
 			// interested in
 			// reverse
@@ -571,7 +574,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 */
 	public IBuildpathEntry[] getExpandedBuildpath(
 			boolean ignoreUnresolvedVariable, boolean generateMarkerOnError,
-			Map preferredBuildpaths) throws ModelException {
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths)
+			throws ModelException {
 
 		List<IBuildpathEntry> accumulatedEntries = new ArrayList<IBuildpathEntry>();
 		computeExpandedBuildpath(null, ignoreUnresolvedVariable,
@@ -590,7 +594,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 	private void computeExpandedBuildpath(BuildpathEntry referringEntry,
 			boolean ignoreUnresolvedVariable, boolean generateMarkerOnError,
 			HashSet<String> rootIDs, List<IBuildpathEntry> accumulatedEntries,
-			Map preferredBuildpaths) throws ModelException {
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths)
+			throws ModelException {
 
 		String projectRootId = this.rootID();
 		if (rootIDs.contains(projectRootId)) {
@@ -1687,12 +1692,13 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * @see IScriptProject
 	 */
 	public boolean hasBuildpathCycle(IBuildpathEntry[] preferredBuildpath) {
-		HashSet cycleParticipants = new HashSet();
-		HashMap preferredBuildpaths = new HashMap(1);
+		HashSet<IPath> cycleParticipants = new HashSet<IPath>();
+		HashMap<ScriptProject, IBuildpathEntry[]> preferredBuildpaths = new HashMap<ScriptProject, IBuildpathEntry[]>(
+				1);
 		preferredBuildpaths.put(this, preferredBuildpath);
-		updateCycleParticipants(new ArrayList(2), cycleParticipants,
-				ResourcesPlugin.getWorkspace().getRoot(), new HashSet(2),
-				preferredBuildpaths);
+		updateCycleParticipants(new ArrayList<IPath>(2), cycleParticipants,
+				ResourcesPlugin.getWorkspace().getRoot(),
+				new HashSet<IPath>(2), preferredBuildpaths);
 		return !cycleParticipants.isEmpty();
 	}
 
@@ -1735,17 +1741,18 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 *            Map
 	 * @throws ModelException
 	 */
-	public static void updateAllCycleMarkers(Map preferredBuildpaths)
+	public static void updateAllCycleMarkers(
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths)
 			throws ModelException {
 		// long start = System.currentTimeMillis();
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] rscProjects = workspaceRoot.getProjects();
 		int length = rscProjects.length;
 		ScriptProject[] projects = new ScriptProject[length];
-		HashSet cycleParticipants = new HashSet();
-		HashSet traversed = new HashSet();
+		HashSet<IPath> cycleParticipants = new HashSet<IPath>();
+		HashSet<IPath> traversed = new HashSet<IPath>();
 		// compute cycle participants
-		ArrayList prereqChain = new ArrayList();
+		ArrayList<IPath> prereqChain = new ArrayList<IPath>();
 		for (int i = 0; i < length; i++) {
 			ScriptProject project = (projects[i] = (ScriptProject) DLTKCore
 					.create(rscProjects[i]));
@@ -1806,12 +1813,12 @@ public class ScriptProject extends Openable implements IScriptProject,
 
 	public Map<String, String> getOptions(boolean inheritCoreOptions) {
 		// initialize to the defaults from DLTKCore options pool
-		Map options = inheritCoreOptions ? DLTKCore.getOptions()
-				: new Hashtable(5);
+		Map<String, String> options = inheritCoreOptions ? DLTKCore
+				.getOptions() : new Hashtable<String, String>(5);
 		// Get project specific options
 		ModelManager.PerProjectInfo perProjectInfo = null;
-		Hashtable projectOptions = null;
-		HashSet optionNames = ModelManager.getModelManager().optionNames;
+		Hashtable<String, String> projectOptions = null;
+		HashSet<String> optionNames = ModelManager.getModelManager().optionNames;
 		try {
 			perProjectInfo = getPerProjectInfo();
 			projectOptions = perProjectInfo.options;
@@ -1822,7 +1829,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 					return options; // cannot do better (non-script project)
 				// create project options
 				String[] propertyNames = projectPreferences.keys();
-				projectOptions = new Hashtable(propertyNames.length);
+				projectOptions = new Hashtable<String, String>(
+						propertyNames.length);
 				for (int i = 0; i < propertyNames.length; i++) {
 					String propertyName = propertyNames[i];
 					String value = projectPreferences.get(propertyName, null);
@@ -1834,17 +1842,14 @@ public class ScriptProject extends Openable implements IScriptProject,
 				perProjectInfo.options = projectOptions;
 			}
 		} catch (ModelException jme) {
-			projectOptions = new Hashtable();
+			projectOptions = new Hashtable<String, String>();
 		} catch (BackingStoreException e) {
-			projectOptions = new Hashtable();
+			projectOptions = new Hashtable<String, String>();
 		}
 		// Inherit from DLTKCore options if specified
 		if (inheritCoreOptions) {
-			Iterator propertyNames = projectOptions.keySet().iterator();
-			while (propertyNames.hasNext()) {
-				String propertyName = (String) propertyNames.next();
-				String propertyValue = (String) projectOptions
-						.get(propertyName);
+			for (String propertyName : projectOptions.keySet()) {
+				String propertyValue = projectOptions.get(propertyName);
 				if (propertyValue != null && optionNames.contains(propertyName)) {
 					options.put(propertyName, propertyValue.trim());
 				}
@@ -2032,7 +2037,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 	/*
 	 * Update .buildpath format markers.
 	 */
-	public void updateBuildpathMarkers(Map preferredBuildpaths) {
+	public void updateBuildpathMarkers(
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths) {
 
 		this.flushBuildpathProblemMarkers(false/* cycle */, true/* format */);
 		this.flushBuildpathProblemMarkers(false/* cycle */, false/* format */);
@@ -2080,16 +2086,17 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * @param preferredBuildpaths
 	 *            Map
 	 */
-	public void updateCycleParticipants(ArrayList prereqChain,
-			HashSet cycleParticipants, IWorkspaceRoot workspaceRoot,
-			HashSet traversed, Map preferredBuildpaths) {
+	public void updateCycleParticipants(ArrayList<IPath> prereqChain,
+			HashSet<IPath> cycleParticipants, IWorkspaceRoot workspaceRoot,
+			HashSet<IPath> traversed,
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths) {
 		IPath path = this.getPath();
 		prereqChain.add(path);
 		traversed.add(path);
 		try {
 			IBuildpathEntry[] buildpath = null;
 			if (preferredBuildpaths != null)
-				buildpath = (IBuildpathEntry[]) preferredBuildpaths.get(this);
+				buildpath = preferredBuildpaths.get(this);
 			if (buildpath == null)
 				buildpath = getResolvedBuildpath();
 			for (int i = 0, length = buildpath.length; i < length; i++) {
@@ -2283,17 +2290,18 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * markers if necessary. @param preferredBuildpaths Map @throws
 	 * ModelException
 	 */
-	public static void validateCycles(Map preferredBuildpaths)
+	public static void validateCycles(
+			Map<ScriptProject, IBuildpathEntry[]> preferredBuildpaths)
 			throws ModelException {
 		// long start = System.currentTimeMillis();
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] rscProjects = workspaceRoot.getProjects();
 		int length = rscProjects.length;
 		ScriptProject[] projects = new ScriptProject[length];
-		HashSet cycleParticipants = new HashSet();
-		HashSet traversed = new HashSet();
+		HashSet<IPath> cycleParticipants = new HashSet<IPath>();
+		HashSet<IPath> traversed = new HashSet<IPath>();
 		// compute cycle participants
-		ArrayList prereqChain = new ArrayList();
+		ArrayList<IPath> prereqChain = new ArrayList<IPath>();
 		for (int i = 0; i < length; i++) {
 			if (DLTKLanguageManager.hasScriptNature(rscProjects[i])) {
 				ScriptProject project = (projects[i] = (ScriptProject) DLTKCore
@@ -3194,22 +3202,19 @@ public class ScriptProject extends Openable implements IScriptProject,
 	}
 
 	public IScriptFolder[] getScriptFoldersInFragments(IProjectFragment[] roots) {
-
-		ArrayList frags = new ArrayList();
+		ArrayList<IScriptFolder> frags = new ArrayList<IScriptFolder>();
 		for (int i = 0; i < roots.length; i++) {
 			IProjectFragment root = roots[i];
 			try {
 				IModelElement[] rootFragments = root.getChildren();
 				for (int j = 0; j < rootFragments.length; j++) {
-					frags.add(rootFragments[j]);
+					frags.add((IScriptFolder) rootFragments[j]);
 				}
 			} catch (ModelException e) {
 				// do nothing
 			}
 		}
-		IScriptFolder[] fragments = new IScriptFolder[frags.size()];
-		frags.toArray(fragments);
-		return fragments;
+		return frags.toArray(new IScriptFolder[frags.size()]);
 	}
 
 	/**
