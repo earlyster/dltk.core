@@ -70,11 +70,20 @@ public class SimpleDLTKExtensionManager {
 				.getConfigurationElementsFor(this.extensionPoint);
 
 		for (int i = 0; i < cfg.length; i++) {
-			ElementInfo info = createInfo(cfg[i]);
-			if (!this.extensions.contains(info)) {
-				extensions.add(info);
+			if (isValidElement(cfg[i])) {
+				ElementInfo info = createInfo(cfg[i]);
+				if (!this.extensions.contains(info)) {
+					extensions.add(info);
+				}
 			}
 		}
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	protected boolean isValidElement(IConfigurationElement confElement) {
+		return true;
 	}
 
 	public ElementInfo[] getElementInfos() {
