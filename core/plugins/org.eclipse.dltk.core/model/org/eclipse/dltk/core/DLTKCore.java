@@ -1319,7 +1319,7 @@ public class DLTKCore extends Plugin {
 	 * @see #getDefaultOptions()
 	 * @see DLTKCorePreferenceInitializer for changing default settings
 	 */
-	public static Hashtable getOptions() {
+	public static Hashtable<String, String> getOptions() {
 		return ModelManager.getModelManager().getOptions();
 	}
 
