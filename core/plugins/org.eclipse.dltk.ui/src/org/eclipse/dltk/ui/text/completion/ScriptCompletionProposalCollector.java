@@ -361,7 +361,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	public final IScriptCompletionProposal[] getKeywordCompletionProposals() {
 		processUnprocessedProposals();
 		return fKeywords
-				.toArray(new ScriptCompletionProposal[fKeywords.size()]);
+				.toArray(new IScriptCompletionProposal[fKeywords.size()]);
 	}
 
 	/**
