@@ -11,7 +11,7 @@
 package org.eclipse.dltk.internal.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -136,7 +136,6 @@ public class StandardModelElementContentProvider implements
 	 *            leaves provided by this content provider.
 	 */
 	public void setProvideMembers(boolean b) {
-		// hello
 		fProvideMembers = b;
 	}
 
@@ -187,15 +186,14 @@ public class StandardModelElementContentProvider implements
 	}
 
 	public Object[] getExtendedChildren(Object element, Object[] children) {
-		String toolkitId = getToolkitID(element);
-		IModelContentProvider[] providers = UIModelProviderManager
-				.getContentProviders(toolkitId);
+		final IModelContentProvider[] providers = UIModelProviderManager
+				.getContentProviders(getToolkitID(element));
 		if (providers.length > 0) {
-			List elements = new ArrayList();
-			elements.addAll(Arrays.asList(children));
+			final List<Object> elements = new ArrayList<Object>(
+					children.length + 2);
+			Collections.addAll(elements, children);
 			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(element, elements,
-						(ITreeContentProvider) this);
+				providers[i].provideModelChanges(element, elements, this);
 			}
 			return elements.toArray();
 		} else {
@@ -219,8 +217,7 @@ public class StandardModelElementContentProvider implements
 				.getContentProviders(getToolkitID(element));
 		if (providers.length > 0) {
 			for (int i = 0; i < providers.length; i++) {
-				Object parent = providers[i].getParentElement(element,
-						(ITreeContentProvider) this);
+				Object parent = providers[i].getParentElement(element, this);
 				if (parent != null) {
 					return parent;
 				}
@@ -256,15 +253,15 @@ public class StandardModelElementContentProvider implements
 			if (element instanceof IFolder)
 				return getExtendedChildren(element,
 						getFolderContent((IFolder) element));
-			//			
+			//
 			// if (element instanceof IJarEntryResource) {
 			// return ((IJarEntryResource) element).getChildren();
 			// }
-			//			
+			//
 			if (getProvideMembers() && element instanceof ISourceReference
 					&& element instanceof IParent) {
-				return getExtendedChildren(element, ((IParent) element)
-						.getChildren());
+				return getExtendedChildren(element,
+						((IParent) element).getChildren());
 			}
 		} catch (CoreException e) {
 			return NO_CHILDREN;
@@ -429,8 +426,8 @@ public class StandardModelElementContentProvider implements
 	protected Object[] getScriptFolderContent(IScriptFolder fragment)
 			throws ModelException {
 		// if (fragment.getKind() == IProjectFragment.K_SOURCE) {
-		return concatenate(fragment.getSourceModules(), fragment
-				.getForeignResources());
+		return concatenate(fragment.getSourceModules(),
+				fragment.getForeignResources());
 		// }
 		// return concatenate(fragment.getClassFiles(),
 		// fragment.getForeignResources());
