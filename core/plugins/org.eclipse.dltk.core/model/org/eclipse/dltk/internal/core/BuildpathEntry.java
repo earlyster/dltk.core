@@ -127,14 +127,6 @@ public class BuildpathEntry implements IBuildpathEntry {
 	 * Default exclusion pattern set
 	 */
 	public final static IPath[] EXCLUDE_NONE = {};
-	/*
-	 * Default extra attributes
-	 */
-	public final static IBuildpathAttribute[] NO_EXTRA_ATTRIBUTES = {};
-	/*
-	 * Default access rules
-	 */
-	public final static IAccessRule[] NO_ACCESS_RULES = {};
 	/**
 	 * The export flag
 	 */

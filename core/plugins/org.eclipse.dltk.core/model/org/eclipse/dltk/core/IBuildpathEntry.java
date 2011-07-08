@@ -50,6 +50,16 @@ public interface IBuildpathEntry {
 	String BUILDPATH_SPECIAL = "#special#";
 
 	/**
+	 * Default extra attributes
+	 */
+	public final static IBuildpathAttribute[] NO_EXTRA_ATTRIBUTES = {};
+
+	/**
+	 * Default access rules
+	 */
+	public final static IAccessRule[] NO_ACCESS_RULES = {};
+
+	/**
 	 * Returns whether the access rules of the project's exported entries should
 	 * be combined with this entry's access rules. Returns true for container
 	 * entries. Returns false otherwise.
@@ -118,13 +128,13 @@ public interface IBuildpathEntry {
 	 * simple patterns involving standard wildcard characters.
 	 * </p>
 	 * <p>
-	 *'*' matches 0 or more characters within a segment. So <code>*.java</code>
+	 * '*' matches 0 or more characters within a segment. So <code>*.java</code>
 	 * matches <code>.java</code>, <code>a.java</code> and <code>Foo.java</code>
 	 * , but not <code>Foo.properties</code> (does not end with
 	 * <code>.java</code>).
 	 * </p>
 	 * <p>
-	 *'?' matches 1 character within a segment. So <code>?.java</code> matches
+	 * '?' matches 1 character within a segment. So <code>?.java</code> matches
 	 * <code>a.java</code>, <code>A.java</code>, but not <code>.java</code> or
 	 * <code>xyz.java</code> (neither have just one character before
 	 * <code>.java</code>).
