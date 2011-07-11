@@ -187,9 +187,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator,
 				case IModelElement.SCRIPT_MODEL:
 				case IModelElement.SCRIPT_PROJECT:
 				case IModelElement.PROJECT_FRAGMENT:
+				case IModelElement.SCRIPT_FOLDER:
 					return getErrorTicksFromMarkers(element.getResource(),
 							IResource.DEPTH_INFINITE, null);
-				case IModelElement.SCRIPT_FOLDER:
 				case IModelElement.SOURCE_MODULE:
 					return getErrorTicksFromMarkers(element.getResource(),
 							IResource.DEPTH_ONE, null);
