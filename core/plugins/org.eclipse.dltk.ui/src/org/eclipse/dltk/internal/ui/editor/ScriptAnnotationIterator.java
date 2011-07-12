@@ -12,9 +12,12 @@ package org.eclipse.dltk.internal.ui.editor;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 /**
  * Filters problems based on their types.
@@ -23,17 +26,7 @@ public class ScriptAnnotationIterator implements Iterator<Annotation> {
 
 	private Iterator<?> fIterator;
 	private Annotation fNext;
-	private boolean fSkipIrrelevants;
 	private boolean fReturnAllAnnotations;
-
-	/**
-	 * Equivalent to
-	 * <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
-	 */
-	public ScriptAnnotationIterator(IAnnotationModel model,
-			boolean skipIrrelevants) {
-		this(model, skipIrrelevants, false);
-	}
 
 	/**
 	 * Returns a new JavaAnnotationIterator.
@@ -45,36 +38,53 @@ public class ScriptAnnotationIterator implements Iterator<Annotation> {
 	 * @param returnAllAnnotations
 	 *            Whether to return non IJavaAnnotations as well
 	 */
+	@Deprecated
 	public ScriptAnnotationIterator(IAnnotationModel model,
 			boolean skipIrrelevants, boolean returnAllAnnotations) {
+		this(model, returnAllAnnotations);
+	}
+
+	/**
+	 * Returns a new JavaAnnotationIterator.
+	 * 
+	 * @param model
+	 *            the annotation model
+	 * @param returnAllAnnotations
+	 *            Whether to return non IJavaAnnotations as well
+	 */
+	public ScriptAnnotationIterator(IAnnotationModel model,
+			boolean returnAllAnnotations) {
 		fReturnAllAnnotations = returnAllAnnotations;
 		if (model != null)
 			fIterator = model.getAnnotationIterator();
 		else
 			fIterator = Collections.EMPTY_LIST.iterator();
-		fSkipIrrelevants = skipIrrelevants;
 		skip();
 	}
 
 	private void skip() {
 		while (fIterator.hasNext()) {
 			Annotation next = (Annotation) fIterator.next();
-			if (next instanceof IScriptAnnotation) {
-				if (fSkipIrrelevants) {
-					if (!next.isMarkedDeleted()) {
-						fNext = next;
-						return;
-					}
-				} else {
-					fNext = next;
-					return;
-				}
-			} else if (fReturnAllAnnotations) {
+			if (next.isMarkedDeleted())
+				continue;
+			if (fReturnAllAnnotations || next instanceof IScriptAnnotation
+					|| isProblemMarkerAnnotation(next)) {
 				fNext = next;
 				return;
 			}
 		}
 		fNext = null;
+	}
+
+	private static boolean isProblemMarkerAnnotation(Annotation annotation) {
+		if (!(annotation instanceof MarkerAnnotation))
+			return false;
+		try {
+			return (((MarkerAnnotation) annotation).getMarker()
+					.isSubtypeOf(IMarker.PROBLEM));
+		} catch (CoreException e) {
+			return false;
+		}
 	}
 
 	/*

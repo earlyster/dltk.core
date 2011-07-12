@@ -87,7 +87,7 @@ public abstract class AbstractAnnotationHover extends
 
 		try {
 			final IPreferenceStore store = getCombinedPreferenceStore();
-			Iterator<Annotation> e = new ScriptAnnotationIterator(model, true,
+			Iterator<Annotation> e = new ScriptAnnotationIterator(model,
 					fAllAnnotations);
 			int layer = -1;
 			String message = null;

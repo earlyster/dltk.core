@@ -1710,7 +1710,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		IAnnotationModel model = getDocumentProvider().getAnnotationModel(
 				getEditorInput());
-		Iterator<Annotation> e = new ScriptAnnotationIterator(model, true, true);
+		Iterator<Annotation> e = new ScriptAnnotationIterator(model, true);
 		while (e.hasNext()) {
 			Annotation a = e.next();
 			if ((a instanceof IScriptAnnotation)
@@ -1795,8 +1795,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	private Annotation getAnnotation(int offset, int length) {
 		IAnnotationModel model = getDocumentProvider().getAnnotationModel(
 				getEditorInput());
-		Iterator<Annotation> e = new ScriptAnnotationIterator(model, true,
-				false);
+		Iterator<Annotation> e = new ScriptAnnotationIterator(model, false);
 		while (e.hasNext()) {
 			Annotation a = e.next();
 			Position p = model.getPosition(a);
