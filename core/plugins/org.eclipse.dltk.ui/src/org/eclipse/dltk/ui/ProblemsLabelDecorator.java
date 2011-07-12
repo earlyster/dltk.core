@@ -187,9 +187,17 @@ public class ProblemsLabelDecorator implements ILabelDecorator,
 				case IModelElement.SCRIPT_MODEL:
 				case IModelElement.SCRIPT_PROJECT:
 				case IModelElement.PROJECT_FRAGMENT:
-				case IModelElement.SCRIPT_FOLDER:
 					return getErrorTicksFromMarkers(element.getResource(),
 							IResource.DEPTH_INFINITE, null);
+				case IModelElement.SCRIPT_FOLDER:
+					/**
+					 * At the moment IScriptFolder refers to the current folder
+					 * only (used in flat view mode). If you want problem status
+					 * with subfolders then use
+					 * {@link org.eclipse.dltk.internal.ui.navigator.TreeHierarchyLayoutProblemsDecorator}
+					 * which handles it as
+					 * {@link org.eclipse.core.resources.IFolder}
+					 */
 				case IModelElement.SOURCE_MODULE:
 					return getErrorTicksFromMarkers(element.getResource(),
 							IResource.DEPTH_ONE, null);
