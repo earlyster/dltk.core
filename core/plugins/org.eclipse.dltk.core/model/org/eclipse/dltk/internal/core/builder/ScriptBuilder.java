@@ -49,6 +49,7 @@ import org.eclipse.dltk.core.builder.IBuildChange;
 import org.eclipse.dltk.core.builder.IBuildState;
 import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.core.builder.IScriptBuilderVersionInfo;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
@@ -438,6 +439,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
+			saveBuilderVersions(builders);
 			updateExternalFolderLocations(buildChange);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
@@ -499,8 +501,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (builders == null || builders.length == 0) {
 				return;
 			}
-			IBuildChange buildChange = createBuildChange(delta,
-					requiredProjects, externalFoldersBefore, monitor);
+			IBuildChange buildChange = null;
+			if (isBuilderVersionChange(builders)) {
+				buildChange = new FullBuildChange(currentProject, monitor);
+				this.lastState.resetDependencies();
+			}
+			if (buildChange == null) {
+				buildChange = createBuildChange(delta, requiredProjects,
+						externalFoldersBefore, monitor);
+			}
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -589,6 +598,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				// TODO prevent cycles
 				queue.addAll(nextQueue);
 			}
+			saveBuilderVersions(builders);
 			updateExternalFolderLocations(buildChange);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
@@ -597,6 +607,36 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
 			monitor.done();
+		}
+	}
+
+	private QualifiedName getQualifiedName(IScriptBuilderVersionInfo vi) {
+		return vi.getVersionKey();
+	}
+
+	private boolean isBuilderVersionChange(IScriptBuilder[] builders)
+			throws CoreException {
+		for (IScriptBuilder builder : builders) {
+			if (builder instanceof IScriptBuilderVersionInfo) {
+				final IScriptBuilderVersionInfo vi = (IScriptBuilderVersionInfo) builder;
+				final String version = currentProject
+						.getPersistentProperty(getQualifiedName(vi));
+				if (!vi.getVersion().equals(version)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void saveBuilderVersions(IScriptBuilder[] builders)
+			throws CoreException {
+		for (IScriptBuilder builder : builders) {
+			if (builder instanceof IScriptBuilderVersionInfo) {
+				final IScriptBuilderVersionInfo vi = (IScriptBuilderVersionInfo) builder;
+				currentProject.setPersistentProperty(getQualifiedName(vi),
+						vi.getVersion());
+			}
 		}
 	}
 
