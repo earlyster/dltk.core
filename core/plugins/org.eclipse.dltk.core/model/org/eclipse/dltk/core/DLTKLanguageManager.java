@@ -64,6 +64,11 @@ public class DLTKLanguageManager {
 		for (int j = 0; j < elementInfos.length; j++) {
 			IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) toolkitManager
 					.getInitObject(elementInfos[j]);
+			if (toolkit == null) {
+				// toolkit instantiation failed, skip it
+				// TODO (alex) remove this ElementInfo entry
+				continue;
+			}
 			if (object instanceof IResource) {
 				if (DLTKContentTypeManager.isValidResourceForContentType(
 						toolkit, (IResource) object)) {
