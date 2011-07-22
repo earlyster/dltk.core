@@ -21,10 +21,10 @@ import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
 import org.eclipse.dltk.console.ui.AnsiColorHelper;
+import org.eclipse.dltk.console.ui.AnsiColorHelper.IAnsiColorHandler;
 import org.eclipse.dltk.console.ui.IScriptConsoleViewer;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.ScriptConsolePartitioner;
-import org.eclipse.dltk.console.ui.AnsiColorHelper.IAnsiColorHandler;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -159,14 +159,14 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 						if (((ScriptConsole) handler).getState() != IScriptConsoleInterpreter.WAIT_USER_INPUT) {
 							((ScriptConsole) handler).getPage().getSite()
-									.getShell().getDisplay().asyncExec(
-											new Runnable() {
+									.getShell().getDisplay()
+									.asyncExec(new Runnable() {
 
-												public void run() {
-													processResult(result);
-												}
+										public void run() {
+											processResult(result);
+										}
 
-											});
+									});
 						}
 					} catch (IOException ixcn) {
 						ixcn.printStackTrace();
@@ -271,8 +271,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 								token.length(), AnsiColorHelper.COLOR_BLACK,
 								null, SWT.BOLD));
 					} else {
-						addToPartitioner(viewer, ansiHelper.resolveStyleRange(
-								tokenStart, token.length(), isError));
+						addToPartitioner(
+								viewer,
+								ansiHelper.resolveStyleRange(tokenStart,
+										token.length(), isError));
 					}
 				}
 
@@ -298,8 +300,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 				int index;
 				while ((index = text.indexOf(delim, start)) != -1) {
 					if (index > start) {
-						processText(getCommandLineOffset(), text.substring(
-								start, index), true, false, false, true);
+						processText(getCommandLineOffset(),
+								text.substring(start, index), true, false,
+								false, true);
 					}
 					final String commandLine = getCommandLine();
 					processText(-1, delim, true, false, false, true);
@@ -395,9 +398,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 					// TODO should we restore the text after this command
 					// execution?
 				}
-				processText(getCommandLineOffset(), command
-						+ TextUtilities.getDefaultLineDelimiter(doc), true,
-						false, true, true);
+				processText(getCommandLineOffset(),
+						command + TextUtilities.getDefaultLineDelimiter(doc),
+						true, false, true, true);
 				inviteStart = inviteEnd = doc.getLength();
 				handleCommandLine(command);
 			} catch (BadLocationException e) {
@@ -785,7 +788,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			switch (operation) {
 			case CUT:
 			case DELETE:
-			case PASTE:
+				// case PASTE:
 			case SHIFT_LEFT:
 			case SHIFT_RIGHT:
 			case PREFIX:
