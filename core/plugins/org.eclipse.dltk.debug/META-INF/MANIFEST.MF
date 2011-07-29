@@ -9,7 +9,6 @@ Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.dltk.core;bundle-version="3.0.0"
-Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.dbgp,
  org.eclipse.dltk.dbgp.breakpoints,
  org.eclipse.dltk.dbgp.commands,
