@@ -482,8 +482,8 @@ public class EditorUtility {
 	}
 
 	public static IEditorPart[] getDirtyEditors() {
-		Set inputs = new HashSet();
-		List result = new ArrayList(0);
+		Set<IEditorInput> inputs = new HashSet<IEditorInput>();
+		List<IEditorPart> result = new ArrayList<IEditorPart>(0);
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
 		for (int i = 0; i < windows.length; i++) {
@@ -500,7 +500,7 @@ public class EditorUtility {
 				}
 			}
 		}
-		return (IEditorPart[]) result.toArray(new IEditorPart[result.size()]);
+		return result.toArray(new IEditorPart[result.size()]);
 	}
 
 	/**
