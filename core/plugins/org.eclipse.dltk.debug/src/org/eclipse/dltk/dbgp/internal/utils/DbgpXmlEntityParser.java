@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@ package org.eclipse.dltk.dbgp.internal.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
@@ -34,6 +36,7 @@ import org.eclipse.dltk.dbgp.internal.breakpoints.DbgpWatchBreakpoint;
 import org.eclipse.dltk.debug.core.DLTKDebugConstants;
 import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DbgpXmlEntityParser extends DbgpXmlParser {
@@ -54,6 +57,21 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 	private static final String ATTR_LINENO = "lineno"; //$NON-NLS-1$
 	private static final String ATTR_FILENAME = "filename"; //$NON-NLS-1$
 	private static final String ATTR_WHERE = "where"; //$NON-NLS-1$
+
+	private static Element[] getChildElements(Element elem, String name) {
+		final List<Element> result = new ArrayList<Element>();
+		final NodeList children = elem.getChildNodes();
+		for (int i = 0, length = children.getLength(); i < length; ++i) {
+			final Node childNode = children.item(i);
+			if (childNode instanceof Element) {
+				final Element child = (Element) childNode;
+				if (child.getTagName().equals(name)) {
+					result.add(child);
+				}
+			}
+		}
+		return result.toArray(new Element[result.size()]);
+	}
 
 	public static DbgpStackLevel parseStackLevel(Element element)
 			throws DbgpException {
@@ -212,24 +230,22 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		// Value
 		String value = ""; //$NON-NLS-1$
 
-		NodeList list = property.getElementsByTagName("value"); //$NON-NLS-1$
-		if (list.getLength() == 0) {
+		Element[] list = getChildElements(property, "value"); //$NON-NLS-1$
+		if (list.length == 0) {
 			value = getEncodedValue(property);
 		} else {
-			value = getEncodedValue((Element) list.item(0));
+			value = getEncodedValue(list[0]);
 		}
 
 		// Children
 		IDbgpProperty[] availableChildren = NO_CHILDREN;
 		if (hasChildren) {
-			final NodeList children = property
-					.getElementsByTagName(TAG_PROPERTY);
-			final int length = children.getLength();
+			final Element[] children = getChildElements(property, TAG_PROPERTY);
+			final int length = children.length;
 			if (length > 0) {
 				availableChildren = new IDbgpProperty[length];
 				for (int i = 0; i < length; ++i) {
-					Element child = (Element) children.item(i);
-					availableChildren[i] = parseProperty(child);
+					availableChildren[i] = parseProperty(children[i]);
 				}
 			}
 		}
@@ -353,9 +369,9 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 	}
 
 	protected static String getFromChildOrAttr(Element property, String name) {
-		NodeList list = property.getElementsByTagName(name);
+		Element[] list = getChildElements(property, name);
 
-		if (list.getLength() == 0) {
+		if (list.length == 0) {
 			return property.getAttribute(name);
 		}
 
@@ -365,7 +381,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		 * love protocol changes that have made their way back into the
 		 * published spec
 		 */
-		return getEncodedValue((Element) list.item(0));
+		return getEncodedValue(list[0]);
 	}
 
 	private static final String ATTR_ENCODING = "encoding"; //$NON-NLS-1$
