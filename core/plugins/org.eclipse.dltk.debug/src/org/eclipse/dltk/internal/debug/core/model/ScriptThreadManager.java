@@ -71,7 +71,7 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	private final ListenerList listeners = new ListenerList(
 			ListenerList.IDENTITY);
 
-	private final List threads = new ArrayList();
+	private final List<IScriptThread> threads = new ArrayList<IScriptThread>();
 
 	private volatile boolean waitingForThreads = true;
 
@@ -112,8 +112,7 @@ public class ScriptThreadManager implements IScriptThreadManager,
 
 	public IScriptThread[] getThreads() {
 		synchronized (threads) {
-			return (IScriptThread[]) threads.toArray(new IScriptThread[threads
-					.size()]);
+			return threads.toArray(new IScriptThread[threads.size()]);
 		}
 	}
 
@@ -266,8 +265,8 @@ public class ScriptThreadManager implements IScriptThreadManager,
 			}
 			if (isFirstThread || !isSupportsThreads(thread)) {
 				SubMonitor child = sub.newChild(25);
-				target.breakpointManager.initializeSession(thread
-						.getDbgpSession(), child);
+				target.breakpointManager.initializeSession(
+						thread.getDbgpSession(), child);
 				child = sub.newChild(25);
 				if (configurator != null) {
 					configurator.initializeBreakpoints(thread, child);
@@ -314,8 +313,8 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	private static boolean isSupportsThreads(IScriptThread thread) {
 		try {
 			final IDbgpFeature feature = thread.getDbgpSession()
-					.getCoreCommands().getFeature(
-							IDbgpFeatureCommands.LANGUAGE_SUPPORTS_THREADS);
+					.getCoreCommands()
+					.getFeature(IDbgpFeatureCommands.LANGUAGE_SUPPORTS_THREADS);
 			return feature != null
 					&& IDbgpFeature.ONE_VALUE.equals(feature.getValue());
 		} catch (DbgpException e) {
@@ -328,7 +327,7 @@ public class ScriptThreadManager implements IScriptThreadManager,
 
 	private boolean isAnyThreadInStepInto() {
 		synchronized (threads) {
-			for (Iterator i = threads.iterator(); i.hasNext();) {
+			for (Iterator<IScriptThread> i = threads.iterator(); i.hasNext();) {
 				ScriptThread thread = (ScriptThread) i.next();
 				if (thread.isStepInto()) {
 					return true;
