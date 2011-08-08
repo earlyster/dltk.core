@@ -10,7 +10,7 @@
 package org.eclipse.dltk.ui.text;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +78,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	// private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
-	protected Map fTypeHierarchies = new HashMap();
+	protected Map<IType, ITypeHierarchy> fTypeHierarchies = new HashMap<IType, ITypeHierarchy>();
 	private final IPreferenceStore fPreferenceStore;
 
 	/**
@@ -203,10 +203,8 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 				Item i = (Item) node;
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
-					if (/*
-						 * je.getElementType() == IModelElement.IMPORT_CONTAINER
-						 * ||
-						 */isInnerType(je)) {
+					if (je.getElementType() == IModelElement.IMPORT_CONTAINER
+							|| isInnerType(je)) {
 						setExpanded(i, false);
 						return;
 					}
@@ -263,12 +261,13 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 				if (!isInnerType(type)) {
 					ITypeHierarchy th = getSuperTypeHierarchy(type);
 					if (th != null) {
-						List children = new ArrayList();
+						List<Object> children = new ArrayList<Object>();
+						Collections.addAll(children, super.getChildren(type));
 						IType[] superClasses = th.getAllSupertypes(type);
-						children.addAll(Arrays.asList(super.getChildren(type)));
-						for (int i = 0, scLength = superClasses.length; i < scLength; i++)
-							children.addAll(Arrays.asList(super
-									.getChildren(superClasses[i])));
+						for (int i = 0, scLength = superClasses.length; i < scLength; i++) {
+							Collections.addAll(children,
+									super.getChildren(superClasses[i]));
+						}
 						return children.toArray();
 					}
 				}
@@ -333,7 +332,9 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 			setChecked(checked);
 			// PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
 			// IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
-			System.err.println("TODO: add help support here"); //$NON-NLS-1$
+			if (DLTKUIPlugin.isDebug()) {
+				System.err.println("TODO: add help support here"); //$NON-NLS-1$
+			}
 		}
 
 		public void run() {
@@ -379,7 +380,9 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 			// PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
 			// IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
-			System.err.println("TODO: add help support here"); //$NON-NLS-1$
+			if (DLTKUIPlugin.isDebug()) {
+				System.err.println("TODO: add help support here"); //$NON-NLS-1$
+			}
 
 			boolean state = getDialogSettings().getBoolean(
 					STORE_SORT_BY_DEFINING_TYPE_CHECKED);
@@ -544,13 +547,11 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 		if (fOutlineContentProvider.isShowingInheritedMembers())
 			return Messages
-					.format(
-							TextMessages.ScriptOutlineInformationControl_pressToHideInheritedMembers,
+					.format(TextMessages.ScriptOutlineInformationControl_pressToHideInheritedMembers,
 							keySequence);
 		else
 			return Messages
-					.format(
-							TextMessages.ScriptOutlineInformationControl_pressToShowInheritedMembers,
+					.format(TextMessages.ScriptOutlineInformationControl_pressToShowInheritedMembers,
 							keySequence);
 	}
 
@@ -684,18 +685,17 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		return editor.getEditorSite().getActionBars().getStatusLineManager()
 				.getProgressMonitor();
 	}
-	
+
 	protected boolean isInnerType(IModelElement element) {
-		if (element != null
-				&& element.getElementType() == IModelElement.TYPE) {
+		if (element != null && element.getElementType() == IModelElement.TYPE) {
 			IType type = (IType) element;
 			// try {
 			return type.getDeclaringType() != null;
 			/*
 			 * } catch (ModelException e) { IModelElement parent=
-			 * type.getParent(); if (parent != null) { int
-			 * parentElementType= parent.getElementType(); return
-			 * (parentElementType != IModelElement.SOURCE_MODULE); } }
+			 * type.getParent(); if (parent != null) { int parentElementType=
+			 * parent.getElementType(); return (parentElementType !=
+			 * IModelElement.SOURCE_MODULE); } }
 			 */
 		}
 		return false;
