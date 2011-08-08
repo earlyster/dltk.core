@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IModelStatusConstants;
+import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
@@ -98,11 +99,11 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	protected ISourceModule[] workingCopies;
 
-	protected Map classToSuperclass;
-	protected Map typeToSubtypes;
-	protected Map typeFlags;
+	protected Map<IType, TypeVector> classToSuperclass;
+	protected Map<IType, TypeVector> typeToSubtypes;
+	protected Map<IType, Integer> typeFlags;
 	protected TypeVector rootClasses = new TypeVector();
-	public ArrayList missingTypes = new ArrayList(4);
+	public ArrayList<String> missingTypes = new ArrayList<String>(4);
 
 	protected static final IType[] NO_TYPE = new IType[0];
 
@@ -114,12 +115,12 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	/**
 	 * Change listeners - null if no one is listening.
 	 */
-	protected ArrayList changeListeners = null;
+	protected ArrayList<ITypeHierarchyChangedListener> changeListeners = null;
 
 	/*
 	 * A map from Openables to ArrayLists of ITypes
 	 */
-	public Map files = null;
+	public Map<IOpenable, ArrayList<IType>> files = null;
 
 	/**
 	 * A region describing the packages considered by this hierarchy. Null if
@@ -201,9 +202,9 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			IType type = allTypes[i];
 			Openable o = (Openable) ((ModelElement) type).getOpenableParent();
 			if (o != null) {
-				ArrayList types = (ArrayList) this.files.get(o);
+				ArrayList<IType> types = this.files.get(o);
 				if (types == null) {
-					types = new ArrayList();
+					types = new ArrayList<IType>();
 					this.files.put(o, types);
 				}
 				types.add(type);
@@ -222,7 +223,8 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * Adds all of the elements in the collection to the list if the element is
 	 * not already in the list.
 	 */
-	private void addAllCheckingDuplicates(ArrayList list, IType[] collection) {
+	private void addAllCheckingDuplicates(ArrayList<IType> list,
+			IType[] collection) {
 		for (int i = 0; i < collection.length; i++) {
 			IType element = collection[i];
 			if (!list.contains(element)) {
@@ -246,7 +248,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * Adds the given subtype to the type.
 	 */
 	protected void addSubtype(IType type, IType subtype) {
-		TypeVector subtypes = (TypeVector) this.typeToSubtypes.get(type);
+		TypeVector subtypes = this.typeToSubtypes.get(type);
 		if (subtypes == null) {
 			subtypes = new TypeVector();
 			this.typeToSubtypes.put(type, subtypes);
@@ -261,9 +263,9 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	public synchronized void addTypeHierarchyChangedListener(
 			ITypeHierarchyChangedListener listener) {
-		ArrayList listeners = this.changeListeners;
+		ArrayList<ITypeHierarchyChangedListener> listeners = this.changeListeners;
 		if (listeners == null) {
-			this.changeListeners = listeners = new ArrayList();
+			this.changeListeners = listeners = new ArrayList<ITypeHierarchyChangedListener>();
 		}
 
 		// register with JavaCore to get Java element delta on first listener
@@ -299,8 +301,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	protected void cacheSuperclass(IType type, IType superclass) {
 		if (superclass != null) {
-			TypeVector superTypes = (TypeVector) this.classToSuperclass
-					.get(type);
+			TypeVector superTypes = this.classToSuperclass.get(type);
 			if (superTypes == null) {
 				superTypes = new TypeVector();
 				this.classToSuperclass.put(type, superTypes);
@@ -389,7 +390,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * Note that listeners can be removed as we iterate through the list.
 	 */
 	public void fireChange() {
-		ArrayList listeners = this.changeListeners;
+		ArrayList<ITypeHierarchyChangedListener> listeners = this.changeListeners;
 		if (listeners == null) {
 			return;
 		}
@@ -403,15 +404,14 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 		}
 		// clone so that a listener cannot have a side-effect on this list when
 		// being notified
-		listeners = (ArrayList) listeners.clone();
+		listeners = (ArrayList<ITypeHierarchyChangedListener>) listeners
+				.clone();
 		for (int i = 0; i < listeners.size(); i++) {
-			final ITypeHierarchyChangedListener listener = (ITypeHierarchyChangedListener) listeners
-					.get(i);
+			final ITypeHierarchyChangedListener listener = listeners.get(i);
 			SafeRunner.run(new ISafeRunnable() {
 				public void handleException(Throwable exception) {
-					Util
-							.log(exception,
-									"Exception occurred in listener of Type hierarchy change notification"); //$NON-NLS-1$
+					Util.log(exception,
+							"Exception occurred in listener of Type hierarchy change notification"); //$NON-NLS-1$
 				}
 
 				public void run() throws Exception {
@@ -434,9 +434,9 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	public IType[] getAllClasses() {
 		TypeVector classes = this.rootClasses.copy();
-		for (Iterator iter = this.classToSuperclass.keySet().iterator(); iter
+		for (Iterator<IType> iter = this.classToSuperclass.keySet().iterator(); iter
 				.hasNext();) {
-			classes.add((IType) iter.next());
+			classes.add(iter.next());
 		}
 		return classes.elements();
 	}
@@ -452,8 +452,8 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see #getAllSubtypes(IType)
 	 */
 	private IType[] getAllSubtypesForType(IType type) {
-		ArrayList subTypes = new ArrayList();
-		getAllSubtypesForType0(type, subTypes, new HashSet());
+		ArrayList<IType> subTypes = new ArrayList<IType>();
+		getAllSubtypesForType0(type, subTypes, new HashSet<IType>());
 		IType[] subClasses = new IType[subTypes.size()];
 		subTypes.toArray(subClasses);
 		return subClasses;
@@ -461,8 +461,8 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 
 	/**
 	 */
-	private void getAllSubtypesForType0(IType type, ArrayList subs,
-			Set alreadyProcessed) {
+	private void getAllSubtypesForType0(IType type, ArrayList<IType> subs,
+			Set<IType> alreadyProcessed) {
 		IType[] subTypes = getSubtypesForType(type);
 		if (subTypes.length != 0) {
 			for (int i = 0; i < subTypes.length; i++) {
@@ -502,15 +502,15 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy
 	 */
 	public IType[] getAllSupertypes(IType type) {
-		ArrayList supers = new ArrayList();
+		ArrayList<IType> supers = new ArrayList<IType>();
 		getAllSupertypes0(type, supers);
 		IType[] supertypes = new IType[supers.size()];
 		supers.toArray(supertypes);
 		return supertypes;
 	}
 
-	private void getAllSupertypes0(IType type, ArrayList supers) {
-		TypeVector superTypes = (TypeVector) this.classToSuperclass.get(type);
+	private void getAllSupertypes0(IType type, ArrayList<IType> supers) {
+		TypeVector superTypes = this.classToSuperclass.get(type);
 		if (superTypes != null) {
 			IType[] superclasses = superTypes.elements();
 			if (superclasses.length != 0) {
@@ -537,7 +537,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy#getCachedFlags(IType)
 	 */
 	public int getCachedFlags(IType type) {
-		Integer flagObject = (Integer) this.typeFlags.get(type);
+		Integer flagObject = this.typeFlags.get(type);
 		if (flagObject != null) {
 			return flagObject.intValue();
 		}
@@ -555,7 +555,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy
 	 */
 	public IType[] getSubclasses(IType type) {
-		TypeVector vector = (TypeVector) this.typeToSubtypes.get(type);
+		TypeVector vector = this.typeToSubtypes.get(type);
 		if (vector == null) {
 			return NO_TYPE;
 		} else {
@@ -574,7 +574,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * Returns an array of subtypes for the given type - will never return null.
 	 */
 	private IType[] getSubtypesForType(IType type) {
-		TypeVector vector = (TypeVector) this.typeToSubtypes.get(type);
+		TypeVector vector = this.typeToSubtypes.get(type);
 		if (vector == null) {
 			return NO_TYPE;
 		} else {
@@ -586,7 +586,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy
 	 */
 	public IType[] getSuperclass(IType type) {
-		TypeVector superTypes = (TypeVector) this.classToSuperclass.get(type);
+		TypeVector superTypes = this.classToSuperclass.get(type);
 		if (superTypes != null) {
 			return superTypes.elements();
 		}
@@ -734,15 +734,15 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			size = 10;
 		}
 		int smallSize = (size / 2);
-		this.classToSuperclass = new HashMap(size);
-		this.missingTypes = new ArrayList(smallSize);
+		this.classToSuperclass = new HashMap<IType, TypeVector>(size);
+		this.missingTypes = new ArrayList<String>(smallSize);
 		this.rootClasses = new TypeVector();
-		this.typeToSubtypes = new HashMap(smallSize);
-		this.typeFlags = new HashMap(smallSize);
+		this.typeToSubtypes = new HashMap<IType, TypeVector>(smallSize);
+		this.typeFlags = new HashMap<IType, Integer>(smallSize);
 
 		this.projectRegion = new Region();
 		this.packageRegion = new Region();
-		this.files = new HashMap(5);
+		this.files = new HashMap<IOpenable, ArrayList<IType>>(5);
 	}
 
 	/**
@@ -1182,8 +1182,8 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			if (monitor != null) {
 				if (this.focusType != null) {
 					monitor.beginTask(Messages.bind(
-							Messages.hierarchy_creatingOnType, this.focusType
-									.getFullyQualifiedName()), 100);
+							Messages.hierarchy_creatingOnType,
+							this.focusType.getFullyQualifiedName()), 100);
 				} else {
 					monitor.beginTask(Messages.hierarchy_creating, 100);
 				}
@@ -1236,7 +1236,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	public synchronized void removeTypeHierarchyChangedListener(
 			ITypeHierarchyChangedListener listener) {
-		ArrayList listeners = this.changeListeners;
+		ArrayList<ITypeHierarchyChangedListener> listeners = this.changeListeners;
 		if (listeners == null) {
 			return;
 		}
@@ -1255,8 +1255,8 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			throws ModelException {
 		try {
 			// compute types in hierarchy
-			Hashtable hashtable = new Hashtable();
-			Hashtable hashtable2 = new Hashtable();
+			Hashtable<IType, Integer> hashtable = new Hashtable<IType, Integer>();
+			Hashtable<Integer, IType> hashtable2 = new Hashtable<Integer, IType>();
 			int count = 0;
 
 			if (this.focusType != null) {
@@ -1267,14 +1267,15 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			Object[] types = this.classToSuperclass.entrySet().toArray();
 			for (int k = 0; k < types.length; k++) {
 				Object type = types[k];
-				Map.Entry entry = (Map.Entry) type;
-				Object t = entry.getKey();
+				@SuppressWarnings("unchecked")
+				Map.Entry<IType, TypeVector> entry = (Map.Entry<IType, TypeVector>) type;
+				final IType t = entry.getKey();
 				if (hashtable.get(t) == null) {
 					Integer index = new Integer(count++);
 					hashtable.put(t, index);
 					hashtable2.put(index, t);
 				}
-				TypeVector superClasses = (TypeVector) entry.getValue();
+				TypeVector superClasses = entry.getValue();
 				if (superClasses != null) {
 					IType[] sp = superClasses.elements();
 					for (int i = 0; i < sp.length; i++) {
@@ -1310,19 +1311,19 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 				if (i != 0) {
 					output.write(SEPARATOR2);
 				}
-				output.write(((String) this.missingTypes.get(i)).getBytes());
+				output.write(this.missingTypes.get(i).getBytes());
 
 			}
 			output.write(SEPARATOR1);
 
 			// save types
 			for (int i = 0; i < count; i++) {
-				IType t = (IType) hashtable2.get(new Integer(i));
+				IType t = hashtable2.get(new Integer(i));
 
 				// n bytes
 				output.write(t.getHandleIdentifier().getBytes());
 				output.write(SEPARATOR4);
-				output.write(flagsToBytes((Integer) this.typeFlags.get(t)));
+				output.write(flagsToBytes(this.typeFlags.get(t)));
 				output.write(SEPARATOR4);
 				byte info = CLASS;
 				if (this.focusType != null && this.focusType.equals(t)) {
@@ -1339,24 +1340,24 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 			types = this.classToSuperclass.entrySet().toArray();
 			for (int q = 0; q < types.length; q++) {
 				Object type = types[q];
-				Map.Entry entry = (Map.Entry) type;
-				IModelElement key = (IModelElement) entry.getKey();
+				@SuppressWarnings("unchecked")
+				Map.Entry<IType, TypeVector> entry = (Map.Entry<IType, TypeVector>) type;
+				IModelElement key = entry.getKey();
 
-				TypeVector superTypes = (TypeVector) entry.getValue();
+				TypeVector superTypes = entry.getValue();
 				if (superTypes != null) {
 
 					IType[] values = superTypes.elements();
 					if (values.length > 0) {
-						output.write(((Integer) hashtable.get(key)).toString()
-								.getBytes());
+						output.write((hashtable.get(key)).toString().getBytes());
 						output.write(SEPARATOR3);
 						for (int j = 0; j < values.length; j++) {
 							IModelElement value = values[j];
 							if (j != 0) {
 								output.write(SEPARATOR2);
 							}
-							output.write(((Integer) hashtable.get(value))
-									.toString().getBytes());
+							output.write((hashtable.get(value)).toString()
+									.getBytes());
 						}
 						output.write(SEPARATOR1);
 					}
@@ -1391,8 +1392,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 				String interfaceName = superclassNames[i];
 				dot = -1;
 				String simpleInterface = (dot = interfaceName.lastIndexOf('.')) > -1 ? interfaceName
-						.substring(dot)
-						: interfaceName;
+						.substring(dot) : interfaceName;
 				if (hasSubtypeNamed(simpleInterface)) {
 					return true;
 				}
@@ -1469,9 +1469,9 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * simple name is the given simple name.
 	 */
 	boolean hasSupertype(String simpleName) {
-		for (Iterator iter = this.classToSuperclass.values().iterator(); iter
-				.hasNext();) {
-			TypeVector typeVector = (TypeVector) iter.next();
+		for (Iterator<TypeVector> iter = this.classToSuperclass.values()
+				.iterator(); iter.hasNext();) {
+			TypeVector typeVector = iter.next();
 			if (typeVector != null) {
 				IType[] elements = typeVector.elements();
 				for (int i = 0; i < elements.length; i++) {

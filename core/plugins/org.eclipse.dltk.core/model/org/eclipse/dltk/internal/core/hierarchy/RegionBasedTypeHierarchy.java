@@ -86,11 +86,11 @@ protected void initializeRegions() {
 	IModelElement[] roots = this.region.getElements();
 	for (int i = 0; i < roots.length; i++) {
 		if (roots[i] instanceof IOpenable) {
-			this.files.put(roots[i], new ArrayList());
+				this.files.put((IOpenable) roots[i], new ArrayList<IType>());
 		} else {
 			Openable o = (Openable) ((ModelElement) roots[i]).getOpenableParent();
 			if (o != null) {
-				this.files.put(o, new ArrayList());
+					this.files.put(o, new ArrayList<IType>());
 			}
 		}
 		checkCanceled();
