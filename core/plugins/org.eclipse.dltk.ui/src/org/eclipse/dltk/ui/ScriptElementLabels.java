@@ -825,6 +825,15 @@ public class ScriptElementLabels {
 				DLTKCore.error("Failed to append type name to field", e);
 			}
 		}
+		// post qualification
+		if (getFlag(flags, M_POST_QUALIFIED)) {
+			IType declaringType = field.getDeclaringType();
+			if (declaringType != null) {
+				buf.append(CONCAT_STRING);
+				getTypeLabel(declaringType, T_FULLY_QUALIFIED
+						| (flags & QUALIFIER_FLAGS), buf);
+			}
+		}
 	}
 
 	protected void getLocalVariableLabel(ILocalVariable field, long flags,
