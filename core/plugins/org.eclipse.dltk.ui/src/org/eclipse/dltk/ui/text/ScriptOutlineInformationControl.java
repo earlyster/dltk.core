@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchyBuilders;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
@@ -206,6 +207,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
 					if (je.getElementType() == IModelElement.IMPORT_CONTAINER
+							|| (je.getElementType() == ModelElement.METHOD && !expandMethodChildren((IMethod) je))
 							|| isInnerType(je)) {
 						setExpanded(i, false);
 						return;
@@ -213,6 +215,19 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 				}
 			}
 			super.internalExpandToLevel(node, level);
+		}
+
+		private boolean expandMethodChildren(IMethod method) {
+			try {
+				for (IModelElement child : method.getChildren()) {
+					if (child.getElementType() != IModelElement.FIELD) {
+						return true;
+					}
+				}
+			} catch (ModelException e) {
+				// ignore
+			}
+			return false;
 		}
 
 	}
