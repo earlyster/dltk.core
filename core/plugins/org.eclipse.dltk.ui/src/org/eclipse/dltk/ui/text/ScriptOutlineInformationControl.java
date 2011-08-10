@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -23,6 +24,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchyBuilders;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
 import org.eclipse.dltk.internal.ui.text.AbstractInformationControl;
@@ -663,14 +665,17 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	}
 
 	protected ITypeHierarchy getSuperTypeHierarchy(IType type) {
-		/*
-		 * ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type); if (th
-		 * == null) { try { th= SuperTypeHierarchyCache.getTypeHierarchy(type,
-		 * getProgressMonitor()); } catch (ModelException e) { return null; }
-		 * catch (OperationCanceledException e) { return null; }
-		 * fTypeHierarchies.put(type, th); } return th;
-		 */
-		return null;
+		ITypeHierarchy th = fTypeHierarchies.get(type);
+		if (th == null) {
+			try {
+				th = TypeHierarchyBuilders.getTypeHierarchy(type,
+						getProgressMonitor());
+			} catch (OperationCanceledException e) {
+				return null;
+			}
+			fTypeHierarchies.put(type, th);
+		}
+		return th;
 	}
 
 	protected IProgressMonitor getProgressMonitor() {
