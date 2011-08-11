@@ -141,7 +141,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	private IModelElement fInputElement;
 
 	// history of input elements. No duplicates
-	private ArrayList fInputHistory;
+	private ArrayList<IModelElement> fInputHistory;
 
 	private IMemento fMemento;
 	private IDialogSettings fDialogSettings;
@@ -232,7 +232,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 		fIsEnableMemberFilter = false;
 
-		fInputHistory = new ArrayList();
+		fInputHistory = new ArrayList<IModelElement>();
 		fAllViewers = null;
 
 		fViewActions = new ToggleViewAction[] {
@@ -350,7 +350,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 	private void updateHistoryEntries() {
 		for (int i = fInputHistory.size() - 1; i >= 0; i--) {
-			IModelElement type = (IModelElement) fInputHistory.get(i);
+			IModelElement type = fInputHistory.get(i);
 			if (!type.exists()) {
 				fInputHistory.remove(i);
 			}
@@ -380,8 +380,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 		if (fInputHistory.size() > 0) {
 			updateHistoryEntries();
 		}
-		return (IModelElement[]) fInputHistory
-				.toArray(new IModelElement[fInputHistory.size()]);
+		return fInputHistory.toArray(new IModelElement[fInputHistory.size()]);
 	}
 
 	/**
@@ -539,8 +538,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 				// getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler
-						.handle(
-								e,
+						.handle(e,
 								getSite().getShell(),
 								TypeHierarchyMessages.TypeHierarchyViewPart_exception_title,
 								TypeHierarchyMessages.TypeHierarchyViewPart_exception_message);
@@ -636,16 +634,16 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	 * 
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
-	public Object getAdapter(Class key) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
 		}
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
-					return new String[] { IPageLayout.ID_RES_NAV };
+					return new String[] { DLTKUIPlugin.ID_SCRIPT_EXPLORER,
+							IPageLayout.ID_RES_NAV };
 				}
-
 			};
 		}
 		// if (key == IContextProvider.class) {
@@ -782,13 +780,13 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	// dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this,
 	// fAllViewers[0]));
 	// }
-	//	
+	//
 	// private void addDropAdapters(AbstractTreeViewer viewer) {
 	// Transfer[] transfers= new Transfer[] {
 	// LocalSelectionTransfer.getInstance() };
 	// int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK |
 	// DND.DROP_DEFAULT;
-	//		
+	//
 	// TransferDropTargetListener[] dropListeners= new
 	// TransferDropTargetListener[] {
 	// new TypeHierarchyTransferDropAdapter(this, viewer)
@@ -1231,7 +1229,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 	private void methodSelectionChanged(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			List selected = ((IStructuredSelection) sel).toList();
+			List<?> selected = ((IStructuredSelection) sel).toList();
 			int nSelected = selected.size();
 			if (fIsEnableMemberFilter) {
 				IMember[] memberFilter = null;
@@ -1252,15 +1250,15 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 	private void typeSelectionChanged(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			List selected = ((IStructuredSelection) sel).toList();
+			List<?> selected = ((IStructuredSelection) sel).toList();
 			int nSelected = selected.size();
 			if (nSelected != 0) {
-				List types = new ArrayList(nSelected);
+				List<IType> types = new ArrayList<IType>(nSelected);
 				for (int i = nSelected - 1; i >= 0; i--) {
 					Object elem = selected.get(i);
 					if (elem instanceof IType) {
 						if (!types.contains(elem)) {
-							types.add(elem);
+							types.add((IType) elem);
 						}
 					} else if (elem instanceof CumulativeType.Part) {
 						final CumulativeType.Part part = (CumulativeType.Part) elem;
@@ -1270,7 +1268,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 					}
 				}
 				if (types.size() == 1) {
-					fSelectedType = (IType) types.get(0);
+					fSelectedType = types.get(0);
 					updateMethodViewer(fSelectedType);
 				} else if (types.size() == 0) {
 					// method selected, no change
@@ -1336,8 +1334,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 						ScriptElementLabels.getDefault().getElementLabel(
 								fInputElement, ScriptElementLabels.ALL_DEFAULT) };
 				title = Messages
-						.format(
-								TypeHierarchyMessages.TypeHierarchyViewPart_title,
+						.format(TypeHierarchyMessages.TypeHierarchyViewPart_title,
 								args);
 				tooltip = Messages.format(
 						TypeHierarchyMessages.TypeHierarchyViewPart_tooltip,
@@ -1523,8 +1520,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 							fInputElement, getSite().getWorkbenchWindow());
 				} catch (InvocationTargetException e) {
 					ExceptionHandler
-							.handle(
-									e,
+							.handle(e,
 									getSite().getShell(),
 									TypeHierarchyMessages.TypeHierarchyViewPart_exception_title,
 									TypeHierarchyMessages.TypeHierarchyViewPart_exception_message);
@@ -1644,8 +1640,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 
 			synchronized (this) {
 				String label = Messages
-						.format(
-								TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput,
+						.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput,
 								hierarchyInput.getElementName());
 				fNoHierarchyShownLabel.setText(label);
 
