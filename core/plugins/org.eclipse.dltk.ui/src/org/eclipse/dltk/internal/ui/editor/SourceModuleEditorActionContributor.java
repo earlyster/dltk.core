@@ -65,7 +65,11 @@ public class SourceModuleEditorActionContributor extends BasicSourceModuleEditor
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 
+		final IActionBars bars = getActionBars();
 		fToggleInsertModeAction.setAction(getAction(textEditor, ITextEditorActionConstants.TOGGLE_INSERT_MODE));
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
+		IAction action = getAction(textEditor,
+				ITextEditorActionConstants.REFRESH);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.REFRESH, action);
 	}
 }
