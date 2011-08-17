@@ -140,7 +140,7 @@ public class SourceType extends NamedMember implements IType {
 			}
 
 			String selector = memento.nextToken();
-			ArrayList params = new ArrayList();
+			ArrayList<String> params = new ArrayList<String>();
 			nextParam: while (memento.hasMoreTokens()) {
 				token = memento.nextToken();
 				switch (token.charAt(0)) {
@@ -448,7 +448,8 @@ public class SourceType extends NamedMember implements IType {
 		IProject project = scriptProject.getProject();
 		IProject[] referencingProjects = project.getReferencingProjects();
 
-		List scriptProjects = new ArrayList(referencingProjects.length + 1);
+		List<IScriptProject> scriptProjects = new ArrayList<IScriptProject>(
+				referencingProjects.length + 1);
 		scriptProjects.add(scriptProject);
 
 		for (int i = 0; i < referencingProjects.length; ++i) {
@@ -457,7 +458,7 @@ public class SourceType extends NamedMember implements IType {
 				scriptProjects.add(DLTKCore.create(p));
 			}
 		}
-		return SearchEngine.createSearchScope((IModelElement[]) scriptProjects
+		return SearchEngine.createSearchScope(scriptProjects
 				.toArray(new IModelElement[scriptProjects.size()]), false,
 				DLTKLanguageManager.getLanguageToolkit(this));
 	}
