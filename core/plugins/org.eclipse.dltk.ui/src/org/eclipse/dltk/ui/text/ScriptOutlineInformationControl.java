@@ -684,7 +684,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		if (th == null) {
 			try {
 				th = TypeHierarchyBuilders.getTypeHierarchy(type,
-						getProgressMonitor());
+						ITypeHierarchy.Mode.SUPERTYPE, getProgressMonitor());
 			} catch (OperationCanceledException e) {
 				return null;
 			}
