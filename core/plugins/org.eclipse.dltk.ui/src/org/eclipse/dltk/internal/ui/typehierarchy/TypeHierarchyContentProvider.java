@@ -184,20 +184,21 @@ public abstract class TypeHierarchyContentProvider implements
 		return types.toArray();
 	}
 
-	protected void compactTypes(Collection types) {
-		final Map map = new HashMap();
+	protected void compactTypes(Collection<Object> types) {
+		final Map<String, Object> map = new HashMap<String, Object>();
 		for (Iterator i = types.iterator(); i.hasNext();) {
 			final Object item = i.next();
 			if (item instanceof IType) {
 				final IType type = (IType) item;
-				final String qName = type.getTypeQualifiedName();
+				// TODO (alex) use language specific separator
+				final String qName = type.getFullyQualifiedName(".");
 				Object value = map.get(qName);
 				if (value == null) {
 					map.put(qName, type);
 				} else if (value instanceof List) {
-					((List) value).add(type);
+					((List<IType>) value).add(type);
 				} else {
-					List list = new ArrayList(4);
+					List<Object> list = new ArrayList<Object>(4);
 					list.add(value);
 					list.add(type);
 					map.put(qName, list);
@@ -205,15 +206,15 @@ public abstract class TypeHierarchyContentProvider implements
 				i.remove();
 			}
 		}
-		final List qNames = new ArrayList(map.keySet());
+		final List<String> qNames = new ArrayList<String>(map.keySet());
 		Collections.sort(qNames);
-		for (Iterator i = qNames.iterator(); i.hasNext();) {
-			final String qName = (String) i.next();
+		for (final String qName : qNames) {
 			final Object value = map.get(qName);
 			if (value instanceof List) {
-				final List list = (List) value;
-				types.add(new CumulativeType(qName, (IType[]) list
-						.toArray(new IType[list.size()])));
+				@SuppressWarnings("unchecked")
+				final List<IType> list = (List<IType>) value;
+				types.add(new CumulativeType(qName, list.toArray(new IType[list
+						.size()])));
 			} else {
 				types.add(value);
 			}
