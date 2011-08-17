@@ -25,7 +25,7 @@ public class ScriptModelHelper {
 	 */
 	public static IScriptProject[] getOpenedScriptProjects(IScriptModel model,
 			String natureId) throws ModelException {
-		final List list = new ArrayList();
+		final List<IScriptProject> list = new ArrayList<IScriptProject>();
 		final IScriptProject[] projects = model.getScriptProjects();
 		try {
 			for (int i = 0; i < projects.length; ++i) {
@@ -41,6 +41,6 @@ public class ScriptModelHelper {
 			throw new ModelException(e);
 		}
 
-		return (IScriptProject[]) list.toArray(new IScriptProject[list.size()]);
+		return list.toArray(new IScriptProject[list.size()]);
 	}
 }
