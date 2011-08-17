@@ -420,7 +420,12 @@ public abstract class TypeHierarchyContentProvider implements
 		if (element instanceof IMember) {
 			IMember member = (IMember) element;
 			if (member.getElementType() == IModelElement.TYPE) {
-				return getParentType((IType) member);
+				final IType[] parents = getParentType((IType) member);
+				if (parents != null && parents.length == 1) {
+					return parents[0];
+				} else {
+					return null;
+				}
 			}
 			return member.getDeclaringType();
 		} else if (element instanceof CumulativeType.Part) {
