@@ -22,9 +22,11 @@ import org.eclipse.dltk.ui.ScriptElementImageDescriptor;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -148,12 +150,30 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 	}
 
+	private boolean isCustomTypeHierarchy() {
+		final ITypeHierarchy hierarchy = fHierarchy.getHierarchy();
+		return hierarchy != null && !(hierarchy instanceof TypeHierarchy);
+	}
+
+	private ILabelProvider fScriptLabelProvider = null;
+
+	private ILabelProvider getScriptLabelProvider() {
+		if (fScriptLabelProvider == null) {
+			fScriptLabelProvider = new ScriptUILabelProvider();
+		}
+		return fScriptLabelProvider;
+	}
+
 	/*
 	 * @see ILabelProvider#getImage
 	 */
 	public Image getImage(Object element) {
 		Image result = null;
 		if (element instanceof IType) {
+			if (isCustomTypeHierarchy()) {
+				// TODO (alex) think of better solution
+				return getScriptLabelProvider().getImage(element);
+			}
 			ImageDescriptor desc = getTypeImageDescriptor((IType) element);
 			if (desc != null) {
 				if (element.equals(fHierarchy.getInputElement())) {
