@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchy;
+import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchyBuilders;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -388,6 +389,11 @@ public class SourceType extends NamedMember implements IType {
 	 */
 	public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner,
 			IProgressMonitor monitor) throws ModelException {
+		final ITypeHierarchy hierarchy = TypeHierarchyBuilders
+				.getTypeHierarchy(this, ITypeHierarchy.Mode.SUPERTYPE, monitor);
+		if (hierarchy != null) {
+			return hierarchy;
+		}
 
 		ISourceModule[] workingCopies = ModelManager.getModelManager()
 				.getWorkingCopies(owner, true/* add primary working copies */);
@@ -468,6 +474,11 @@ public class SourceType extends NamedMember implements IType {
 	 */
 	public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
 			throws ModelException {
+		final ITypeHierarchy hierarchy = TypeHierarchyBuilders
+				.getTypeHierarchy(this, ITypeHierarchy.Mode.HIERARCHY, monitor);
+		if (hierarchy != null) {
+			return hierarchy;
+		}
 		CreateTypeHierarchyOperation op;
 		op = new CreateTypeHierarchyOperation(this, null,
 				createReferencingProjectsScope(), true);

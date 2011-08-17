@@ -38,7 +38,7 @@ public class TypeHierarchyBuilders extends
 	}
 
 	public static ITypeHierarchy getTypeHierarchy(IType type,
-			IProgressMonitor monitor) {
+			ITypeHierarchy.Mode mode, IProgressMonitor monitor) {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(type);
 		if (toolkit != null) {
@@ -46,7 +46,7 @@ public class TypeHierarchyBuilders extends
 					toolkit.getNatureId());
 			if (builders != null) {
 				for (ITypeHierarchyBuilder builder : builders) {
-					final ITypeHierarchy hierarchy = builder.build(type,
+					final ITypeHierarchy hierarchy = builder.build(type, mode,
 							monitor);
 					if (hierarchy != null) {
 						return hierarchy;

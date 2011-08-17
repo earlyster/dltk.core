@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface ITypeHierarchyBuilder {
 
-	ITypeHierarchy build(IType type, IProgressMonitor monitor);
+	ITypeHierarchy build(IType type, ITypeHierarchy.Mode mode,
+			IProgressMonitor monitor);
 
 }

@@ -43,6 +43,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * </p>
  */
 public interface ITypeHierarchy {
+	public static enum Mode {
+		HIERARCHY, SUPERTYPE
+	}
+	
 	/**
 	 * Adds the given listener for changes to this type hierarchy. Listeners are
 	 * notified when this type hierarchy changes and needs to be refreshed. Has
