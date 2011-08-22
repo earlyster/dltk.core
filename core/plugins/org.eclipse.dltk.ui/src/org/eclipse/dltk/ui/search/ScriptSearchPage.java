@@ -146,9 +146,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			settings.put("scope", scope); //$NON-NLS-1$
 			settings.put("pattern", pattern); //$NON-NLS-1$
 			settings.put("limitTo", limitTo); //$NON-NLS-1$
-			settings
-					.put(
-							"modelElement", modelElement != null ? modelElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
+			settings.put(
+					"modelElement", modelElement != null ? modelElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
 			settings.put("isCaseSensitive", isCaseSensitive); //$NON-NLS-1$
 			if (workingSets != null) {
 				String[] wsIds = new String[workingSets.length];
@@ -159,9 +158,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			} else {
 				settings.put("workingSets", new String[0]); //$NON-NLS-1$
 			}
-			settings
-					.put(
-							"includeInterpreterEnvironment", includeInterpreterEnvironment); //$NON-NLS-1$
+			settings.put(
+					"includeInterpreterEnvironment", includeInterpreterEnvironment); //$NON-NLS-1$
 		}
 
 		public static SearchPatternData create(IDialogSettings settings) {
@@ -335,9 +333,9 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			querySpec = new ElementQuerySpecification(data.getModelElement(),
 					data.getLimitTo(), scope, scopeDescription);
 		} else {
-			querySpec = new PatternQuerySpecification(data.getPattern(), data
-					.getSearchFor(), data.isCaseSensitive(), data.getLimitTo(),
-					scope, scopeDescription);
+			querySpec = new PatternQuerySpecification(data.getPattern(),
+					data.getSearchFor(), data.isCaseSensitive(),
+					data.getLimitTo(), scope, scopeDescription);
 			data.setModelElement(null);
 		}
 
@@ -408,8 +406,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		int patternCount = fPreviousSearchPatterns.size();
 		String[] patterns = new String[patternCount];
 		for (int i = 0; i < patternCount; i++)
-			patterns[i] = fPreviousSearchPatterns.get(i)
-					.getPattern();
+			patterns[i] = fPreviousSearchPatterns.get(i).getPattern();
 		return patterns;
 	}
 
@@ -427,7 +424,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	}
 
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator<SearchPatternData> iter = fPreviousSearchPatterns.iterator(); iter.hasNext();) {
+		for (Iterator<SearchPatternData> iter = fPreviousSearchPatterns
+				.iterator(); iter.hasNext();) {
 			SearchPatternData element = iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
@@ -521,6 +519,12 @@ public abstract class ScriptSearchPage extends DialogPage implements
 
 		SelectionAdapter modelElementInitializer = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
+				// Skip events from non selected buttons
+				if (event.widget instanceof Button) {
+					if (!((Button) event.widget).getSelection()) {
+						return;
+					}
+				}
 				if (getSearchFor() == fInitialData.getSearchFor())
 					fModelElement = fInitialData.getModelElement();
 				else
@@ -533,7 +537,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		fSearchFor[TYPE].addSelectionListener(modelElementInitializer);
 		fSearchFor[METHOD].addSelectionListener(modelElementInitializer);
 		fSearchFor[FIELD].addSelectionListener(modelElementInitializer);
-		//fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
+		// fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
 		// fSearchFor[PACKAGE].addSelectionListener(modelElementInitializer);
 
 		setControl(result);
@@ -699,6 +703,11 @@ public abstract class ScriptSearchPage extends DialogPage implements
 
 		SelectionAdapter listener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				if (e.widget instanceof Button) {
+					if (((Button) e.widget).getSelection() == false) {
+						return;
+					}
+				}
 				updateUseInterpreterEnvironment();
 			}
 		};
@@ -860,8 +869,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			// }
 			break;
 		case IModelElement.TYPE:
-			return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings
-					.getTypeSignature((IType) element), element,
+			return new SearchPatternData(TYPE, REFERENCES, true,
+					PatternStrings.getTypeSignature((IType) element), element,
 					isInsideInterpreterEnvironment);
 		case IModelElement.SOURCE_MODULE: {
 			if (DLTKCore.DEBUG) {
@@ -995,8 +1004,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i = 0; i < historySize; i++) {
 			IDialogSettings histSettings = s.addNewSection(STORE_HISTORY + i);
-			SearchPatternData data = fPreviousSearchPatterns
-					.get(i);
+			SearchPatternData data = fPreviousSearchPatterns.get(i);
 			data.store(histSettings);
 		}
 	}
