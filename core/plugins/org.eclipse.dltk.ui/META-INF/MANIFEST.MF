@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.dltk.ui;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.1.qualifier
 Bundle-Activator: org.eclipse.dltk.ui.DLTKUIPlugin
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
@@ -99,7 +99,6 @@ Export-Package: org.eclipse.dltk.corext,
  org.eclipse.dltk.ui.text.folding,
  org.eclipse.dltk.ui.text.hover,
  org.eclipse.dltk.ui.text.rules,
- org.eclipse.dltk.ui.text.spelling,
  org.eclipse.dltk.ui.text.templates,
  org.eclipse.dltk.ui.text.util,
  org.eclipse.dltk.ui.util,
