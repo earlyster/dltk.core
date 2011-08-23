@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.dltk.core</groupId>
 	<artifactId>core</artifactId>
@@ -35,9 +36,11 @@
 	</modules>
 
 	<properties>
+		<reactorBuildTimestampProperty></reactorBuildTimestampProperty>
 		<tycho-version>0.11.1</tycho-version>
 		<tycho-groupid>org.sonatype.tycho</tycho-groupid>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<build.qualifier>'v'yyyyMMddHHmm</build.qualifier>
 	</properties>
 
 	<repositories>
@@ -50,6 +53,17 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>maven-osgi-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<target>site</target>
+					<format>${build.qualifier}</format>
+					<archiveSite>true</archiveSite>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
