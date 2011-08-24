@@ -536,6 +536,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	public void setBreakpointUntilFirstSuspend(URI uri, int line) {
+		uri = bpPathMapper.map(uri);
 		final TemporaryBreakpoint temp = new TemporaryBreakpoint(this, uri,
 				line);
 		if (!temp.ids.isEmpty()) {
