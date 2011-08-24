@@ -141,11 +141,11 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			IScriptLineBreakpoint lineBreakpoint = (IScriptLineBreakpoint) breakpoint;
 
 			if (ScriptBreakpointUtils.isConditional(lineBreakpoint)) {
-				id = commands.setConditionalBreakpoint(bpUri, lineBreakpoint
-						.getLineNumber(), config);
+				id = commands.setConditionalBreakpoint(bpUri,
+						lineBreakpoint.getLineNumber(), config);
 			} else {
-				id = commands.setLineBreakpoint(bpUri, lineBreakpoint
-						.getLineNumber(), config);
+				id = commands.setLineBreakpoint(bpUri,
+						lineBreakpoint.getLineNumber(), config);
 			}
 		} else if (breakpoint instanceof IScriptExceptionBreakpoint) {
 			IScriptExceptionBreakpoint lineBreakpoint = (IScriptExceptionBreakpoint) breakpoint;
@@ -161,9 +161,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			IScriptSpawnpoint spawnpoint) throws DbgpException, CoreException {
 		final IDbgpSpawnpointCommands commands = (IDbgpSpawnpointCommands) session
 				.get(IDbgpSpawnpointCommands.class);
-		final IDbgpSpawnpoint p = commands.setSpawnpoint(bpPathMapper
-				.map(spawnpoint.getResourceURI()), spawnpoint.getLineNumber(),
-				spawnpoint.isEnabled());
+		final IDbgpSpawnpoint p = commands.setSpawnpoint(
+				bpPathMapper.map(spawnpoint.getResourceURI()),
+				spawnpoint.getLineNumber(), spawnpoint.isEnabled());
 		if (p != null) {
 			spawnpoint.setId(session, p.getId());
 		}
@@ -188,8 +188,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			if (entryBreakpoint.breakOnEntry()) {
 				if (entryId == null) {
 					// Create entry breakpoint
-					entryId = commands.setCallBreakpoint(bpUri, entryBreakpoint
-							.getMethodName(), config);
+					entryId = commands.setCallBreakpoint(bpUri,
+							entryBreakpoint.getMethodName(), config);
 					entryBreakpoint.setEntryBreakpointId(entryId);
 				} else {
 					// Update entry breakpoint
@@ -227,8 +227,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			if (id != null) {
 				final DbgpBreakpointConfig config = createBreakpointConfig(breakpoint);
 				if (breakpoint instanceof IScriptWatchpoint) {
-					config
-							.setExpression(makeWatchpointExpression((IScriptWatchpoint) breakpoint));
+					config.setExpression(makeWatchpointExpression((IScriptWatchpoint) breakpoint));
 				}
 				commands.updateBreakpoint(id, config);
 			}
@@ -385,8 +384,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	public boolean supportsBreakpoint(IBreakpoint breakpoint) {
 		if (breakpoint instanceof IScriptBreakpoint) {
-			return StrUtils.equals(breakpoint.getModelIdentifier(), target
-					.getModelIdentifier());
+			return StrUtils.equals(breakpoint.getModelIdentifier(),
+					target.getModelIdentifier());
 		}
 
 		return false;
@@ -468,8 +467,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				}
 			} catch (Exception e) {
 				DLTKDebugPlugin.logWarning(
-						NLS.bind(Messages.ErrorSetupDeferredBreakpoints, e
-								.getMessage()), e);
+						NLS.bind(Messages.ErrorSetupDeferredBreakpoints,
+								e.getMessage()), e);
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
@@ -482,7 +481,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	private static class TemporaryBreakpoint implements IDebugEventSetListener {
 		final ScriptBreakpointManager manager;
-		final Map ids = new IdentityHashMap(1);
+		final Map<IDbgpSession, String> ids = new IdentityHashMap<IDbgpSession, String>(
+				1);
 
 		/**
 		 * @param manager
@@ -536,6 +536,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	public void setBreakpointUntilFirstSuspend(URI uri, int line) {
+		uri = bpPathMapper.map(uri);
 		final TemporaryBreakpoint temp = new TemporaryBreakpoint(this, uri,
 				line);
 		if (!temp.ids.isEmpty()) {
