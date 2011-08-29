@@ -60,7 +60,11 @@ public class SourceMapper {
 
 	public ISourceRange getSourceRange(IModelElement element) {
 		fetchRangesForElement(element);
-		return getRange(sourceRanges.get(element));
+		Range range = null;
+		synchronized (sourceRanges) {
+			range = sourceRanges.get(element);
+		}
+		return getRange(range);
 	}
 
 	protected void fetchRangesForElement(IModelElement element) {
@@ -68,29 +72,42 @@ public class SourceMapper {
 
 	public ISourceRange getNameRange(IModelElement element) {
 		fetchRangesForElement(element);
-		return getRange(nameRanges.get(element));
+		Range range = null;
+		synchronized (sourceRanges) {
+			range = nameRanges.get(element);
+		}
+		return getRange(range);
 	}
 
 	void reportType(TypeInfo info, IType type) {
-		nameRanges.put(type,
-				new Range(info.nameSourceStart, info.nameSourceEnd));
-		sourceRanges.put(type, new Range(info.declarationStart, 0));
+		synchronized (sourceRanges) {
+			nameRanges.put(type, new Range(info.nameSourceStart,
+					info.nameSourceEnd));
+			sourceRanges.put(type, new Range(info.declarationStart, 0));
+		}
 	}
 
 	void reportField(FieldInfo info, IField field) {
-		nameRanges.put(field, new Range(info.nameSourceStart,
-				info.nameSourceEnd));
-		sourceRanges.put(field, new Range(info.declarationStart, 0));
+		synchronized (sourceRanges) {
+			nameRanges.put(field, new Range(info.nameSourceStart,
+					info.nameSourceEnd));
+			sourceRanges.put(field, new Range(info.declarationStart, 0));
+		}
 	}
 
 	void reportMethod(MethodInfo info, IMethod method) {
-		nameRanges.put(method, new Range(info.nameSourceStart,
-				info.nameSourceEnd));
-		sourceRanges.put(method, new Range(info.declarationStart, 0));
+		synchronized (sourceRanges) {
+			nameRanges.put(method, new Range(info.nameSourceStart,
+					info.nameSourceEnd));
+			sourceRanges.put(method, new Range(info.declarationStart, 0));
+		}
 	}
 
 	public void setRangeEnd(IModelElement element, int declarationEnd) {
-		Range range = sourceRanges.get(element);
+		Range range = null;
+		synchronized (sourceRanges) {
+			range = sourceRanges.get(element);
+		}
 		if (range != null) {
 			range.end = declarationEnd;
 		}
