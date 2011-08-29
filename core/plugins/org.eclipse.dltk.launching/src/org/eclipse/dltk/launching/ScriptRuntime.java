@@ -1837,7 +1837,7 @@ public final class ScriptRuntime {
 							}
 						}
 						standin.setLibraryLocations(locations);
-						InterpreterDefs.addInterpreter(standin);
+						InterpreterDefs.addInterpreter(standin,true);
 					}
 					fgContributedInterpreters.add(id);
 				} else {

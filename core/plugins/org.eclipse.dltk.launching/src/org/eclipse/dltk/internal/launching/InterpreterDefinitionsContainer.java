@@ -166,24 +166,49 @@ public class InterpreterDefinitionsContainer {
 	 *            the Interpreter to be added to this container
 	 */
 	public void addInterpreter(IInterpreterInstall Interpreter) {
-		if (!fInterpreterList.contains(Interpreter)) {
-			IInterpreterInstallType InterpreterInstallType = Interpreter
+		addInterpreter(Interpreter, false);
+	}
+
+	/**
+	 * Add the specified Interpreter to the Interpreter definitions managed by
+	 * this container.
+	 * <p>
+	 * If distinguishing valid from invalid Interpreters is important, the
+	 * specified Interpreter must have already had its install location set. An
+	 * invalid Interpreter is one whose install location doesn't exist.
+	 * </p>
+	 * 
+	 * @param interpreter
+	 *            the Interpreter to be added to this container
+	 * @param overwrite
+	 *            overwite interpreter install anyway
+	 */
+	public void addInterpreter(IInterpreterInstall interpreter,
+			boolean overwrite) {
+		if (fInterpreterList.contains(interpreter) && overwrite) {
+			fInterpreterList.remove(interpreter);
+		}
+		if (!fInterpreterList.contains(interpreter) || overwrite) {
+			IInterpreterInstallType InterpreterInstallType = interpreter
 					.getInterpreterInstallType();
-			List<IInterpreterInstall> InterpreterList = fInterTypeToInterMap
+			List<IInterpreterInstall> interpreterList = fInterTypeToInterMap
 					.get(InterpreterInstallType);
-			if (InterpreterList == null) {
-				InterpreterList = new ArrayList<IInterpreterInstall>(3);
+			if (interpreterList == null) {
+				interpreterList = new ArrayList<IInterpreterInstall>(3);
 				fInterTypeToInterMap.put(InterpreterInstallType,
-						InterpreterList);
+						interpreterList);
 			}
-			InterpreterList.add(Interpreter);
+			if (interpreterList.contains(interpreter)) {
+				interpreterList.remove(interpreter);
+			}
+			interpreterList.add(interpreter);
 			// IFileHandle installLocation = Interpreter.getInstallLocation();
 			// if (installLocation == null
 			// || !InterpreterInstallType.validateInstallLocation(
 			// installLocation).isOK()) {
 			// fInvalidInterpreterList.add(Interpreter);
 			// }
-			fInterpreterList.add(Interpreter);
+			fInterpreterList.add(interpreter);
 		}
 	}
 
@@ -203,7 +228,7 @@ public class InterpreterDefinitionsContainer {
 		Iterator<IInterpreterInstall> iterator = InterpreterList.iterator();
 		while (iterator.hasNext()) {
 			IInterpreterInstall Interpreter = iterator.next();
-			addInterpreter(Interpreter);
+			addInterpreter(Interpreter, false);
 		}
 	}
 
@@ -722,7 +747,7 @@ public class InterpreterDefinitionsContainer {
 			standin.setInstallLocation(new LazyFileHandle(envId, new Path(
 					installPath)));
 
-			container.addInterpreter(standin);
+			container.addInterpreter(standin, false);
 
 			// Look for subordinate nodes. These may be 'libraryLocation',
 			// 'libraryLocations' or 'versionInfo'.
