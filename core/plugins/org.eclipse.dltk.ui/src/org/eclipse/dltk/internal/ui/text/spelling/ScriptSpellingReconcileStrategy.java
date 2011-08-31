@@ -83,7 +83,7 @@ public class ScriptSpellingReconcileStrategy implements IReconcilingStrategy,
 								problem.getMessage(), word,
 								false /* dictionaryMatch */,
 								false /* sentenceStart */, document,
-								editorInput.getName());
+								editorInput.getName(), problem);
 						requestor.acceptProblem(iProblem);
 					}
 				} catch (BadLocationException x) {

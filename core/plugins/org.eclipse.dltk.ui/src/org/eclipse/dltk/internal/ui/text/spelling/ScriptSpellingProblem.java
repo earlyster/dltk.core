@@ -15,6 +15,7 @@ import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 /**
  * Spelling problem to be accepted by problem requesters.
@@ -55,6 +56,8 @@ public class ScriptSpellingProblem extends CategorizedProblem {
 	/** The originating file name */
 	private String fOrigin;
 
+	private SpellingProblem fSpellingProblem;
+
 	/**
 	 * Initialize with the given parameters.
 	 * 
@@ -76,10 +79,11 @@ public class ScriptSpellingProblem extends CategorizedProblem {
 	 *            the document
 	 * @param origin
 	 *            the originating file name
+	 * @param problem
 	 */
 	public ScriptSpellingProblem(int start, int end, int line, String message,
 			String word, boolean match, boolean sentence, IDocument document,
-			String origin) {
+			String origin, SpellingProblem problem) {
 		super();
 		fSourceStart = start;
 		fSourceEnd = end;
@@ -90,6 +94,11 @@ public class ScriptSpellingProblem extends CategorizedProblem {
 		fSentence = sentence;
 		fDocument = document;
 		fOrigin = origin;
+		fSpellingProblem = problem;
+	}
+
+	public SpellingProblem getfSpellingProblem() {
+		return fSpellingProblem;
 	}
 
 	/*

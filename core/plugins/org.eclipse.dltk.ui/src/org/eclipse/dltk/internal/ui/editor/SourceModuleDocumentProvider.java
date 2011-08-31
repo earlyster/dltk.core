@@ -65,6 +65,7 @@ import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
+import org.eclipse.dltk.internal.ui.text.spelling.ScriptSpellingProblem;
 import org.eclipse.dltk.internal.ui.text.spelling.SpellingProblems;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -569,7 +570,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private int fStateCount = 0;
 
 		private ISourceModule fSourceModule;
-		private List<ProblemAnnotation> fGeneratedAnnotations = new ArrayList<ProblemAnnotation>();
+		private List<Annotation> fGeneratedAnnotations = new ArrayList<Annotation>();
 		private IProgressMonitor fProgressMonitor;
 		private boolean fIsActive = false;
 		private boolean fIsHandlingTemporaryProblems;
@@ -767,12 +768,20 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 						if (position != null) {
 
 							try {
+								if (problem instanceof ScriptSpellingProblem) {
+									SpellingAnnotation annotation = new SpellingAnnotation(
+											((ScriptSpellingProblem) problem)
+													.getfSpellingProblem());
+									addAnnotation(annotation, position, false);
+									fGeneratedAnnotations.add(annotation);
+								}
 								ProblemAnnotation annotation = new ProblemAnnotation(
 										problem, fSourceModule);
 								overlayMarkers(position, annotation);
+
 								addAnnotation(annotation, position, false);
 								fGeneratedAnnotations.add(annotation);
-
+								
 								temporaryProblemsChanged = true;
 							} catch (BadLocationException x) {
 								// ignore invalid position
