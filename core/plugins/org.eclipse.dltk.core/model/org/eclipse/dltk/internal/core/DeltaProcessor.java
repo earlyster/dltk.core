@@ -2082,6 +2082,9 @@ public class DeltaProcessor {
 
 	private static boolean isVirtualProjectFragment(IProjectFragment fragment)
 			throws ModelException {
+		if (fragment == null) {
+			return false;
+		}
 		return fragment.isExternal() && fragment.getRawBuildpathEntry() == null;
 	}
 
