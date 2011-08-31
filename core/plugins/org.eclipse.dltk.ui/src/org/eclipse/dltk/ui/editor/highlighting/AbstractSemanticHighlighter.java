@@ -46,9 +46,11 @@ public abstract class AbstractSemanticHighlighter implements
 			HighlightingStyle[] styles) {
 		this.positionFactory = factory;
 		this.highlightingStyles.clear();
-		for (HighlightingStyle style : styles) {
-			this.highlightingStyles.put(style.getSemaHighlighting()
-					.getPreferenceKey(), style);
+		if (styles != null) {
+			for (HighlightingStyle style : styles) {
+				this.highlightingStyles.put(style.getSemaHighlighting()
+						.getPreferenceKey(), style);
+			}
 		}
 	}
 
