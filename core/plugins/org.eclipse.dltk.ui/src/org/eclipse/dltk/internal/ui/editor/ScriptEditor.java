@@ -2680,24 +2680,42 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	protected void createNavigationActions() {
 		super.createNavigationActions();
 		final StyledText textWidget = getSourceViewer().getTextWidget();
+
 		IAction action = new NavigatePreviousSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.WORD_PREVIOUS, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_LEFT, SWT.NULL);
+
 		action = new NavigateNextSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_NEXT);
 		setAction(ITextEditorActionDefinitionIds.WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_RIGHT, SWT.NULL);
+
 		action = new SelectPreviousSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_LEFT,
 				SWT.NULL);
+
 		action = new SelectNextSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_RIGHT,
 				SWT.NULL);
+
+		action = new DeletePreviousSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.BS, SWT.NULL);
+		markAsStateDependentAction(
+				ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, true);
+
+		action = new DeleteNextSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.DEL, SWT.NULL);
+		markAsStateDependentAction(
+				ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, true);
 	}
 
 	@Override
