@@ -771,7 +771,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 								if (problem instanceof ScriptSpellingProblem) {
 									SpellingAnnotation annotation = new SpellingAnnotation(
 											((ScriptSpellingProblem) problem)
-													.getfSpellingProblem());
+													.getSpellingProblem());
 									addAnnotation(annotation, position, false);
 									fGeneratedAnnotations.add(annotation);
 								}

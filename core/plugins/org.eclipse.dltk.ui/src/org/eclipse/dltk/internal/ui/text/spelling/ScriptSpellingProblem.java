@@ -97,7 +97,7 @@ public class ScriptSpellingProblem extends CategorizedProblem {
 		fSpellingProblem = problem;
 	}
 
-	public SpellingProblem getfSpellingProblem() {
+	public SpellingProblem getSpellingProblem() {
 		return fSpellingProblem;
 	}
 
