@@ -162,7 +162,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 		boolean containsReadOnlyScriptFolder = false;
 		IContainer parentFolder = (IContainer) root.getResource();
 		ModelElementDelta projectDelta = null;
-		IPath sideEffectPackageName = new Path(""); //$NON-NLS-1$
+		IPath sideEffectPackageName = Path.EMPTY;
 		for (int i = 0; i < newFragName.segmentCount(); i++) {
 			String subFolderName = newFragName.segment(i);
 			sideEffectPackageName = sideEffectPackageName.append(subFolderName);
