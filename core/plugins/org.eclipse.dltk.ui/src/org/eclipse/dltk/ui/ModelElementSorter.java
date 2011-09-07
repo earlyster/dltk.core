@@ -409,6 +409,9 @@ public class ModelElementSorter extends ViewerSorter implements
 			return ((IModelElement) element).getElementName();
 		} else if (element instanceof BuildPathContainer) {
 			return ((BuildPathContainer) element).getLabel();
+		} else if (element instanceof IFile) {
+			// handle SOURCEMODULES category returned for IFile
+			return ((IFile) element).getName();
 		} else {
 			return element.toString();
 		}
