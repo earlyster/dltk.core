@@ -923,4 +923,8 @@ public class CompletionProposal {
 	public void setIsConstructor(boolean isConstructor) {
 		this.isConstructor = isConstructor;
 	}
+
+	public void setCompletionLocation(int i) {
+		this.completionLocation = i;
+	}
 }
