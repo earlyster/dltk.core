@@ -230,6 +230,7 @@ public class CompletionProposal {
 	private String[] parameterNames = null;
 
 	private IModelElement modelElement;
+	private Object foreign;
 
 	private Object extraInfo;
 
@@ -863,6 +864,14 @@ public class CompletionProposal {
 
 	public void setModelElement(IModelElement modelElement) {
 		this.modelElement = modelElement;
+	}
+
+	public void setForeign(Object f) {
+		this.foreign = f;
+	}
+
+	public Object getForeign() {
+		return foreign;
 	}
 
 	public Object getExtraInfo() {
