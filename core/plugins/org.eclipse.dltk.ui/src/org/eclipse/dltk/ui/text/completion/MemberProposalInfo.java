@@ -11,8 +11,8 @@ package org.eclipse.dltk.ui.text.completion;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.CompletionProposal;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 
 /**
@@ -56,6 +56,11 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 //			//fElement = resolveMember();
 //		}
 		return fProposal.getModelElement();
+	}
+
+	@Override
+	public Object getForeignElement() {
+		return fProposal.getForeign();
 	}
 	
 	public void setModelElement(IModelElement element) {

@@ -45,6 +45,10 @@ public class ProposalInfo {
 		return fElement;
 	}
 
+	public Object getForeignElement() {
+		return null;
+	}
+
 	public String getKeyword() {
 		return fKeyword;
 	}
@@ -89,6 +93,11 @@ public class ProposalInfo {
 				IMember member = (IMember) modelElement;
 				return extractScriptdoc(member, monitor);
 			}
+			final Object foreignElement = getForeignElement();
+			if (foreignElement != null) {
+				return extractScriptdoc(foreignElement, monitor);
+			}
+
 		} catch (ModelException e) {
 			DLTKUIPlugin.log(e);
 		} catch (IOException e) {
@@ -149,6 +158,16 @@ public class ProposalInfo {
 		return null;
 	}
 
+	private String extractScriptdoc(Object member, IProgressMonitor monitor)
+			throws ModelException, IOException {
+		if (member != null) {
+			Reader reader = getHTMLContentReader(member, monitor);
+			if (reader != null)
+				return getString(reader);
+		}
+		return null;
+	}
+
 	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor)
 			throws ModelException {
 		String nature = null;
@@ -162,6 +181,20 @@ public class ProposalInfo {
 			return null;
 		return ScriptDocumentationAccess.getHTMLContentReader(nature, member,
 				true, false);
+	}
+
+	private Reader getHTMLContentReader(Object member, IProgressMonitor monitor)
+			throws ModelException {
+		IDLTKLanguageToolkit[] languageToolkits = DLTKLanguageManager
+				.getLanguageToolkits();
+		for (IDLTKLanguageToolkit idltkLanguageToolkit : languageToolkits) {
+			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
+					idltkLanguageToolkit.getNatureId(), member, true, false);
+			if (reader != null) {
+				return reader;
+			}
+		}
+		return null;
 	}
 
 	/**

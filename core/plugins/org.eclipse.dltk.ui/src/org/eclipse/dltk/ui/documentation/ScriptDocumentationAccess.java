@@ -147,14 +147,14 @@ public class ScriptDocumentationAccess {
 			final boolean allowExternal) {
 		return merge(nature, new Operation() {
 			public Reader getInfo(IScriptDocumentationProvider provider) {
-				if (member instanceof IMember) {
-					return provider.getInfo((IMember) member, allowInherited,
-							allowExternal);
-				} else if (provider instanceof IScriptDocumentationProviderExtension2) {
+				if (provider instanceof IScriptDocumentationProviderExtension2) {
 					final IScriptDocumentationProviderExtension2 ext = (IScriptDocumentationProviderExtension2) provider;
 					final IDocumentationResponse response = ext
 							.getDocumentationFor(member);
 					return DocumentationUtils.getReader(response);
+				} else if (member instanceof IMember) {
+					return provider.getInfo((IMember) member, allowInherited,
+							allowExternal);
 				} else {
 					return null;
 				}
