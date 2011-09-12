@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.dltk.core.index.sdk"
       label="%featureName"
-      version="3.0.0.qualifier"
+      version="4.0.0.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -14,12 +14,28 @@
       %license
    </license>
 
-   <includes
-         id="org.eclipse.dltk.core.index"
-         version="0.0.0"/>
+   <requires>
+      <import feature="org.eclipse.dltk.core.index"/>
+   </requires>
 
-   <includes
+   <plugin
+         id="org.eclipse.dltk.core.index.sql.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.dltk.core.index.sql.h2.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.dltk.core.index.source"
+         download-size="0"
+         install-size="0"
          version="0.0.0"/>
 
 </feature>
