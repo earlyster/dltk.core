@@ -5,10 +5,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.dltk.core</groupId>
 	<artifactId>core</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
+	<parent>
+		<artifactId>dltk</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../build/pom.xml</relativePath>
+		<groupId>org.eclipse.dltk</groupId>
+	</parent>
 	<packaging>pom</packaging>
+
 	<modules>
 		<module>features/org.eclipse.dltk.core-feature</module>
+		<module>features/org.eclipse.dltk.core.sdk</module>
+		<module>features/org.eclipse.dltk.core.index-feature</module>
+		<module>features/org.eclipse.dltk.core.index.sdk</module>
 		<module>plugins/org.eclipse.dltk</module>
 		<module>plugins/org.eclipse.dltk.console</module>
 		<module>plugins/org.eclipse.dltk.console.ui</module>
@@ -34,75 +44,4 @@
 		<module>tests/org.eclipse.dltk.core.tests</module>
 		<module>tests/org.eclipse.dltk.formatter.tests</module>
 	</modules>
-
-	<properties>
-		<tycho-version>0.11.1</tycho-version>
-		<tycho-groupid>org.sonatype.tycho</tycho-groupid>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<build.qualifier>'v'yyyyMMddHHmm</build.qualifier>
-	</properties>
-
-	<repositories>
-		<repository>
-			<id>helios</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/helios/</url>
-		</repository>
-	</repositories>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>maven-osgi-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<format>${build.qualifier}</format>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-			<plugin>
-				<groupId>${tycho-groupid}</groupId>
-				<artifactId>tycho-maven-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>${tycho-groupid}</groupId>
-				<artifactId>maven-osgi-compiler-plugin</artifactId>
-				<version>${tycho-version}</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<resolver>p2</resolver>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
-
-	<profiles>
-		<profile>
-			<id>tycho-last</id>
-			<activation>
-				<property>
-					<name>tycho</name>
-					<value>last</value>
-				</property>
-			</activation>
-			<properties>
-				<tycho-version>0.11.1</tycho-version>
-			</properties>
-		</profile>
-	</profiles>
-
 </project>
