@@ -41,7 +41,6 @@
 		<module>plugins/org.eclipse.dltk.validators.externalchecker</module>
 		<module>plugins/org.eclipse.dltk.validators.ui</module>
 		<module>update.site</module>
-		<module>tests/org.eclipse.dltk.core.tests</module>
-		<module>tests/org.eclipse.dltk.formatter.tests</module>
+		<module>tests</module>
 	</modules>
 </project>

@@ -13,13 +13,12 @@
    <license url="%licenseURL">
       %license
    </license>
-
-   <includes
-         id="org.eclipse.dltk.mylyn"
-         version="0.0.0"/>
-
-   <includes
+   
+   <plugin
          id="org.eclipse.dltk.mylyn.source"
-         version="0.0.0"/>
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

@@ -6,10 +6,9 @@
     <artifactId>core.tests</artifactId>
     <groupId>org.eclipse.dltk.core</groupId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../</relativePath>
   </parent>
   <groupId>org.eclipse.dltk.core</groupId>
-  <artifactId>org.eclipse.dltk.core.tests</artifactId>
+  <artifactId>org.eclipse.dltk.core.debug.tests</artifactId>
   <version>4.0.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
   <build>
@@ -19,8 +18,8 @@
 			  <artifactId>tycho-surefire-plugin</artifactId>
 			  <version>${tycho-version}</version>
 			  <configuration>
-				  <testSuite>org.eclipse.dltk.core.tests</testSuite>
-				  <testClass>org.eclipse.dltk.core.tests.AllTests</testClass>
+				  <testSuite>org.eclipse.dltk.debug.tests</testSuite>
+				  <testClass>org.eclipse.dltk.debug.tests.AllTests</testClass>
 				  <dependencies>
 					  <dependency>
 						  <type>p2-installable-unit</type>

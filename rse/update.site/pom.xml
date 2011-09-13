@@ -4,12 +4,12 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>core</artifactId>
-		<groupId>org.eclipse.dltk.core</groupId>
+		<artifactId>rse</artifactId>
+		<groupId>org.eclipse.dltk.rse</groupId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<groupId>org.eclipse.dltk.core</groupId>
-	<artifactId>org.eclipse.dltk.core-updatesite</artifactId>
+	<groupId>org.eclipse.dltk.rse</groupId>
+	<artifactId>org.eclipse.dltk.rse-updatesite</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-update-site</packaging>
 	<build>

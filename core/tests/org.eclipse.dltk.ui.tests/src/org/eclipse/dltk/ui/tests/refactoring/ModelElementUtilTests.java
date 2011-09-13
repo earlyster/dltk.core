@@ -59,7 +59,11 @@ public class ModelElementUtilTests extends AbstractModelTests {
 			checkFolders(subfolders2, new String[] { folder2.getElementName(),
 					folder2.getElementName() + "/B",
 					folder2.getElementName() + "/C" });
-		} finally {
+		}
+		catch(Throwable e) {
+			e.printStackTrace();
+		}
+		finally {
 			deleteProject(projectName);
 		}
 	}

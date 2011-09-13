@@ -5,6 +5,6 @@
 	<projects>
 	</projects>
 	<natures>
-		<nature>org.eclipse.dltk.ruby.core.nature</nature>
+		<nature>org.eclipse.dltk.core.tests.testnature</nature>
 	</natures>
 </projectDescription>

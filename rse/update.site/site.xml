@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.dltk.rse_4.0.0.qualifier.jar" id="org.eclipse.dltk.rse" version="4.0.0.qualifier"/>
+   <feature url="features/org.eclipse.dltk.rse.sdk_4.0.0.qualifier.jar" id="org.eclipse.dltk.rse.sdk" version="4.0.0.qualifier"/>
+</site>
