@@ -60,9 +60,6 @@ public class ModelElementUtilTests extends AbstractModelTests {
 					folder2.getElementName() + "/B",
 					folder2.getElementName() + "/C" });
 		}
-		catch(Throwable e) {
-			e.printStackTrace();
-		}
 		finally {
 			deleteProject(projectName);
 		}
