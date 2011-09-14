@@ -15,6 +15,7 @@
 	<modules>
 		<module>org.eclipse.dltk.core.tests</module>
 		<module>org.eclipse.dltk.debug.tests</module>
+		<module>org.eclipse.dltk.debug.ui.tests</module>
 		<module>org.eclipse.dltk.formatter.tests</module>
 		<module>org.eclipse.dltk.validators.core.tests</module>
 		<module>org.eclipse.dltk.ui.tests</module>

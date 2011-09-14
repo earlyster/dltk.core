@@ -17,6 +17,7 @@
 	<modules>
 		<module>features/org.eclipse.dltk.core-feature</module>
 		<module>features/org.eclipse.dltk.core.sdk</module>
+		<module>features/org.eclipse.dltk.core.tests</module>
 		<module>features/org.eclipse.dltk.core.index-feature</module>
 		<module>features/org.eclipse.dltk.core.index.sdk</module>
 		<module>plugins/org.eclipse.dltk</module>
@@ -40,7 +41,7 @@
 		<module>plugins/org.eclipse.dltk.validators.core</module>
 		<module>plugins/org.eclipse.dltk.validators.externalchecker</module>
 		<module>plugins/org.eclipse.dltk.validators.ui</module>
-		<module>update.site</module>
+		<!-- <module>update.site</module> -->
 		<module>tests</module>
 	</modules>
 </project>

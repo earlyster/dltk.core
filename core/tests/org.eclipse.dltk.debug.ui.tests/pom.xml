@@ -7,9 +7,10 @@
 		<artifactId>core.tests</artifactId>
 		<groupId>org.eclipse.dltk.core</groupId>
 		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
 	</parent>
 	<groupId>org.eclipse.dltk.core</groupId>
-	<artifactId>org.eclipse.dltk.formatter.tests</artifactId>
+	<artifactId>org.eclipse.dltk.debug.ui.tests</artifactId>
 	<version>4.0.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 	<build>
@@ -19,10 +20,9 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<testSuite>${project.artifactId}</testSuite>
-					<testClass>org.eclipse.dltk.formatter.tests.AllTests</testClass>
 					<failIfNoTests>false</failIfNoTests>
 					<testIgnoreFailure>true</testIgnoreFailure>
+					<include>*Tests.java</include>
 					<dependencies>
 						<dependency>
 							<type>p2-installable-unit</type>

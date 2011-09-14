@@ -17,6 +17,10 @@
       %license
    </license>
 
+   <requires>
+      <import feature="org.eclipse.dltk.core" version="4.0.0" match="compatible"/>
+   </requires>
+
    <plugin
          id="org.eclipse.dltk.core.tests"
          download-size="0"
@@ -37,12 +41,6 @@
 
    <plugin
          id="org.eclipse.dltk.validators.core.tests"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dltk.ui.bot.tests"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
