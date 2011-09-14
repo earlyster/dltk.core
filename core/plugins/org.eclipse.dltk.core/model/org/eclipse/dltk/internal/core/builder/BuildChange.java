@@ -27,7 +27,7 @@ import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IRenameChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 
-class BuildChange extends AbstractBuildChange implements IBuildChange {
+public class BuildChange extends AbstractBuildChange implements IBuildChange {
 
 	private final IResourceDelta resourceDelta;
 	private final List<IFile> files;

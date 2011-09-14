@@ -64,7 +64,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private static final int TRACE_BUILDER_MIN_ELAPSED_TIME = 10;
 
 	public IProject currentProject = null;
-	ScriptProject scriptProject = null;
+	protected ScriptProject scriptProject = null;
 	State lastState;
 
 	/**
@@ -401,7 +401,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private static final int WORK_SOURCES = 100;
 	private static final int WORK_BUILD = 750;
 
-	static final String NONAME = ""; //$NON-NLS-1$
+	protected static final String NONAME = ""; //$NON-NLS-1$
 
 	protected void fullBuild(final IProgressMonitor monitor) {
 		this.lastState = clearLastState();
@@ -680,8 +680,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(scriptProject);
 		if (toolkit != null) {
-			IScriptBuilder[] builders = ScriptBuilderManager
-					.getScriptBuilders(toolkit.getNatureId());
+			IScriptBuilder[] builders = getScriptBuilders(toolkit);
 			if (builders != null) {
 				final List<IScriptBuilder> result = new ArrayList<IScriptBuilder>(
 						builders.length);
@@ -696,6 +695,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		} else {
 			return null;
 		}
+	}
+
+	protected IScriptBuilder[] getScriptBuilders(IDLTKLanguageToolkit toolkit) {
+		return ScriptBuilderManager.getScriptBuilders(toolkit.getNatureId());
 	}
 
 	public static void removeProblemsAndTasksFor(IResource resource) {

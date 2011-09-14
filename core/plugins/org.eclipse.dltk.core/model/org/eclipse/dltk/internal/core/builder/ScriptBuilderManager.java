@@ -15,16 +15,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.utils.NatureExtensionManager;
@@ -167,20 +162,4 @@ public class ScriptBuilderManager extends
 		return getManager().getAllInstances();
 	}
 
-	public static void build(List<IFile> files, IProgressMonitor monitor) {
-		final Map<IProject, Set<IFile>> byProject = new HashMap<IProject, Set<IFile>>();
-		for (IFile file : files) {
-			Set<IFile> projectFiles = byProject.get(file.getProject());
-			if (projectFiles == null) {
-				projectFiles = new LinkedHashSet<IFile>();
-				byProject.put(file.getProject(), projectFiles);
-			}
-			projectFiles.add(file);
-		}
-		final LocalScriptBuilder builder = new LocalScriptBuilder();
-		for (Map.Entry<IProject, Set<IFile>> entry : byProject.entrySet()) {
-			builder.build(entry.getKey(),
-					new ArrayList<IFile>(entry.getValue()), monitor);
-		}
-	}
 }
