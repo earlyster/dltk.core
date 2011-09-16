@@ -34,6 +34,9 @@ public class MementoModelElementUtil {
 				break;
 			}
 		}
+		if (!memento.hasMoreTokens()) {
+			token = null;
+		}
 		try {
 			IModelElement[] children = parent.getChildren();
 			for (int i = 0; i < children.length; i++) {
