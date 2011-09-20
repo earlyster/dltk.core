@@ -164,14 +164,14 @@ public class Model extends Openable implements IScriptModel {
 	 * @see IScriptModel
 	 */
 	public IScriptProject[] getScriptProjects() throws ModelException {
-		final List list = getChildrenOfType(SCRIPT_PROJECT);
-		return (IScriptProject[]) list.toArray(new IScriptProject[list.size()]);
+		final List<IModelElement> list = getChildrenOfType(SCRIPT_PROJECT);
+		return list.toArray(new IScriptProject[list.size()]);
 	}
 
 	public IScriptProject[] getScriptProjects(String nature)
 			throws ModelException {
-		final List list = getChildrenOfType(SCRIPT_PROJECT);
-		final List result = new ArrayList();
+		final List<IModelElement> list = getChildrenOfType(SCRIPT_PROJECT);
+		final List<IScriptProject> result = new ArrayList<IScriptProject>();
 		for (int i = 0; i < list.size(); i++) {
 			IScriptProject project = (IScriptProject) list.get(i);
 			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -181,8 +181,7 @@ public class Model extends Openable implements IScriptModel {
 			}
 		}
 
-		return (IScriptProject[]) result.toArray(new IScriptProject[result
-				.size()]);
+		return result.toArray(new IScriptProject[result.size()]);
 	}
 
 	public void copy(IModelElement[] elements, IModelElement[] containers,
