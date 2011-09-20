@@ -22,7 +22,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.documentation.ScriptDocumentationAccess;
 
-public class ProposalInfo {
+public class ProposalInfo implements ICompletionProposalInfo {
 	private boolean fScriptdocResolved = false;
 	private String fScriptdoc = null;
 
