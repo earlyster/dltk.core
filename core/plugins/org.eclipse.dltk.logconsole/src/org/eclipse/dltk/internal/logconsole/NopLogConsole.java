@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.logconsole;
 
+import org.eclipse.dltk.logconsole.ILogCategory;
 import org.eclipse.dltk.logconsole.ILogConsoleStream;
 import org.eclipse.dltk.logconsole.LogConsoleType;
 import org.eclipse.dltk.logconsole.impl.AbstractLogConsole;
@@ -22,6 +23,9 @@ public class NopLogConsole extends AbstractLogConsole {
 	}
 
 	public void println(ILogConsoleStream stream, Object message) {
+	}
+
+	public void println(ILogCategory category, Object message) {
 	}
 
 }

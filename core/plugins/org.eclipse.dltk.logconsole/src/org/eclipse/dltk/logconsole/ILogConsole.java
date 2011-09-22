@@ -60,6 +60,15 @@ public interface ILogConsole {
 	void println(ILogConsoleStream stream, Object message);
 
 	/**
+	 * Prints the message
+	 * 
+	 * @param stream
+	 * @param message
+	 * @since 4.0
+	 */
+	void println(ILogCategory category, Object message);
+
+	/**
 	 * Activates this console - makes it visible to the user
 	 */
 	void activate();

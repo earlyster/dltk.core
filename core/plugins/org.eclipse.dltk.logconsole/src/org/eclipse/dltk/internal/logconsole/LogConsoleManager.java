@@ -11,7 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.logconsole;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.dltk.logconsole.ILogConsole;
@@ -24,7 +26,7 @@ public class LogConsoleManager implements ILogConsoleManager {
 		return getConsole(consoleType, null);
 	}
 
-	private static final LogConsoleType DEFAULT_CONSOLE_TYPE = new LogConsoleType(
+	protected static final LogConsoleType DEFAULT_CONSOLE_TYPE = new LogConsoleType(
 			"org.eclipse.dltk.logconsole.DEFAULT");
 
 	private static class ConsoleKey {
@@ -97,6 +99,18 @@ public class LogConsoleManager implements ILogConsoleManager {
 			return console;
 		}
 		return new NopLogConsole(key.consoleType, key.identifier);
+	}
+
+	public ILogConsole[] list(LogConsoleType consoleType) {
+		final List<ILogConsole> result = new ArrayList<ILogConsole>();
+		synchronized (lock) {
+			for (Map.Entry<ConsoleKey, ILogConsole> entry : consoles.entrySet()) {
+				if (consoleType.equals(entry.getKey().consoleType)) {
+					result.add(entry.getValue());
+				}
+			}
+		}
+		return result.toArray(new ILogConsole[result.size()]);
 	}
 
 }

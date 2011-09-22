@@ -59,4 +59,8 @@ public class LogConsoleType {
 		return LogConsolePlugin.getConsoleManager()
 				.getConsole(this, identifier);
 	}
+
+	public ILogConsole[] list() {
+		return LogConsolePlugin.getConsoleManager().list(this);
+	}
 }

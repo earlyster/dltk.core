@@ -38,4 +38,13 @@ public interface ILogConsoleManager {
 	 * @return
 	 */
 	ILogConsole getConsole(LogConsoleType consoleType, Object identifier);
+
+	/**
+	 * Lists all the consoles of the specified type.
+	 * 
+	 * @param logConsoleType
+	 * @return array of consoles, if there are no matching consoles empty array
+	 *         is returned
+	 */
+	ILogConsole[] list(LogConsoleType logConsoleType);
 }
