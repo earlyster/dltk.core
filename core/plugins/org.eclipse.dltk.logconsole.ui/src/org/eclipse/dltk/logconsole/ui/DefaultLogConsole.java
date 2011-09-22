@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.logconsole.ui;
 
+import static java.lang.System.currentTimeMillis;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.logconsole.ILogCategory;
 import org.eclipse.dltk.logconsole.ILogConsoleStream;
 import org.eclipse.dltk.logconsole.LogConsoleType;
 import org.eclipse.dltk.logconsole.impl.AbstractLogConsole;
@@ -33,26 +37,53 @@ public class DefaultLogConsole extends AbstractLogConsole {
 
 	private static class LogItem {
 		final ILogConsoleStream stream;
-		final String message;
+		final long timestamp;
+		final ILogCategory category;
+		final Object message;
 
-		public LogItem(ILogConsoleStream stream, String message) {
+		public LogItem(ILogConsoleStream stream, long timestamp,
+				ILogCategory category, Object message) {
 			this.stream = stream;
+			this.timestamp = timestamp;
+			this.category = category;
 			this.message = message;
 		}
 
 	}
 
-	private final List<LogItem> items = new ArrayList<LogItem>();
-	private int writePos = 0;
+	protected final List<LogItem> items = new ArrayList<LogItem>();
+	protected int writePos = 0;
+
+	private static final int LIMIT = 1000;
+	private static final int PURGE = LIMIT / 4;
 
 	public void println(ILogConsoleStream stream, Object message) {
 		if (message == null) {
 			return;
 		}
-		final LogItem item = new LogItem(stream, message.toString());
+		print(new LogItem(stream, currentTimeMillis(), null, message));
+	}
+
+	public void println(ILogCategory category, Object message) {
+		if (message == null) {
+			return;
+		}
+		print(new LogItem(category.stream(), currentTimeMillis(), category,
+				message));
+	}
+
+	private void print(final LogItem item) {
 		synchronized (items) {
 			items.add(item);
-			// TODO limit buffer size
+			if (items.size() > LIMIT) {
+				// TODO (alex) keep list of pages and drop the whole page(s)
+				items.removeAll(new ArrayList<LogItem>(items.subList(0, PURGE)));
+				if (writePos > PURGE) {
+					writePos -= PURGE;
+				} else {
+					writePos = 0;
+				}
+			}
 			if (consoleImpl != null) {
 				writeJob.schedule(100);
 			}
@@ -70,18 +101,39 @@ public class DefaultLogConsole extends AbstractLogConsole {
 				if (consoleImpl == null) {
 					return;
 				}
+				// TODO (alex) release lock earlier
 				if (writePos < items.size()) {
 					for (int i = writePos; i < items.size(); ++i) {
 						final LogItem item = items.get(i);
-						consoleImpl.println(item.stream, item.message);
+						buffer.setLength(0);
+						if (item.timestamp != 0) {
+							timestamp.setTime(item.timestamp);
+							final String timeStr = timestamp.toString();
+							buffer.append(timeStr.substring(11));
+							if (timeStr.length() < 23) {
+								buffer.append("000".substring(0,
+										23 - timeStr.length()));
+							}
+							buffer.append(' ');
+						}
+						if (item.category != null) {
+							buffer.append(item.category);
+							buffer.append(' ');
+						}
+						buffer.append(item.message);
+						consoleImpl.println(item.stream, buffer.toString());
 					}
 					writePos = items.size();
 				}
 			}
 		}
+
+		private final StringBuilder buffer = new StringBuilder(128);
+
+		private final Timestamp timestamp = new Timestamp(currentTimeMillis());
 	};
 
-	private LogConsoleImpl consoleImpl = null;
+	protected LogConsoleImpl consoleImpl = null;
 
 	@Override
 	public void activate() {
@@ -103,6 +155,13 @@ public class DefaultLogConsole extends AbstractLogConsole {
 	protected void consoleDisposed() {
 		synchronized (items) {
 			consoleImpl = null;
+			writePos = 0;
+		}
+	}
+
+	protected void clear() {
+		synchronized (items) {
+			items.clear();
 			writePos = 0;
 		}
 	}

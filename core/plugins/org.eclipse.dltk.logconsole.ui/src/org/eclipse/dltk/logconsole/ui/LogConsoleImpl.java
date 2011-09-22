@@ -41,6 +41,12 @@ public class LogConsoleImpl extends IOConsole {
 	}
 
 	@Override
+	public void clearConsole() {
+		super.clearConsole();
+		logConsole.clear();
+	}
+
+	@Override
 	protected void dispose() {
 		logConsole.consoleDisposed();
 		super.dispose();
