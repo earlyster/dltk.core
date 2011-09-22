@@ -54,7 +54,8 @@ public class LogConsoleImpl extends IOConsole {
 
 	private final Map<ILogConsoleStream, IOConsoleOutputStream> streams = new HashMap<ILogConsoleStream, IOConsoleOutputStream>();
 
-	public void println(ILogConsoleStream stream, String message) {
+	protected void println(ILogConsoleStream stream, String message)
+			throws IOException {
 		IOConsoleOutputStream outputStream;
 		synchronized (streams) {
 			outputStream = streams.get(stream);
@@ -64,12 +65,7 @@ public class LogConsoleImpl extends IOConsole {
 			}
 			streams.put(stream, outputStream);
 		}
-		try {
-			outputStream.write(message + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		outputStream.write(message + "\n");
 	}
 
 	private void setupColor(final IOConsoleOutputStream outputStream,

@@ -13,6 +13,7 @@ package org.eclipse.dltk.logconsole.ui;
 
 import static java.lang.System.currentTimeMillis;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.logconsole.CompoundMessage;
 import org.eclipse.dltk.logconsole.ILogCategory;
 import org.eclipse.dltk.logconsole.ILogConsoleStream;
 import org.eclipse.dltk.logconsole.LogConsoleType;
@@ -92,11 +94,16 @@ public class DefaultLogConsole extends AbstractLogConsole {
 
 	private final Job writeJob = new Job("") {
 		protected IStatus run(IProgressMonitor monitor) {
-			execute();
+			try {
+				execute();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return Status.OK_STATUS;
 		}
 
-		protected void execute() {
+		protected void execute() throws IOException {
 			synchronized (items) {
 				if (consoleImpl == null) {
 					return;
@@ -120,8 +127,28 @@ public class DefaultLogConsole extends AbstractLogConsole {
 							buffer.append(item.category);
 							buffer.append(' ');
 						}
-						buffer.append(item.message);
-						consoleImpl.println(item.stream, buffer.toString());
+						if (item.message instanceof CompoundMessage) {
+							final CompoundMessage msg = (CompoundMessage) item.message;
+							int headerLen = buffer.length();
+							buffer.append(msg.getHeader());
+							consoleImpl.println(item.stream, buffer.toString());
+							if (!msg.getContents().isEmpty()) {
+								headerLen += 2;
+								buffer.setLength(headerLen);
+								for (int j = 0; j < headerLen; ++j) {
+									buffer.setCharAt(j, ' ');
+								}
+								for (Object message : msg.getContents()) {
+									buffer.append(message);
+									consoleImpl.println(item.stream,
+											buffer.toString());
+									buffer.setLength(headerLen);
+								}
+							}
+						} else {
+							buffer.append(item.message);
+							consoleImpl.println(item.stream, buffer.toString());
+						}
 					}
 					writePos = items.size();
 				}
