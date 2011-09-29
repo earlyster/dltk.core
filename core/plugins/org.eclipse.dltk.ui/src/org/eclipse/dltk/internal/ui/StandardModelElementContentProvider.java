@@ -337,7 +337,7 @@ public class StandardModelElementContentProvider implements
 			throws ModelException {
 		IModelElement[] fragments = root.getChildren();
 
-		List newFragments = new ArrayList();
+		List<IModelElement> newFragments = new ArrayList<IModelElement>();
 		for (int i = 0; i < fragments.length; ++i) {
 			if (fragments[i] instanceof IScriptFolder) {
 				IScriptFolder scriptFolder = ((IScriptFolder) fragments[i]);
@@ -351,7 +351,7 @@ public class StandardModelElementContentProvider implements
 			}
 			newFragments.add(fragments[i]);
 		}
-		fragments = (IModelElement[]) newFragments
+		fragments = newFragments
 				.toArray(new IModelElement[newFragments.size()]);
 
 		if (isProjectProjectFragment(root)) {
@@ -381,7 +381,7 @@ public class StandardModelElementContentProvider implements
 			return NO_CHILDREN;
 
 		IProjectFragment[] roots = project.getProjectFragments();
-		List list = new ArrayList(roots.length);
+		List<Object> list = new ArrayList<Object>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i = 0; i < roots.length; i++) {
@@ -450,7 +450,7 @@ public class StandardModelElementContentProvider implements
 		if (javaProject == null || !javaProject.exists())
 			return members;
 		boolean isFolderOnClasspath = javaProject.isOnBuildpath(folder);
-		List nonJavaResources = new ArrayList();
+		List<Object> nonJavaResources = new ArrayList<Object>();
 		// Can be on classpath but as a member of non-java resource folder
 		for (int i = 0; i < members.length; i++) {
 			IResource member = members[i];
