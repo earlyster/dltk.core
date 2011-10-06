@@ -627,7 +627,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	/**
 	 * Batch deletion of projects
 	 */
-	protected void deleteProjects(final String[] projectNames)
+	protected void deleteProjects(final String... projectNames)
 			throws CoreException {
 		ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
