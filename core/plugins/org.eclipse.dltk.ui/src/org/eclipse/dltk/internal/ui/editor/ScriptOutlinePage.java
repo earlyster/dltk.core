@@ -460,7 +460,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 					});
 
 			if (store) {
-				DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
+				fStore.setValue(
 						LEXICAL_SORTING_ACTION_IS_CHECKED, on);
 			}
 		}
