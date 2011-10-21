@@ -68,6 +68,17 @@ public class IncrementalBuildChange extends IncrementalProjectChange implements
 		return super.addChangedResource(file);
 	}
 
+	public boolean addChangedResources(Collection<IFile> files)
+			throws CoreException {
+		boolean result = false;
+		for (IFile file : files) {
+			if (addChangedResource(file)) {
+				result = true;
+			}
+		}
+		return result;
+	}
+
 	private List<IPath> externalPaths = null;
 	private Collection<IProjectFragment> externalFragments = null;
 

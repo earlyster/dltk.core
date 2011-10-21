@@ -125,6 +125,11 @@ public class FullBuildChange extends AbstractBuildChange implements
 		return false;
 	}
 
+	public boolean addChangedResources(Collection<IFile> files)
+			throws CoreException {
+		return false;
+	}
+
 	private List<IPath> externalPaths = null;
 	private Collection<IProjectFragment> externalFragments = null;
 

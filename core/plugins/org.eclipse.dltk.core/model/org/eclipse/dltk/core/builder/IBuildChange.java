@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -61,6 +62,8 @@ public interface IBuildChange extends IProjectChange {
 	 * @return
 	 */
 	boolean addChangedResource(IFile file) throws CoreException;
+
+	boolean addChangedResources(Collection<IFile> files) throws CoreException;
 
 	/**
 	 * @param options

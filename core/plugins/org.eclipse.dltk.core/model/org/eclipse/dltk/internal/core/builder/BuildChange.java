@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,7 +97,11 @@ public class BuildChange extends AbstractBuildChange implements IBuildChange {
 	}
 
 	public boolean addChangedResource(IFile file) throws CoreException {
-		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean addChangedResources(Collection<IFile> files)
+			throws CoreException {
 		return false;
 	}
 
