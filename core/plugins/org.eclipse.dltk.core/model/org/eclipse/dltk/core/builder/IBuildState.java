@@ -21,6 +21,10 @@ import org.eclipse.core.runtime.IPath;
  * Eventually it will be used to collect dependencies between project sources.
  */
 public interface IBuildState {
+
+	static int STRUCTURAL = 1;
+	static int CONTENT = 2;
+
 	/**
 	 * @param path
 	 */
@@ -33,6 +37,15 @@ public interface IBuildState {
 	 *            it's dependency
 	 */
 	void recordDependency(IPath path, IPath dependency);
+
+	/**
+	 * 
+	 * @param path
+	 * @param dependency
+	 * @param flags
+	 * @since 4.0
+	 */
+	void recordDependency(IPath path, IPath dependency, int flags);
 
 	/**
 	 * Records the structural change at the specified path

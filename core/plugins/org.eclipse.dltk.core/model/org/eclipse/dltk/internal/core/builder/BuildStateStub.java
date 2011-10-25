@@ -21,6 +21,6 @@ public class BuildStateStub extends AbstractBuildState {
 	public void recordImportProblem(IPath path) {
 	}
 
-	public void recordDependency(IPath path, IPath dependency) {
+	public void recordDependency(IPath path, IPath dependency, int flags) {
 	}
 }

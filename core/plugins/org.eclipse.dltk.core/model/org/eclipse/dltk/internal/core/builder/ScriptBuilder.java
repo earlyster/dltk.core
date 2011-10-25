@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -109,44 +110,46 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
 					+ " @ " + new Date(startTime)); //$NON-NLS-1$
 		}
-		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
-		if (!ScriptProjectUtil.isBuilderEnabled(scriptProject)) {
-			if (monitor != null) {
-				monitor.done();
-			}
-			return null;
-		}
-		IEnvironment environment = EnvironmentManager
-				.getEnvironment(scriptProject);
-		if (environment == null || !environment.isConnected()) {
-			// Do not build if environment is not available.
-			// TODO: Store build requests and call builds when connection will
-			// be established.
-			if (monitor != null) {
-				monitor.done();
-			}
-			return null;
-		}
-		final String version = currentProject
-				.getPersistentProperty(PROPERTY_BUILDER_VERSION);
-		if (version == null) {
-			removeWrongTaskMarkers();
-			currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
-					CURRENT_VERSION);
-			kind = FULL_BUILD;
-		} else if (!CURRENT_VERSION.equals(version)) {
-			if ("200810012003".equals(version)) { //$NON-NLS-1$
-				removeWrongTaskMarkers();
-			}
-			currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
-					CURRENT_VERSION);
-			kind = FULL_BUILD;
-		}
-		if (monitor == null) {
-			monitor = new NullProgressMonitor();
-		}
-		IProject[] requiredProjects = getRequiredProjects(true);
+		IProject[] requiredProjects = null;
 		try {
+			this.scriptProject = (ScriptProject) DLTKCore
+					.create(currentProject);
+			if (!ScriptProjectUtil.isBuilderEnabled(scriptProject)) {
+				if (monitor != null) {
+					monitor.done();
+				}
+				return null;
+			}
+			IEnvironment environment = EnvironmentManager
+					.getEnvironment(scriptProject);
+			if (environment == null || !environment.isConnected()) {
+				// Do not build if environment is not available.
+				// TODO: Store build requests and call builds when connection
+				// will
+				// be established.
+				if (monitor != null) {
+					monitor.done();
+				}
+				return null;
+			}
+			final String version = currentProject
+					.getPersistentProperty(PROPERTY_BUILDER_VERSION);
+			if (version == null) {
+				removeWrongTaskMarkers();
+				currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
+						CURRENT_VERSION);
+				kind = FULL_BUILD;
+			} else if (!CURRENT_VERSION.equals(version)) {
+				if ("200810012003".equals(version)) { //$NON-NLS-1$
+					removeWrongTaskMarkers();
+				}
+				currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
+						CURRENT_VERSION);
+				kind = FULL_BUILD;
+			}
+			if (monitor == null) {
+				monitor = new NullProgressMonitor();
+			}
 			if (kind == FULL_BUILD) {
 				if (DEBUG)
 					log("Performing full build as requested by user"); //$NON-NLS-1$
@@ -169,36 +172,45 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					} else {
 						if (DEBUG)
 							log("Performing incremental build"); //$NON-NLS-1$
+						requiredProjects = getRequiredProjects(true);
 						incrementalBuild(delta, requiredProjects, monitor);
 					}
 				}
 			}
 		} catch (OperationCanceledException e) {
 			// TODO what?
+		} finally {
+			cleanup();
 		}
-		long endTime = 0;
 		if (DEBUG || TRACE) {
-			endTime = System.currentTimeMillis();
-		}
-		if (DEBUG) {
-			log("Finished build of " + currentProject.getName() //$NON-NLS-1$
-					+ " @ " + new Date(endTime) + ", elapsed " + (endTime - startTime) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		if (TRACE) {
-			System.out
-					.println("-----SCRIPT-BUILDER-INFORMATION-TRACE----------------------------"); //$NON-NLS-1$
-			System.out.println("Finished build of project:" //$NON-NLS-1$
-					+ currentProject.getName() + "\n" //$NON-NLS-1$
-					+ "Building time:" //$NON-NLS-1$
-					+ Long.toString(endTime - startTime) + "\n" //$NON-NLS-1$
-					+ "Build type:" //$NON-NLS-1$
-					+ (kind == FULL_BUILD ? "Full build" //$NON-NLS-1$
-							: "Incremental build")); //$NON-NLS-1$
-			System.out
-					.println("-----------------------------------------------------------------"); //$NON-NLS-1$
+			final long endTime = System.currentTimeMillis();
+			if (DEBUG) {
+				log("Finished build of " + currentProject.getName() //$NON-NLS-1$
+						+ " @ " + new Date(endTime) + ", elapsed " + (endTime - startTime) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			if (TRACE) {
+				System.out
+						.println("-----SCRIPT-BUILDER-INFORMATION-TRACE----------------------------"); //$NON-NLS-1$
+				System.out.println("Finished build of project:" //$NON-NLS-1$
+						+ currentProject.getName() + "\n" //$NON-NLS-1$
+						+ "Building time:" //$NON-NLS-1$
+						+ Long.toString(endTime - startTime) + "\n" //$NON-NLS-1$
+						+ "Build type:" //$NON-NLS-1$
+						+ (kind == FULL_BUILD ? "Full build" //$NON-NLS-1$
+								: "Incremental build")); //$NON-NLS-1$
+				System.out
+						.println("-----------------------------------------------------------------"); //$NON-NLS-1$
+			}
 		}
 		monitor.done();
+		if (requiredProjects == null) {
+			requiredProjects = getRequiredProjects(true);
+		}
 		return requiredProjects;
+	}
+
+	private void cleanup() {
+		lastState = null;
 	}
 
 	private static boolean isProjectConfigChange(IResourceDelta projectDelta) {
@@ -260,17 +272,21 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private class BuildState extends AbstractBuildState {
-		public BuildState(String projectName) {
-			super(projectName);
+	private static class BuildState extends AbstractBuildState {
+		final State state;
+
+		public BuildState(State state) {
+			super(state.scriptProjectName);
+			this.state = state;
 		}
 
 		public void recordImportProblem(IPath path) {
-			ScriptBuilder.this.lastState.recordImportProblem(path);
+			this.state.recordImportProblem(path);
 		}
 
-		public void recordDependency(IPath path, IPath dependency) {
-			ScriptBuilder.this.lastState.recordDependency(path, dependency);
+		public void recordDependency(IPath path, IPath dependency, int flags) {
+			Assert.isTrue(flags != 0);
+			this.state.recordDependency(path, dependency, flags);
 		}
 	}
 
@@ -404,8 +420,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected static final String NONAME = ""; //$NON-NLS-1$
 
 	protected void fullBuild(final IProgressMonitor monitor) {
-		this.lastState = clearLastState();
-		final IBuildState buildState = new BuildState(currentProject.getName());
+		final State newState = clearLastState();
+		final IBuildState buildState = new BuildState(newState);
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -440,14 +456,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 			}
 			saveBuilderVersions(builders);
-			updateExternalFolderLocations(buildChange);
+			updateExternalFolderLocations(newState, buildChange);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
 		} finally {
 			resetBuilders(builders, buildState, monitor);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
-					this.lastState);
+					newState);
 			monitor.done();
+			this.lastState = null;
 		}
 	}
 
@@ -477,19 +494,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected void incrementalBuild(IResourceDelta delta,
 			IProject[] requiredProjects, IProgressMonitor monitor)
 			throws CoreException {
-		State newState = new State(this);
+		final State newState = new State(this);
+		newState.copyFrom(this.lastState);
+		final Set<IPath> externalFoldersBefore = new HashSet<IPath>(
+				newState.getExternalFolders());
 
-		final Set<IPath> externalFoldersBefore;
-		if (this.lastState != null) {
-			newState.copyFrom(this.lastState);
-			externalFoldersBefore = new HashSet<IPath>(
-					newState.getExternalFolders());
-		} else {
-			externalFoldersBefore = new HashSet<IPath>();
-		}
-
-		this.lastState = newState;
-		final BuildState buildState = new BuildState(currentProject.getName());
+		final BuildState buildState = new BuildState(newState);
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
@@ -504,7 +514,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IBuildChange buildChange = null;
 			if (isBuilderVersionChange(builders)) {
 				buildChange = new FullBuildChange(currentProject, monitor);
-				this.lastState.resetDependencies();
+				newState.resetDependencies();
 			}
 			if (buildChange == null) {
 				buildChange = createBuildChange(delta, requiredProjects,
@@ -517,35 +527,21 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				builder.prepare(buildChange, buildState, monitor);
 				if (buildChange.getBuildType() == IScriptBuilder.FULL_BUILD
 						&& buildChange instanceof IncrementalBuildChange) {
+					if (TRACE) {
+						System.out.println("Full build requested by "
+								+ builder.getClass().getName());
+					}
 					buildChange = new FullBuildChange(currentProject, monitor);
-					this.lastState.resetDependencies();
+					newState.resetDependencies();
 				}
 			}
-			final Set<IPath> processed = new HashSet<IPath>();
-			final Set<IPath> queue = new HashSet<IPath>();
 			if (buildChange instanceof IncrementalBuildChange) {
 				final Set<IPath> changes = ((IncrementalBuildChange) buildChange)
 						.getChangedPaths();
 				if (TRACE) {
 					System.out.println("  Changes: " + changes);
 				}
-				queue.addAll(this.lastState.dependenciesOf(changes, true));
-				for (IProjectChange projectChange : buildChange
-						.getRequiredProjectChanges()) {
-					Collection<IPath> projectChanges = ((IncrementalProjectChange) projectChange)
-							.getChangedPaths();
-					final State projectState = getLastState(
-							projectChange.getProject(), monitor);
-					if (projectState != null) {
-						projectChanges = projectState
-								.allDependenciesOf(projectChanges);
-					}
-					queue.addAll(this.lastState.dependenciesOf(projectChanges,
-							false));
-				}
-				this.lastState.removeDependenciesFor(changes);
-				processed.addAll(changes);
-				queue.removeAll(processed);
+				newState.removeDependenciesFor(changes);
 			}
 			for (IScriptBuilder builder : builders) {
 				if (monitor.isCanceled()) {
@@ -561,52 +557,79 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			while (!buildState.getStructuralChanges().isEmpty()
-					&& !queue.isEmpty()) {
-				if (TRACE) {
-					System.out.println("  Queue: " + queue);
+			newState.recordStructuralChanges(buildState.getStructuralChanges());
+			if (buildChange instanceof IncrementalBuildChange) {
+				final Set<IPath> processed = new HashSet<IPath>();
+				final Set<IPath> changes = ((IncrementalBuildChange) buildChange)
+						.getChangedPaths();
+				processed.addAll(changes);
+				final Set<IPath> queue = new HashSet<IPath>();
+				// TODO review cross-project dependency handling
+				for (IProjectChange projectChange : buildChange
+						.getRequiredProjectChanges()) {
+					final Collection<IPath> projectChanges = ((IncrementalProjectChange) projectChange)
+							.getChangedPaths();
+					final State projectState = getLastState(
+							projectChange.getProject(), monitor);
+					if (projectState != null) {
+						projectChanges.addAll(projectState
+								.getAllStructuralDependencies(projectChanges));
+					}
+					queue.addAll(this.lastState.dependenciesOf(projectChanges,
+							buildState.getStructuralChanges(), false));
 				}
-				final Set<IPath> nextQueue = new HashSet<IPath>();
-				nextQueue.addAll(this.lastState.dependenciesOf(queue, false));
-				this.lastState.removeDependenciesFor(queue);
 				final IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
 						.getRoot();
-				final List<IFile> files = new ArrayList<IFile>();
-				for (IPath path : queue) {
-					files.add(root.getFile(path));
-				}
-				buildState.resetStructuralChanges();
-				final DependencyBuildChange qChange = new DependencyBuildChange(
-						currentProject, delta, files, monitor);
-				for (IScriptBuilder builder : builders) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
+				for (;;) {
+					queue.addAll(this.lastState.dependenciesOf(changes,
+							buildState.getStructuralChanges(), true));
+					queue.removeAll(processed);
+					if (queue.isEmpty()) {
+						break;
 					}
-					final long start = TRACE ? System.currentTimeMillis() : 0;
-					builder.build(qChange, buildState, monitor);
 					if (TRACE) {
-						final long elapsed = System.currentTimeMillis() - start;
-						if (elapsed > TRACE_BUILDER_MIN_ELAPSED_TIME) {
-							System.out.println(builder.getClass().getName()
-									+ " " + elapsed + "ms");
+						System.out.println("  Queue: " + queue);
+					}
+					newState.removeDependenciesFor(queue);
+					final List<IFile> files = new ArrayList<IFile>();
+					for (IPath path : queue) {
+						files.add(root.getFile(path));
+					}
+					buildState.resetStructuralChanges();
+					final DependencyBuildChange qChange = new DependencyBuildChange(
+							currentProject, delta, files, monitor);
+					for (IScriptBuilder builder : builders) {
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+						final long start = TRACE ? System.currentTimeMillis()
+								: 0;
+						builder.build(qChange, buildState, monitor);
+						if (TRACE) {
+							final long elapsed = System.currentTimeMillis()
+									- start;
+							if (elapsed > TRACE_BUILDER_MIN_ELAPSED_TIME) {
+								System.out.println(builder.getClass().getName()
+										+ " " + elapsed + "ms");
+							}
 						}
 					}
+					changes.clear();
+					changes.addAll(queue);
+					processed.addAll(queue);
+					queue.clear();
 				}
-				processed.addAll(queue);
-				nextQueue.removeAll(processed);
-				queue.clear();
-				// TODO prevent cycles
-				queue.addAll(nextQueue);
 			}
 			saveBuilderVersions(builders);
-			updateExternalFolderLocations(buildChange);
+			updateExternalFolderLocations(newState, buildChange);
 		} catch (CoreException e) {
 			DLTKCore.error(e);
 		} finally {
 			resetBuilders(builders, buildState, monitor);
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
-					this.lastState);
+					newState);
 			monitor.done();
+			this.lastState = null;
 		}
 	}
 
@@ -661,10 +684,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						externalFoldersBefore));
 	}
 
-	private void updateExternalFolderLocations(IBuildChange buildChange)
-			throws CoreException {
-		this.lastState.externalFolderLocations.clear();
-		this.lastState.externalFolderLocations.addAll(buildChange
+	private static void updateExternalFolderLocations(State state,
+			IBuildChange buildChange) throws CoreException {
+		state.externalFolderLocations.clear();
+		state.externalFolderLocations.addAll(buildChange
 				.getExternalPaths(IProjectChange.DEFAULT));
 	}
 

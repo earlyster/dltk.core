@@ -41,4 +41,8 @@ abstract class AbstractBuildState implements IBuildState {
 	public void resetStructuralChanges() {
 		structuralChanges.clear();
 	}
+
+	public final void recordDependency(IPath path, IPath dependency) {
+		recordDependency(path, dependency, STRUCTURAL);
+	}
 }

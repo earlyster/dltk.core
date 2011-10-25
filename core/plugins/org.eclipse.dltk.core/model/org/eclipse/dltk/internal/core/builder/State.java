@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.SimpleLookupTable;
+import org.eclipse.dltk.core.builder.IBuildState;
 
 public class State {
 	// NOTE: this state cannot contain types that are not defined in this
@@ -37,21 +39,42 @@ public class State {
 	int buildNumber;
 	long lastStructuralBuildTime;
 	SimpleLookupTable structuralBuildTimes;
+	Set<IPath> structuralChanges;
 
 	/**
-	 * 0x16 boolean noCleanExternalFolders is always present
+	 * <ul>
+	 * <li>0x16 boolean noCleanExternalFolders is always present
+	 * <li>0x17 dependencies
+	 * <li>0x18 dependencies + flags
+	 * </ul>
 	 **/
-	public static final byte VERSION = 0x0017;
+	public static final byte VERSION = 0x0018;
 
 	Set<IPath> externalFolderLocations = new HashSet<IPath>();
 
 	boolean noCleanExternalFolders = false;
 
+	static class DependencyInfo {
+		int flags;
+
+		public DependencyInfo() {
+		}
+
+		public DependencyInfo(DependencyInfo source) {
+			this.flags = source.flags;
+		}
+
+		@Override
+		public String toString() {
+			return String.valueOf(flags);
+		}
+	}
+
 	/**
 	 * Full (absolute,including project) path to the set of paths, depending on
 	 * it.
 	 */
-	private final Map<IPath, Set<IPath>> dependencies = new HashMap<IPath, Set<IPath>>();
+	private final Map<IPath, Map<IPath, DependencyInfo>> dependencies = new HashMap<IPath, Map<IPath, DependencyInfo>>();
 
 	private final Set<IPath> importProblems = new HashSet<IPath>();
 
@@ -86,6 +109,7 @@ public class State {
 		this.buildNumber = lastState.buildNumber + 1;
 		this.lastStructuralBuildTime = lastState.lastStructuralBuildTime;
 		this.structuralBuildTimes = lastState.structuralBuildTimes;
+		this.structuralChanges = null;
 
 		this.externalFolderLocations.clear();
 		this.externalFolderLocations.addAll(lastState.externalFolderLocations);
@@ -98,6 +122,14 @@ public class State {
 
 	public Set<IPath> getExternalFolders() {
 		return this.externalFolderLocations;
+	}
+
+	void recordStructuralChanges(Set<IPath> changes) {
+		if (changes != null && !changes.isEmpty()) {
+			this.structuralChanges = new HashSet<IPath>(changes);
+		} else {
+			this.structuralChanges = null;
+		}
 	}
 
 	static State read(IProject project, DataInputStream in) throws IOException {
@@ -132,9 +164,10 @@ public class State {
 		final int dependencyCount = in.readInt();
 		newState.dependencies.clear();
 		for (int i = 0; i < dependencyCount; ++i) {
-			final Set<IPath> paths = new HashSet<IPath>();
-			newState.dependencies.put(Path.fromOSString(in.readUTF()), paths);
-			readPaths(in, paths);
+			final Map<IPath, DependencyInfo> paths = new HashMap<IPath, DependencyInfo>();
+			newState.dependencies.put(Path.fromPortableString(in.readUTF()),
+					paths);
+			readDependencyPaths(in, paths);
 		}
 		newState.importProblems.clear();
 		readPaths(in, newState.importProblems);
@@ -186,9 +219,10 @@ public class State {
 		}
 		out.writeBoolean(this.noCleanExternalFolders);
 		out.writeInt(dependencies.size());
-		for (Map.Entry<IPath, Set<IPath>> entry : dependencies.entrySet()) {
+		for (Map.Entry<IPath, Map<IPath, DependencyInfo>> entry : dependencies
+				.entrySet()) {
 			out.writeUTF(entry.getKey().toPortableString());
-			writePaths(out, entry.getValue());
+			writeDependencyPaths(out, entry.getValue());
 		}
 		writePaths(out, importProblems);
 	}
@@ -206,6 +240,26 @@ public class State {
 		out.writeInt(paths.size());
 		for (IPath path : paths) {
 			out.writeUTF(path.toPortableString());
+		}
+	}
+
+	private static void readDependencyPaths(DataInputStream in,
+			Map<IPath, DependencyInfo> paths) throws IOException {
+		final int pathCount = in.readInt();
+		for (int j = 0; j < pathCount; ++j) {
+			final IPath path = Path.fromPortableString(in.readUTF());
+			final DependencyInfo depInfo = new DependencyInfo();
+			depInfo.flags = in.readInt();
+			paths.put(path, depInfo);
+		}
+	}
+
+	private void writeDependencyPaths(DataOutputStream out,
+			Map<IPath, DependencyInfo> paths) throws IOException {
+		out.writeInt(paths.size());
+		for (Map.Entry<IPath, DependencyInfo> entry : paths.entrySet()) {
+			out.writeUTF(entry.getKey().toPortableString());
+			out.writeInt(entry.getValue().flags);
 		}
 	}
 
@@ -232,15 +286,20 @@ public class State {
 		importProblems.add(path);
 	}
 
-	protected void recordDependency(IPath path, IPath dependency) {
+	protected void recordDependency(IPath path, IPath dependency, int flags) {
 		Assert.isLegal(scriptProjectName.equals(path.segment(0)));
 		Assert.isLegal(!path.equals(dependency));
-		Set<IPath> paths = dependencies.get(dependency);
+		Map<IPath, DependencyInfo> paths = dependencies.get(dependency);
 		if (paths == null) {
-			paths = new HashSet<IPath>();
+			paths = new HashMap<IPath, DependencyInfo>();
 			dependencies.put(dependency, paths);
 		}
-		paths.add(path);
+		DependencyInfo depInfo = paths.get(path);
+		if (depInfo == null) {
+			depInfo = new DependencyInfo();
+			paths.put(path, depInfo);
+		}
+		depInfo.flags |= flags;
 	}
 
 	protected void resetDependencies() {
@@ -249,46 +308,69 @@ public class State {
 	}
 
 	protected void removeDependenciesFor(Set<IPath> paths) {
-		for (Iterator<Map.Entry<IPath, Set<IPath>>> i = dependencies.entrySet()
-				.iterator(); i.hasNext();) {
-			final Map.Entry<IPath, Set<IPath>> entry = i.next();
-			if (entry.getValue().removeAll(paths) && entry.getValue().isEmpty()) {
+		for (Iterator<Map.Entry<IPath, Map<IPath, DependencyInfo>>> i = dependencies
+				.entrySet().iterator(); i.hasNext();) {
+			final Map.Entry<IPath, Map<IPath, DependencyInfo>> entry = i.next();
+			if (entry.getValue().keySet().removeAll(paths)
+					&& entry.getValue().isEmpty()) {
 				i.remove();
 			}
 		}
 		importProblems.removeAll(paths);
 	}
 
-	protected Collection<IPath> dependenciesOf(Collection<IPath> paths,
-			boolean includeImportProblems) {
-		final Collection<IPath> result = new ArrayList<IPath>();
+	protected Set<IPath> dependenciesOf(Collection<IPath> paths,
+			Set<IPath> structuralChanges, boolean includeImportProblems) {
+		final Set<IPath> result = new HashSet<IPath>();
 		if (includeImportProblems) {
-			result.addAll(importProblems);
+			for (IPath path : importProblems) {
+				result.add(path);
+			}
 		}
 		for (IPath path : paths) {
-			final Set<IPath> deps = dependencies.get(path);
+			final boolean structuralChange = structuralChanges.contains(path);
+			final Map<IPath, DependencyInfo> deps = dependencies.get(path);
 			if (deps != null) {
-				result.addAll(deps);
+				for (Map.Entry<IPath, DependencyInfo> entry : deps.entrySet()) {
+					if (structuralChange
+							|| ((entry.getValue().flags & IBuildState.CONTENT) != 0)) {
+						result.add(entry.getKey());
+					}
+				}
 			}
 		}
 		return result;
 	}
 
-	protected Collection<IPath> allDependenciesOf(Collection<IPath> paths) {
-		final Collection<IPath> result = new HashSet<IPath>();
-		final List<IPath> queue = new ArrayList<IPath>();
-		while (!paths.isEmpty()) {
-			result.addAll(paths);
-			for (IPath path : paths) {
-				final Set<IPath> deps = dependencies.get(path);
+	protected Collection<IPath> getAllStructuralDependencies(
+			Collection<IPath> paths) {
+		if (structuralChanges == null) {
+			return Collections.emptyList();
+		}
+		final Set<IPath> result = new HashSet<IPath>();
+		result.addAll(paths);
+		result.retainAll(structuralChanges);
+		if (result.isEmpty()) {
+			return Collections.emptyList();
+		}
+		final List<IPath> queue = new ArrayList<IPath>(result);
+		while (!queue.isEmpty()) {
+			final List<IPath> nextQueue = new ArrayList<IPath>();
+			for (IPath path : queue) {
+				final Map<IPath, DependencyInfo> deps = dependencies.get(path);
 				if (deps != null) {
-					queue.addAll(deps);
+					for (Map.Entry<IPath, DependencyInfo> entry : deps
+							.entrySet()) {
+						if (!result.contains(entry.getKey())
+								&& ((entry.getValue().flags & IBuildState.STRUCTURAL) != 0)) {
+							nextQueue.add(entry.getKey());
+						}
+					}
 				}
 			}
-			queue.removeAll(result);
-			paths.clear();
-			paths.addAll(queue);
+			result.addAll(nextQueue);
 			queue.clear();
+			queue.addAll(nextQueue);
 		}
 		return result;
 	}
