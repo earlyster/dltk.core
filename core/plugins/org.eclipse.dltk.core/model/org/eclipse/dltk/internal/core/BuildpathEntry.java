@@ -232,6 +232,17 @@ public class BuildpathEntry implements IBuildpathEntry {
 		return this.extraAttributes;
 	}
 
+	public String getExtraAttribute(String name) {
+		if (name != null) {
+			for (IBuildpathAttribute attribute : extraAttributes) {
+				if (name.equals(attribute.getName())) {
+					return attribute.getValue();
+				}
+			}
+		}
+		return null;
+	}
+
 	private String[] getMessageTemplates() {
 		ModelManager manager = ModelManager.getModelManager();
 		String[] result = new String[AccessRuleSet.MESSAGE_TEMPLATES_LENGTH];

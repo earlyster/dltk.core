@@ -193,6 +193,15 @@ public interface IBuildpathEntry {
 	IBuildpathAttribute[] getExtraAttributes();
 
 	/**
+	 * Returns the value of the extra attribute with the specified name or
+	 * <code>null</code>.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	String getExtraAttribute(String name);
+
+	/**
 	 * Returns the set of patterns used to explicitly define resources or
 	 * classes to be included with this buildpath entry.
 	 * <p>
