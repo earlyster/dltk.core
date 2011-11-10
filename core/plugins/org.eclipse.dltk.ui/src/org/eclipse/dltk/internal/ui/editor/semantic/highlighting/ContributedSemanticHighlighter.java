@@ -75,6 +75,12 @@ public class ContributedSemanticHighlighter extends AbstractSemanticHighlighter 
 			return enablementStyle != EnablementStyle.ALWAYS_ON;
 		}
 
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + "(" + key + ","
+					+ enablementStyle + ")";
+		}
+
 	}
 
 	private static class SemanticHighlightingCollector extends

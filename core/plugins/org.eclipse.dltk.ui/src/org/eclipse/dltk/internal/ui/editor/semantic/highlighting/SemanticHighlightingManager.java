@@ -499,6 +499,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			String key = fSemanticHighlightings[i].getEnabledPreferenceKey();
 			if (key.equals(relevantKey))
 				continue;
+			if (!fSemanticHighlightings[i].isSemanticOnly())
+				return false;
 			if (fPreferenceStore.getBoolean(key))
 				return false; // another is still enabled or was enabled before
 		}

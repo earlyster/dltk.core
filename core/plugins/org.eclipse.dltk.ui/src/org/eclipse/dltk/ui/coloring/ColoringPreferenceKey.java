@@ -53,4 +53,9 @@ public class ColoringPreferenceKey implements IColoringPreferenceKey {
 				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
 	}
 
+	@Override
+	public String toString() {
+		return baseKey;
+	}
+
 }
