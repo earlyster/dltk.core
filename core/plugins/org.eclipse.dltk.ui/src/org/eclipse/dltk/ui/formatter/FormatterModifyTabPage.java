@@ -13,12 +13,12 @@ package org.eclipse.dltk.ui.formatter;
 
 import java.net.URL;
 
-import org.eclipse.dltk.ui.formatter.internal.WhitespaceCharacterPainter;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.WhitespaceCharacterPainter;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
