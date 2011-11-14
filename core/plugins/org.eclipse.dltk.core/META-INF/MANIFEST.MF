@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;bundle-version="2.4.0",
  org.eclipse.emf.ecore.xmi;bundle-version="2.4.0"
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.dltk.ast,
+Export-Package: org.eclipse.dltk.annotations,
+ org.eclipse.dltk.ast,
  org.eclipse.dltk.ast.declarations,
  org.eclipse.dltk.ast.expressions,
  org.eclipse.dltk.ast.parser,

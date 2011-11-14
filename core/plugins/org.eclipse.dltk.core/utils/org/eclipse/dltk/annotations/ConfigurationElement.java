@@ -9,7 +9,7 @@
  * Contributors:
  *     NumberFour AG - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.utils;
+package org.eclipse.dltk.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
