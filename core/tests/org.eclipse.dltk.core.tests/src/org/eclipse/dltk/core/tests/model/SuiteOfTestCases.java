@@ -19,7 +19,6 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.eclipse.dltk.core.tests.Skip;
 import org.eclipse.dltk.core.tests.TestSupport;
 
 /**
@@ -40,12 +39,8 @@ public abstract class SuiteOfTestCases extends TestCase {
 		 * Creates a new suite on the given class. This class must be a subclass
 		 * of SetupableTestSuite.
 		 */
-		public Suite(Class theClass) {
+		public Suite(Class<? extends SuiteOfTestCases> theClass) {
 			super(theClass);
-		}
-
-		public Suite(Class theClass, String methodName) {
-			this(theClass, new String[] { methodName });
 		}
 
 		/**
@@ -55,7 +50,8 @@ public abstract class SuiteOfTestCases extends TestCase {
 		 * @param theClass
 		 * @param methodNames
 		 */
-		public Suite(Class theClass, String[] methodNames) {
+		public Suite(Class<? extends SuiteOfTestCases> theClass,
+				String... methodNames) {
 			super(theClass.getName());
 			for (int i = 0; i < methodNames.length; ++i) {
 				final String methodName = methodNames[i];
@@ -89,7 +85,7 @@ public abstract class SuiteOfTestCases extends TestCase {
 		}
 
 		private void initialize(SuiteOfTestCases test) {
-			Class currentClass = test.getClass();
+			Class<?> currentClass = test.getClass();
 			while (currentClass != null
 					&& !currentClass.equals(SuiteOfTestCases.class)) {
 				Field[] fields = currentClass.getDeclaredFields();
@@ -201,15 +197,8 @@ public abstract class SuiteOfTestCases extends TestCase {
 
 	@Override
 	public void run(TestResult result) {
-		try {
-			final Method runMethod = getClass().getMethod(getName(),
-					(Class[]) null);
-			if (runMethod.getAnnotation(Skip.class) != null) {
-				return;
-			}
-		} catch (NoSuchMethodException e) {
-			// shouldn't happen, fall thru
-		}
+		if (TestSupport.ignored(this))
+			return;
 		super.run(result);
 	}
 

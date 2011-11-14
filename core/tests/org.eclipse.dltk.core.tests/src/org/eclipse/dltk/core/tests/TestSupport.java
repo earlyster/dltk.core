@@ -113,4 +113,18 @@ public class TestSupport {
 	}
 
 	private static final ThreadLocal<Boolean> notYetImplementedFlag = new ThreadLocal<Boolean>();
+
+	public static boolean ignored(TestCase testCase) {
+		try {
+			final Method runMethod = testCase.getClass().getMethod(
+					testCase.getName(), NO_PARAMS);
+			if (runMethod.getAnnotation(Skip.class) != null) {
+				return true;
+			}
+		} catch (NoSuchMethodException e) {
+			// shouldn't happen, fall thru
+		}
+		return false;
+	}
+
 }
