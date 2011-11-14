@@ -45,10 +45,9 @@ public class TestSupport {
 		final Method testMethod = findRunningJUnitTestMethod(caller.getClass());
 		try {
 			log("Running " + testMethod.getName() + " as not yet implemented");
-			testMethod.invoke(caller, null);
-			Assert
-					.fail(testMethod.getName()
-							+ " is marked as not yet implemented but passes unexpectedly");
+			testMethod.invoke(caller, (Object[]) null);
+			Assert.fail(testMethod.getName()
+					+ " is marked as not yet implemented but passes unexpectedly");
 		} catch (final Exception e) {
 			log(testMethod.getName()
 					+ " fails which is expected as it is not yet implemented");
@@ -76,7 +75,7 @@ public class TestSupport {
 	 * @throws RuntimeException
 	 *             if no method could be found.
 	 */
-	private static Method findRunningJUnitTestMethod(Class caller) {
+	private static Method findRunningJUnitTestMethod(Class<?> caller) {
 		// search the initial junit test
 		final Throwable t = new Exception();
 		for (int i = t.getStackTrace().length - 1; i >= 0; --i) {
@@ -97,7 +96,7 @@ public class TestSupport {
 				"No JUnit test case method found in call stack");
 	}
 
-	private static final Class[] NO_PARAMS = new Class[] {};
+	private static final Class<?>[] NO_PARAMS = new Class[] {};
 
 	/**
 	 * Test if the method is a junit test.
@@ -113,5 +112,5 @@ public class TestSupport {
 				&& Modifier.isPublic(method.getModifiers());
 	}
 
-	private static final ThreadLocal notYetImplementedFlag = new ThreadLocal();
+	private static final ThreadLocal<Boolean> notYetImplementedFlag = new ThreadLocal<Boolean>();
 }
