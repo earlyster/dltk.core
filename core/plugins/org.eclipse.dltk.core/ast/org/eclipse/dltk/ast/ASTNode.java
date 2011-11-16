@@ -18,12 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceNode;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.SourceRange;
 import org.eclipse.dltk.utils.CorePrinter;
 import org.eclipse.osgi.util.NLS;
 
-public abstract class ASTNode {
+public abstract class ASTNode implements ISourceNode {
 
 	// storage for internal flags (32 bits) BIT USAGE
 	public final static int Bit1 = 0x1; // return type (operator) | name
@@ -172,8 +173,16 @@ public abstract class ASTNode {
 		return this.sourceStart;
 	}
 
+	public int start() {
+		return sourceStart();
+	}
+
 	public final int sourceEnd() {
 		return this.sourceEnd;
+	}
+
+	public int end() {
+		return sourceEnd();
 	}
 
 	/**
