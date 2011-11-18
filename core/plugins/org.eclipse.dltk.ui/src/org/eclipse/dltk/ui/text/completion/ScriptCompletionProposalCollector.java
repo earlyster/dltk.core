@@ -802,7 +802,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		}
 	}
 
-	private IScriptCompletionProposal createTypeProposal(
+	protected IScriptCompletionProposal createTypeProposal(
 			CompletionProposal typeProposal) {
 
 		String completion = typeProposal.getCompletion();
