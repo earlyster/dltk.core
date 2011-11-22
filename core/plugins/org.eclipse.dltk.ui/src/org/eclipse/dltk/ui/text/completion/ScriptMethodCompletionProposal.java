@@ -9,9 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.completion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -65,43 +62,6 @@ public class ScriptMethodCompletionProposal extends
 		return fProposal.getName();
 	}
 
-	/**
-	 * @since 3.0
-	 */
-	public static interface IReplacementBuffer {
-		void addArgument(int offset, int length);
-
-		void append(String text);
-
-		String toString();
-
-		int length();
-	}
-
-	private static class ReplacementBuffer implements IReplacementBuffer {
-		private final List<IRegion> arguments = new ArrayList<IRegion>();
-
-		public void addArgument(int offset, int length) {
-			arguments.add(new Region(offset, length));
-		}
-
-		private final StringBuilder buffer = new StringBuilder();
-
-		public void append(String text) {
-			buffer.append(text);
-		}
-
-		public int length() {
-			return buffer.length();
-		}
-
-		@Override
-		public String toString() {
-			return buffer.toString();
-		}
-
-	}
-
 	private ReplacementBuffer replacementBuffer;
 
 	@Override
@@ -112,12 +72,12 @@ public class ScriptMethodCompletionProposal extends
 
 		int exit = getReplacementOffset() + getReplacementString().length();
 
-		if (replacementBuffer != null && !replacementBuffer.arguments.isEmpty()
+		if (replacementBuffer != null && replacementBuffer.hasArguments()
 				&& getTextViewer() != null) {
 			int baseOffset = getReplacementOffset() + getCursorPosition();
 			try {
 				LinkedModeModel model = new LinkedModeModel();
-				for (IRegion region : replacementBuffer.arguments) {
+				for (IRegion region : replacementBuffer.getArguments()) {
 					LinkedPositionGroup group = new LinkedPositionGroup();
 					group.addPosition(new LinkedPosition(document, baseOffset
 							+ region.getOffset(), region.getLength(),
@@ -140,10 +100,6 @@ public class ScriptMethodCompletionProposal extends
 		} else {
 			fSelectedRegion = new Region(exit, 0);
 		}
-	}
-
-	protected boolean needsLinkedMode() {
-		return false; // we do it our selfs
 	}
 
 	/**
@@ -261,7 +217,7 @@ public class ScriptMethodCompletionProposal extends
 	/**
 	 * @since 3.0
 	 */
-	protected void computeReplacement(IReplacementBuffer buffer) {
+	protected void computeReplacement(ReplacementBuffer buffer) {
 		if (!hasArgumentList()) {
 			buffer.append(super.computeReplacementString());
 			return;
