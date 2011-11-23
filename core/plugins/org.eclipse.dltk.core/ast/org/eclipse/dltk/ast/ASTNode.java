@@ -291,8 +291,4 @@ public abstract class ASTNode implements ISourceNode {
 				&& sourceEnd() == other.sourceEnd();
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
 }
