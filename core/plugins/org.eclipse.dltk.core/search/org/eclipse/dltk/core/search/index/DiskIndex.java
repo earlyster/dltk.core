@@ -61,8 +61,9 @@ public class DiskIndex {
 	// offset if not read yet
 
 	private char[] cachedCategoryName;
+	char separator = Index.DEFAULT_SEPARATOR;
 
-	public static final String SIGNATURE = "DLTK INDEX VERSION 1.013"; //$NON-NLS-1$
+	public static final String SIGNATURE = "DLTK INDEX VERSION 1.014"; //$NON-NLS-1$
 
 	public final static boolean DEBUG = false;
 
@@ -542,6 +543,7 @@ public class DiskIndex {
 				: diskIndex.categoryOffsets.elementSize;
 		this.categoryOffsets = new HashtableOfIntValues(size);
 		this.categoryTables = new HashtableOfObject(size);
+		this.separator = diskIndex.separator;
 	}
 
 	private void mergeCategories(DiskIndex onDisk, int[] positions,
@@ -961,6 +963,7 @@ public class DiskIndex {
 		this.numberOfChunks = file.readInt();
 		this.sizeOfLastChunk = file.readUnsignedByte();
 		this.documentReferenceSize = file.readUnsignedByte();
+		this.separator = (char) file.readUnsignedByte();
 
 		this.chunkOffsets = new int[this.numberOfChunks];
 		for (int i = 0; i < this.numberOfChunks; i++)
@@ -1171,6 +1174,7 @@ public class DiskIndex {
 		stream.writeInt(this.numberOfChunks);
 		stream.writeByte(this.sizeOfLastChunk);
 		stream.writeByte(this.documentReferenceSize);
+		stream.writeByte(this.separator);
 
 		// apend the file with chunk offsets
 		for (int i = 0; i < this.numberOfChunks; i++)

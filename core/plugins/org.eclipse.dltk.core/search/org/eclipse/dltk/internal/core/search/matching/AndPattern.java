@@ -79,13 +79,15 @@ public abstract class AndPattern extends DLTKSearchPattern {
 			index.stopQuery();
 		}
 
-		String containerPath = index.getContainerPath();
+		final String containerPath = index.getContainerPath();
+		final char separator = index.separator;
 		Object[] names = intersectedNames.values;
 		for (int i = 0, l = names.length; i < l; i++)
 			if (names[i] != null)
 				((InternalSearchPattern) this).acceptMatch((String) names[i],
-						containerPath, null/* no pattern */, requestor,
-						participant, scope); // AndPatterns cannot provide
+						containerPath, separator, null/* no pattern */,
+						requestor, participant, scope); // AndPatterns cannot
+														// provide
 		// the decoded result
 	}
 

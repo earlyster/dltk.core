@@ -79,6 +79,9 @@ public class ProjectRequest extends IndexRequest {
 				indexer.requestIfNotWaiting(new BuiltinProjectFragmentRequest(
 						indexer, fragment, toolkit,
 						((BuiltinProjectFragment) fragment).lastModified()));
+			} else if (fragment.isArchive()) {
+				indexer.requestIfNotWaiting(new ArchiveProjectFragmentRequest(
+						indexer, fragment, toolkit));
 			} else if (fragment.isExternal()) {
 				indexer.requestIfNotWaiting(new ExternalProjectFragmentRequest(
 						indexer, fragment, toolkit));

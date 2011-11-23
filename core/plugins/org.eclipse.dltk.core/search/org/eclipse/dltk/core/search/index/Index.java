@@ -17,9 +17,9 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
-
 
 /**
  * An <code>Index</code> maps document names to their referenced words in
@@ -36,6 +36,12 @@ public class Index {
 	public String containerPath;
 
 	public ReadWriteMonitor monitor;
+
+	// Separator to use after the container path
+	static final char DEFAULT_SEPARATOR = '/';
+	public char separator = DEFAULT_SEPARATOR;
+	public static final char JAR_SEPARATOR = IDLTKSearchScope.FILE_ENTRY_SEPARATOR
+			.charAt(0);
 
 	protected DiskIndex diskIndex;
 
@@ -104,16 +110,18 @@ public class Index {
 		this.memoryIndex = new MemoryIndex();
 		this.diskIndex = new DiskIndex(fileName);
 		this.diskIndex.initialize(reuseExistingFile);
+		if (reuseExistingFile)
+			this.separator = this.diskIndex.separator;
 	}
-	
-	protected Index (String fileName, String containerPath) {
+
+	protected Index(String fileName, String containerPath) {
 		this.containerPath = containerPath;
 		this.monitor = new ReadWriteMonitor();
 	}
-	
+
 	public void addIndexEntry(char[] category, char[] key,
 			String containerRelativePath) {
-		if( DLTKCore.DEBUG_INDEX ) {
+		if (DLTKCore.DEBUG_INDEX) {
 			System.out.println("DEBUG INDEX: Add Index Entry:" + new String( category ) + " " + new String( key ) + " path:" + containerRelativePath ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		this.memoryIndex.addIndexEntry(category, key, containerRelativePath);
@@ -209,10 +217,11 @@ public class Index {
 			System.out.println("Index for " + this.containerPath + " (" + new Path(diskIndex.fileName).lastSegment() + ") saved"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$		
 		}
 		// int numberOfChanges = this.memoryIndex.docsToReferences.elementSize;
+		this.diskIndex.separator = this.separator;
 		this.diskIndex = this.diskIndex.mergeWith(this.memoryIndex);
 		this.memoryIndex = new MemoryIndex();
-//		if (numberOfChanges > 1000)
-//			System.gc(); // reclaim space if the MemoryIndex was very BIG
+		// if (numberOfChanges > 1000)
+		// System.gc(); // reclaim space if the MemoryIndex was very BIG
 	}
 
 	public void startQuery() {
@@ -232,7 +241,7 @@ public class Index {
 	public boolean isRebuildable() {
 		return true;
 	}
-	
+
 	/**
 	 * Returns the containerPath of this index without any additional prefixes.
 	 * 

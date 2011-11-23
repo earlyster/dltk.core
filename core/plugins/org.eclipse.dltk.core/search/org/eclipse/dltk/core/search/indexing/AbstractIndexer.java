@@ -93,7 +93,10 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		addNameReference(fieldName);
 	}
 
+	private int entryCount = 0;
+
 	protected void addIndexEntry(char[] category, char[] key) {
+		++entryCount;
 		this.document.addIndexEntry(category, key);
 	}
 
@@ -130,5 +133,15 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public abstract void indexDocument();
+
+	/**
+	 * Make sure document was added to the index. If no entries were added then
+	 * just add one.
+	 */
+	protected void ensureDocumentAdded() {
+		if (entryCount == 0) {
+			addIndexEntry(STAMP, CharOperation.NO_CHAR);
+		}
+	}
 
 }

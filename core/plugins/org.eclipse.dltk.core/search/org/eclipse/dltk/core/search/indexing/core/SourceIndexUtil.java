@@ -21,15 +21,13 @@ public class SourceIndexUtil {
 				.getAncestor(IModelElement.PROJECT_FRAGMENT);
 		if (fragment.isArchive()) {
 			if (module instanceof IExternalSourceModule) {
-				IExternalSourceModule ext = (IExternalSourceModule) module;
-				IPath fullPath = ext.getFullPath();
-				return fullPath.toString();
+				final IExternalSourceModule ext = (IExternalSourceModule) module;
+				// archive related path
+				return ext.getFullPath().toString();
 			}
 			if (module.isBinary()) {
-				IPath modulePath = module.getPath();
-				return modulePath.removeFirstSegments(
-						containerPath.segmentCount()).setDevice(null)
-						.toString();
+				return path.removeFirstSegments(containerPath.segmentCount())
+						.setDevice(null).toString();
 			}
 		}
 		if (module instanceof ExternalSourceModule

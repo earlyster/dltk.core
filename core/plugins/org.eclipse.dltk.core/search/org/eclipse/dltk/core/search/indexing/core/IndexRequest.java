@@ -49,9 +49,7 @@ public abstract class IndexRequest extends AbstractJob {
 	}
 
 	/**
-	 * Returns the document names that starts with the given substring, if
-	 * <code>null</code> then returns all of them. Read lock is acquired
-	 * automatically.
+	 * Returns all the document names. Read lock is acquired automatically.
 	 * 
 	 * @param index
 	 * @return

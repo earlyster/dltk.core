@@ -13,8 +13,6 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchParticipant;
@@ -38,8 +36,9 @@ public abstract class InternalSearchPattern {
 	public int kind;
 
 	public void acceptMatch(String relativePath, String containerPath,
-			SearchPattern pattern, IndexQueryRequestor requestor,
-			SearchParticipant participant, IDLTKSearchScope scope) {
+			char separator, SearchPattern pattern,
+			IndexQueryRequestor requestor, SearchParticipant participant,
+			IDLTKSearchScope scope) {
 
 		if (scope instanceof DLTKSearchScope) {
 			DLTKSearchScope javaSearchScope = (DLTKSearchScope) scope;
@@ -50,15 +49,15 @@ public abstract class InternalSearchPattern {
 					relativePath, containerPath);
 			if (access != DLTKSearchScope.NOT_ENCLOSED) { // scope encloses
 				// the document path
-				String documentPath = documentPath(scope.getLanguageToolkit(),
-						containerPath, relativePath);
+				String documentPath = documentPath(containerPath, separator,
+						relativePath);
 				if (!requestor.acceptIndexMatch(documentPath, pattern,
 						participant, access))
 					throw new OperationCanceledException();
 			}
 		} else {
-			String documentPath = documentPath(scope.getLanguageToolkit(),
-					containerPath, relativePath);
+			String documentPath = documentPath(containerPath, separator,
+					relativePath);
 			if (scope.encloses(documentPath))
 				if (!requestor.acceptIndexMatch(documentPath, pattern,
 						participant, null))
@@ -71,26 +70,10 @@ public abstract class InternalSearchPattern {
 		return (SearchPattern) this;
 	}
 
-	/**
-	 * @deprecated
-	 */
-	public String documentPath(String containerPath, String relativePath) {
-		String separator = Util.isArchiveFileName(containerPath) ? IDLTKSearchScope.FILE_ENTRY_SEPARATOR
-				: "/"; //$NON-NLS-1$
-		StringBuffer buffer = new StringBuffer(containerPath.length()
-				+ separator.length() + relativePath.length());
-		buffer.append(containerPath);
-		buffer.append(separator);
-		buffer.append(relativePath);
-		return buffer.toString();
-	}
-
-	public String documentPath(IDLTKLanguageToolkit toolkit,
-			String containerPath, String relativePath) {
-		String separator = Util.isArchiveFileName(toolkit, containerPath) ? IDLTKSearchScope.FILE_ENTRY_SEPARATOR
-				: "/"; //$NON-NLS-1$
-		StringBuffer buffer = new StringBuffer(containerPath.length()
-				+ separator.length() + relativePath.length());
+	public String documentPath(String containerPath, char separator,
+			String relativePath) {
+		StringBuffer buffer = new StringBuffer(containerPath.length() + 1
+				+ relativePath.length());
 		buffer.append(containerPath);
 		buffer.append(separator);
 		buffer.append(relativePath);
@@ -117,8 +100,9 @@ public abstract class InternalSearchPattern {
 			if (entries == null)
 				return;
 
-			SearchPattern decodedResult = pattern.getBlankPattern();
-			String containerPath = index.getContainerPath();
+			final SearchPattern decodedResult = pattern.getBlankPattern();
+			final String containerPath = index.getContainerPath();
+			final char separator = index.separator;
 			for (int i = 0, l = entries.length; i < l; i++) {
 				if (monitor != null && monitor.isCanceled())
 					throw new OperationCanceledException();
@@ -129,8 +113,8 @@ public abstract class InternalSearchPattern {
 					// TODO (kent) some clients may not need the document names
 					String[] names = entry.getDocumentNames(index);
 					for (int j = 0, n = names.length; j < n; j++)
-						acceptMatch(names[j], containerPath, decodedResult,
-								requestor, participant, scope);
+						acceptMatch(names[j], containerPath, separator,
+								decodedResult, requestor, participant, scope);
 				}
 			}
 		} finally {

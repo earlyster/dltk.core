@@ -12,6 +12,7 @@ package org.eclipse.dltk.core.search.indexing;
 public interface IIndexConstants {
 
 	/* index encoding */
+	char[] STAMP = "STAMP".toCharArray(); //$NON-NLS-1$
 	char[] REF = "ref".toCharArray(); //$NON-NLS-1$
 	char[] METHOD_REF = "methodRef".toCharArray(); //$NON-NLS-1$
 	char[] CONSTRUCTOR_REF = "constructorRef".toCharArray(); //$NON-NLS-1$

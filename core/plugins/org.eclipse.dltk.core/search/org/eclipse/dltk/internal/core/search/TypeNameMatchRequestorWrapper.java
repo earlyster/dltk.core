@@ -105,8 +105,8 @@ public class TypeNameMatchRequestorWrapper implements
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				type = separatorIndex == -1 ? createTypeFromPath(path,
 						new String(simpleTypeName), enclosingTypeNames)
-						: createTypeFromZip(path, new String(simpleTypeName),
-								enclosingTypeNames);
+						: createTypeFromZip(path, separatorIndex, new String(
+								simpleTypeName), enclosingTypeNames);
 				// if (DLTKCore.DEBUG) {
 				// System.err.println("TO DO: Add types from zips..."); //$NON-NLS-1$
 				// }
@@ -120,18 +120,19 @@ public class TypeNameMatchRequestorWrapper implements
 		}
 	}
 
-	private IType createTypeFromZip(String resourcePath, String simpleTypeName,
-			char[][] enclosingTypeNames) throws ModelException {
+	private IType createTypeFromZip(String resourcePath, int separatorIndex,
+			String simpleTypeName, char[][] enclosingTypeNames)
+			throws ModelException {
 		// path to a class file inside a jar
 		// Optimization: cache package fragment root handle and package handles
-		int separatorIndex = resourcePath
-				.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 		if (this.lastPkgFragmentRootPath == null
 				|| this.lastPkgFragmentRootPath.length() > resourcePath
 						.length()
 				|| !resourcePath.startsWith(this.lastPkgFragmentRootPath)) {
-			IProjectFragment root = ((DLTKSearchScope) this.scope)
-					.projectFragment(resourcePath);
+			final String archivePath = resourcePath
+					.substring(0, separatorIndex);
+			final IProjectFragment root = ((DLTKSearchScope) this.scope)
+					.projectFragment(archivePath);
 			if (root == null)
 				return null;
 			this.lastPkgFragmentRootPath = resourcePath.substring(0,
@@ -158,6 +159,11 @@ public class TypeNameMatchRequestorWrapper implements
 			this.packageHandles.put(pkgName, pkgFragment);
 		}
 		ISourceModule unit = pkgFragment.getSourceModule(simpleNames[length]);
+		if (enclosingTypeNames == IIndexConstants.ONE_ZERO_CHAR) {
+			final TypeFinder finder = new TypeFinder(simpleTypeName);
+			unit.accept(finder);
+			return finder.type;
+		}
 		int etnLength = enclosingTypeNames == null ? 0
 				: enclosingTypeNames.length;
 		String containerTypeName = (etnLength == 0) ? simpleTypeName

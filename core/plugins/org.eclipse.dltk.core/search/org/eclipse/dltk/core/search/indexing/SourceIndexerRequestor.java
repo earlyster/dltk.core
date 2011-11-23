@@ -259,6 +259,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	}
 
 	public void exitModule(int declarationEnd) {
+		indexer.ensureDocumentAdded();
 	}
 
 	/**
