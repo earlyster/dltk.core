@@ -50,6 +50,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
@@ -579,5 +580,14 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 	protected SpellCheckDelegate createSpellCheckDelegate() {
 		return new SpellCheckDelegate();
+	}
+
+	@Override
+	public IQuickAssistAssistant getQuickAssistAssistant(
+			ISourceViewer sourceViewer) {
+		if (getEditor() != null)
+			return new ScriptCorrectionAssistant(getEditor(), fPreferenceStore,
+					getColorManager());
+		return null;
 	}
 }
