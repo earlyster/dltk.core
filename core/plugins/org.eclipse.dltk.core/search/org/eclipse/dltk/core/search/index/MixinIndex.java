@@ -26,7 +26,6 @@ import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.ObjectVector;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -90,17 +89,6 @@ public class MixinIndex extends Index {
 			keyToDocs.put(key, docs);
 		}
 		docs.add(containerRelativePath);
-	}
-
-	public String containerRelativePath(String documentPath) {
-		int index = documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
-		if (index == -1) {
-			index = this.containerPath.length();
-			if (documentPath.length() <= index)
-				throw new IllegalArgumentException(
-						"Document path " + documentPath + " must be relative to " + this.containerPath); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return documentPath.substring(index + 1);
 	}
 
 	public File getIndexFile() {
