@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,8 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.AbstractJob;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
-import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer.Internal;
+import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
@@ -117,7 +116,6 @@ public abstract class IndexRequest extends AbstractJob {
 				log("modules.size=" + modules.size()); //$NON-NLS-1$
 				log("map.size=" + m.size()); //$NON-NLS-1$
 			}
-			Set<IFileHandle> processedFolders = new HashSet<IFileHandle>();
 			for (int i = 0; i < documents.length; ++i) {
 				final String document = documents[i];
 				final ISourceModule module = m.remove(document);
@@ -136,7 +134,7 @@ public abstract class IndexRequest extends AbstractJob {
 										"indexed", true);
 						if (indexed == null) {
 							IFileHandle parent = handle.getParent();
-							if (processedFolders.add(parent)
+							if (parentFolders.add(parent)
 									&& documents.length > 1) {
 								coreCache.updateFolderTimestamps(parent);
 							}
