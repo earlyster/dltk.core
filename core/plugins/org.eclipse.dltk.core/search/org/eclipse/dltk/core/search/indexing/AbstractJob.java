@@ -61,7 +61,7 @@ public abstract class AbstractJob implements IJob {
 				savedName = getName();
 			} catch (Exception e) {
 				savedName = "<Unknown>"; //$NON-NLS-1$
-				Util.log(e, getShortClassName() + " getName() error"); //$NON-NLS-1$
+				Util.log(e, shortClassName + " getName() error"); //$NON-NLS-1$
 			}
 		}
 		return shortClassName + '|' + savedName;
