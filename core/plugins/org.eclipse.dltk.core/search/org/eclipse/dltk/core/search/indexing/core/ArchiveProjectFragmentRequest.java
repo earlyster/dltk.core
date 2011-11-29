@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IExternalSourceModule;
@@ -31,8 +32,11 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
@@ -64,8 +68,16 @@ public class ArchiveProjectFragmentRequest extends IndexRequest {
 		if (index == null) {
 			return;
 		}
+		final IFileHandle archive = EnvironmentPathUtils.getFile(fragment
+				.getPath());
+		if (archive == null) {
+			return;
+		}
+		final String signature = archive.lastModified() + "#"
+				+ archive.length();
 		final IPath containerPath = fragment.getPath();
-		final List<Object> changes = checkChanges(index, modules, containerPath);
+		final List<Object> changes = checkChanges(index, modules,
+				containerPath, signature);
 		if (DEBUG) {
 			log("changes.size=" + changes.size()); //$NON-NLS-1$
 		}
@@ -76,6 +88,8 @@ public class ArchiveProjectFragmentRequest extends IndexRequest {
 		imon.enterWrite();
 		try {
 			index.separator = Index.JAR_SEPARATOR;
+			index.addIndexEntry(IIndexConstants.STAMP, CharOperation.NO_CHAR,
+					SIGNATURE_PREFIX + signature);
 			for (Iterator<Object> i = changes.iterator(); !isCancelled
 					&& i.hasNext();) {
 				final Object change = i.next();
@@ -101,13 +115,14 @@ public class ArchiveProjectFragmentRequest extends IndexRequest {
 		}
 	}
 
+	// TODO (alex) use content cache for it probably
+	private static final String SIGNATURE_PREFIX = "###.LIBRARY.###.SIGNATURE.###";
+
 	protected List<Object> checkChanges(Index index,
-			Collection<ISourceModule> modules, IPath containerPath)
-			throws ModelException, IOException {
+			Collection<ISourceModule> modules, IPath containerPath,
+			String signature) throws ModelException, IOException {
 		final String[] documents = queryDocumentNames(index);
 		if (documents != null && documents.length != 0) {
-			// final long indexLastModified =
-			// index.getIndexFile().lastModified();
 			final List<Object> changes = new ArrayList<Object>();
 			final Map<String, ISourceModule> m = collectSourceModulePaths(
 					modules, containerPath);
@@ -116,15 +131,27 @@ public class ArchiveProjectFragmentRequest extends IndexRequest {
 				log("modules.size=" + modules.size()); //$NON-NLS-1$
 				log("map.size=" + m.size()); //$NON-NLS-1$
 			}
+			boolean signatureOK = false;
+			final List<ISourceModule> updates = new ArrayList<ISourceModule>();
 			for (int i = 0; i < documents.length; ++i) {
 				final String document = documents[i];
-				final ISourceModule module = m.remove(document);
-				if (module == null) {
-					changes.add(document);
+				if (document.startsWith(SIGNATURE_PREFIX)) {
+					signatureOK = document.substring(SIGNATURE_PREFIX.length())
+							.equals(signature);
+					if (!signatureOK) {
+						changes.add(document);
+					}
 				} else {
-					// TODO (alex) compare dates somehow
-					changes.add(module);
+					final ISourceModule module = m.remove(document);
+					if (module == null) {
+						changes.add(document);
+					} else {
+						updates.add(module);
+					}
 				}
+			}
+			if (!signatureOK) {
+				changes.addAll(updates);
 			}
 			if (!m.isEmpty()) {
 				changes.addAll(m.values());
