@@ -2837,26 +2837,6 @@ public class DeltaProcessor {
 				// in its declaring
 				// project)
 				IPath jarPath = root.getPath();
-				BuildpathEntry buildpathEntry;
-				char[][] fullInclusionPatternChars = null;
-				char[][] fullExclusionPatternChars = null;
-				try {
-					if (root instanceof ProjectFragment) {
-						buildpathEntry = (BuildpathEntry) ((ProjectFragment) root)
-								.getBuildpathEntry();
-					} else {
-						buildpathEntry = (BuildpathEntry) root
-								.getRawBuildpathEntry();
-					}
-					fullInclusionPatternChars = buildpathEntry
-							.fullInclusionPatternChars();
-					fullExclusionPatternChars = buildpathEntry
-							.fullExclusionPatternChars();
-				} catch (ModelException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
 				final IScriptProject scriptProject = root.getScriptProject();
 				switch (delta.getKind()) {
 				case IResourceDelta.ADDED:
