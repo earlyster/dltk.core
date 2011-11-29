@@ -55,9 +55,18 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 			final IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
 				if (!path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
-					final IndexRequest request = new ExternalProjectFragmentRequest(
-							this, fragment,
-							DLTKLanguageManager.getLanguageToolkit(fragment));
+					final IndexRequest request;
+					if (fragment.isArchive()) {
+						request = new ArchiveProjectFragmentRequest(this,
+								fragment,
+								DLTKLanguageManager
+										.getLanguageToolkit(fragment));
+					} else {
+						request = new ExternalProjectFragmentRequest(this,
+								fragment,
+								DLTKLanguageManager
+										.getLanguageToolkit(fragment));
+					}
 					requestIfNotWaiting(request);
 				}
 			} else {
@@ -88,9 +97,17 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 			requestIfNotWaiting(new ProjectRequest(this, project));
 			return;
 		}
-		requestIfNotWaiting(new ExternalProjectFragmentRequest(this,
-				fragmentToIndex,
-				DLTKLanguageManager.getLanguageToolkit(project)));
+		final IndexRequest indexRequest;
+		if (fragmentToIndex.isArchive()) {
+			indexRequest = new ArchiveProjectFragmentRequest(this,
+					fragmentToIndex,
+					DLTKLanguageManager.getLanguageToolkit(project));
+		} else {
+			indexRequest = new ExternalProjectFragmentRequest(this,
+					fragmentToIndex,
+					DLTKLanguageManager.getLanguageToolkit(project));
+		}
+		requestIfNotWaiting(indexRequest);
 	}
 
 	public void indexSourceModule(ISourceModule module,
