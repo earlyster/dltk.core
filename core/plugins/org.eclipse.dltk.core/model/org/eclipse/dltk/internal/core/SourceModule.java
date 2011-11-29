@@ -14,7 +14,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -29,18 +28,11 @@ import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class SourceModule extends AbstractSourceModule implements ISourceModule {
-	private static int nextId = 1;
-
-	private final int id = nextId++;
 
 	// ~ Constructors
 
 	public SourceModule(ModelElement parent, String name, WorkingCopyOwner owner) {
 		super(parent, name, owner);
-
-		if (DLTKCore.VERBOSE) {
-			System.out.println("SourceModule.SourceModule#" + id + "()"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 	}
 
 	// ~ Methods
