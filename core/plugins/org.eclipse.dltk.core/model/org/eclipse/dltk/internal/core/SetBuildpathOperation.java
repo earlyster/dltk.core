@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -180,14 +179,14 @@ public class SetBuildpathOperation extends ModelOperation {
 	 * Recursively adds all subfolders of <code>folder</code> to the given
 	 * collection.
 	 */
-	protected void collectAllSubfolders(IFolder folder, ArrayList collection)
-			throws ModelException {
+	protected void collectAllSubfolders(IFolder folder,
+			ArrayList<IFolder> collection) throws ModelException {
 		try {
 			IResource[] members = folder.members();
 			for (int i = 0, max = members.length; i < max; i++) {
 				IResource r = members[i];
 				if (r.getType() == IResource.FOLDER) {
-					collection.add(r);
+					collection.add((IFolder) r);
 					this.collectAllSubfolders((IFolder) r, collection);
 				}
 			}
@@ -201,9 +200,9 @@ public class SetBuildpathOperation extends ModelOperation {
 	 * the result of changing the output location to/from the given location.
 	 * The collection is empty if no package fragments are affected.
 	 */
-	protected ArrayList determineAffectedScriptFolders(IPath location)
-			throws ModelException {
-		ArrayList fragments = new ArrayList();
+	protected ArrayList<IScriptFolder> determineAffectedScriptFolders(
+			IPath location) throws ModelException {
+		ArrayList<IScriptFolder> fragments = new ArrayList<IScriptFolder>();
 
 		// see if this will cause any package fragments to be affected
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -223,16 +222,14 @@ public class SetBuildpathOperation extends ModelOperation {
 						&& path.isPrefixOf(location) && !path.equals(location)) {
 					IProjectFragment[] roots = this.project
 							.computeProjectFragments(buildpath[i]);
-					IProjectFragment root = (IProjectFragment) roots[0];
+					IProjectFragment root = roots[0];
 					// now the output location becomes a package fragment -
 					// along with any subfolders
-					ArrayList folders = new ArrayList();
+					ArrayList<IFolder> folders = new ArrayList<IFolder>();
 					folders.add(folder);
 					this.collectAllSubfolders(folder, folders);
-					Iterator elements = folders.iterator();
 					int segments = path.segmentCount();
-					while (elements.hasNext()) {
-						IFolder f = (IFolder) elements.next();
+					for (IFolder f : folders) {
 						IPath relativePath = f.getFullPath()
 								.removeFirstSegments(segments);
 						IScriptFolder pkg = root.getScriptFolder(relativePath);
@@ -286,9 +283,8 @@ public class SetBuildpathOperation extends ModelOperation {
 					this.project.getProject().touch(this.progressMonitor);
 				} catch (CoreException e) {
 					if (ModelManager.BP_RESOLVE_VERBOSE) {
-						Util
-								.verbose(
-										"CPContainer INIT - FAILED to touch project: " + this.project.getElementName(), System.err); //$NON-NLS-1$
+						Util.verbose(
+								"CPContainer INIT - FAILED to touch project: " + this.project.getElementName(), System.err); //$NON-NLS-1$
 						e.printStackTrace();
 					}
 				}
@@ -324,7 +320,7 @@ public class SetBuildpathOperation extends ModelOperation {
 		int newLength = this.newResolvedPath.length;
 
 		final IndexManager indexManager = manager.getIndexManager();
-		Map oldRoots = null;
+		Map<IPath, IProjectFragment> oldRoots = null;
 		IProjectFragment[] roots = null;
 		if (this.project.isOpen()) {
 			try {
@@ -339,7 +335,7 @@ public class SetBuildpathOperation extends ModelOperation {
 			}
 		}
 		if (roots != null) {
-			oldRoots = new HashMap();
+			oldRoots = new HashMap<IPath, IProjectFragment>();
 			for (int i = 0; i < roots.length; i++) {
 				IProjectFragment root = roots[i];
 				oldRoots.put(root.getPath(), root);
@@ -359,7 +355,7 @@ public class SetBuildpathOperation extends ModelOperation {
 
 				IProjectFragment[] pkgFragmentRoots = null;
 				if (oldRoots != null) {
-					IProjectFragment oldRoot = (IProjectFragment) oldRoots
+					IProjectFragment oldRoot = oldRoots
 							.get(this.oldResolvedPath[i].getPath());
 					if (oldRoot != null) { // use old root if any (could be
 						// none if entry wasn't bound)
@@ -546,10 +542,6 @@ public class SetBuildpathOperation extends ModelOperation {
 						break;
 					case IBuildpathEntry.BPE_SOURCE:
 						final IPath path = entry.getPath();
-						final char[][] inclusionPatterns = (entry)
-								.fullInclusionPatternChars();
-						final char[][] exclusionPatterns = (entry)
-								.fullExclusionPatternChars();
 						this.postAction(new IPostAction() {
 							public String getID() {
 								return path.toString();
@@ -570,7 +562,7 @@ public class SetBuildpathOperation extends ModelOperation {
 				hasDelta = true;
 
 			} // buildpath reordering has already been generated in previous
-			// loop
+				// loop
 		}
 
 		if (hasDelta) {
@@ -579,9 +571,7 @@ public class SetBuildpathOperation extends ModelOperation {
 			this.identicalRoots = true;
 		}
 		if (needToUpdateDependents) {
-			this
-					.updateAffectedProjects(this.project.getProject()
-							.getFullPath());
+			this.updateAffectedProjects(this.project.getProject().getFullPath());
 		}
 	}
 
@@ -639,8 +629,9 @@ public class SetBuildpathOperation extends ModelOperation {
 
 	private void updateBuildpath() throws ModelException {
 
-		this.beginTask(Messages.bind(Messages.buildpath_settingProgress,
-				this.project.getElementName()), 2);
+		this.beginTask(
+				Messages.bind(Messages.buildpath_settingProgress,
+						this.project.getElementName()), 2);
 
 		// SIDE-EFFECT: from thereon, the buildpath got modified
 		this.project.getPerProjectInfo().updateBuildpathInformation(
@@ -657,9 +648,7 @@ public class SetBuildpathOperation extends ModelOperation {
 			this.generateBuildpathChangeDeltas();
 		} else {
 			this.needCycleCheck = true;
-			this
-					.updateAffectedProjects(this.project.getProject()
-							.getFullPath());
+			this.updateAffectedProjects(this.project.getProject().getFullPath());
 		}
 
 		this.updateCycleMarkersIfNecessary();
