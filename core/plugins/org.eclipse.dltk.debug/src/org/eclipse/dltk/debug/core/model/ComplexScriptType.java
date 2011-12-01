@@ -8,7 +8,6 @@
  *
  * Contributors:
  *     xored software, Inc. - initial API and Implementation
- *     jdesgats@sierrawireless.com - fix for Bug 352826 
  *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
