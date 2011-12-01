@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ *			sbernard@sierrawireless.com - fix for Bug 361231 - Bad Memento serialization with external Zip projet fragment 
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
@@ -30,6 +30,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -296,6 +297,18 @@ public class ArchiveProjectFragment extends ProjectFragment {
 	}
 
 	public String getElementName() {
+		if (isExternal()) {
+			IEnvironment env = EnvironmentManager.getEnvironment(this);
+			if (env == null) {
+				env = EnvironmentPathUtils.getPathEnvironment(this.zipPath);
+			}
+			String pathString = EnvironmentPathUtils
+					.getLocalPathString(this.zipPath);
+			if (env != null && pathString != null) {
+				return pathString.replace(env.getSeparatorChar(),
+						JEM_SKIP_DELIMETER);
+			}
+		}
 		return this.zipPath.lastSegment();
 	}
 
