@@ -1,6 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2007-2011 xored software, Inc.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     jdesgats@sierrawireless.com - fix for Bug 352826 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IIndexedValue;
 import org.eclipse.debug.core.model.IVariable;
 
 public class CollectionScriptType extends AtomicScriptType {
@@ -44,7 +57,15 @@ public class CollectionScriptType extends AtomicScriptType {
 		sb.append(getName());
 
 		try {
-			sb.append("[" + value.getVariables().length + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+			int size;
+			if (value instanceof IIndexedValue) {
+				// getting size directly can be munch faster when available
+				size = ((IIndexedValue) value).getSize();
+			} else {
+				size = value.getVariables().length;
+			}
+
+			sb.append("[" + size + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (DebugException e) {
 			sb.append("[]"); //$NON-NLS-1$
 		}
