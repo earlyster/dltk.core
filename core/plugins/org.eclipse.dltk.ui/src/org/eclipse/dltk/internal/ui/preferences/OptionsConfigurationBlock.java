@@ -2,18 +2,21 @@ package org.eclipse.dltk.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.preferences.IPreferenceChangeRebuildPrompt;
@@ -48,16 +51,19 @@ public abstract class OptionsConfigurationBlock {
 
 	private final IStatusChangeListener fContext;
 	protected final IProject fProject; // project or null
-	protected final PreferenceKey[] fAllKeys;
+	private PreferenceKey[] fAllKeys;
 
-	private IScopeContext[] fLookupOrder;
+	private final IScopeContext[] fLookupOrder;
 
 	private Shell fShell;
 
 	private final IWorkingCopyManager fManager;
-	private IWorkbenchPreferenceContainer fContainer;
+	private final IWorkbenchPreferenceContainer fContainer;
+	private boolean fInitialized;
 
-	// null when project specific settings are turned off
+	/**
+	 * null when project specific settings are turned off
+	 */
 	private Map<PreferenceKey, String> fDisabledProjectSettings;
 
 	// used to prevent multiple dialogs that ask for a rebuild
@@ -85,18 +91,34 @@ public abstract class OptionsConfigurationBlock {
 		}
 
 		testIfOptionsComplete(allKeys);
+
+		fRebuildCount = getRebuildCount();
+	}
+
+	protected void initializeProjectSettings() {
+		if (fInitialized) {
+			return;
+		}
+		fInitialized = true;
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings = null;
 		} else {
 			fDisabledProjectSettings = new HashMap<PreferenceKey, String>();
-			for (int i = 0; i < allKeys.length; i++) {
-				PreferenceKey curr = allKeys[i];
+			for (PreferenceKey curr : getPreferenceKeys()) {
 				fDisabledProjectSettings.put(curr,
 						curr.getStoredValue(fLookupOrder, false, fManager));
 			}
 		}
+	}
 
-		fRebuildCount = getRebuildCount();
+	protected void addKeys(List<PreferenceKey> keys) {
+		Assert.isLegal(!fInitialized);
+		final Set<PreferenceKey> all = new LinkedHashSet<PreferenceKey>();
+		Collections.addAll(all, fAllKeys);
+		all.addAll(keys);
+		if (all.size() != fAllKeys.length) {
+			fAllKeys = all.toArray(new PreferenceKey[all.size()]);
+		}
 	}
 
 	protected final IWorkbenchPreferenceContainer getPreferenceContainer() {
@@ -203,38 +225,28 @@ public abstract class OptionsConfigurationBlock {
 				&& fDisabledProjectSettings == null;
 		boolean needsBuild = false;
 
-		/*
-		 * XXX: need to rework this once there are options this affects - this
-		 * can cause an illegal state exception - probably due to the fact that
-		 * key binding is different from the jdt implementation
-		 */
 		PreferenceKey[] allKeys = getPreferenceKeys();
 		for (int i = 0; i < allKeys.length; i++) {
-			try {
-				PreferenceKey key = allKeys[i];
-				String oldVal = key.getStoredValue(currContext, null);
-				String val = key.getStoredValue(currContext, fManager);
-				if (val == null) {
-					if (oldVal != null) {
-						changedSettings.add(key);
-						needsBuild |= !oldVal.equals(key.getStoredValue(
-								fLookupOrder, true, fManager));
-					} else if (completeSettings) {
-						key.setStoredValue(currContext, key.getStoredValue(
-								fLookupOrder, true, fManager), fManager);
-						changedSettings.add(key);
-						// no build needed
-					}
-				} else if (!val.equals(oldVal)) {
+			PreferenceKey key = allKeys[i];
+			String oldVal = key.getStoredValue(currContext, null);
+			String val = key.getStoredValue(currContext, fManager);
+			if (val == null) {
+				if (oldVal != null) {
 					changedSettings.add(key);
-					needsBuild |= oldVal != null
-							|| !val.equals(key.getStoredValue(fLookupOrder,
-									true, fManager));
+					needsBuild |= !oldVal.equals(key.getStoredValue(
+							fLookupOrder, true, fManager));
+				} else if (completeSettings) {
+					key.setStoredValue(currContext,
+							key.getStoredValue(fLookupOrder, true, fManager),
+							fManager);
+					changedSettings.add(key);
+					// no build needed
 				}
-			} catch (IllegalStateException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+			} else if (!val.equals(oldVal)) {
+				changedSettings.add(key);
+				needsBuild |= oldVal != null
+						|| !val.equals(key.getStoredValue(fLookupOrder, true,
+								fManager));
 			}
 		}
 		return needsBuild;

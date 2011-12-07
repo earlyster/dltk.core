@@ -23,7 +23,7 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		implements IPreferenceDelegate {
 
-	private List<PreferenceKey> keys = new ArrayList<PreferenceKey>();
+	private final List<PreferenceKey> keys = new ArrayList<PreferenceKey>();
 
 	private ControlBindingManager bindManager;
 
@@ -44,6 +44,11 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	}
 
 	protected void initialize() {
+		if (!keys.isEmpty()) {
+			addKeys(keys);
+			keys.clear();
+		}
+		initializeProjectSettings();
 		bindManager.initialize();
 	}
 
@@ -78,24 +83,6 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 			String[] itemValues) {
 		bindManager.bindControl(combo, key, itemValues);
 		keys.add(key);
-	}
-
-	@Override
-	protected PreferenceKey[] getPreferenceKeys() {
-		PreferenceKey[] prefKeys = super.getPreferenceKeys();
-		// keys != null shouldnt happen but this can be called from the
-		// constructor, needs to be refactored a bit.
-		if (keys != null && keys.size() > 0) {
-			PreferenceKey[] allKeys = new PreferenceKey[prefKeys.length
-					+ keys.size()];
-			System.arraycopy(prefKeys, 0, allKeys, 0, prefKeys.length);
-			int counter = prefKeys.length;
-			for (PreferenceKey preferenceKey : keys) {
-				allKeys[counter++] = preferenceKey;
-			}
-			prefKeys = allKeys;
-		}
-		return prefKeys;
 	}
 
 	/**
