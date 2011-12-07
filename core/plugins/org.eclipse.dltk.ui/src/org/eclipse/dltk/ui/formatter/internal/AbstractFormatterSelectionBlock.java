@@ -14,6 +14,7 @@ package org.eclipse.dltk.ui.formatter.internal;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -235,10 +236,11 @@ public abstract class AbstractFormatterSelectionBlock extends
 			factories.add(factory);
 			final PreferenceKey[] keys = factory.getPreferenceKeys();
 			if (keys != null) {
-				for (int j = 0; j < keys.length; ++j) {
-					final PreferenceKey prefKey = keys[j];
-					result.add(prefKey);
-				}
+				Collections.addAll(result, keys);
+			}
+			final PreferenceKey profile = factory.getActiveProfileKey();
+			if (profile != null) {
+				result.add(profile);
 			}
 		}
 		return result.toArray(new PreferenceKey[result.size()]);
@@ -248,6 +250,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 
 	@Override
 	public final Control createOptionsBlock(Composite parent) {
+		initializeProjectSettings();
 		return createSelectorBlock(parent);
 	}
 
