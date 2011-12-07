@@ -12,6 +12,7 @@ package org.eclipse.dltk.compiler.problem;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.IScriptProject;
 
 /*
  * Factory used from inside the compiler to build the actual problems
@@ -53,5 +54,15 @@ public interface IProblemFactory {
 	 * @return
 	 */
 	boolean isValidMarker(IMarker marker);
+
+	/**
+	 * Returns new instance of the {@link IProblemSeverityTranslator} to be used
+	 * for the specified project.
+	 * 
+	 * @param project
+	 * @return
+	 * @since 4.0
+	 */
+	IProblemSeverityTranslator createSeverityTranslator(IScriptProject project);
 
 }

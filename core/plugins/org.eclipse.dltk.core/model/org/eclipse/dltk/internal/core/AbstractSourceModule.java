@@ -466,7 +466,8 @@ public abstract class AbstractSourceModule extends Openable implements
 					&& (ExternalScriptProject.EXTERNAL_PROJECT_NAME
 							.equals(project.getProject().getName()) || ScriptProject
 							.hasScriptNature(project.getProject()))) {
-				return new AccumulatingProblemReporter(perWorkingCopyInfo);
+				return new AccumulatingProblemReporter(this,
+						perWorkingCopyInfo);
 			}
 		}
 		return null;

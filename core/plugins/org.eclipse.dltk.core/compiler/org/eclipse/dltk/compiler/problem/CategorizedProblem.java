@@ -131,4 +131,8 @@ public abstract class CategorizedProblem implements IProblem {
 	public Object[] getExtraMarkerAttributeValues() {
 		return DefaultProblem.EMPTY_VALUES;
 	}
+
+	public ProblemSeverity getSeverity() {
+		return null;
+	}
 }

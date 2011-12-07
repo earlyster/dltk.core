@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IScriptProject;
 
 public class DefaultProblemFactory implements IProblemFactory {
 
@@ -64,5 +65,10 @@ public class DefaultProblemFactory implements IProblemFactory {
 	 */
 	protected boolean isValidMarkerType(String markerType) {
 		return markerType.startsWith(DefaultProblem.MARKER_TYPE_PREFIX);
+	}
+
+	public IProblemSeverityTranslator createSeverityTranslator(
+			IScriptProject project) {
+		return IProblemSeverityTranslator.IDENTITY;
 	}
 }

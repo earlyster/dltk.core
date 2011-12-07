@@ -146,6 +146,10 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			return priority;
 		}
 
+		public void setSeverity(ProblemSeverity severity) {
+			// unsupported
+		}
+
 		public boolean isError() {
 			return false;
 		}
@@ -220,7 +224,28 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	 */
 	public void createMarkers(IResource resource, IProblemFactory problemFactory)
 			throws CoreException {
+		createMarkers(resource, problemFactory,
+				IProblemSeverityTranslator.IDENTITY);
+	}
+
+	/**
+	 * @param resource
+	 * @param problemFactory
+	 * @param translator
+	 * @throws CoreException
+	 * @since 4.0
+	 */
+	public void createMarkers(IResource resource,
+			IProblemFactory problemFactory,
+			IProblemSeverityTranslator translator) throws CoreException {
 		for (final IProblem problem : problems) {
+			ProblemSeverity severity = problem.getSeverity();
+			if (!problem.isTask()) {
+				severity = translator.getSeverity(problem.getID(), severity);
+				if (severity == null || severity == ProblemSeverity.IGNORE) {
+					continue;
+				}
+			}
 			final IMarker m = problemFactory.createMarker(resource, problem);
 			if (problem.getSourceLineNumber() >= 0) {
 				m.setAttribute(IMarker.LINE_NUMBER,
@@ -234,13 +259,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 				m.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
 			}
 			if (!problem.isTask()) {
-				int severity = IMarker.SEVERITY_INFO;
-				if (problem.isError()) {
-					severity = IMarker.SEVERITY_ERROR;
-				} else if (problem.isWarning()) {
-					severity = IMarker.SEVERITY_WARNING;
-				}
-				m.setAttribute(IMarker.SEVERITY, severity);
+				m.setAttribute(IMarker.SEVERITY, severity.value);
 			} else {
 				m.setAttribute(IMarker.USER_EDITABLE, Boolean.FALSE);
 				if (problem instanceof TaskInfo) {

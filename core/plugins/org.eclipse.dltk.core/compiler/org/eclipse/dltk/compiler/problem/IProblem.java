@@ -85,6 +85,10 @@ public interface IProblem {
 	 */
 	int getSourceStart();
 
+	ProblemSeverity getSeverity();
+
+	void setSeverity(ProblemSeverity severity);
+
 	/**
 	 * Checks the severity to see if the Error bit is set.
 	 * 

@@ -11,6 +11,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import org.eclipse.core.resources.IMarker;
+
 public enum ProblemSeverity {
-	IGNORE, INFO, WARNING, ERROR
+	DEFAULT(-1), IGNORE(-1), INFO(IMarker.SEVERITY_INFO), WARNING(
+			IMarker.SEVERITY_WARNING), ERROR(IMarker.SEVERITY_ERROR);
+
+	public final int value;
+
+	private ProblemSeverity(int value) {
+		this.value = value;
+	}
 }

@@ -76,8 +76,8 @@ public class DefaultProblem extends CategorizedProblem {
 	public DefaultProblem(String message, int id, String[] stringArguments,
 			ProblemSeverity severity, int startPosition, int endPosition,
 			int line) {
-		this(NONAME, message, DefaultProblemIdentifier.decode(id), stringArguments, severity,
-				startPosition, endPosition, line, 0);
+		this(NONAME, message, DefaultProblemIdentifier.decode(id),
+				stringArguments, severity, startPosition, endPosition, line, 0);
 	}
 
 	public DefaultProblem(String message, IProblemIdentifier id,
@@ -296,6 +296,15 @@ public class DefaultProblem extends CategorizedProblem {
 	 */
 	public int getSourceStart() {
 		return this.startPosition;
+	}
+
+	@Override
+	public ProblemSeverity getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(ProblemSeverity severity) {
+		this.severity = severity;
 	}
 
 	/*

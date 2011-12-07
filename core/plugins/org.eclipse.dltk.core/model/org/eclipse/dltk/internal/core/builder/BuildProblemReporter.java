@@ -18,6 +18,7 @@ import org.eclipse.dltk.compiler.problem.IProblemCategory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifierExtension3;
+import org.eclipse.dltk.compiler.problem.IProblemSeverityTranslator;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKCore;
 
@@ -36,13 +37,13 @@ public class BuildProblemReporter extends ProblemCollector {
 		this.resource = resource;
 	}
 
-	public void flush() {
+	public void flush(IProblemSeverityTranslator severityProvider) {
 		try {
 			if (!oldMarkersDeleted) {
 				oldMarkersDeleted = true;
 				problemFactory.deleteMarkers(resource);
 			}
-			createMarkers(resource, problemFactory);
+			createMarkers(resource, problemFactory, severityProvider);
 			problems.clear();
 		} catch (CoreException e) {
 			DLTKCore.error(Messages.BuildProblemReporter_errorUpdatingMarkers,

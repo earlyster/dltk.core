@@ -80,7 +80,7 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			ProjectIndexerManager.reconciled(workingCopy);
 		} else if (forceProblemDetection && problemRequestor.isActive()) {
 			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(
-					problemRequestor);
+					workingCopy, problemRequestor);
 			final IModuleDeclaration moduleDeclaration = SourceParserUtil
 					.parse(workingCopy, reporter);
 			// TODO put it to the context

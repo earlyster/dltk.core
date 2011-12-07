@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.compiler.problem.IProblemSeverityTranslator;
 import org.eclipse.dltk.compiler.problem.ProblemCategory;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
@@ -340,13 +341,15 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			endBuildNeeded = false;
 		}
 		if (reporters != null) {
+			final IProblemSeverityTranslator severityTranslator = problemFactory
+					.createSeverityTranslator(project);
 			for (IProblemReporter reporter : reporters) {
 				final BuildProblemReporter buildReporter = (BuildProblemReporter) reporter;
 				if (buildReporter.hasCategory(ProblemCategory.IMPORT)) {
 					state.recordImportProblem(buildReporter.resource
 							.getFullPath());
 				}
-				buildReporter.flush();
+				buildReporter.flush(severityTranslator);
 			}
 			reporters = null;
 		}
