@@ -613,7 +613,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	}
 
 	public void deleteProject(String projectName) throws CoreException {
-		IProject project = this.getProject(projectName);
+		IProject project = getProject(projectName);
 		if (project.exists() && !project.isOpen()) { // force opening so that
 			// project can be
 			// deleted without
