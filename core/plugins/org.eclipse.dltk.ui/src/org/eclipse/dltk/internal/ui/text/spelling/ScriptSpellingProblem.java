@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.ui.text.spelling;
 
 import org.eclipse.dltk.compiler.problem.CategorizedProblem;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
+import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -166,6 +167,10 @@ public class ScriptSpellingProblem extends CategorizedProblem {
 	 */
 	public int getSourceStart() {
 		return fSourceStart;
+	}
+
+	public void setSeverity(ProblemSeverity severity) {
+		// unsupported
 	}
 
 	/*
