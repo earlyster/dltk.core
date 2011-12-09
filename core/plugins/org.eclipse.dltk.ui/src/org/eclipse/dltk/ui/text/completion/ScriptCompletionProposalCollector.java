@@ -10,8 +10,10 @@
 package org.eclipse.dltk.ui.text.completion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -843,4 +845,27 @@ public abstract class ScriptCompletionProposalCollector extends
 	public IScriptProject getScriptProject() {
 		return fScriptProject;
 	}
+
+	private Map<Object, Object> attributes = null;
+
+	public Object getAttribute(Object key) {
+		if (attributes != null) {
+			return attributes.get(key);
+		}
+		return null;
+	}
+
+	public void setAttribute(Object key, Object value) {
+		if (value == null) {
+			if (attributes != null) {
+				attributes.remove(value);
+			}
+		} else {
+			if (attributes == null) {
+				attributes = new HashMap<Object, Object>();
+			}
+			attributes.put(key, value);
+		}
+	}
+
 }
