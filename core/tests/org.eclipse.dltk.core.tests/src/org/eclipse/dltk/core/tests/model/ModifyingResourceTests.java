@@ -116,7 +116,7 @@ public class ModifyingResourceTests extends AbstractModelTests {
 	}
 
 	protected void renameProject(String project, String newName) throws CoreException {
-		this.getProject(project).move(new Path(newName), true, null);
+		getProject(project).move(new Path(newName), true, null);
 	}
 
 	protected ISourceModule getSourceModule(String path) {
@@ -135,7 +135,7 @@ public class ModifyingResourceTests extends AbstractModelTests {
 			}
 			return (IScriptFolder) element;
 		}
-		IProject project = this.getProject(path);
+		IProject project = getProject(path);
 		return DLTKCore.create(project).getProjectFragment(project).getScriptFolder(new Path(""));
 	}
 
@@ -146,7 +146,7 @@ public class ModifyingResourceTests extends AbstractModelTests {
 			}
 			return (IProjectFragment) DLTKCore.create(this.getFolder(path));
 		}
-		IProject project = this.getProject(path);
+		IProject project = getProject(path);
 		return DLTKCore.create(project).getProjectFragment(project);
 	}
 
