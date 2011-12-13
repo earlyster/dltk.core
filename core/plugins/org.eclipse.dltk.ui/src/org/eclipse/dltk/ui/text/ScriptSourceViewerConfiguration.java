@@ -588,6 +588,6 @@ public abstract class ScriptSourceViewerConfiguration extends
 		if (getEditor() != null)
 			return new ScriptCorrectionAssistant(getEditor(), fPreferenceStore,
 					getColorManager());
-		return null;
+		return super.getQuickAssistAssistant(sourceViewer);
 	}
 }

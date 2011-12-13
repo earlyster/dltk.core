@@ -10,6 +10,7 @@ import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
+import org.eclipse.ui.texteditor.spelling.SpellingCorrectionProcessor;
 
 public class ScriptCorrectionProcessor implements IQuickAssistProcessor {
 	private final ScriptCorrectionAssistant fAssistant;
@@ -61,6 +62,13 @@ public class ScriptCorrectionProcessor implements IQuickAssistProcessor {
 				}
 			}
 
+		}
+		if (context.getProposals() == null) {
+			SpellingCorrectionProcessor scp = new SpellingCorrectionProcessor();
+			for (ICompletionProposal proposal : scp
+					.computeQuickAssistProposals(invocationContext)) {
+				context.addProposal(proposal);
+			}
 		}
 		return context.getProposals();
 	}
