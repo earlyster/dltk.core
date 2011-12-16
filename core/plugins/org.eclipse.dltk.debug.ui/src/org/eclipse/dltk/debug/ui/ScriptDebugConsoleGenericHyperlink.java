@@ -92,8 +92,8 @@ public abstract class ScriptDebugConsoleGenericHyperlink implements IHyperlink {
 					IDocument document = provider.getDocument(input);
 					try {
 						IRegion line = document.getLineInformation(lineNumber);
-						textEditor.selectAndReveal(line.getOffset(), line
-								.getLength());
+						textEditor.selectAndReveal(line.getOffset(),
+								line.getLength());
 					} catch (BadLocationException e) {
 
 					}
@@ -117,18 +117,9 @@ public abstract class ScriptDebugConsoleGenericHyperlink implements IHyperlink {
 		}
 	}
 
-	public IEditorInput getEditorInput(Object item) {
-		try {
-			return EditorUtility.getEditorInput(item);
-		} catch (CoreException e) {
-// DLTKDebugUIPlugin.log(e);
-			return null;
-		}
-	}
-
 	protected Object getSourceModule(String fileName) throws CoreException {
-		IFile f = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
-				new Path(fileName));
+		IFile f = ResourcesPlugin.getWorkspace().getRoot()
+				.getFileForLocation(new Path(fileName));
 		return f;
 	}
 }
