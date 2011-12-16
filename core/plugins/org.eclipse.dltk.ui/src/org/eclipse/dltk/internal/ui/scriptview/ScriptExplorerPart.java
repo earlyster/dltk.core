@@ -1295,16 +1295,8 @@ public class ScriptExplorerPart extends ViewPart implements
 			return false;
 		}
 
-		IEditorInput selectionAsInput;
-		try {
-			selectionAsInput = EditorUtility.getEditorInput(selection
-					.getFirstElement());
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-			return false;
-		}
+		IEditorInput selectionAsInput = EditorUtility.getEditorInput(selection
+				.getFirstElement());
 		return input.equals(selectionAsInput);
 	}
 

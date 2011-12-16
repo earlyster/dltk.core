@@ -227,8 +227,7 @@ public class EditorUtility {
 		return null;
 	}
 
-	private static IEditorInput getEditorInput(IModelElement element)
-			throws ModelException {
+	private static IEditorInput getEditorInput(IModelElement element) {
 		while (element != null) {
 			if (element instanceof IExternalSourceModule) {
 				ISourceModule unit = ((ISourceModule) element).getPrimary();
@@ -247,8 +246,7 @@ public class EditorUtility {
 		return null;
 	}
 
-	public static IEditorInput getEditorInput(Object input)
-			throws ModelException {
+	public static IEditorInput getEditorInput(Object input) {
 		if (input instanceof IModelElement)
 			return getEditorInput((IModelElement) input);
 		if (input instanceof IFile)
@@ -463,13 +461,7 @@ public class EditorUtility {
 	 *         editor
 	 */
 	public static IEditorPart isOpenInEditor(Object inputElement) {
-		IEditorInput input = null;
-
-		try {
-			input = getEditorInput(inputElement);
-		} catch (ModelException x) {
-			DLTKUIPlugin.log(x.getStatus());
-		}
+		IEditorInput input = getEditorInput(inputElement);
 
 		if (input != null) {
 			IWorkbenchPage p = DLTKUIPlugin.getActivePage();
@@ -728,8 +720,7 @@ public class EditorUtility {
 						}
 					}
 
-					return regions.toArray(new IRegion[regions
-							.size()]);
+					return regions.toArray(new IRegion[regions.size()]);
 				}
 			});
 		} finally {

@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -61,14 +59,8 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			for (Iterator iter = structuredSelection.iterator(); iter.hasNext();) {
 				Object element = iter.next();
-				IEditorInput editorInput = null;
-				try {
-					editorInput = EditorUtility.getEditorInput(element);
-				} catch (ModelException e1) {
-					if (DLTKCore.DEBUG) {
-						e1.printStackTrace();
-					}
-				}
+				IEditorInput editorInput = EditorUtility
+						.getEditorInput(element);
 				if (editorInput != null && editorInput.getPersistable() != null) {
 					String editorId = EditorUtility.getEditorID(editorInput,
 							element);
