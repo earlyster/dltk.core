@@ -118,15 +118,6 @@ public abstract class ExternalCheckerGenericHyperlink implements IHyperlink {
 		}
 	}
 
-	public IEditorInput getEditorInput(Object item) {
-		try {
-			return EditorUtility.getEditorInput(item);
-		} catch (CoreException e) {
-// DLTKDebugUIPlugin.log(e);
-			return null;
-		}
-	}
-
 	protected Object getSourceModule(String fileName) throws CoreException {
 		IFile f = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
 				new Path(fileName));
