@@ -19,27 +19,27 @@ import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.utils.CorePrinter;
 
 public class Block extends Expression {
-	private List statements;
+	private List<ASTNode> statements;
 
 	public Block() {
-		this.statements = new ArrayList();
+		this.statements = new ArrayList<ASTNode>();
 	}
 
 	public Block(int start, int end) {
 		this(start, end, null);
 	}
 	
-	public Block(int start, int end, List statems) {
+	public Block(int start, int end, List<ASTNode> statems) {
 		super(start, end);
-		this.statements = statems != null ? new ArrayList(statems)
-				: new ArrayList();
+		this.statements = statems != null ? new ArrayList<ASTNode>(statems)
+				: new ArrayList<ASTNode>();
 	}
 
 	public void traverse(ASTVisitor visitor) throws Exception {
 		if (visitor.visit(this)) {
-			Iterator it = statements.iterator();
+			Iterator<ASTNode> it = statements.iterator();
 			while (it.hasNext()) {
-				ASTNode node = (ASTNode) it.next();
+				ASTNode node = it.next();
 				node.traverse(visitor);
 			}
 			visitor.endvisit(this);
@@ -50,7 +50,7 @@ public class Block extends Expression {
 		return S_BLOCK;
 	}
 
-	public void acceptStatements(List statems) {
+	public void acceptStatements(List<ASTNode> statems) {
 		if (statems == null) {
 			throw new IllegalArgumentException();
 		}
@@ -58,7 +58,7 @@ public class Block extends Expression {
 		statements.addAll(statems);
 	}
 
-	public List getStatements() {
+	public List<ASTNode> getStatements() {
 		return statements;
 	}
 
@@ -72,9 +72,9 @@ public class Block extends Expression {
 
 	public void printNode(CorePrinter output) {
 		output.indent();
-		Iterator it = statements.iterator();
+		Iterator<ASTNode> it = statements.iterator();
 		while (it.hasNext()) {
-			((ASTNode) it.next()).printNode(output);
+			it.next().printNode(output);
 			output.formatPrint(""); //$NON-NLS-1$
 		}
 		output.formatPrint(""); //$NON-NLS-1$
