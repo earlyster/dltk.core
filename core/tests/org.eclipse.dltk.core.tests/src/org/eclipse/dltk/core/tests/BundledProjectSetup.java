@@ -11,10 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.tests;
 
+import static org.eclipse.dltk.core.tests.model.AbstractModelTests.getProject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 
@@ -32,6 +38,46 @@ import org.eclipse.dltk.core.tests.model.AbstractModelTests;
  */
 public class BundledProjectSetup extends TestSetup {
 
+	public static class Builder {
+
+		private String bundleName;
+		private List<String> projectNames = new ArrayList<String>();
+		private boolean build;
+
+		public Builder(String bundleName, String[] projectNames) {
+			this.bundleName = bundleName;
+			Collections.addAll(this.projectNames, projectNames);
+		}
+
+		public Builder build(boolean value) {
+			this.build = value;
+			return this;
+		}
+
+		public BundledProjectSetup suite(Class<?>... testClasses) {
+			return new BundledProjectSetup(bundleName,
+					projectNames.toArray(new String[projectNames.size()]),
+					createTests(testClasses), build);
+		}
+
+		private Test createTests(Class<?>[] testClasses) {
+			if (testClasses.length == 1) {
+				return new TestSuite(testClasses[0]);
+			} else {
+				TestSuite result = new TestSuite();
+				for (Class<?> clazz : testClasses) {
+					result.addTest(new TestSuite(clazz));
+				}
+				return result;
+			}
+		}
+
+	}
+
+	public static Builder create(String bundleName, String... projectNames) {
+		return new Builder(bundleName, projectNames);
+	}
+
 	static class Helper extends AbstractModelTests {
 
 		public Helper(String bundleName) {
@@ -41,7 +87,7 @@ public class BundledProjectSetup extends TestSetup {
 	}
 
 	private final Helper helper;
-	private final String projectName;
+	private final String[] projectNames;
 	private final boolean build;
 
 	public BundledProjectSetup(String bundleName, String projectName, Test test) {
@@ -50,9 +96,14 @@ public class BundledProjectSetup extends TestSetup {
 
 	public BundledProjectSetup(String bundleName, String projectName,
 			Test test, boolean build) {
+		this(bundleName, new String[] { projectName }, test, build);
+	}
+
+	public BundledProjectSetup(String bundleName, String[] projectNames,
+			Test test, boolean build) {
 		super(test);
 		this.helper = new Helper(bundleName);
-		this.projectName = projectName;
+		this.projectNames = projectNames;
 		this.build = build;
 	}
 
@@ -60,20 +111,23 @@ public class BundledProjectSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 		AbstractModelTests.disableAutoBulid();
-		helper.setUpProject(projectName);
+		for (String projectName : projectNames) {
+			helper.setUpProject(projectName);
+		}
 		if (build) {
-			getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			for (String projectName : projectNames) {
+				getProject(projectName).build(
+						IncrementalProjectBuilder.FULL_BUILD, null);
+			}
 		}
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		helper.deleteProject(projectName);
+		for (String projectName : projectNames) {
+			helper.deleteProject(projectName);
+		}
 		super.tearDown();
-	}
-
-	protected IProject getProject() {
-		return AbstractModelTests.getProject(projectName);
 	}
 
 }
