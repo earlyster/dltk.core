@@ -73,15 +73,19 @@ public class LogConsoleImpl extends IOConsole {
 		if (stream == ILogConsole.STDERR) {
 			final Display current = Display.getCurrent();
 			if (current != null) {
-				outputStream.setColor(current.getSystemColor(SWT.COLOR_RED));
+				if (!current.isDisposed())
+					outputStream
+							.setColor(current.getSystemColor(SWT.COLOR_RED));
 			} else {
-				PlatformUI.getWorkbench().getDisplay()
-						.asyncExec(new Runnable() {
-							public void run() {
-								outputStream.setColor(Display.getDefault()
+				final Display display = PlatformUI.getWorkbench().getDisplay();
+				if (!display.isDisposed())
+					display.asyncExec(new Runnable() {
+						public void run() {
+							if (!display.isDisposed())
+								outputStream.setColor(display
 										.getSystemColor(SWT.COLOR_RED));
-							}
-						});
+						}
+					});
 			}
 		}
 	}
