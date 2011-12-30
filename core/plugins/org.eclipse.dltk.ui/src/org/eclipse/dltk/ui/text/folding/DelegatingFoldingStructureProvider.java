@@ -194,9 +194,10 @@ public class DelegatingFoldingStructureProvider implements
 		 */
 		@Override
 		public String toString() {
-			return "ScriptProjectionAnnotation:\n" + //$NON-NLS-1$
-					"\tcollapsed: \t" + isCollapsed() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
-					"\tcomment: \t" + getKind() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "ScriptProjectionAnnotation(" + //$NON-NLS-1$
+					"collapsed: " + isCollapsed() + ", " + //$NON-NLS-1$ //$NON-NLS-2$
+					"element:" + getElement() + ", " + //$NON-NLS-1$ //$NON-NLS-2$
+					"kind: " + getKind() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
