@@ -322,10 +322,8 @@ public class State {
 	protected Set<IPath> dependenciesOf(Collection<IPath> paths,
 			Set<IPath> structuralChanges, boolean includeImportProblems) {
 		final Set<IPath> result = new HashSet<IPath>();
-		if (includeImportProblems) {
-			for (IPath path : importProblems) {
-				result.add(path);
-			}
+		if (includeImportProblems && !structuralChanges.isEmpty()) {
+			result.addAll(importProblems);
 		}
 		for (IPath path : paths) {
 			final boolean structuralChange = structuralChanges.contains(path);
