@@ -819,10 +819,8 @@ public class ModelManager implements ISaveParticipant {
 	public PerWorkingCopyInfo getPerWorkingCopyInfo(SourceModule workingCopy,
 			boolean create, boolean recordUsage,
 			IProblemRequestor problemRequestor) {
-		synchronized (this.perWorkingCopyInfos) { // use the
-			// perWorkingCopyInfo
-			// collection as its own
-			// lock
+		synchronized (this.perWorkingCopyInfos) {
+			// use the perWorkingCopyInfo collection as its own lock
 			WorkingCopyOwner owner = workingCopy.getOwner();
 			Map workingCopyToInfos = (Map) this.perWorkingCopyInfos.get(owner);
 			if (workingCopyToInfos == null && create) {
@@ -834,14 +832,6 @@ public class ModelManager implements ISaveParticipant {
 			if (info == null && create) {
 				info = new PerWorkingCopyInfo(workingCopy, problemRequestor);
 				workingCopyToInfos.put(workingCopy, info);
-			}
-
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267008
-			// problem requester added to PerWorkingCopyInfo after it already
-			// created and exists.
-			// is it ok or problem requester should be set during the creation?
-			if (info != null && problemRequestor != null) {
-				info.problemRequestor = problemRequestor;
 			}
 			if (info != null && recordUsage)
 				info.useCount++;
