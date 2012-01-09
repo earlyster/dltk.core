@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.editor;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,7 +19,6 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -31,11 +29,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.BufferChangedEvent;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IBufferChangedListener;
 import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentEvent;
@@ -149,6 +149,11 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			3);
 	private IStatus fStatus;
 
+	/** @since 4.0 */
+	private LocationKind fLocationKind;
+
+	/** @since 4.0 */
+	private IFileStore fFileStore;
 
 	/**
 	 * Constructs a new document adapter.
@@ -158,6 +163,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		fOwner= owner;
 		fFile= file;
 		fPath= fFile.getFullPath();
+		fLocationKind = LocationKind.IFILE;
 
 		initialize();
 	}
@@ -171,22 +177,44 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		
 		fOwner= owner;
 		fPath= path;
+		fLocationKind = LocationKind.NORMALIZE;
 		
+		initialize();
+	}
+
+	/**
+	 * Constructs a new document adapter.
+	 * 
+	 * @param owner
+	 *            the owner of this buffer
+	 * @param fileStore
+	 *            the file store of the file that backs the buffer
+	 * @param path
+	 *            the path of the file that backs the buffer
+	 * @since 4.0
+	 */
+	public DocumentAdapter(IOpenable owner, IFileStore fileStore, IPath path) {
+		Assert.isLegal(fileStore != null);
+		Assert.isLegal(path != null);
+		fOwner = owner;
+		fFileStore = fileStore;
+		fPath = path;
+		fLocationKind = LocationKind.NORMALIZE;
+
 		initialize();
 	}
 
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			if (fFile == null) {
-				URI uri = fPath.toFile().toURI();
-				IFileStore fileStore = EFS.getStore(uri);
-				manager.connectFileStore(fileStore, new NullProgressMonitor());
-				fTextFileBuffer = manager.getFileStoreTextFileBuffer(fileStore);
+			if (fFileStore != null) {
+				manager.connectFileStore(fFileStore, new NullProgressMonitor());
+				fTextFileBuffer = manager
+						.getFileStoreTextFileBuffer(fFileStore);
 			} else {
-				manager.connect(fPath, LocationKind.NORMALIZE,
-						new NullProgressMonitor());
-				fTextFileBuffer= manager.getTextFileBuffer(fPath, LocationKind.NORMALIZE);
+				manager.connect(fPath, fLocationKind, new NullProgressMonitor());
+				fTextFileBuffer = manager.getTextFileBuffer(fPath,
+						fLocationKind);
 			}
 			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
@@ -267,7 +295,12 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.disconnect(fTextFileBuffer.getLocation(), LocationKind.NORMALIZE,  new NullProgressMonitor());
+				if (fFileStore != null)
+					manager.disconnectFileStore(fFileStore,
+							new NullProgressMonitor());
+				else
+					manager.disconnect(fPath, fLocationKind,
+							new NullProgressMonitor());
 			} catch (CoreException x) {
 				// ignore
 			}
@@ -432,8 +465,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 						existingDelimiters.add(curr);
 					}
 				} catch (BadLocationException e) {
-					e.printStackTrace();
-					//DLTKPlugin.log(e);
+					DLTKUIPlugin.log(e);
 				}
 			}
 			if (existingDelimiters.isEmpty()) {
@@ -454,15 +486,20 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			try {
 				String curr= tracker.getLineDelimiter(i);
 				if (curr != null && !fLegalLineDelimiters.contains(curr)) {
-					StringBuffer buf= new StringBuffer("New line delimiter added to new code: "); //$NON-NLS-1$
+					StringBuffer buf = new StringBuffer(
+							"WARNING: DocumentAdapter added new line delimiter to code: "); //$NON-NLS-1$
 					for (int k= 0; k < curr.length(); k++) {
-						buf.append(String.valueOf((int) curr.charAt(k)));
+						if (k > 0)
+							buf.append(' ');
+						buf.append((int) curr.charAt(k));
 					}
-					//DLTKPlugin.log(new Exception(buf.toString()));
-					(new Exception(buf.toString())).printStackTrace();
+					IStatus status = new Status(IStatus.WARNING,
+							DLTKUIPlugin.PLUGIN_ID, IStatus.OK, buf.toString(),
+							new Throwable());
+					DLTKUIPlugin.log(status);
 				}
 			} catch (BadLocationException e) {
-				e.printStackTrace();
+				DLTKUIPlugin.log(e);
 			}
 		}
 	}
@@ -486,7 +523,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			Iterator<IBufferChangedListener> e = new ArrayList<IBufferChangedListener>(
 					fBufferListeners).iterator();
 			while (e.hasNext())
-				((IBufferChangedListener) e.next()).bufferChanged(event);
+				e.next().bufferChanged(event);
 		}
 	}
 

@@ -781,7 +781,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 								addAnnotation(annotation, position, false);
 								fGeneratedAnnotations.add(annotation);
-								
+
 								temporaryProblemsChanged = true;
 							} catch (BadLocationException x) {
 								// ignore invalid position
@@ -963,7 +963,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	 */
 	protected static class ExternalSourceModuleAnnotationModel extends
 			SourceModuleAnnotationModel {
-		private IPath location;
+		private final IPath location;
 
 		public ExternalSourceModuleAnnotationModel(IPath location) {
 			super(ResourcesPlugin.getWorkspace().getRoot());
@@ -1101,6 +1101,11 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		public ISourceModule fCopy;
+
+		public IProblemRequestor getProblemRequestor() {
+			return fModel instanceof IProblemRequestor ? (IProblemRequestor) fModel
+					: null;
+		}
 	}
 
 	public void shutdown() {
@@ -1226,6 +1231,31 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return new SourceModuleAnnotationModel(file);
 	}
 
+	static class DelegatingRequestor implements IProblemRequestor {
+
+		IProblemRequestor fRequestor;
+
+		public void acceptProblem(IProblem problem) {
+			if (fRequestor != null)
+				fRequestor.acceptProblem(problem);
+		}
+
+		public void beginReporting() {
+			if (fRequestor != null)
+				fRequestor.beginReporting();
+		}
+
+		public void endReporting() {
+			if (fRequestor != null)
+				fRequestor.endReporting();
+		}
+
+		public boolean isActive() {
+			return fRequestor != null && fRequestor.isActive();
+		}
+
+	}
+
 	@Override
 	protected FileInfo createFileInfo(Object element) throws CoreException {
 
@@ -1248,10 +1278,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		if (!(info instanceof SourceModuleInfo))
 			return null;
 
-		boolean isFake = false;
+		DelegatingRequestor delegatingRequestor = null;
 		if (original == null) {
-			original = createFakeSourceModule(element, false);
-			isFake = true;
+			original = createFakeSourceModule(element, false,
+					delegatingRequestor = new DelegatingRequestor());
 		}
 		if (original == null)
 			return null;
@@ -1267,8 +1297,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		SourceModuleInfo cuInfo = (SourceModuleInfo) info;
 		setUpSynchronization(cuInfo);
 
-		IProblemRequestor requestor = cuInfo.fModel instanceof IProblemRequestor ? (IProblemRequestor) cuInfo.fModel
-				: null;
+		final IProblemRequestor requestor = cuInfo.getProblemRequestor();
+		if (delegatingRequestor != null) {
+			delegatingRequestor.fRequestor = requestor;
+		}
 		if (requestor instanceof IProblemRequestorExtension) {
 			IProblemRequestorExtension extension = (IProblemRequestorExtension) requestor;
 			extension.setIsActive(false);
@@ -1276,7 +1308,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		if (ScriptModelUtil.isPrimary(original) || isFake)
+		if (ScriptModelUtil.isPrimary(original))
 			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy = original;
 
@@ -1532,8 +1564,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					cu = (ISourceModule) e;
 				}
 			}
+			DelegatingRequestor delegatingRequestor = null;
 			if (cu == null) {
-				cu = createFakeSourceModule(element, true);
+				cu = createFakeSourceModule(element, true,
+						delegatingRequestor = new DelegatingRequestor());
 			}
 			if (cu == null)
 				return;
@@ -1541,6 +1575,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			info.fCopy = cu;
 			info.fElement = element;
 			info.fModel = createAnnotationModel(element);
+			if (delegatingRequestor != null) {
+				delegatingRequestor.fRequestor = info.getProblemRequestor();
+			}
 			fFakeCUMapForMissingInfo.put(element, info);
 		}
 		info.fCount++;
@@ -1614,19 +1651,20 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	 * 
 	 */
 	private ISourceModule createFakeSourceModule(Object element,
-			boolean setContents) {
+			boolean setContents, IProblemRequestor requestor) {
 		if (element instanceof IStorageEditorInput)
 			return createFakeSourceModule((IStorageEditorInput) element,
-					setContents);
+					setContents, requestor);
 		else if (element instanceof IURIEditorInput)
-			return createFakeSourceModule((IURIEditorInput) element);
+			return createFakeSourceModule((IURIEditorInput) element, requestor);
 		else if (element instanceof NonExistingFileEditorInput)
-			return createFakeSourceModule((NonExistingFileEditorInput) element);
+			return createFakeSourceModule((NonExistingFileEditorInput) element,
+					requestor);
 		return null;
 	}
 
 	private ISourceModule createFakeSourceModule(
-			NonExistingFileEditorInput editorInput) {
+			NonExistingFileEditorInput editorInput, IProblemRequestor requestor) {
 		try {
 			final IPath path = editorInput.getPath(editorInput);
 			URI uri = URIUtil.toURI(path);
@@ -1644,8 +1682,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				 * @since 3.2
 				 */
 				public IBuffer createBuffer(ISourceModule workingCopy) {
-					return new DocumentAdapter(workingCopy, path);
-					// return BufferManager.createBuffer(workingCopy);
+					return new DocumentAdapter(workingCopy, fileStore, path);
 				}
 			};
 
@@ -1659,7 +1696,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 						.getDefaultInterpreterContainerEntry() };
 
 			final ISourceModule cu = woc.newWorkingCopy(fileStore.getName(),
-					cpEntries, null, getProgressMonitor());
+					cpEntries, requestor, getProgressMonitor());
 
 			if (!isModifiable(editorInput))
 				ScriptModelUtil.reconcile(cu);
@@ -1671,12 +1708,13 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	private ISourceModule createFakeSourceModule(
-			final IURIEditorInput editorInput) {
+			final IURIEditorInput editorInput, IProblemRequestor requestor) {
 		try {
 			final URI uri = editorInput.getURI();
 			final IFileStore fileStore = EFS.getStore(uri);
 			final IPath path = URIUtil.toPath(uri);
-			if (fileStore.getName() == null || path == null)
+			final String fileStoreName = fileStore.getName();
+			if (fileStoreName == null || path == null)
 				return null;
 
 			WorkingCopyOwner woc = new WorkingCopyOwner() {
@@ -1688,7 +1726,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				 * @since 3.2
 				 */
 				public IBuffer createBuffer(ISourceModule workingCopy) {
-					return new DocumentAdapter(workingCopy, path);
+					return new DocumentAdapter(workingCopy, fileStore, path);
 				}
 			};
 
@@ -1701,8 +1739,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				cpEntries = new IBuildpathEntry[] { ScriptRuntime
 						.getDefaultInterpreterContainerEntry() };
 
-			final ISourceModule cu = woc.newWorkingCopy(fileStore.getName(),
-					cpEntries, null, getProgressMonitor());
+			final ISourceModule cu = woc.newWorkingCopy(fileStoreName,
+					cpEntries, requestor, getProgressMonitor());
 
 			if (!isModifiable(editorInput))
 				ScriptModelUtil.reconcile(cu);
@@ -1714,7 +1752,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	private ISourceModule createFakeSourceModule(final IStorageEditorInput sei,
-			boolean setContents) {
+			boolean setContents, IProblemRequestor requestor) {
 		try {
 			final IStorage storage = sei.getStorage();
 			final IPath storagePath = storage.getFullPath();
@@ -1731,7 +1769,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			WorkingCopyOwner woc = new WorkingCopyOwner() {
 				public IBuffer createBuffer(ISourceModule workingCopy) {
-					// return new DocumentAdapter(workingCopy, documentPath);
 					return BufferManager.createBuffer(workingCopy);
 				}
 			};
@@ -1746,7 +1783,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 						.getDefaultInterpreterContainerEntry() };
 
 			final ISourceModule cu = woc.newWorkingCopy(storage.getName(),
-					cpEntries, null, getProgressMonitor());
+					cpEntries, requestor, getProgressMonitor());
 			if (setContents) {
 				int READER_CHUNK_SIZE = 2048;
 				int BUFFER_SIZE = 8 * READER_CHUNK_SIZE;
