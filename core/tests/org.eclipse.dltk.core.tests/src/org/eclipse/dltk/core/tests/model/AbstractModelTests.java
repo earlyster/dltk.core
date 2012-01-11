@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -59,6 +58,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.tests.BundledProjectSetup;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -377,15 +377,15 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		super.setUpSuite();
 
 		// ensure autobuilding is turned off
-		disableAutoBulid();
+		BundledProjectSetup.disableAutoBuild();
 	}
 
+	/**
+	 * Deprecated since 2012-01-11 because of the typo in method name.
+	 */
+	@Deprecated
 	public static void disableAutoBulid() throws CoreException {
-		IWorkspaceDescription description = getWorkspace().getDescription();
-		if (description.isAutoBuilding()) {
-			description.setAutoBuilding(false);
-			getWorkspace().setDescription(description);
-		}
+		BundledProjectSetup.disableAutoBuild();
 	}
 
 	protected ISourceModule getSourceModule(String path) {
