@@ -35,11 +35,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ElementChangedEvent;
@@ -58,7 +55,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.tests.BundledProjectSetup;
+import org.eclipse.dltk.core.tests.WorkspaceAutoBuild;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -377,7 +374,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		super.setUpSuite();
 
 		// ensure autobuilding is turned off
-		BundledProjectSetup.disableAutoBuild();
+		WorkspaceAutoBuild.disable();
 	}
 
 	/**
@@ -385,7 +382,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	 */
 	@Deprecated
 	public static void disableAutoBulid() throws CoreException {
-		BundledProjectSetup.disableAutoBuild();
+		WorkspaceAutoBuild.disable();
 	}
 
 	protected ISourceModule getSourceModule(String path) {
@@ -931,25 +928,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	 * Wait for autobuild notification to occur
 	 */
 	public static void waitForAutoBuild() {
-		boolean wasInterrupted = false;
-		do {
-			try {
-				IJobManager jobManager = Job.getJobManager();
-				Job[] jobs = Job.getJobManager().find(
-						ResourcesPlugin.FAMILY_AUTO_BUILD);
-				jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-				jobs = Job.getJobManager().find(
-						ResourcesPlugin.FAMILY_AUTO_BUILD);
-				for (int j = 0; j < jobs.length; j++) {
-					System.out.println("#2" + jobs[j]);
-				}
-				wasInterrupted = false;
-			} catch (OperationCanceledException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				wasInterrupted = true;
-			}
-		} while (wasInterrupted);
+		WorkspaceAutoBuild.waitFor();
 	}
 
 	public void ensureCorrectPositioning(IParent container,

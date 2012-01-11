@@ -21,9 +21,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 
 /**
@@ -112,7 +110,7 @@ public class BundledProjectSetup extends TestSetup {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		disableAutoBuild();
+		WorkspaceAutoBuild.disable();
 		for (String projectName : projectNames) {
 			helper.setUpProject(projectName);
 		}
@@ -130,15 +128,6 @@ public class BundledProjectSetup extends TestSetup {
 			helper.deleteProject(projectName);
 		}
 		super.tearDown();
-	}
-
-	public static void disableAutoBuild() throws CoreException {
-		IWorkspaceDescription description = AbstractModelTests.getWorkspace()
-				.getDescription();
-		if (description.isAutoBuilding()) {
-			description.setAutoBuilding(false);
-			AbstractModelTests.getWorkspace().setDescription(description);
-		}
 	}
 
 }
