@@ -335,13 +335,6 @@ public class DLTKCore extends Plugin {
 	public static final char LOGGING_OPTION_SEPARATOR = ';';
 
 	/**
-	 * Possible configurable option ID. Value is the identifier of
-	 * implementation contributed to the org.eclipse.dltk.core.fileCache
-	 * extension point.
-	 */
-	public static final String FILE_CACHE = PLUGIN_ID + ".contentCache"; //$NON-NLS-1$
-
-	/**
 	 * Possible configurable option ID. Value should be {@link #ENABLED} or
 	 * {@link #DISABLED}.
 	 */

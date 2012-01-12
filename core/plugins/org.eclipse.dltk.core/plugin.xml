@@ -20,7 +20,6 @@
    <extension-point id="buildpathVariableInitializer" name="%extension-point.name.buildpathVariableInitializer" schema="schema/buildpathVariableInitializer.exsd"/>
    <extension-point id="scriptFileConfigurator" name="%extension-point.name.scriptFileConfigurator" schema="schema/scriptFileConfigurator.exsd"/>
    <extension-point id="buildParticipant" name="%extension-point.name.buildParticipant" schema="schema/buildParticipant.exsd"/>
-   <extension-point id="fileCache" name="%extension-point.name.fileCache" schema="schema/fileCache.exsd"/>
    <extension-point id="model" name="model" schema="schema/model.exsd"/>
    <extension-point id="contentCacheProvider" name="contentCacheProvider" schema="schema/contentCacheProvider.exsd"/>
    <extension-point id="astCache" name="astCache" schema="schema/astCache.exsd"/>
@@ -128,18 +127,6 @@
             priority="10"
             nature="#">
       </builder>
-   </extension>
-   <extension point="org.eclipse.dltk.core.fileCache">
-      <fileCache
-      	class="org.eclipse.dltk.internal.core.FileCacheStub"
-      	name="No file caching"
-        id="org.eclipse.dltk.core.fileCache.nop">
-      </fileCache>
-      <fileCache
-      	class="org.eclipse.dltk.internal.core.SourceCodeCache"
-      	name="Default file caching"
-        id="org.eclipse.dltk.core.fileCache.default">
-      </fileCache>
    </extension>
    <extension
          point="org.eclipse.dltk.core.projectIndexer">

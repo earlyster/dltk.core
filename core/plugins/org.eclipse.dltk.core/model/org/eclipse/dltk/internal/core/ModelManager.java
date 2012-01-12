@@ -343,11 +343,6 @@ public class ModelManager implements ISaveParticipant {
 	 */
 	private ThreadLocal<Map<IPath, IArchive>> zipFiles = new ThreadLocal<Map<IPath, IArchive>>();
 
-	/**
-	 * A cache of resource content.
-	 */
-	private IFileCache fileCache = null;
-
 	private UserLibraryManager userLibraryManager;
 
 	public final static ISourceModule[] NO_WORKING_COPY = new ISourceModule[0];
@@ -1138,18 +1133,6 @@ public class ModelManager implements ISaveParticipant {
 			this.propertyListener = new IEclipsePreferences.IPreferenceChangeListener() {
 				public void preferenceChange(PreferenceChangeEvent event) {
 					ModelManager.this.optionsCache = null;
-					if (DLTKCore.FILE_CACHE.equals(event.getKey())) {
-						final IFileCache newCache = createFileCache();
-						if (newCache instanceof IFileCacheManagement) {
-							((IFileCacheManagement) newCache).start();
-						}
-						final IFileCache oldCache = fileCache;
-						fileCache = newCache;
-						if (oldCache != null
-								&& oldCache instanceof IFileCacheManagement) {
-							((IFileCacheManagement) oldCache).stop();
-						}
-					}
 				}
 			};
 			installPreferenceChangeListener(DLTKCore.PLUGIN_ID,
@@ -1180,10 +1163,6 @@ public class ModelManager implements ISaveParticipant {
 							| IResourceChangeEvent.PRE_DELETE
 							| IResourceChangeEvent.PRE_CLOSE);
 			DLTKContentTypeManager.installListener();
-			fileCache = createFileCache();
-			if (fileCache instanceof IFileCacheManagement) {
-				((IFileCacheManagement) fileCache).start();
-			}
 			sourceModuleInfoCache = new SourceModuleInfoCache();
 			sourceModuleInfoCache.start();
 			startIndexing();
@@ -1237,36 +1216,6 @@ public class ModelManager implements ISaveParticipant {
 	private static void installPreferenceChangeListener(String pluginId,
 			IPreferenceChangeListener listener) {
 		getPluginPreferences(pluginId).addPreferenceChangeListener(listener);
-	}
-
-	/**
-	 * @return
-	 */
-	private IFileCache createFileCache() {
-		final String selectedCacheId = DLTKCore.getPlugin()
-				.getPluginPreferences().getString(DLTKCore.FILE_CACHE);
-		if (selectedCacheId != null) {
-			final String fileCacheExtPoint = DLTKCore.PLUGIN_ID + ".fileCache"; //$NON-NLS-1$
-			final IConfigurationElement[] elements = Platform
-					.getExtensionRegistry().getConfigurationElementsFor(
-							fileCacheExtPoint);
-			for (int i = 0; i < elements.length; ++i) {
-				final IConfigurationElement element = elements[i];
-				if (selectedCacheId.equals(element.getAttribute("id"))) { //$NON-NLS-1$
-					try {
-						final IFileCache cache = (IFileCache) element
-								.createExecutableExtension("class"); //$NON-NLS-1$
-						if (selectedCacheId.equals(cache.getId())) {
-							return cache;
-						}
-					} catch (Exception e) {
-						DLTKCore.error("FileCache create error", e); //$NON-NLS-1$
-					}
-					break;
-				}
-			}
-		}
-		return new FileCacheStub();
 	}
 
 	private void startIndexing() {
@@ -1489,11 +1438,6 @@ public class ModelManager implements ISaveParticipant {
 		DLTKContentTypeManager.uninstallListener();
 		workspace.removeSaveParticipant(DLTKCore.getDefault());
 
-		if (fileCache != null) {
-			if (fileCache instanceof IFileCacheManagement) {
-				((IFileCacheManagement) fileCache).stop();
-			}
-		}
 		if (sourceModuleInfoCache != null) {
 			sourceModuleInfoCache.stop();
 		}
@@ -2261,10 +2205,6 @@ public class ModelManager implements ISaveParticipant {
 		} else {
 			return new ZipArchiveFile(localFile);
 		}
-	}
-
-	public IFileCache getFileCache() {
-		return fileCache;
 	}
 
 	/**

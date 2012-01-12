@@ -56,7 +56,6 @@ import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelElement;
-import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.osgi.util.NLS;
 
@@ -482,11 +481,6 @@ public class Util {
 	 */
 	public static char[] getResourceContentsAsCharArray(IFile file)
 			throws ModelException {
-		final char[] result = ModelManager.getModelManager().getFileCache()
-				.get(file);
-		if (result != null) {
-			return result;
-		}
 		// Get encoding from file
 		String encoding = null;
 		try {
@@ -498,16 +492,6 @@ public class Util {
 	}
 
 	public static char[] getResourceContentsAsCharArray(IFileHandle file)
-			throws ModelException {
-		final char[] result = ModelManager.getModelManager().getFileCache()
-				.get(file);
-		if (result != null) {
-			return result;
-		}
-		return getResourceContentsAsCharArrayNoCache(file);
-	}
-
-	public static char[] getResourceContentsAsCharArrayNoCache(IFileHandle file)
 			throws ModelException {
 		// Get resource contents
 		InputStream stream = null;

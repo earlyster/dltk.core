@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeLi
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.DLTKAssociationManager;
-import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.NopAssociationManager;
 import org.eclipse.dltk.internal.core.ScriptFileConfiguratorManager;
 
@@ -298,11 +297,8 @@ public class DLTKContentTypeManager {
 				 * TODO use something like LazyInputStream if there are multiple
 				 * content types
 				 */
-				InputStream contents = ModelManager.getModelManager()
-						.getFileCache().getContentsIfCached(file);
-				if (contents == null) {
-					contents = new BufferedInputStream(file.getContents(), 2048);
-				}
+				final InputStream contents = new BufferedInputStream(
+						file.getContents(), 2048);
 				try {
 					final IContentDescription description = type
 							.getDescriptionFor(contents,
