@@ -18,9 +18,7 @@ import java.util.List;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
@@ -63,37 +61,6 @@ final class ScriptCorePreferenceBlock extends
 		super(store, page);
 	}
 
-	private static FileCacheEntry[] getFileCaches() {
-		final List result = new ArrayList();
-		final String fileCacheExtPoint = DLTKCore.PLUGIN_ID + ".fileCache"; //$NON-NLS-1$
-		final IConfigurationElement[] elements = Platform
-				.getExtensionRegistry().getConfigurationElementsFor(
-						fileCacheExtPoint);
-		for (int i = 0; i < elements.length; ++i) {
-			final IConfigurationElement element = elements[i];
-			final String id = element.getAttribute("id"); //$NON-NLS-1$
-			final String name = element.getAttribute("name"); //$NON-NLS-1$
-			if (id != null && name != null) {
-				result.add(new FileCacheEntry(id, name));
-			}
-		}
-		return (FileCacheEntry[]) result.toArray(new FileCacheEntry[result
-				.size()]);
-	}
-
-	final FileCacheEntry[] cacheEntries = getFileCaches();
-
-	private static class FileCacheEntry {
-		final String id;
-		final String name;
-
-		FileCacheEntry(String id, String name) {
-			this.id = id;
-			this.name = name;
-		}
-	}
-
-	private Combo cacheCombo;
 	private static final String[] names = new String[] { "Warning", "Error" };
 	private static final String[] ids = new String[] { "warning", "error" };
 
@@ -106,14 +73,6 @@ final class ScriptCorePreferenceBlock extends
 		Group coreGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_coreOptions, 2, 1,
 				GridData.FILL_HORIZONTAL);
-		SWTFactory.createLabel(coreGroup,
-				Messages.ScriptCorePreferenceBlock_fileCaching, 1);
-		final String[] items = new String[cacheEntries.length];
-		for (int i = 0; i < cacheEntries.length; ++i) {
-			items[i] = cacheEntries[i].name;
-		}
-		cacheCombo = SWTFactory.createCombo(coreGroup, SWT.READ_ONLY
-				| SWT.BORDER, 0, items);
 
 		Group editorGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_editOptions, 2, 1,
@@ -160,15 +119,6 @@ final class ScriptCorePreferenceBlock extends
 		return composite;
 	}
 
-	private void initializeCacheField(String cacheId) {
-		for (int i = 0; i < cacheEntries.length; ++i) {
-			if (cacheId != null && cacheId.equals(cacheEntries[i].id)) {
-				cacheCombo.select(i);
-				break;
-			}
-		}
-	}
-
 	private void createReIndex(Composite composite) {
 		if (DLTKCore.SHOW_REINDEX) {
 			Group g = SWTFactory.createGroup(composite,
@@ -190,8 +140,8 @@ final class ScriptCorePreferenceBlock extends
 					indexManager.rebuild();
 
 					try {
-						PlatformUI.getWorkbench().getProgressService().run(
-								false, true, new ReindexOperation());
+						PlatformUI.getWorkbench().getProgressService()
+								.run(false, true, new ReindexOperation());
 					} catch (InvocationTargetException e3) {
 						if (DLTKCore.DEBUG) {
 							e3.printStackTrace();
@@ -222,8 +172,6 @@ final class ScriptCorePreferenceBlock extends
 
 	public void initialize() {
 		super.initialize();
-		initializeCacheField(DLTKCore.getPlugin().getPluginPreferences()
-				.getString(DLTKCore.FILE_CACHE));
 		initializeBuildPathField(DLTKCore.getPlugin().getPluginPreferences()
 				.getString(DLTKCore.CORE_CIRCULAR_BUILDPATH));
 
@@ -231,9 +179,6 @@ final class ScriptCorePreferenceBlock extends
 
 	public void performDefaults() {
 		super.performDefaults();
-		initializeCacheField(DLTKCore.getPlugin().getPluginPreferences()
-				.getDefaultString(DLTKCore.FILE_CACHE));
-		
 		initializeBuildPathField(DLTKCore.getPlugin().getPluginPreferences()
 				.getDefaultString(DLTKCore.CORE_CIRCULAR_BUILDPATH));
 	}
@@ -256,15 +201,6 @@ final class ScriptCorePreferenceBlock extends
 
 	public void performOk() {
 		super.performOk();
-		final int cacheIndex = cacheCombo.getSelectionIndex();
-		if (cacheIndex >= 0 && cacheIndex < cacheEntries.length) {
-			final Preferences prefs = DLTKCore.getDefault()
-					.getPluginPreferences();
-			final String value = cacheEntries[cacheIndex].id;
-			if (!value.equals(prefs.getString(DLTKCore.FILE_CACHE))) {
-				prefs.setValue(DLTKCore.FILE_CACHE, value);
-			}
-		}
 		final int buildPathIndex = circularBuildPathCombo.getSelectionIndex();
 		if (buildPathIndex >= 0 && buildPathIndex < ids.length) {
 			final Preferences prefs = DLTKCore.getDefault()

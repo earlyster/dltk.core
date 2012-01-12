@@ -10,7 +10,6 @@ public class Messages extends NLS {
 	public static String ScriptCorePreferenceBlock_coreOptions;
 	public static String ScriptCorePreferenceBlock_editOptions;
 	public static String ScriptCorePreferenceBlock_debugOptionsOperations;
-	public static String ScriptCorePreferenceBlock_fileCaching;
 	public static String ScriptCorePreferencePage_manualReindex;
 	public static String ScriptCorePreferencePage_reindex;
 	public static String ScriptCorePreferenceBlock_UI_Options;
