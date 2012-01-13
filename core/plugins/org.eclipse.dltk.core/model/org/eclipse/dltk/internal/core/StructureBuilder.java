@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
+import org.eclipse.dltk.core.builder.IBuildParticipantPredicate;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.builder.AbstractBuildContext;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
@@ -65,11 +66,17 @@ class StructureBuilder {
 		if (participants.length == 0) {
 			return;
 		}
+		final IBuildParticipantPredicate[] predicates = BuildParticipantManager
+				.getPredicates(project, natureId);
 		final ReconcileBuildContext context = new ReconcileBuildContext(module,
 				reporter);
 		try {
-			for (int k = 0; k < participants.length; ++k) {
+			OUTER: for (int k = 0; k < participants.length; ++k) {
 				final IBuildParticipant participant = participants[k];
+				for (IBuildParticipantPredicate predicate : predicates) {
+					if (!predicate.apply(participant, context))
+						continue OUTER;
+				}
 				participant.build(context);
 			}
 		} catch (CoreException e) {

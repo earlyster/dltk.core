@@ -20,18 +20,28 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
-import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantDescriptor;
+import org.eclipse.dltk.core.builder.IBuildParticipantPredicate;
+import org.eclipse.dltk.core.builder.IBuildParticipantPredicateFactory;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.FactoryValue;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.osgi.util.NLS;
 
 public class BuildParticipantManager extends
-		NatureExtensionManager<BuildParticipantDescriptor> {
+		NatureExtensionManager<FactoryValue> {
 
 	private static final String EXT_POINT = DLTKCore.PLUGIN_ID
 			+ ".buildParticipant"; //$NON-NLS-1$
 
-	public static class BuildParticipantDescriptor {
-		final IBuildParticipantFactory factory;
+	public static class FactoryValue<T> {
+		final T factory;
+
+		public FactoryValue(T factory) {
+			this.factory = factory;
+		}
+	}
+
+	public static class BuildParticipantFactoryValue extends
+			FactoryValue<IBuildParticipantFactory> {
 		final String id;
 		final String name;
 		public final Set<String> requirements = new HashSet<String>();
@@ -39,21 +49,33 @@ public class BuildParticipantManager extends
 		/**
 		 * @param factory
 		 */
-		public BuildParticipantDescriptor(IBuildParticipantFactory factory,
+		public BuildParticipantFactoryValue(IBuildParticipantFactory factory,
 				String id, String name) {
-			this.factory = factory;
+			super(factory);
 			this.id = id != null ? id : factory.getClass().getName();
 			this.name = name;
 		}
 
 	}
 
+	public static class PredicateFactoryValue extends
+			FactoryValue<IBuildParticipantPredicateFactory> {
+
+		public PredicateFactoryValue(IBuildParticipantPredicateFactory factory) {
+			super(factory);
+		}
+
+	}
+
 	private BuildParticipantManager() {
-		super(EXT_POINT, BuildParticipantDescriptor.class);
+		super(EXT_POINT, FactoryValue.class);
 	}
 
 	private static final String REQUIRES = "requires"; //$NON-NLS-1$
 	private static final String REQUIRES_ID = "id"; //$NON-NLS-1$
+
+	private static final String PARTICIPANT = "buildParticipant";
+	private static final String PREDICATE = "predicate";
 
 	private static final String ATTR_ID = "id"; //$NON-NLS-1$
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
@@ -61,21 +83,50 @@ public class BuildParticipantManager extends
 	protected Object createInstanceByDescriptor(Object input)
 			throws CoreException {
 		final IConfigurationElement element = (IConfigurationElement) input;
-		final Object factory = element.createExecutableExtension(classAttr);
-		if (!(factory instanceof IBuildParticipantFactory)) {
+		if (PARTICIPANT.equals(element.getName())) {
+			final Object factory = element.createExecutableExtension(classAttr);
+			if (!(factory instanceof IBuildParticipantFactory)) {
+				DLTKCore.warn(NLS.bind(
+						"{0} contributed by {1} must implement {2}",
+						new Object[] { element.getName(),
+								element.getContributor(),
+								IBuildParticipantFactory.class.getName() }));
+				return null;
+			}
+			final BuildParticipantFactoryValue factoryValue = new BuildParticipantFactoryValue(
+					(IBuildParticipantFactory) factory,
+					element.getAttribute(ATTR_ID),
+					element.getAttribute(ATTR_NAME));
+			final IConfigurationElement[] requires = element
+					.getChildren(REQUIRES);
+			for (int i = 0; i < requires.length; ++i) {
+				final String id = requires[i].getAttribute(REQUIRES_ID);
+				if (id != null) {
+					factoryValue.requirements.add(id);
+				}
+			}
+			return factoryValue;
+		} else if (PREDICATE.equals(element.getName())) {
+			final Object factory = element.createExecutableExtension(classAttr);
+			if (!(factory instanceof IBuildParticipantPredicateFactory)) {
+				DLTKCore.warn(NLS.bind(
+						"{0} contributed by {1} must implement {2}",
+						new Object[] {
+								element.getName(),
+								element.getContributor(),
+								IBuildParticipantPredicateFactory.class
+										.getName() }));
+				return null;
+			}
+			return new PredicateFactoryValue(
+					(IBuildParticipantPredicateFactory) factory);
+		} else {
+			DLTKCore.warn(NLS
+					.bind("Wrong element {0} in {1} extension point contributed by {2}",
+							new Object[] { element.getName(), extensionPoint,
+									element.getContributor() }));
 			return null;
 		}
-		final BuildParticipantDescriptor descriptor = new BuildParticipantDescriptor(
-				(IBuildParticipantFactory) factory,
-				element.getAttribute(ATTR_ID), element.getAttribute(ATTR_NAME));
-		final IConfigurationElement[] requires = element.getChildren(REQUIRES);
-		for (int i = 0; i < requires.length; ++i) {
-			final String id = requires[i].getAttribute(REQUIRES_ID);
-			if (id != null) {
-				descriptor.requirements.add(id);
-			}
-		}
-		return descriptor;
 	}
 
 	private static BuildParticipantManager instance = null;
@@ -89,6 +140,8 @@ public class BuildParticipantManager extends
 
 	private static final IBuildParticipant[] NO_PARTICIPANTS = new IBuildParticipant[0];
 
+	private static final IBuildParticipantPredicate[] NO_PREDICATES = new IBuildParticipantPredicate[0];
+
 	/**
 	 * Returns {@link IBuildParticipant} instances of the specified nature. If
 	 * there are no build participants then the empty array is returned.
@@ -99,36 +152,39 @@ public class BuildParticipantManager extends
 	 */
 	public static IBuildParticipant[] getBuildParticipants(
 			IScriptProject project, String natureId) {
-		final BuildParticipantDescriptor[] descriptors = getInstance()
+		final FactoryValue<?>[] factories = getInstance()
 				.getInstances(natureId);
-		if (descriptors == null || descriptors.length == 0) {
+		if (factories == null || factories.length == 0) {
 			return NO_PARTICIPANTS;
 		}
-		return createParticipants(project, descriptors);
+		return createParticipants(project, factories);
 	}
 
 	public static IBuildParticipant[] createParticipants(
-			IScriptProject project, BuildParticipantDescriptor[] descriptors) {
-		final IBuildParticipant[] result = new IBuildParticipant[descriptors.length];
+			IScriptProject project, FactoryValue<?>[] factories) {
+		final IBuildParticipant[] result = new IBuildParticipant[factories.length];
 		final Set<String> processed = new HashSet<String>();
 		final Set<String> created = new HashSet<String>();
 		for (;;) {
 			final int iterationStartCount = created.size();
-			for (int i = 0; i < descriptors.length; ++i) {
-				final BuildParticipantDescriptor desc = descriptors[i];
-				if (!processed.contains(desc.id)
-						&& created.containsAll(desc.requirements)) {
-					processed.add(desc.id);
+			for (int i = 0; i < factories.length; ++i) {
+				if (!(factories[i] instanceof BuildParticipantFactoryValue)) {
+					continue;
+				}
+				final BuildParticipantFactoryValue factory = (BuildParticipantFactoryValue) factories[i];
+				if (!processed.contains(factory.id)
+						&& created.containsAll(factory.requirements)) {
+					processed.add(factory.id);
 					try {
-						final IBuildParticipant participant = desc.factory
+						final IBuildParticipant participant = factory.factory
 								.createBuildParticipant(project);
 						if (participant != null) {
 							result[created.size()] = participant;
-							created.add(desc.id);
+							created.add(factory.id);
 						}
 					} catch (CoreException e) {
 						final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
-						DLTKCore.warn(NLS.bind(tpl, desc.id), e);
+						DLTKCore.warn(NLS.bind(tpl, factory.id), e);
 					}
 				}
 			}
@@ -137,9 +193,55 @@ public class BuildParticipantManager extends
 			}
 		}
 		if (created.size() != result.length) {
+			if (created.size() == 0) {
+				return NO_PARTICIPANTS;
+			}
 			final IBuildParticipant[] newResult = new IBuildParticipant[created
 					.size()];
 			System.arraycopy(result, 0, newResult, 0, created.size());
+			return newResult;
+		} else {
+			return result;
+		}
+	}
+
+	public static IBuildParticipantPredicate[] getPredicates(
+			IScriptProject project, String natureId) {
+		final FactoryValue<?>[] factories = getInstance()
+				.getInstances(natureId);
+		if (factories == null || factories.length == 0) {
+			return NO_PREDICATES;
+		}
+		return createPredicates(project, factories);
+	}
+
+	public static IBuildParticipantPredicate[] createPredicates(
+			IScriptProject project, FactoryValue<?>[] factories) {
+		final IBuildParticipantPredicate[] result = new IBuildParticipantPredicate[factories.length];
+		int created = 0;
+		for (int i = 0; i < factories.length; ++i) {
+			if (!(factories[i] instanceof PredicateFactoryValue)) {
+				continue;
+			}
+			final PredicateFactoryValue factory = (PredicateFactoryValue) factories[i];
+			try {
+				final IBuildParticipantPredicate predicate = factory.factory
+						.createPredicate(project);
+				if (predicate != null) {
+					result[created++] = predicate;
+				}
+			} catch (CoreException e) {
+				final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
+				DLTKCore.warn(
+						NLS.bind(tpl, factory.factory.getClass().getName()), e);
+			}
+		}
+		if (created != result.length) {
+			if (created == 0) {
+				return NO_PREDICATES;
+			}
+			final IBuildParticipantPredicate[] newResult = new IBuildParticipantPredicate[created];
+			System.arraycopy(result, 0, newResult, 0, created);
 			return newResult;
 		} else {
 			return result;

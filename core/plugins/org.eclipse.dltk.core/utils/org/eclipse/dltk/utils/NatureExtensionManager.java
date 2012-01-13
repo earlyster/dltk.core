@@ -24,7 +24,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class NatureExtensionManager<E> {
 
-	private final String extensionPoint;
+	protected final String extensionPoint;
 	protected final String classAttr = "class"; //$NON-NLS-1$
 	private final String universalNatureId;
 	private final Class<?> elementType;

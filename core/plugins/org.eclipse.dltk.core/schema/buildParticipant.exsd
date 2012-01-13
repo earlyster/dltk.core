@@ -17,9 +17,10 @@
          </appInfo>
       </annotation>
       <complexType>
-         <sequence>
-            <element ref="buildParticipant" minOccurs="1" maxOccurs="unbounded"/>
-         </sequence>
+         <choice minOccurs="1" maxOccurs="unbounded">
+            <element ref="buildParticipant"/>
+            <element ref="predicate"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -93,6 +94,31 @@
                <documentation>
                   
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="predicate">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.builder.IBuildParticipantPredicateFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Used to filter validators only for selected type of projects.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.language/language/@nature"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
