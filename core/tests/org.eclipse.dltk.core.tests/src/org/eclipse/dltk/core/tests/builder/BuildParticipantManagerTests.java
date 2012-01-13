@@ -17,7 +17,7 @@ import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
-import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantDescriptor;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantFactoryValue;
 import org.eclipse.dltk.utils.TextUtils;
 
 import junit.framework.TestCase;
@@ -54,9 +54,9 @@ public class BuildParticipantManagerTests extends TestCase {
 
 	}
 
-	private BuildParticipantDescriptor createDescriptor(String id,
+	private BuildParticipantFactoryValue createDescriptor(String id,
 			String requirements) {
-		final BuildParticipantDescriptor descriptor = new BuildParticipantDescriptor(
+		final BuildParticipantFactoryValue descriptor = new BuildParticipantFactoryValue(
 				new TestBuildParticipantFactory(id), id, id);
 		final String[] ids = TextUtils.split(requirements, ',');
 		if (ids != null && ids.length != 0) {
@@ -68,7 +68,7 @@ public class BuildParticipantManagerTests extends TestCase {
 	}
 
 	public void testSimple() {
-		BuildParticipantDescriptor[] descriptors = new BuildParticipantDescriptor[] {
+		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", null), createDescriptor("B", null),
 				createDescriptor("C", null) };
 		IBuildParticipant[] participants = BuildParticipantManager
@@ -80,7 +80,7 @@ public class BuildParticipantManagerTests extends TestCase {
 	}
 
 	public void testDependency() {
-		BuildParticipantDescriptor[] descriptors = new BuildParticipantDescriptor[] {
+		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", "B,C"), createDescriptor("B", "C"),
 				createDescriptor("C", null) };
 		IBuildParticipant[] participants = BuildParticipantManager
@@ -92,7 +92,7 @@ public class BuildParticipantManagerTests extends TestCase {
 	}
 
 	public void testMissingDependency() {
-		BuildParticipantDescriptor[] descriptors = new BuildParticipantDescriptor[] {
+		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", "D"), createDescriptor("B", "C"),
 				createDescriptor("C", null) };
 		IBuildParticipant[] participants = BuildParticipantManager
