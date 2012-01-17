@@ -209,12 +209,4 @@ public abstract class CompletionRequestor {
 	public boolean isContextInformationMode() {
 		return false;
 	}
-
-	/**
-	 * Remove all collected information.
-	 * 
-	 * @since 2.0
-	 */
-	public void clear() {
-	}
 }

@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IBufferChangedListener;
+import org.eclipse.dltk.core.ICompletionRequestorExtension;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
@@ -550,11 +551,14 @@ public abstract class Openable extends ModelElement implements IOpenable,
 				getScriptProject(), cu, position, requestor);
 		if (!thread.execute(timeout)) {
 			Thread.interrupted();
-			requestor.completionFailure(new DefaultProblem(
-					"Compution of proposals is to long. Please try again. ",
-					IProblemIdentifier.NULL, null, ProblemSeverity.WARNING, 0,
-					0, 0));
-			requestor.clear();
+			requestor
+					.completionFailure(new DefaultProblem(
+							"Computation of proposals takes too long. Please try again.",
+							IProblemIdentifier.NULL, null,
+							ProblemSeverity.WARNING, 0, 0, 0));
+			if (requestor instanceof ICompletionRequestorExtension) {
+				((ICompletionRequestorExtension) requestor).reset();
+			}
 		}
 	}
 
