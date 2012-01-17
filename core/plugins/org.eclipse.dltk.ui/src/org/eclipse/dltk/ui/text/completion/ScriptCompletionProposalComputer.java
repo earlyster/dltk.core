@@ -208,7 +208,9 @@ public abstract class ScriptCompletionProposalComputer implements
 			}
 			int timeout = DLTKUIPlugin.getDefault().getPreferenceStore()
 					.getInt(PreferenceConstants.CODEASSIST_TIMEOUT);
+			collector.startCompletion();
 			sourceModule.codeComplete(offset, collector, timeout);
+			collector.endCompletion();
 		} catch (ModelException e) {
 			handleCodeCompletionException(e, context);
 		}

@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ICompletionRequestorExtension;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -69,7 +70,7 @@ import org.eclipse.swt.graphics.Image;
  * 
  */
 public abstract class ScriptCompletionProposalCollector extends
-		CompletionRequestor {
+		CompletionRequestor implements ICompletionRequestorExtension {
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG = "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.dltk.ui/debug/ResultCollector")); //$NON-NLS-1$//$NON-NLS-2$
 
@@ -100,8 +101,6 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	/* performance measurement */
 	private long fStartTime;
-
-	private long fUITime;
 
 	/**
 	 * The UI invocation context or <code>null</code>.
@@ -203,7 +202,6 @@ public abstract class ScriptCompletionProposalCollector extends
 	 */
 	@Override
 	public void accept(CompletionProposal proposal) {
-		long start = DEBUG ? System.currentTimeMillis() : 0;
 		try {
 			if (isFiltered(proposal))
 				return;
@@ -219,8 +217,6 @@ public abstract class ScriptCompletionProposalCollector extends
 							IStatus.OK,
 							"Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()), e)); //$NON-NLS-1$
 		}
-		if (DEBUG)
-			fUITime += System.currentTimeMillis() - start;
 	}
 
 	protected void doAccept(CompletionProposal proposal) {
@@ -261,39 +257,8 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * Subclasses may extend, but must call the super implementation.
 	 */
 	@Override
-	public void beginReporting() {
-		if (DEBUG) {
-			fStartTime = System.currentTimeMillis();
-			fUITime = 0;
-		}
-		fLastProblem = null;
-		fScriptProposals.clear();
-		fKeywords.clear();
-		fSuggestedMethodNames.clear();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * Subclasses may extend, but must call the super implementation.
-	 */
-	@Override
 	public void completionFailure(IProblem problem) {
 		fLastProblem = problem;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * Subclasses may extend, but must call the super implementation.
-	 */
-	@Override
-	public void endReporting() {
-		if (DEBUG) {
-			long total = System.currentTimeMillis() - fStartTime;
-			System.err.println("Core Collector (core):\t" + (total - fUITime)); //$NON-NLS-1$
-			System.err.println("Core Collector (ui):\t" + fUITime); //$NON-NLS-1$
-		}
 	}
 
 	/**
@@ -323,6 +288,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	}
 
 	private void processUnprocessedProposals() {
+		final long start = DEBUG ? System.currentTimeMillis() : 0;
 		final CompletionProposal[] copy;
 		synchronized (fUnprocessedCompletionProposals) {
 			final int size = fUnprocessedCompletionProposals.size();
@@ -334,6 +300,10 @@ public abstract class ScriptCompletionProposalCollector extends
 		}
 		for (CompletionProposal proposal : copy) {
 			processUnprocessedProposal(proposal);
+		}
+		if (DEBUG) {
+			final long UITime = System.currentTimeMillis() - start;
+			System.err.println("Core Collector (ui):\t" + UITime); //$NON-NLS-1$
 		}
 	}
 
@@ -512,7 +482,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * @return the compilation unit that the receiver operates on, or
 	 *         <code>null</code>
 	 */
-	protected final ISourceModule getSourceModule() {
+	public final ISourceModule getSourceModule() {
 		return fSourceModule;
 	}
 
@@ -832,8 +802,10 @@ public abstract class ScriptCompletionProposalCollector extends
 				&& fInvocationContext.isContextInformationMode();
 	}
 
-	@Override
-	public void clear() {
+	/*
+	 * Implements {@link ICompletionRequestorExtension#reset}
+	 */
+	public void reset() {
 		synchronized (fUnprocessedCompletionProposals) {
 			fUnprocessedCompletionProposals.clear();
 		}
@@ -865,6 +837,19 @@ public abstract class ScriptCompletionProposalCollector extends
 				attributes = new HashMap<Object, Object>();
 			}
 			attributes.put(key, value);
+		}
+	}
+
+	void startCompletion() {
+		if (DEBUG) {
+			fStartTime = System.currentTimeMillis();
+		}
+	}
+
+	void endCompletion() {
+		if (DEBUG) {
+			long total = System.currentTimeMillis() - fStartTime;
+			System.err.println("Core Collector (core):\t" + total); //$NON-NLS-1$
 		}
 	}
 
