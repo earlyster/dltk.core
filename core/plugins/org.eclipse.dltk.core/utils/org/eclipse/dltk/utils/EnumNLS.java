@@ -23,9 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-
 /**
  * Common superclass for all message bundle classes. Provides convenience
  * methods for manipulating messages.
@@ -42,7 +39,7 @@ import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
  * </p>
  * <p>
  * Text appearing within single quotes is treated as a literal. A single quote
- * is escaped by a preceeding single quote.
+ * is escaped by a preceding single quote.
  * </p>
  * <p>
  * Clients who wish to use the full substitution power of the
@@ -57,13 +54,9 @@ import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
  */
 public class EnumNLS {
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
-	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
-	private static final String IGNORE = "ignore"; //$NON-NLS-1$
-	private static final boolean ignoreWarnings = IGNORE
-			.equals(FrameworkProperties.getProperty(PROP_WARNINGS));
+	private static final boolean DEBUG = false;
 
 	static final int SEVERITY_ERROR = 0x04;
 	static final int SEVERITY_WARNING = 0x02;
@@ -171,8 +164,6 @@ public class EnumNLS {
 				// will fail later in the code and if so then we will see both
 				// the NPE and this error.
 				String value = "NLS missing message: " + item.name() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
-				if (Debug.DEBUG_MESSAGE_BUNDLES)
-					System.out.println(value);
 				log(SEVERITY_WARNING, value, null);
 				field.set(item, value);
 			} catch (Exception e) {
@@ -233,7 +224,7 @@ public class EnumNLS {
 			}
 		}
 		computeMissingMessages(bundleName, clazz, field, fields, values);
-		if (Debug.DEBUG_MESSAGE_BUNDLES)
+		if (DEBUG)
 			System.out
 					.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -254,13 +245,6 @@ public class EnumNLS {
 	 * @param e - exception to log
 	 */
 	static void log(int severity, String message, Exception e) {
-		if (severity == SEVERITY_WARNING && ignoreWarnings)
-			return; // ignoring warnings; bug 292980
-		// if (frameworkLog != null) {
-		// frameworkLog.log(new FrameworkLogEntry(
-		//					"org.eclipse.osgi", severity, 1, message, 0, e, null)); //$NON-NLS-1$
-		// return;
-		// }
 		String statusMsg;
 		switch (severity) {
 		case SEVERITY_ERROR:
@@ -315,8 +299,6 @@ public class EnumNLS {
 				return null;
 			if (fieldObject == null) {
 				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
-				if (Debug.DEBUG_MESSAGE_BUNDLES)
-					System.out.println(msg);
 				log(SEVERITY_WARNING, msg, null);
 				return null;
 			}
