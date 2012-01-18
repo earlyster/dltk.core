@@ -17,7 +17,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.dltk.core.DLTKCore;
 
 public class SimpleExtensionManager<E> {
@@ -45,14 +46,16 @@ public class SimpleExtensionManager<E> {
 
 	@SuppressWarnings("unchecked")
 	private void initialize() {
-		final IConfigurationElement[] elements = Platform
-				.getExtensionRegistry().getConfigurationElementsFor(
-						extensionPoint);
 		final List<E> result = new ArrayList<E>();
-		for (IConfigurationElement element : elements) {
-			final E instance = createInstance(element);
-			if (instance != null) {
-				result.add(instance);
+		final IExtensionRegistry registry = RegistryFactory.getRegistry();
+		if (registry != null) { // if running under OSGI
+			final IConfigurationElement[] elements = registry
+					.getConfigurationElementsFor(extensionPoint);
+			for (IConfigurationElement element : elements) {
+				final E instance = createInstance(element);
+				if (instance != null) {
+					result.add(instance);
+				}
 			}
 		}
 		instances = (E[]) Array.newInstance(elementType, result.size());
