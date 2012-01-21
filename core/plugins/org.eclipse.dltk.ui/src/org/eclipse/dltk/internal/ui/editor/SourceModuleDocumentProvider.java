@@ -62,7 +62,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.BufferManager;
-import org.eclipse.dltk.internal.core.ExternalScriptProject;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
 import org.eclipse.dltk.internal.ui.text.spelling.ScriptSpellingProblem;
@@ -668,14 +667,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			// the same behavior as in
 			// AbstractSourceModule.getAccumulatingProblemReporter
-			// It's possible that there is no script nature set, but the project
-			// is ExtenalScriptProject,
-			// that determined by it's name
-			if (fSourceModule != null
-					&& (ExternalScriptProject.EXTERNAL_PROJECT_NAME
-							.equals(fSourceModule.getScriptProject()
-									.getElementName()) || fSourceModule
-							.getScriptProject().isOnBuildpath(fSourceModule))) {
+			if (fSourceModule != null && !fSourceModule.isReadOnly()) {
 				ProblemRequestorState state = new ProblemRequestorState();
 				state.fInsideReportingSequence = insideReportingSequence;
 				state.fReportedProblems = new ArrayList<IProblem>();
