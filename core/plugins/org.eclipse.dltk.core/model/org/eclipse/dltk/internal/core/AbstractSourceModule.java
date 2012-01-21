@@ -449,25 +449,13 @@ public abstract class AbstractSourceModule extends Openable implements
 	 */
 	private AccumulatingProblemReporter getAccumulatingProblemReporter() {
 		final PerWorkingCopyInfo perWorkingCopyInfo = getPerWorkingCopyInfo();
-		if (perWorkingCopyInfo != null && perWorkingCopyInfo.isActive()) {
-			final IScriptProject project = getScriptProject();
-
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267008
-			// Script nature check is not enough. It's possible that the
-			// external project created
-			// has a name of ExternalScriptProject.EXTERNAL_PROJECT_NAME, but no
-			// script nature.
-			// If script nature added during
-			// WorkingCopyOwner.newWorkingCopy(...), this fix is not relevant.
-			// Does script nature should be added in
-			// WorkingCopyOwner.newWorkingCopy, or just script name checked?
-			if (project != null
-					&& (ExternalScriptProject.EXTERNAL_PROJECT_NAME
-							.equals(project.getProject().getName()) || ScriptProject
-							.hasScriptNature(project.getProject()))) {
-				return new AccumulatingProblemReporter(this,
-						perWorkingCopyInfo);
-			}
+		if (perWorkingCopyInfo != null && perWorkingCopyInfo.isActive()
+				&& !isReadOnly()) {
+			// Always report problems to AnnotationModel (in
+			// SourceModuleDocumentProvider). Should be useful for
+			// editing some scripts in other project without setting correctly
+			// the natures.
+			return new AccumulatingProblemReporter(this, perWorkingCopyInfo);
 		}
 		return null;
 	}
