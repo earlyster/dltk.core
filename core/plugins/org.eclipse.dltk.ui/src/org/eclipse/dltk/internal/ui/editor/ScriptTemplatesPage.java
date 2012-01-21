@@ -125,7 +125,7 @@ public class ScriptTemplatesPage extends AbstractTemplatesPage {
 		Region region = new Region(textSelection.getOffset() + 1, 0);
 		contextViewer.getSelectionProvider().setSelection(
 				new TextSelection(textSelection.getOffset(), 1));
-		ISourceModule compilationUnit = (ISourceModule) EditorUtility
+		ISourceModule compilationUnit = EditorUtility
 				.getEditorInputModelElement(fScriptEditor, true);
 
 		TemplateContextType type = getContextTypeRegistry().getContextType(
