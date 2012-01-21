@@ -29,7 +29,6 @@ import org.eclipse.dltk.core.IPackageDeclaration;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
-import org.eclipse.dltk.core.ISourceElementParserExtension;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
@@ -517,12 +516,6 @@ public abstract class AbstractSourceModule extends Openable implements
 			final ISourceElementParser parser = getSourceElementParser(natureId);
 			final AccumulatingProblemReporter problemReporter = getAccumulatingProblemReporter();
 			if (parser != null) {
-				if (!isReadOnly()) {
-					if (parser instanceof ISourceElementParserExtension) {
-						((ISourceElementParserExtension) parser)
-								.setScriptProject(this.getScriptProject());
-					}
-				}
 				parser.setRequestor(requestor);
 				parser.setReporter(problemReporter);
 				PerformanceNode p = RuntimePerformanceMonitor.begin();
