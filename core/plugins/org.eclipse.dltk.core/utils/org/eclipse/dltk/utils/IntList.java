@@ -57,6 +57,16 @@ public class IntList {
 		this.length = newSize;
 	}
 
+	public int removeAt(int index) {
+		final int result = values[index];
+		int j = length - index - 1;
+		if (j > 0) {
+			System.arraycopy(values, index + 1, values, index, j);
+		}
+		length--;
+		return result;
+	}
+
 	public int[] toArray() {
 		if (length == values.length) {
 			return values;
