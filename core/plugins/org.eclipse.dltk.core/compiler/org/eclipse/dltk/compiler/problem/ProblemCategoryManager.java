@@ -15,7 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -92,10 +94,39 @@ public class ProblemCategoryManager {
 		}
 
 	}
+	
+	public String getID(String natureId, String scopeId,
+			IProblemIdentifier problem) {
+		Assert.isNotNull(natureId);
+		ScopeDescriptor scope = getScope(natureId, scopeId);
+		if (scope == null)
+			return null;
+		Iterator<Entry<String, ProblemCategory>> iterator = scope.entrySet()
+				.iterator();
+		while (iterator.hasNext()) {
+			Entry<String, ProblemCategory> entry = iterator.next();
+			if (entry.getValue().contains(problem)) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
 
 	public IProblemCategory getCategory(String natureId, String scopeId,
 			String id) {
 		Assert.isNotNull(natureId);
+		ScopeDescriptor scope = getScope(natureId, scopeId);
+		if (scope == null)
+			return null;
+		return scope.get(id);
+	}
+
+	/**
+	 * @param natureId
+	 * @param scopeId
+	 * @return
+	 */
+	private ScopeDescriptor getScope(String natureId, String scopeId) {
 		final Key scopeKey = new Key(natureId, scopeId);
 		ScopeDescriptor scope;
 		synchronized (scopes) {
@@ -140,6 +171,6 @@ public class ProblemCategoryManager {
 				scopes.put(scopeKey, scope);
 			}
 		}
-		return scope.get(id);
+		return scope;
 	}
 }
