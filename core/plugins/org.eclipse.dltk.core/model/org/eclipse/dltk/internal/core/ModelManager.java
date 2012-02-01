@@ -367,7 +367,7 @@ public class ModelManager implements ISaveParticipant {
 	 * Holds the state used for delta processing.
 	 */
 	public DeltaProcessingState deltaState = new DeltaProcessingState();
-	public IndexManager indexManager = new IndexManager();
+	public IndexManager indexManager;
 	/**
 	 * Table from IProject to PerProjectInfo. NOTE: this object itself is used
 	 * as a lock to synchronize creation/removal of per project infos
@@ -1219,8 +1219,20 @@ public class ModelManager implements ISaveParticipant {
 	}
 
 	private void startIndexing() {
-		getIndexManager().reset();
-		ProjectIndexerManager.startIndexing();
+		if (indexManager != null) {
+			indexManager.reset();
+			// create contributed indexers in a job, so
+			// dltk.core initialization completes earlier.
+			final Job startIndexing = new Job("DLTK indexing initialization") {
+				protected IStatus run(IProgressMonitor monitor) {
+					ProjectIndexerManager.startIndexing();
+					return Status.OK_STATUS;
+				}
+			};
+			startIndexing.setSystem(true);
+			startIndexing.setPriority(Job.BUILD);
+			startIndexing.schedule();
+		}
 	}
 
 	/**
