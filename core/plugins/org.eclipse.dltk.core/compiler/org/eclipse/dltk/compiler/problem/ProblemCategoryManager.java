@@ -11,11 +11,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -95,21 +97,31 @@ public class ProblemCategoryManager {
 
 	}
 	
-	public String getID(String natureId, String scopeId,
+	/**
+	 * returns an array (empty is nothing can be found) of all the category ids
+	 * that can be found for this problem.
+	 * 
+	 * @param natureId
+	 * @param scopeId
+	 * @param problem
+	 * @return
+	 */
+	public String[] getID(String natureId, String scopeId,
 			IProblemIdentifier problem) {
 		Assert.isNotNull(natureId);
 		ScopeDescriptor scope = getScope(natureId, scopeId);
 		if (scope == null)
-			return null;
+			return new String[0];
 		Iterator<Entry<String, ProblemCategory>> iterator = scope.entrySet()
 				.iterator();
+		List<String> ids = new ArrayList<String>();
 		while (iterator.hasNext()) {
 			Entry<String, ProblemCategory> entry = iterator.next();
 			if (entry.getValue().contains(problem)) {
-				return entry.getKey();
+				ids.add(entry.getKey());
 			}
 		}
-		return null;
+		return ids.toArray(new String[ids.size()]);
 	}
 
 	public IProblemCategory getCategory(String natureId, String scopeId,
