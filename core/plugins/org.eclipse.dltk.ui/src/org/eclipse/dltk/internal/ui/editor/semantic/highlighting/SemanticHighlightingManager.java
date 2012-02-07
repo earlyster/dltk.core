@@ -334,20 +334,17 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * Initialize semantic highlightings.
 	 */
 	private void initializeHighlightings() {
-		final ScriptTextTools textTools = getTextTools();
-		if (textTools != null) {
-			Assert.isNotNull(fSemanticHighlightings);
-			fHighlightings = new HighlightingStyle[fSemanticHighlightings.length];
-			for (int a = 0; a < fSemanticHighlightings.length; a++) {
-				final SemanticHighlighting sh = fSemanticHighlightings[a];
-				final TextAttribute ta = createTextAttribute(fColorManager,
-						fPreferenceStore, sh.getPreferenceKey(),
-						sh.getBackgroundPreferenceKey());
-				final boolean isEnabled = !sh.isSemanticOnly()
-						|| fPreferenceStore.getBoolean(sh
-								.getEnabledPreferenceKey());
-				fHighlightings[a] = new HighlightingStyle(ta, isEnabled, sh);
-			}
+		Assert.isNotNull(fSemanticHighlightings);
+		fHighlightings = new HighlightingStyle[fSemanticHighlightings.length];
+		for (int a = 0; a < fSemanticHighlightings.length; a++) {
+			final SemanticHighlighting sh = fSemanticHighlightings[a];
+			final TextAttribute ta = createTextAttribute(fColorManager,
+					fPreferenceStore, sh.getPreferenceKey(),
+					sh.getBackgroundPreferenceKey());
+			final boolean isEnabled = !sh.isSemanticOnly()
+					|| fPreferenceStore
+							.getBoolean(sh.getEnabledPreferenceKey());
+			fHighlightings[a] = new HighlightingStyle(ta, isEnabled, sh);
 		}
 	}
 
