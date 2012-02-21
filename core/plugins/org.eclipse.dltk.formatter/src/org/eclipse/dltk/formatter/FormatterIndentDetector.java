@@ -64,6 +64,10 @@ public class FormatterIndentDetector implements IFormatterWriter {
 		// empty
 	}
 
+	public void skipNextLineBreaks(IFormatterContext context, boolean value) {
+		// empty
+	}
+
 	public void appendToPreviousLine(IFormatterContext context, String text) {
 		// empty
 	}

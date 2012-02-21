@@ -115,8 +115,12 @@ public class FormatterWriter implements IFormatterWriter {
 	}
 
 	public void skipNextLineBreaks(IFormatterContext context) {
+		skipNextLineBreaks(context, true);
+	}
+
+	public void skipNextLineBreaks(IFormatterContext context, boolean value) {
 		if (!keepLines) {
-			skipNextNewLine = true;
+			skipNextNewLine = value;
 		}
 	}
 

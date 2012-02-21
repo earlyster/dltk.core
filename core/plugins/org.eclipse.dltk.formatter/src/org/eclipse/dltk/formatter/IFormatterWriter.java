@@ -37,6 +37,8 @@ public interface IFormatterWriter {
 
 	void skipNextLineBreaks(IFormatterContext context);
 
+	void skipNextLineBreaks(IFormatterContext context, boolean value);
+
 	void appendToPreviousLine(IFormatterContext context, String text);
 
 	void disableAppendToPreviousLine();
