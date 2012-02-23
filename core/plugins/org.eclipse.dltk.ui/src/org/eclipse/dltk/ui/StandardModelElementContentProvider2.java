@@ -111,7 +111,6 @@ public class StandardModelElementContentProvider2 implements
 	 */
 	public StandardModelElementContentProvider2(boolean provideMembers) {
 		this(provideMembers, true);
-		fProvideMembers = provideMembers;
 	}
 
 	/**
@@ -148,7 +147,6 @@ public class StandardModelElementContentProvider2 implements
 	 *            leaves provided by this content provider.
 	 */
 	public void setProvideMembers(boolean b) {
-		// hello
 		fProvideMembers = b;
 	}
 
