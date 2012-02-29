@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.codeassist.InternalCompletionProposal;
@@ -230,8 +233,7 @@ public class CompletionProposal {
 	private String[] parameterNames = null;
 
 	private IModelElement modelElement;
-	private Object foreign;
-
+	private Map<String, Object> attributes;
 	private Object extraInfo;
 
 	private int accessibility = IAccessRule.K_ACCESSIBLE;
@@ -866,12 +868,15 @@ public class CompletionProposal {
 		this.modelElement = modelElement;
 	}
 
+	private static final String FOREIGN = CompletionProposal.class.getName()
+			+ ".FOREIGN";
+
 	public void setForeign(Object f) {
-		this.foreign = f;
+		setAttribute(FOREIGN, f);
 	}
 
 	public Object getForeign() {
-		return foreign;
+		return getAttribute(FOREIGN);
 	}
 
 	public Object getExtraInfo() {
@@ -880,6 +885,21 @@ public class CompletionProposal {
 
 	public void setExtraInfo(Object extraInfo) {
 		this.extraInfo = extraInfo;
+	}
+
+	public void setAttribute(String key, Object value) {
+		if (value != null) {
+			if (attributes == null) {
+				attributes = new HashMap<String, Object>(4);
+			}
+			attributes.put(key, value);
+		} else if (attributes != null) {
+			attributes.remove(key);
+		}
+	}
+
+	public Object getAttribute(String key) {
+		return attributes != null ? attributes.get(key) : null;
 	}
 
 	/**
