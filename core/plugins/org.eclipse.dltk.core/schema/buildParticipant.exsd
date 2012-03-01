@@ -19,7 +19,7 @@
       <complexType>
          <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="buildParticipant"/>
-            <element ref="predicate"/>
+            <element ref="filter"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -99,7 +99,7 @@
       </complexType>
    </element>
 
-   <element name="predicate">
+   <element name="filter">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>

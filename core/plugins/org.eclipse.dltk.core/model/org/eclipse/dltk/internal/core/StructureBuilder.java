@@ -21,7 +21,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
-import org.eclipse.dltk.core.builder.IBuildParticipantPredicate;
+import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.builder.AbstractBuildContext;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
@@ -62,22 +62,23 @@ class StructureBuilder {
 			AccumulatingProblemReporter reporter) {
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 		final IScriptProject project = module.getScriptProject();
-		final IBuildParticipant[] participants = beginBuild(natureId, project);
+		IBuildParticipant[] participants = beginBuild(natureId, project);
 		if (participants.length == 0) {
 			return;
 		}
-		final IBuildParticipantPredicate[] predicates = BuildParticipantManager
-				.getPredicates(project, natureId);
 		final ReconcileBuildContext context = new ReconcileBuildContext(module,
 				reporter);
+		final IBuildParticipantFilter[] filters = BuildParticipantManager
+				.getFilters(project, natureId, reporter);
+		for (IBuildParticipantFilter filter : filters) {
+			participants = filter.filter(participants, context);
+			if (participants == null || participants.length == 0) {
+				return;
+			}
+		}
 		try {
-			OUTER: for (int k = 0; k < participants.length; ++k) {
-				final IBuildParticipant participant = participants[k];
-				for (IBuildParticipantPredicate predicate : predicates) {
-					if (!predicate.apply(participant, context))
-						continue OUTER;
-				}
-				participant.build(context);
+			for (int k = 0; k < participants.length; ++k) {
+				participants[k].build(context);
 			}
 		} catch (CoreException e) {
 			DLTKCore.error("error", e); //$NON-NLS-1$

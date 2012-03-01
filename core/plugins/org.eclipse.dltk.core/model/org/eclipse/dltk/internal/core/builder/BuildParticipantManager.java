@@ -20,8 +20,8 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
-import org.eclipse.dltk.core.builder.IBuildParticipantPredicate;
-import org.eclipse.dltk.core.builder.IBuildParticipantPredicateFactory;
+import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
+import org.eclipse.dltk.core.builder.IBuildParticipantFilterFactory;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.FactoryValue;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.osgi.util.NLS;
@@ -58,10 +58,10 @@ public class BuildParticipantManager extends
 
 	}
 
-	public static class PredicateFactoryValue extends
-			FactoryValue<IBuildParticipantPredicateFactory> {
+	public static class FilterFactoryValue extends
+			FactoryValue<IBuildParticipantFilterFactory> {
 
-		public PredicateFactoryValue(IBuildParticipantPredicateFactory factory) {
+		public FilterFactoryValue(IBuildParticipantFilterFactory factory) {
 			super(factory);
 		}
 
@@ -75,7 +75,7 @@ public class BuildParticipantManager extends
 	private static final String REQUIRES_ID = "id"; //$NON-NLS-1$
 
 	private static final String PARTICIPANT = "buildParticipant";
-	private static final String PREDICATE = "predicate";
+	private static final String FILTER = "filter";
 
 	private static final String ATTR_ID = "id"; //$NON-NLS-1$
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
@@ -106,20 +106,20 @@ public class BuildParticipantManager extends
 				}
 			}
 			return factoryValue;
-		} else if (PREDICATE.equals(element.getName())) {
+		} else if (FILTER.equals(element.getName())) {
 			final Object factory = element.createExecutableExtension(classAttr);
-			if (!(factory instanceof IBuildParticipantPredicateFactory)) {
-				DLTKCore.warn(NLS.bind(
-						"{0} contributed by {1} must implement {2}",
-						new Object[] {
-								element.getName(),
-								element.getContributor(),
-								IBuildParticipantPredicateFactory.class
-										.getName() }));
+			if (!(factory instanceof IBuildParticipantFilterFactory)) {
+				DLTKCore.warn(NLS
+						.bind("{0} contributed by {1} must implement {2}",
+								new Object[] {
+										element.getName(),
+										element.getContributor(),
+										IBuildParticipantFilterFactory.class
+												.getName() }));
 				return null;
 			}
-			return new PredicateFactoryValue(
-					(IBuildParticipantPredicateFactory) factory);
+			return new FilterFactoryValue(
+					(IBuildParticipantFilterFactory) factory);
 		} else {
 			DLTKCore.warn(NLS
 					.bind("Wrong element {0} in {1} extension point contributed by {2}",
@@ -140,7 +140,7 @@ public class BuildParticipantManager extends
 
 	private static final IBuildParticipant[] NO_PARTICIPANTS = new IBuildParticipant[0];
 
-	private static final IBuildParticipantPredicate[] NO_PREDICATES = new IBuildParticipantPredicate[0];
+	private static final IBuildParticipantFilter[] NO_PREDICATES = new IBuildParticipantFilter[0];
 
 	/**
 	 * Returns {@link IBuildParticipant} instances of the specified nature. If
@@ -205,30 +205,30 @@ public class BuildParticipantManager extends
 		}
 	}
 
-	public static IBuildParticipantPredicate[] getPredicates(
-			IScriptProject project, String natureId) {
+	public static IBuildParticipantFilter[] getFilters(IScriptProject project,
+			String natureId, Object context) {
 		final FactoryValue<?>[] factories = getInstance()
 				.getInstances(natureId);
 		if (factories == null || factories.length == 0) {
 			return NO_PREDICATES;
 		}
-		return createPredicates(project, factories);
+		return createFilters(project, factories, context);
 	}
 
-	public static IBuildParticipantPredicate[] createPredicates(
-			IScriptProject project, FactoryValue<?>[] factories) {
-		final IBuildParticipantPredicate[] result = new IBuildParticipantPredicate[factories.length];
+	public static IBuildParticipantFilter[] createFilters(
+			IScriptProject project, FactoryValue<?>[] factories, Object context) {
+		final IBuildParticipantFilter[] result = new IBuildParticipantFilter[factories.length];
 		int created = 0;
 		for (int i = 0; i < factories.length; ++i) {
-			if (!(factories[i] instanceof PredicateFactoryValue)) {
+			if (!(factories[i] instanceof FilterFactoryValue)) {
 				continue;
 			}
-			final PredicateFactoryValue factory = (PredicateFactoryValue) factories[i];
+			final FilterFactoryValue factory = (FilterFactoryValue) factories[i];
 			try {
-				final IBuildParticipantPredicate predicate = factory.factory
-						.createPredicate(project);
-				if (predicate != null) {
-					result[created++] = predicate;
+				final IBuildParticipantFilter filter = factory.factory
+						.createPredicate(project, context);
+				if (filter != null) {
+					result[created++] = filter;
 				}
 			} catch (CoreException e) {
 				final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
@@ -240,7 +240,7 @@ public class BuildParticipantManager extends
 			if (created == 0) {
 				return NO_PREDICATES;
 			}
-			final IBuildParticipantPredicate[] newResult = new IBuildParticipantPredicate[created];
+			final IBuildParticipantFilter[] newResult = new IBuildParticipantFilter[created];
 			System.arraycopy(result, 0, newResult, 0, created);
 			return newResult;
 		} else {

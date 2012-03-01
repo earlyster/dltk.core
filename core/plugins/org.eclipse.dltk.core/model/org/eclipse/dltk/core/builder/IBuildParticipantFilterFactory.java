@@ -20,7 +20,7 @@ import org.eclipse.dltk.core.IScriptProject;
  * 
  * @since 4.0
  */
-public interface IBuildParticipantPredicateFactory {
+public interface IBuildParticipantFilterFactory {
 
 	/**
 	 * Creates the predicate for checking if each {@link IBuildParticipant}
@@ -28,10 +28,11 @@ public interface IBuildParticipantPredicateFactory {
 	 * predicate is required for the project.
 	 * 
 	 * @param project
+	 * @param context
 	 * @return
 	 * @throws CoreException
 	 */
-	IBuildParticipantPredicate createPredicate(IScriptProject project)
-			throws CoreException;
+	IBuildParticipantFilter createPredicate(IScriptProject project,
+			Object context) throws CoreException;
 
 }

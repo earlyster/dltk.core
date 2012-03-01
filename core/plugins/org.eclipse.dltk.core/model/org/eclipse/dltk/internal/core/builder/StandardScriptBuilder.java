@@ -37,7 +37,7 @@ import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension3;
-import org.eclipse.dltk.core.builder.IBuildParticipantPredicate;
+import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.builder.IBuildState;
 import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
@@ -243,19 +243,20 @@ public class StandardScriptBuilder implements IScriptBuilder {
 	}
 
 	private void buildModule(IBuildContext context) {
-		OUTER: for (int k = 0; k < participants.length; ++k) {
-			final IBuildParticipant participant = participants[k];
-			for (IBuildParticipantPredicate predicate : predicates) {
-				if (!predicate.apply(participant, context)) {
-					continue OUTER;
-				}
+		IBuildParticipant[] selected = participants;
+		for (IBuildParticipantFilter filter : filters) {
+			selected = filter.filter(selected, context);
+			if (selected == null || selected.length == 0) {
+				return;
 			}
-			try {
-				participant.build(context);
-			} catch (CoreException e) {
-				DLTKCore.error(
-						Messages.StandardScriptBuilder_errorBuildingModule, e);
+		}
+		try {
+			for (int k = 0; k < selected.length; ++k) {
+				selected[k].build(context);
 			}
+		} catch (CoreException e) {
+			DLTKCore.error(Messages.StandardScriptBuilder_errorBuildingModule,
+					e);
 		}
 	}
 
@@ -301,7 +302,7 @@ public class StandardScriptBuilder implements IScriptBuilder {
 	private boolean beginBuildDone = false;
 	private boolean endBuildNeeded = false;
 	private IBuildParticipant[] participants = null;
-	private IBuildParticipantPredicate[] predicates = null;
+	private IBuildParticipantFilter[] filters = null;
 	private IDLTKLanguageToolkit toolkit = null;
 	private IProblemFactory problemFactory = null;
 
@@ -318,8 +319,8 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		if (participants == null || participants.length == 0) {
 			return false;
 		}
-		predicates = BuildParticipantManager.getPredicates(project,
-				toolkit.getNatureId());
+		filters = BuildParticipantManager.getFilters(project,
+				toolkit.getNatureId(), this);
 		problemFactory = createProblemFactory();
 		beginBuildDone = false;
 		endBuildNeeded = false;
@@ -363,7 +364,7 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			reporters = null;
 		}
 		participants = null;
-		predicates = null;
+		filters = null;
 		toolkit = null;
 		problemFactory = null;
 		beginBuildDone = false;

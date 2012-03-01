@@ -15,20 +15,21 @@ package org.eclipse.dltk.core.builder;
  * Predicate for checking if the specified {@link IBuildParticipant} should be
  * called for the specified file.
  * 
- * Created via {@link IBuildParticipantPredicateFactory}
+ * Created via {@link IBuildParticipantFilterFactory}
  * 
  * @since 4.0
  */
-public interface IBuildParticipantPredicate {
+public interface IBuildParticipantFilter {
 
 	/**
-	 * Returns if the specified {@link IBuildParticipant} should handle the file
-	 * identified with the context.
+	 * Filters the array of {@link IBuildParticipant}s and returns only allowed
+	 * ones.
 	 * 
-	 * @param participant
+	 * @param participants
 	 * @param context
 	 * @return
 	 */
-	boolean apply(IBuildParticipant participant, IBuildContext context);
+	IBuildParticipant[] filter(IBuildParticipant[] participants,
+			IBuildContext context);
 
 }
