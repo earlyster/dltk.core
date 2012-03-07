@@ -16,7 +16,7 @@ package org.eclipse.dltk.compiler.problem;
  * {@link org.eclipse.dltk.utils.EnumNLS} to load localized messages from
  * <code>.properties</code> files.
  */
-public interface IProblemIdentifier {
+public interface IProblemIdentifier extends IValidationStatus {
 
 	static IProblemIdentifier NULL = null;
 
