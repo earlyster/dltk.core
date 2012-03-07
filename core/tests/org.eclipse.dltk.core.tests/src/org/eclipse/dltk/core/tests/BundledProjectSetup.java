@@ -14,6 +14,7 @@ package org.eclipse.dltk.core.tests;
 import static org.eclipse.dltk.core.tests.model.AbstractModelTests.getProject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
+import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
  * A decorator for tests to initialize workspace project before executing the
@@ -43,6 +45,7 @@ public class BundledProjectSetup extends TestSetup {
 		private String bundleName;
 		private List<String> projectNames = new ArrayList<String>();
 		private boolean build;
+		private boolean disableIndexer;
 
 		public Builder(String bundleName, String[] projectNames) {
 			this.bundleName = bundleName;
@@ -57,7 +60,7 @@ public class BundledProjectSetup extends TestSetup {
 		public BundledProjectSetup suite(Class<?>... testClasses) {
 			return new BundledProjectSetup(bundleName,
 					projectNames.toArray(new String[projectNames.size()]),
-					createTests(testClasses), build);
+					createTests(testClasses), build, disableIndexer);
 		}
 
 		private Test createTests(Class<?>[] testClasses) {
@@ -70,6 +73,11 @@ public class BundledProjectSetup extends TestSetup {
 				}
 				return result;
 			}
+		}
+
+		public Builder disableIndexer() {
+			this.disableIndexer = true;
+			return this;
 		}
 
 	}
@@ -89,6 +97,7 @@ public class BundledProjectSetup extends TestSetup {
 	private final Helper helper;
 	private final String[] projectNames;
 	private final boolean build;
+	private final boolean disableIndexer;
 
 	public BundledProjectSetup(String bundleName, String projectName, Test test) {
 		this(bundleName, projectName, test, false);
@@ -101,24 +110,37 @@ public class BundledProjectSetup extends TestSetup {
 
 	public BundledProjectSetup(String bundleName, String[] projectNames,
 			Test test, boolean build) {
+		this(bundleName, projectNames, test, build, false);
+	}
+
+	private BundledProjectSetup(String bundleName, String[] projectNames,
+			Test test, boolean build, boolean disableIndexer) {
 		super(test);
 		this.helper = new Helper(bundleName);
 		this.projectNames = projectNames;
 		this.build = build;
+		this.disableIndexer = disableIndexer;
 	}
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		WorkspaceAutoBuild.disable();
+		if (disableIndexer) {
+			ModelManager.getModelManager().getIndexManager().disable();
+		}
 		for (String projectName : projectNames) {
 			helper.setUpProject(projectName);
 		}
 		if (build) {
+			final long start = System.currentTimeMillis();
 			for (String projectName : projectNames) {
 				getProject(projectName).build(
 						IncrementalProjectBuilder.FULL_BUILD, null);
 			}
+			System.out.println((System.currentTimeMillis() - start)
+					+ " ms to build " + Arrays.asList(projectNames)
+					+ " project(s)");
 		}
 	}
 
@@ -126,6 +148,9 @@ public class BundledProjectSetup extends TestSetup {
 	protected void tearDown() throws Exception {
 		for (String projectName : projectNames) {
 			helper.deleteProject(projectName);
+		}
+		if (disableIndexer) {
+			ModelManager.getModelManager().getIndexManager().enable();
 		}
 		super.tearDown();
 	}
