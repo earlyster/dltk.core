@@ -46,6 +46,8 @@ public final class ScriptMessages extends NLS {
 	public static String PackageExplorerPart_workspace;
 	public static String PackageExplorerPart_workingSetModel;
 
+	public static String LibraryContainer_libraries;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ScriptMessages.class);
 	}
