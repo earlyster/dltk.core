@@ -25,6 +25,9 @@ public final class ScriptMessages extends NLS {
 	public static String DragAdapter_refreshing;
 	public static String DropAdapter_errorTitle;
 	public static String DropAdapter_errorMessage;
+	public static String GotoRequiredProjectAction_label;
+	public static String GotoRequiredProjectAction_description;
+	public static String GotoRequiredProjectAction_tooltip;
 	public static String PackageExplorer_title;
 	public static String PackageExplorer_toolTip;
 	public static String PackageExplorer_toolTip2;

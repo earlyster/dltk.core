@@ -140,7 +140,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		//fGotoResourceAction= new GotoResourceAction(fPart);
 		fCollapseAllAction= new CollapseAllAction(fPart);	
 		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
-		//fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
+		fGotoRequiredProjectAction = new GotoRequiredProjectAction(fPart);
 	}
 
 	public void dispose() {
