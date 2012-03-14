@@ -84,7 +84,8 @@ public abstract class LinkedModeScriptCompletionProposal extends
 			} catch (BadLocationException e) {
 			}
 		} else {
-			fSelectedRegion = new Region(getCursorPosition(), 0);
+			fSelectedRegion = new Region(replacementOffset
+					+ getCursorPosition(), 0);
 		}
 	}
 
