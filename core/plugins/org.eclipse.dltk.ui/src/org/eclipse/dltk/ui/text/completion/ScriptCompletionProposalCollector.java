@@ -197,26 +197,14 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * Subclasses may replace, but usually should not need to. Consider
 	 * replacing
 	 * {@linkplain #createScriptCompletionProposal(CompletionProposal)
-	 * createJavaCompletionProposal} instead.
+	 * createScriptCompletionProposal} instead.
 	 * </p>
 	 */
 	@Override
 	public void accept(CompletionProposal proposal) {
-		try {
-			if (isFiltered(proposal))
-				return;
-			doAccept(proposal);
-		} catch (IllegalArgumentException e) {
-			// all signature processing method may throw IAEs
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
-			// don't abort, but log and show all the valid proposals
-			DLTKUIPlugin
-					.log(new Status(
-							IStatus.ERROR,
-							DLTKUIPlugin.getPluginId(),
-							IStatus.OK,
-							"Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()), e)); //$NON-NLS-1$
-		}
+		if (isFiltered(proposal))
+			return;
+		doAccept(proposal);
 	}
 
 	protected void doAccept(CompletionProposal proposal) {
@@ -299,7 +287,20 @@ public abstract class ScriptCompletionProposalCollector extends
 			fUnprocessedCompletionProposals.clear();
 		}
 		for (CompletionProposal proposal : copy) {
-			processUnprocessedProposal(proposal);
+			try {
+				processUnprocessedProposal(proposal);
+			} catch (IllegalArgumentException e) {
+				// all signature processing method may throw IAEs
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
+				// don't abort, but log and show all the valid proposals
+				DLTKUIPlugin
+						.log(new Status(
+								IStatus.ERROR,
+								DLTKUIPlugin.getPluginId(),
+								IStatus.OK,
+								"Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()), e)); //$NON-NLS-1$
+			}
+
 		}
 		if (DEBUG) {
 			final long UITime = System.currentTimeMillis() - start;
