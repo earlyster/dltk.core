@@ -14,20 +14,11 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.LinkedModeModel;
-import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 public class ScriptMethodCompletionProposal extends
-		LazyScriptCompletionProposal implements
+		LinkedModeScriptCompletionProposal implements
 		IScriptCompletionProposalExtension2 {
 	/**
 	 * Triggers for method proposals without parameters. Do not modify.
@@ -44,8 +35,6 @@ public class ScriptMethodCompletionProposal extends
 	/** Triggers for method name proposals (static imports). Do not modify. */
 	protected final static char[] METHOD_NAME_TRIGGERS = new char[] { ';' };
 
-	private IRegion fSelectedRegion; // initialized by apply()
-
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed = false;
 	private int fContextInformationPosition;
@@ -60,58 +49,6 @@ public class ScriptMethodCompletionProposal extends
 	 */
 	public String getName() {
 		return fProposal.getName();
-	}
-
-	private ReplacementBuffer replacementBuffer;
-
-	@Override
-	public void apply(IDocument document, char trigger, int offset) {
-		if (trigger == ' ' || trigger == '(')
-			trigger = '\0';
-		super.apply(document, trigger, offset);
-
-		int exit = getReplacementOffset() + getReplacementString().length();
-
-		if (replacementBuffer != null && replacementBuffer.hasArguments()
-				&& getTextViewer() != null) {
-			int baseOffset = getReplacementOffset() + getCursorPosition();
-			try {
-				LinkedModeModel model = new LinkedModeModel();
-				for (IRegion region : replacementBuffer.getArguments()) {
-					LinkedPositionGroup group = new LinkedPositionGroup();
-					group.addPosition(new LinkedPosition(document, baseOffset
-							+ region.getOffset(), region.getLength(),
-							LinkedPositionGroup.NO_STOP));
-					model.addGroup(group);
-				}
-
-				model.forceInstall();
-
-				LinkedModeUI ui = new EditorLinkedModeUI(model, getTextViewer());
-				ui.setExitPosition(getTextViewer(), exit, 0, Integer.MAX_VALUE);
-				ui.setExitPolicy(new ExitPolicy(')', document));
-				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
-				ui.enter();
-
-				fSelectedRegion = ui.getSelectedRegion();
-
-			} catch (BadLocationException e) {
-			}
-		} else {
-			fSelectedRegion = new Region(exit, 0);
-		}
-	}
-
-	/**
-	 * @see org.eclipse.dltk.ui.text.completion.AbstractScriptCompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-	 */
-	@Override
-	public Point getSelection(IDocument document) {
-		if (fSelectedRegion == null)
-			return new Point(getReplacementOffset(), 0);
-
-		return new Point(fSelectedRegion.getOffset(),
-				fSelectedRegion.getLength());
 	}
 
 	@Override
@@ -204,14 +141,14 @@ public class ScriptMethodCompletionProposal extends
 				&& (noOverwrite || completion.charAt(completion.length() - 1) == ')');
 	}
 
-	/**
-	 * Override {@link #computeReplacement(IReplacementBuffer)}
-	 */
 	@Override
-	protected final String computeReplacementString() {
-		replacementBuffer = new ReplacementBuffer();
-		computeReplacement(replacementBuffer);
-		return replacementBuffer.toString();
+	protected char getOpenTrigger() {
+		return '(';
+	}
+
+	@Override
+	protected char getExitTigger() {
+		return ')';
 	}
 
 	/**
@@ -239,15 +176,11 @@ public class ScriptMethodCompletionProposal extends
 			// buffer.append(SPACE);
 
 			String[] parameterNames = fProposal.findParameterNames(null);
-			int argumentOffset = 0;
 			for (int i = 0; i < parameterNames.length; ++i) {
 				if (i != 0) {
 					buffer.append(COMMA);
-					argumentOffset += 1;
 				}
-				buffer.append(parameterNames[i]);
-				buffer.addArgument(argumentOffset, parameterNames[i].length());
-				argumentOffset += parameterNames[i].length();
+				buffer.addArgument(parameterNames[i]);
 			}
 
 			// don't add the trailing space, but let the user type it in himself

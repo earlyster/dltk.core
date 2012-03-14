@@ -14,17 +14,33 @@ package org.eclipse.dltk.ui.text.completion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-
 /**
  * @since 4.0
  */
 public class ReplacementBuffer {
-	private final List<IRegion> arguments = new ArrayList<IRegion>();
+	static class Argument {
+		final int offset;
+		final int length;
+		final boolean relativeToCursor;
 
+		public Argument(int offset, int length, boolean relativeToCursor) {
+			this.offset = offset;
+			this.length = length;
+			this.relativeToCursor = relativeToCursor;
+		}
+	}
+
+	final List<Argument> arguments = new ArrayList<Argument>();
+
+	@Deprecated
 	public void addArgument(int offset, int length) {
-		arguments.add(new Region(offset, length));
+		arguments.add(new Argument(offset, length, true));
+	}
+
+	public void addArgument(String value) {
+		final int offset = length();
+		append(value);
+		arguments.add(new Argument(offset, value.length(), false));
 	}
 
 	private final StringBuilder buffer = new StringBuilder();
@@ -44,10 +60,6 @@ public class ReplacementBuffer {
 
 	public boolean hasArguments() {
 		return !arguments.isEmpty();
-	}
-
-	public List<IRegion> getArguments() {
-		return arguments;
 	}
 
 }

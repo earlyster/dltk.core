@@ -287,6 +287,7 @@ public abstract class AbstractScriptCompletionProposal implements
 
 			replace(document, getReplacementOffset(), getReplacementLength(),
 					replacement);
+			postReplace(document);
 
 			referenceOffset = referenceTracker.postReplace(document);
 			setReplacementOffset(referenceOffset
@@ -299,6 +300,9 @@ public abstract class AbstractScriptCompletionProposal implements
 		} catch (BadLocationException x) {
 			// ignore
 		}
+	}
+
+	protected void postReplace(IDocument document) throws BadLocationException {
 	}
 
 	/**
@@ -746,7 +750,6 @@ public abstract class AbstractScriptCompletionProposal implements
 		String value = DLTKCore.getOption(DLTKCore.CODEASSIST_CAMEL_CASE_MATCH);
 		return DLTKCore.ENABLED.equals(value);
 	}
-
 
 	protected IPreferenceStore getPreferenceStore() {
 		return DLTKUIPlugin.getDefault().getPreferenceStore();
