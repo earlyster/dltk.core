@@ -42,11 +42,11 @@ public abstract class LinkedModeScriptCompletionProposal extends
 			trigger = '\0';
 		super.apply(document, trigger, offset);
 
-		int exit = getReplacementOffset() + getReplacementString().length();
+		final int replacementOffset = getReplacementOffset();
+		final int exit = replacementOffset + getReplacementString().length();
 
 		if (replacementBuffer != null && replacementBuffer.hasArguments()
 				&& getTextViewer() != null) {
-			final int replacementOffset = getReplacementOffset();
 			final int cursor = getCursorPosition();
 			try {
 				LinkedModeModel model = new LinkedModeModel();
@@ -84,7 +84,7 @@ public abstract class LinkedModeScriptCompletionProposal extends
 			} catch (BadLocationException e) {
 			}
 		} else {
-			fSelectedRegion = new Region(exit, 0);
+			fSelectedRegion = new Region(getCursorPosition(), 0);
 		}
 	}
 
