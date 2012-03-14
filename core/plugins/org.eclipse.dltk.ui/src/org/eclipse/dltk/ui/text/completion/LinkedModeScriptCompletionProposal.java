@@ -64,8 +64,11 @@ public abstract class LinkedModeScriptCompletionProposal extends
 
 				LinkedModeUI ui = new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), exit, 0, Integer.MAX_VALUE);
-				ui.setExitPolicy(new ExitPolicy(getExitTigger(), document));
-				final char[] exitTriggers = getExitTiggers();
+				char exitTrigger = getExitTrigger();
+				if (exitTrigger != 0) {
+					ui.setExitPolicy(new ExitPolicy(exitTrigger, document));
+				}
+				final char[] exitTriggers = getExitTriggers();
 				if (exitTriggers != null) {
 					for (int i = 0; i < exitTriggers.length; ++i) {
 						ui.setExitPolicy(new ExitPolicy(exitTriggers[i],
@@ -87,9 +90,11 @@ public abstract class LinkedModeScriptCompletionProposal extends
 
 	protected abstract char getOpenTrigger();
 
-	protected abstract char getExitTigger();
+	protected char getExitTrigger() {
+		return 0;
+	}
 
-	protected char[] getExitTiggers() {
+	protected char[] getExitTriggers() {
 		return null;
 	}
 

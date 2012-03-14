@@ -147,7 +147,7 @@ public class ScriptMethodCompletionProposal extends
 	}
 
 	@Override
-	protected char getExitTigger() {
+	protected char getExitTrigger() {
 		return ')';
 	}
 
