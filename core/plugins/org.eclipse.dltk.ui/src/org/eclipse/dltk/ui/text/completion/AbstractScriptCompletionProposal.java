@@ -352,7 +352,7 @@ public abstract class AbstractScriptCompletionProposal implements
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any
 		// longer
-		if (!isInScriptdoc() && !validate(document, offset, null)) {
+		if (!isInDoc() && !validate(document, offset, null)) {
 			setCursorPosition(offset - getReplacementOffset());
 			if (trigger != '\0') {
 				try {
@@ -394,7 +394,19 @@ public abstract class AbstractScriptCompletionProposal implements
 	 * @return <code>true</code> if the proposal is within javadoc,
 	 *         <code>false</code> otherwise
 	 */
-	protected boolean isInScriptdoc() {
+	@Deprecated
+	protected final boolean isInScriptdoc() {
+		return isInDoc();
+	}
+
+	/**
+	 * Returns <code>true</code> if the proposal is within javadoc,
+	 * <code>false</code> otherwise.
+	 * 
+	 * @return <code>true</code> if the proposal is within javadoc,
+	 *         <code>false</code> otherwise
+	 */
+	protected boolean isInDoc() {
 		return fIsInDoc;
 	}
 

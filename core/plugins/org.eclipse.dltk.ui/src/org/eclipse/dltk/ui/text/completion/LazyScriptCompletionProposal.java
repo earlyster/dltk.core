@@ -138,7 +138,7 @@ public abstract class LazyScriptCompletionProposal extends
 		return getReplacementString().length();
 	}
 
-	protected final boolean isInDoc() {
+	protected boolean isInDoc() {
 		final CompletionContext coreContext = fInvocationContext
 				.getCoreContext();
 		// FIXME it should not be null but it is
@@ -336,6 +336,11 @@ public abstract class LazyScriptCompletionProposal extends
 		super.setRelevance(relevance);
 	}
 
+	/**
+	 * TODO (alex) avoid duplicated code.
+	 * 
+	 * @see ScriptCompletionProposalCollector#computeRelevance(CompletionProposal)
+	 */
 	protected int computeRelevance() {
 		final int baseRelevance = fProposal.getRelevance() * 16;
 		switch (fProposal.getKind()) {

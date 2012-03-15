@@ -136,7 +136,7 @@ public class ScriptMethodCompletionProposal extends
 				.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION)
 				^ isToggleEating();
 		String completion = fProposal.getCompletion();
-		return !isInScriptdoc()
+		return !isInDoc()
 				&& completion.length() > 0
 				&& (noOverwrite || completion.charAt(completion.length() - 1) == ')');
 	}
@@ -220,7 +220,7 @@ public class ScriptMethodCompletionProposal extends
 			return true;
 
 		String word = getDisplayString();
-		if (isInScriptdoc()) {
+		if (isInDoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx == 0) {
 				word = word.substring(7);
