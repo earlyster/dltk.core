@@ -54,6 +54,13 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 
 	protected abstract Control createOptionsBlock(Composite parent);
 
+	/**
+	 * @since 4.0
+	 */
+	protected final void bindControl(Button button, PreferenceKey key) {
+		bindControl(button, key, null);
+	}
+
 	protected final void bindControl(Button button, PreferenceKey key,
 			Control[] dependencies) {
 		bindManager.bindControl(button, key, dependencies);
