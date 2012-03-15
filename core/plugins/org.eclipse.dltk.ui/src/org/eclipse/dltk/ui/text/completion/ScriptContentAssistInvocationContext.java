@@ -17,7 +17,9 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.completion.ContentAssistHistory.RHSHistory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 
 /**
@@ -230,6 +232,17 @@ public class ScriptContentAssistInvocationContext extends
 		}
 
 		return fLabelProvider;
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	public Image getImage(ImageDescriptor descriptor) {
+		if (fCollector != null) {
+			return fCollector.getImage(descriptor);
+		} else {
+			return DLTKUIPlugin.getImageDescriptorRegistry().get(descriptor);
+		}
 	}
 
 	protected final CompletionProposalLabelProvider createLabelProvider() {
