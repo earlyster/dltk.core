@@ -17,6 +17,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.IMarkerResolution2;
 
 public class AnnotationResolutionProposal implements ICompletionProposal {
 
@@ -53,6 +54,9 @@ public class AnnotationResolutionProposal implements ICompletionProposal {
 	}
 
 	public Image getImage() {
+		if (resolution instanceof IMarkerResolution2) {
+			return ((IMarkerResolution2) resolution).getImage();
+		}
 		return null;
 	}
 
