@@ -21,6 +21,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 
 public class DLTKPluginImages {
@@ -522,5 +523,28 @@ public class DLTKPluginImages {
 	 */
 	private static ImageDescriptor createUnManaged(String prefix, String name) {
 		return create(prefix, name, true);
+	}
+
+	/**
+	 * Retrieved the the specified image from the specified plugin. Image is
+	 * cached in the plugin {@link ImageRegistry} the specified
+	 * <code>imagePath</code> is used as the registry key.
+	 * 
+	 * @param plugin
+	 * @param imagePath
+	 * @return
+	 */
+	public static Image getImage(AbstractUIPlugin plugin, String imagePath) {
+		Image image = plugin.getImageRegistry().get(imagePath);
+		if (image == null) {
+			final ImageDescriptor descriptor = AbstractUIPlugin
+					.imageDescriptorFromPlugin(plugin.getBundle()
+							.getSymbolicName(), imagePath);
+			if (descriptor != null) {
+				image = descriptor.createImage();
+				plugin.getImageRegistry().put(imagePath, image);
+			}
+		}
+		return image;
 	}
 }
