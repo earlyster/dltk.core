@@ -18,14 +18,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.core.BuildpathValidation;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.builder.BuildChange;
 import org.eclipse.dltk.internal.core.builder.BuildStateStub;
@@ -185,6 +192,77 @@ public class ScriptBuilderUtil {
 		final SingleBuilderRunner builder = new SingleBuilderRunner(
 				builderClass);
 		builder.build(project, monitorFor(monitor));
+	}
+
+	private static class UpgradeCheck extends ScriptBuilder {
+
+		public void checkProject(IScriptProject project,
+				IProgressMonitor monitor) throws CoreException {
+			if (!hasScriptBuilder(project.getProject())) {
+				if (ScriptBuilder.DEBUG) {
+					System.out.println("Skip " + project.getElementName()
+							+ " - no ScriptBuilder");
+				}
+			}
+			this.currentProject = project.getProject();
+			this.scriptProject = (ScriptProject) project;
+			final IScriptBuilder[] builders = getScriptBuilders();
+			if (builders == null || builders.length == 0) {
+				if (ScriptBuilder.DEBUG) {
+					System.out.println("Skip " + project.getElementName()
+							+ " - no builders");
+				}
+				return;
+			}
+			final IBuildState buildState = new BuildStateStub(
+					project.getElementName());
+			try {
+				if (isBuilderVersionChange(builders)) {
+					if (ScriptBuilder.DEBUG) {
+						System.out.println("Touching "
+								+ project.getElementName());
+					}
+					new BuildpathValidation(scriptProject).validate();
+					project.getProject().touch(monitor);
+				}
+			} finally {
+				resetBuilders(builders, buildState, monitor);
+			}
+		}
+
+		private boolean hasScriptBuilder(IProject project) throws CoreException {
+			final IProjectDescription description = project.getDescription();
+			for (ICommand command : description.getBuildSpec()) {
+				if (DLTKCore.BUILDER_ID.equals(command.getBuilderName())) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public static void rebuildAfterUpgrade(IProgressMonitor _monitor)
+			throws CoreException {
+		final UpgradeCheck check = new UpgradeCheck();
+		final IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				if (ScriptBuilder.DEBUG) {
+					System.out.println("Upgrade check BEGIN");
+				}
+				final IScriptProject[] projects = DLTKCore.create(
+						ResourcesPlugin.getWorkspace().getRoot())
+						.getScriptProjects();
+				SubMonitor subMonitor = SubMonitor.convert(monitor,
+						projects.length);
+				for (IScriptProject project : projects) {
+					check.checkProject(project, subMonitor.newChild(1));
+				}
+				if (ScriptBuilder.DEBUG) {
+					System.out.println("Upgrade check END");
+				}
+			}
+		};
+		ResourcesPlugin.getWorkspace().run(runnable, _monitor);
 	}
 
 }

@@ -637,7 +637,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		return vi.getVersionKey();
 	}
 
-	private boolean isBuilderVersionChange(IScriptBuilder[] builders)
+	protected boolean isBuilderVersionChange(IScriptBuilder[] builders)
 			throws CoreException {
 		for (IScriptBuilder builder : builders) {
 			if (builder instanceof IScriptBuilderVersionInfo) {
