@@ -104,4 +104,10 @@ public final class DLTKUIMessages extends NLS {
 	public static String MethodSelectionComponent_label;
 
 	public static String ElementValidator_cannotPerform;
+
+	public static String InitializeJob_ErrorInitializing;
+
+	public static String InitializeJob_Initializing;
+
+	public static String InitializeJob_Starting;
 }

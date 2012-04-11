@@ -52,6 +52,7 @@ import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.DLTKUI;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
+import org.eclipse.dltk.internal.ui.InitializeJob;
 import org.eclipse.dltk.internal.ui.editor.DocumentAdapter;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ISourceModuleDocumentProvider;
@@ -198,6 +199,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		}
 
 		ExecutionContexts.setManager(new UIExecutionContextManager());
+		new InitializeJob().schedule();
 	}
 
 	private static class ShutdownCloseRemoteEditorsListener implements
