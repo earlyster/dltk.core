@@ -66,4 +66,8 @@ public class StringList extends ArrayList<String> {
 		return length;
 	}
 
+	public static String toString(Collection<String> strings) {
+		return new StringList(strings).toString();
+	}
+
 }
