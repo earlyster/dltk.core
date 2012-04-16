@@ -243,6 +243,9 @@ public class ScriptElementImageProvider {
 						useLightIcons(renderFlags));
 			}
 
+			case IModelElement.LOCAL_VARIABLE:
+				return DLTKPluginImages.DESC_OBJS_LOCAL_VARIABLE;
+
 			case IModelElement.PACKAGE_DECLARATION:
 				return DLTKPluginImages.DESC_OBJS_PACKDECL;
 
@@ -290,8 +293,11 @@ public class ScriptElementImageProvider {
 				// return DLTKPluginImages.DESC_OBJS_JAVA_MODEL;
 				return null;
 			}
-			Assert.isTrue(false,
-					DLTKUIMessages.ScriptImageLabelprovider_assert_wrongImage);
+			Assert.isTrue(
+					false,
+					DLTKUIMessages.ScriptImageLabelprovider_assert_wrongImage
+							+ "(" + element.getElementType() + ","
+							+ element.getElementName() + ")");
 
 			return DLTKPluginImages.DESC_OBJS_GHOST;
 		} catch (ModelException e) {
