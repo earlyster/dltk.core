@@ -14,6 +14,8 @@ package org.eclipse.dltk.ui.documentation;
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 /**
  * @since 2.0
  */
@@ -30,6 +32,10 @@ public abstract class AbstractDocumentationResponse implements
 	 * @since 3.0
 	 */
 	public String getTitle() {
+		return null;
+	}
+
+	public ImageDescriptor getImage() {
 		return null;
 	}
 

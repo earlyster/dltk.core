@@ -8,6 +8,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+/*
+ * TODO (alex) to be removed 
+ */
 public class BrowserInformationControl2 extends BrowserInformationControl
 		implements IInformationControlExtension4, IInformationControlExtension5 {
 	public BrowserInformationControl2(Shell parent, int shellStyle, int style,

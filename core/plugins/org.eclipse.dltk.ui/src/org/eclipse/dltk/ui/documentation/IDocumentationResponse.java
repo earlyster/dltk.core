@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 /**
  * Value object to return script documentation. All implementations should
  * extend {@link AbstractDocumentationResponse}
@@ -32,6 +34,15 @@ public interface IDocumentationResponse {
 	 * @since 3.0
 	 */
 	String getTitle();
+
+	/**
+	 * Returns the image for this documentation if available or
+	 * <code>null</code> otherwise.
+	 * 
+	 * @return
+	 * @since 4.0
+	 */
+	ImageDescriptor getImage();
 
 	/**
 	 * Returns the object this documentation applies to

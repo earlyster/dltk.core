@@ -65,6 +65,7 @@ import org.eclipse.dltk.launching.sourcelookup.DBGPSourceModule;
 import org.eclipse.dltk.ui.editor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.dltk.ui.text.completion.ContentAssistHistory;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.dltk.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.dltk.ui.viewsupport.ProblemMarkerManager;
 import org.eclipse.dltk.utils.ExecutionContexts;
 import org.eclipse.dltk.utils.IExecutableOperation;
@@ -824,5 +825,21 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		if (fSaveParticipantRegistry == null)
 			fSaveParticipantRegistry = new SaveParticipantRegistry();
 		return fSaveParticipantRegistry;
+	}
+
+	private ImagesOnFileSystemRegistry fImagesOnFSRegistry;
+
+	/**
+	 * Returns the image registry that keeps its images on the local file
+	 * system.
+	 * 
+	 * @return the image registry
+	 * @since 4.0
+	 */
+	public ImagesOnFileSystemRegistry getImagesOnFSRegistry() {
+		if (fImagesOnFSRegistry == null) {
+			fImagesOnFSRegistry = new ImagesOnFileSystemRegistry();
+		}
+		return fImagesOnFSRegistry;
 	}
 }

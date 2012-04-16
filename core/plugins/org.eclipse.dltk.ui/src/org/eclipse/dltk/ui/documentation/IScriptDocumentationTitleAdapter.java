@@ -11,11 +11,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.documentation;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 /**
  * @since 3.0
  */
 public interface IScriptDocumentationTitleAdapter {
 
 	String getTitle(Object element);
+
+	ImageDescriptor getImage(Object element);
 
 }

@@ -16,11 +16,17 @@ import org.eclipse.osgi.util.NLS;
  */
 public final class ScriptHoverMessages extends NLS {
 
-	private static final String BUNDLE_NAME= ScriptHoverMessages.class.getName();
+	private static final String BUNDLE_NAME = ScriptHoverMessages.class
+			.getName();
 
 	private ScriptHoverMessages() {
 		// Do not instantiate
 	}
+
+	public static String ScriptdocHover_back;
+	public static String ScriptdocHover_forward;
+
+	public static String ScriptdocHover_openDeclaration;
 
 	public static String ScriptdocHover_noAttachedInformation;
 	public static String ScriptTextHover_makeStickyHint;

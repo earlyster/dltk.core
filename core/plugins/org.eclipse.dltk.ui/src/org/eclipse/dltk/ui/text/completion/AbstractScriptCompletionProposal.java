@@ -23,20 +23,19 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.ui.text.hover.CompletionHoverControlCreator;
+import org.eclipse.dltk.internal.ui.text.hover.DocumentationHover;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -67,9 +66,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 import org.osgi.framework.Bundle;
 
+@SuppressWarnings("restriction")
 public abstract class AbstractScriptCompletionProposal implements
 		IScriptCompletionProposal, ICompletionProposalExtension,
 		ICompletionProposalExtension2, ICompletionProposalExtension3,
@@ -891,17 +894,26 @@ public abstract class AbstractScriptCompletionProposal implements
 	}
 
 	public IInformationControlCreator getInformationControlCreator() {
+		Shell shell = DLTKUIPlugin.getActiveWorkbenchShell();
+		if (shell == null || !BrowserInformationControl.isAvailable(shell))
+			return null;
 		if (fCreator == null) {
-			fCreator = new CompletionHoverControlCreator(
-					new IInformationControlCreator() {
-						public IInformationControl createInformationControl(
-								Shell parent) {
-							return new DefaultInformationControl(parent, true);
-						}
-					}, true);
+			DocumentationHover.PresenterControlCreator presenterControlCreator = new DocumentationHover.PresenterControlCreator(
+					getSite());
+			fCreator = new DocumentationHover.HoverControlCreator(
+					presenterControlCreator, true);
 		}
 		return fCreator;
-		// return null;
+	}
+
+	private IWorkbenchSite getSite() {
+		final IWorkbenchPage page = DLTKUIPlugin.getActivePage();
+		if (page != null) {
+			final IWorkbenchPart part = page.getActivePart();
+			if (part != null)
+				return part.getSite();
+		}
+		return null;
 	}
 
 	public String getSortString() {

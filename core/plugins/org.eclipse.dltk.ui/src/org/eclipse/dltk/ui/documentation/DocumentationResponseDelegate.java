@@ -15,11 +15,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 class DocumentationResponseDelegate implements IDocumentationResponse {
 	private final IDocumentationResponse target;
 
 	public String getTitle() {
 		return target.getTitle();
+	}
+
+	public ImageDescriptor getImage() {
+		return target.getImage();
 	}
 
 	public Object getObject() {

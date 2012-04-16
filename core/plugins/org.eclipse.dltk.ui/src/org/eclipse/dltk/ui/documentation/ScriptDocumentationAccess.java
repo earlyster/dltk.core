@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.utils.AdaptUtils;
 import org.eclipse.dltk.utils.NatureExtensionManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * Helper needed to get access to script documentation.
@@ -180,12 +181,31 @@ public class ScriptDocumentationAccess {
 										IScriptDocumentationTitleAdapter.class);
 						if (titleAdapter != null) {
 							final String title = titleAdapter.getTitle(member);
+							// TODO (alex) image
 							if (title != null && title.length() != 0) {
 								return new DocumentationResponseDelegate(
 										response) {
 									@Override
 									public String getTitle() {
 										return title;
+									}
+
+									private boolean imageEvaluated;
+									private ImageDescriptor image;
+
+									@Override
+									public ImageDescriptor getImage() {
+										final ImageDescriptor result = super
+												.getImage();
+										if (result != null) {
+											return result;
+										}
+										if (!imageEvaluated) {
+											image = titleAdapter
+													.getImage(member);
+											imageEvaluated = true;
+										}
+										return image;
 									}
 								};
 							}

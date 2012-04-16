@@ -15,6 +15,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 /**
  * Hover control creator.
  * 
+ * TODO (alex) to be removed
+ * 
  * @since 2.0
  */
 public final class CompletionHoverControlCreator extends
