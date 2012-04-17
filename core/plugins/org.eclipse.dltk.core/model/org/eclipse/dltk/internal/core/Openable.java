@@ -579,19 +579,31 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 
 		IModelElement[] toModelElementArray() {
-			return elements.toArray(new IModelElement[elements.size()]);
+			if (elements.isEmpty()) {
+				return ScriptModelUtil.NO_ELEMENTS;
+			} else {
+				return elements.toArray(new IModelElement[elements.size()]);
+			}
+		}
+
+		boolean isEmpty() {
+			return elements.isEmpty() && foreignElements.isEmpty();
 		}
 
 		Object[] toArray() {
-			final List<Object> result = new ArrayList<Object>(elements.size()
-					+ foreignElements.size());
-			result.addAll(elements);
-			result.addAll(foreignElements);
-			return result.toArray(new Object[result.size()]);
+			if (isEmpty()) {
+				return ScriptModelUtil.NO_ELEMENTS;
+			} else {
+				final List<Object> result = new ArrayList<Object>(
+						elements.size() + foreignElements.size());
+				result.addAll(elements);
+				result.addAll(foreignElements);
+				return result.toArray(new Object[result.size()]);
+			}
 		}
 	}
 
-	private boolean codeSelect(org.eclipse.dltk.compiler.env.IModuleSource cu,
+	private void codeSelect(org.eclipse.dltk.compiler.env.IModuleSource cu,
 			int offset, int length, WorkingCopyOwner owner,
 			ModelElementSelectionRequestor requestor) throws ModelException {
 
@@ -610,7 +622,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 						.println("DLTK.Openable.VERBOSE: Failed to detect language toolkit... for module:" //$NON-NLS-1$
 								+ this.getResource().getName());
 			}
-			return false;
+			return;
 		}
 
 		if (offset < 0 || length < 0 || (end != -1 && (offset + length > end))) {
@@ -618,41 +630,38 @@ public abstract class Openable extends ModelElement implements IOpenable,
 					IModelStatusConstants.INDEX_OUT_OF_BOUNDS));
 		}
 
-		final ISelectionEngine engine = DLTKLanguageManager
-				.getSelectionEngine(toolkit.getNatureId());
-		if (engine == null) {
-			return false;
+		final ISelectionEngine[] engines = DLTKLanguageManager
+				.getSelectionEngines(toolkit.getNatureId());
+		if (engines != null) {
+			for (ISelectionEngine engine : engines) {
+				engine.setOptions(project.getOptions(true));
+				engine.setRequestor(requestor);
+				final IModelElement[] result = engine.select(cu, offset, offset
+						+ length - 1);
+				if (result != null) {
+					requestor.addModelElements(result);
+				}
+				if (!requestor.isEmpty()) {
+					return;
+				}
+			}
 		}
-		engine.setOptions(project.getOptions(true));
-		engine.setRequestor(requestor);
-		final IModelElement[] result = engine.select(cu, offset, offset
-				+ length - 1);
-		if (result != null) {
-			requestor.addModelElements(result);
-		}
-		return true;
 	}
 
 	protected IModelElement[] codeSelect(
 			org.eclipse.dltk.compiler.env.IModuleSource cu, int offset,
 			int length, WorkingCopyOwner owner) throws ModelException {
 		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
-		if (codeSelect(cu, offset, length, owner, requestor)) {
-			return requestor.toModelElementArray();
-		} else {
-			return ScriptModelUtil.NO_ELEMENTS;
-		}
+		codeSelect(cu, offset, length, owner, requestor);
+		return requestor.toModelElementArray();
 	}
 
 	protected Object[] codeSelectAll(
 			org.eclipse.dltk.compiler.env.IModuleSource cu, int offset,
 			int length, WorkingCopyOwner owner) throws ModelException {
 		final ModelElementSelectionRequestor requestor = new ModelElementSelectionRequestor();
-		if (codeSelect(cu, offset, length, owner, requestor)) {
-			return requestor.toArray();
-		} else {
-			return ScriptModelUtil.NO_ELEMENTS;
-		}
+		codeSelect(cu, offset, length, owner, requestor);
+		return requestor.toArray();
 	}
 
 }

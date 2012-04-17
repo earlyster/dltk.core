@@ -260,9 +260,15 @@ public class DLTKLanguageManager {
 				.getInstances(natureID);
 	}
 
+	@Deprecated
 	public static ISelectionEngine getSelectionEngine(String natureID) {
-		return (ISelectionEngine) InternalDLTKLanguageManager
-				.getSelectionEngineManager().getObject(natureID);
+		final ISelectionEngine[] engines = getSelectionEngines(natureID);
+		return engines != null ? engines[0] : null;
+	}
+
+	public static ISelectionEngine[] getSelectionEngines(String natureID) {
+		return InternalDLTKLanguageManager.getSelectionEngineManager()
+				.getInstances(natureID);
 	}
 
 	public static ISourceParser getSourceParser(String natureID) {

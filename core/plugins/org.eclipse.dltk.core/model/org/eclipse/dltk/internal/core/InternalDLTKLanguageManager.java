@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
+import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.search.matching.IMatchLocator;
@@ -56,8 +57,13 @@ public class InternalDLTKLanguageManager {
 		}
 	};
 
-	private static PriorityClassDLTKExtensionManager selectionEngineManager = new NewInstanceClassBasedDLTKExtensionManager(
-			SELECTION_ENGINE_EXTPOINT);
+	private static PriorityNatureExtensionManager<ISelectionEngine> selectionEngineManager = new PriorityNatureExtensionManager<ISelectionEngine>(
+			SELECTION_ENGINE_EXTPOINT, ISelectionEngine.class) {
+		protected void saveInstances(String natureId,
+				ISelectionEngine[] resultArray) {
+			// empty
+		};
+	};
 	private static PriorityNatureExtensionManager<ICompletionEngine> completionEngineManager = new PriorityNatureExtensionManager<ICompletionEngine>(
 			COMPLETION_ENGINE_EXTPOINT, ICompletionEngine.class) {
 		@Override
@@ -96,7 +102,7 @@ public class InternalDLTKLanguageManager {
 		return problemFactoryManager;
 	}
 
-	public static PriorityClassDLTKExtensionManager getSelectionEngineManager() {
+	public static PriorityNatureExtensionManager<ISelectionEngine> getSelectionEngineManager() {
 		return selectionEngineManager;
 	}
 
