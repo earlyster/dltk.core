@@ -71,6 +71,7 @@ public class DocumentationUtils {
 			return new TextDocumentationResponse(
 					member,
 					titleAdapter != null ? titleAdapter.getTitle(member) : null,
+					titleAdapter != null ? titleAdapter.getImage(member) : null,
 					readAll(reader));
 		}
 		return null;

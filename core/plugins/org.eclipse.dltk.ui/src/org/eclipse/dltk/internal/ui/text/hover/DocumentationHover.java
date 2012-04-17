@@ -56,8 +56,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		IInformationProviderExtension2, ITextHoverExtension {
 
-	private static final long LABEL_FLAGS = // ScriptElementLabels.ALL_FULLY_QUALIFIED
-	ScriptElementLabels.M_APP_RETURNTYPE
+	private static final long LABEL_FLAGS = ScriptElementLabels.ALL_FULLY_QUALIFIED
+			| ScriptElementLabels.M_APP_RETURNTYPE
 			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_PARAMETER_NAMES
@@ -586,7 +586,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		public String getTitle(Object element) {
 			if (element instanceof IModelElement) {
 				IModelElement member = (IModelElement) element;
-				long flags = member.getElementType() == IModelElement.FIELD ? LOCAL_VARIABLE_FLAGS
+				long flags = member.getElementType() == IModelElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS
 						: LABEL_FLAGS;
 				String label = ScriptElementLabels.getDefault()
 						.getElementLabel(member, flags);
