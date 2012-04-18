@@ -17,7 +17,8 @@ import org.eclipse.dltk.core.IModelElement;
 public interface ISelectionEngine {
 	void setRequestor(ISelectionRequestor requestor);
 
-	IModelElement[] select(IModuleSource module, int offset, int i);
+	IModelElement[] select(IModuleSource module, int selectionStart,
+			int selectionEnd);
 
 	void setOptions(Map options);
 }
