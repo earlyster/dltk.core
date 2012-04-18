@@ -22,7 +22,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.ScriptElementImageDescriptor;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
-import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
@@ -203,28 +202,7 @@ public class CompletionProposalLabelProvider {
 	}
 
 	protected String createTypeProposalLabel(String fullName) {
-		int qIndex = findSimpleNameStart(fullName);
-
-		StringBuffer buf = new StringBuffer();
-		buf.append(fullName, qIndex, fullName.length());
-		if (qIndex > 0) {
-			buf.append(ScriptElementLabels.CONCAT_STRING);
-			buf.append(fullName, 0, qIndex - 1);
-		}
-		return buf.toString();
-	}
-
-	private int findSimpleNameStart(String array) {
-		int lastDot = 0;
-		for (int i = 0, len = array.length(); i < len; i++) {
-			char ch = array.charAt(i);
-			if (ch == '<') {
-				return lastDot;
-			} else if (ch == '.') {
-				lastDot = i + 1;
-			}
-		}
-		return lastDot;
+		return fullName;
 	}
 
 	protected String createSimpleLabelWithType(CompletionProposal proposal) {
