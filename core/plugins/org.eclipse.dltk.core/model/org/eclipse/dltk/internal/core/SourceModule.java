@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -21,7 +24,6 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -236,17 +238,45 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return !isPrimary() || (getPerWorkingCopyInfo() != null);
 	}
 
+	private static final Set<SourceModule> locks = new HashSet<SourceModule>();
+
+	private boolean acquire() {
+		final long stop = System.currentTimeMillis() + 10000;
+		synchronized (locks) {
+			while (locks.contains(this)) {
+				final long now = System.currentTimeMillis();
+				if (now > stop) {
+					return false;
+				}
+				try {
+					locks.wait(stop - now);
+				} catch (InterruptedException e) {
+					return false;
+				}
+			}
+			locks.add(this);
+			return true;
+		}
+	}
+
+	private void release() {
+		synchronized (locks) {
+			locks.remove(this);
+			locks.notifyAll();
+		}
+	}
+
 	@Override
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
-		if (isConsistent())
-			return;
-		// makeConsistent(false/*don't create AST*/, 0, monitor);
-
-		// Remove AST Cache element
-		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
-				.getModelManager().getSourceModuleInfoCache();
-		sourceModuleInfoCache.remove(this);
-		openWhenClosed(createElementInfo(), monitor);
+		if (acquire()) {
+			try {
+				if (isConsistent())
+					return;
+				openWhenClosed(createElementInfo(), monitor);
+			} finally {
+				release();
+			}
+		}
 	}
 
 	/*
