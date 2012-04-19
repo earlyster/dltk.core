@@ -97,7 +97,9 @@ public class SourceModuleInfoCache extends OverflowingLRUCache implements
 					|| delta.getKind() == IModelElementDelta.CHANGED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 					if (delta.getKind() == IModelElementDelta.REMOVED
-							|| isContentChanged(delta) || isWorkingCopy(delta)) {
+							|| isContentChanged(delta)
+					// || isWorkingCopy(delta)
+					) {
 						if (DEBUG) {
 							System.out
 									.println("[Cache] remove: kind=" + delta.getKind() + " flags=" + Integer.toHexString(delta.getFlags()) + " elementName=" + delta.getElement().getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
