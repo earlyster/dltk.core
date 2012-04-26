@@ -505,7 +505,9 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 			}
 		}
 		StringBuffer buf = new StringBuffer();
-		addImageAndLabel(buf, element, imageName, 16, 16, title, 20, 2);
+		addImageAndLabel(buf, element, imageName, 16, 16,
+				org.eclipse.jface.internal.text.html.HTMLPrinter
+						.convertToHTMLContent(title), 20, 2);
 		return buf.toString();
 	}
 
