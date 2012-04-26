@@ -12,7 +12,9 @@ package org.eclipse.dltk.core.search;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
 /**
  * A match collected while searching for {@link SearchEngine} all type names
@@ -133,7 +135,11 @@ public abstract class TypeNameMatch {
 		if (outerType != null) {
 			return outerType.getTypeQualifiedName();
 		} else {
-			return getType().getScriptFolder().getElementName();
+			return getType()
+					.getScriptFolder()
+					.getElementName()
+					.replace(IScriptFolder.PACKAGE_DELIMITER,
+							IIndexConstants.TYPE_SEPARATOR);
 		}
 	}
 
