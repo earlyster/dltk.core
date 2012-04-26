@@ -219,10 +219,14 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label, 
-			fScope, elementKind, fInitialFilterText, 
-			fTypeSelectionExtension != null ? fTypeSelectionExtension.getFilterExtension() : null,
-			fTypeSelectionExtension != null ? fTypeSelectionExtension.getImageProvider() : null, this.fToolkit);
+		fViewer = new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI
+				: SWT.NONE, label, fScope, elementKind, fInitialFilterText,
+				fTypeSelectionExtension != null ? fTypeSelectionExtension
+						.getFilterExtension() : null,
+				fTypeSelectionExtension != null ? fTypeSelectionExtension
+						.getImageProvider() : null,
+				fTypeSelectionExtension != null ? fTypeSelectionExtension
+						.getSearchPatternProcessor() : null, this.fToolkit);
 		gd= new GridData(GridData.FILL_BOTH);
 		final Table table= fViewer.getTable();
 		PixelConverter converter= new PixelConverter(table);

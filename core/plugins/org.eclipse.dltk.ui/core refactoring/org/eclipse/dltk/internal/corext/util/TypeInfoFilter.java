@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.util;
 
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISearchPatternProcessor.ITypePattern;
@@ -19,6 +18,7 @@ import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.TypeNameMatch;
 import org.eclipse.dltk.internal.ui.util.StringMatcher;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.dialogs.ITypeInfoFilterExtension;
 
 public class TypeInfoFilter {
@@ -125,7 +125,7 @@ public class TypeInfoFilter {
 
 	private String fText;
 	private final IDLTKSearchScope fSearchScope;
-	private boolean fIsWorkspaceScope;
+	private final boolean fIsWorkspaceScope;
 	private int fElementKind;
 	private ITypeInfoFilterExtension fFilterExtension;
 	private TypeInfoRequestorAdapter fAdapter = new TypeInfoRequestorAdapter();
@@ -135,17 +135,16 @@ public class TypeInfoFilter {
 
 	private static final int TYPE_MODIFIERS = 0;
 
-	public TypeInfoFilter(String text, IDLTKSearchScope scope, int elementKind,
-			ITypeInfoFilterExtension extension) {
+	public TypeInfoFilter(IDLTKUILanguageToolkit uiToolkit, String text,
+			IDLTKSearchScope scope, int elementKind,
+			ITypeInfoFilterExtension extension,
+			ISearchPatternProcessor processor) {
 		fText = text;
 		fSearchScope = scope;
-		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
 		fIsWorkspaceScope = fSearchScope.equals(SearchEngine
-				.createWorkspaceScope(toolkit));
+				.createWorkspaceScope(uiToolkit.getCoreToolkit()));
 		fElementKind = elementKind;
 		fFilterExtension = extension;
-		ISearchPatternProcessor processor = DLTKLanguageManager
-				.getSearchPatternProcessor(toolkit, true);
 		ITypePattern pattern = processor.parseType(text);
 		String simpleName = pattern.getSimpleName();
 		if (simpleName.length() == 0) {
@@ -194,7 +193,7 @@ public class TypeInfoFilter {
 		if (!fText.startsWith(text))
 			return false;
 
-		return fText.indexOf('.', text.length()) == -1;
+		return fPackageMatcher == null;
 	}
 
 	public boolean isCamelCasePattern() {

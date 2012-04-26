@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.dialogs;
 
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -87,6 +88,15 @@ public abstract class TypeSelectionExtension {
 	 * @return the image provider
 	 */
 	public ITypeInfoImageProvider getImageProvider() {
+		return null;
+	}
+
+	/**
+	 * Returns search pattern processor to be used by the dialog or
+	 * <code>null</code> if default implementation contributed for the language
+	 * should be used.
+	 */
+	public ISearchPatternProcessor getSearchPatternProcessor() {
 		return null;
 	}
 }

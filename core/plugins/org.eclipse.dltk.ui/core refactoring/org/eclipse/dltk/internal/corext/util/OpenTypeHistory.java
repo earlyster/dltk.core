@@ -286,9 +286,9 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 
 	public synchronized TypeNameMatch[] getFilteredTypeInfos(
 			TypeInfoFilter filter) {
-		Collection values = getValues();
-		List result = new ArrayList();
-		for (Iterator iter = values.iterator(); iter.hasNext();) {
+		Collection<?> values = getValues();
+		List<TypeNameMatch> result = new ArrayList<TypeNameMatch>();
+		for (Iterator<?> iter = values.iterator(); iter.hasNext();) {
 			TypeNameMatch type = (TypeNameMatch) iter.next();
 			if (type != null
 					&& (filter == null || filter.matchesHistoryElement(type))
@@ -296,9 +296,7 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 				result.add(type);
 		}
 		Collections.reverse(result);
-		return (TypeNameMatch[]) result
-				.toArray(new TypeNameMatch[result.size()]);
-
+		return result.toArray(new TypeNameMatch[result.size()]);
 	}
 
 	protected Object getKey(Object object) {
@@ -370,8 +368,8 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 			} else { // external JAR
 				IProjectFragment root = match.getProjectFragment();
 				if (root.exists()) {
-					IFileInfo info = EFS.getLocalFileSystem().getStore(
-							root.getPath()).fetchInfo();
+					IFileInfo info = EFS.getLocalFileSystem()
+							.getStore(root.getPath()).fetchInfo();
 					if (info.exists()) {
 						return info.getLastModified();
 					}
@@ -392,8 +390,8 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 		if (resource != null) {
 			ITextFileBufferManager manager = FileBuffers
 					.getTextFileBufferManager();
-			ITextFileBuffer textFileBuffer = manager.getTextFileBuffer(resource
-					.getFullPath(), LocationKind.NORMALIZE);
+			ITextFileBuffer textFileBuffer = manager.getTextFileBuffer(
+					resource.getFullPath(), LocationKind.NORMALIZE);
 			if (textFileBuffer != null) {
 				return textFileBuffer.isDirty();
 			}
@@ -442,12 +440,12 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 		TypeNameMatch type = (TypeNameMatch) object;
 		String handleId = type.getType().getHandleIdentifier();
 		typeElement.setAttribute(NODE_HANDLE, handleId);
-		typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type
-				.getModifiers()));
+		typeElement.setAttribute(NODE_MODIFIERS,
+				Integer.toString(type.getModifiers()));
 		Long timestamp = (Long) fTimestampMapping.get(type);
 		if (timestamp == null) {
-			typeElement.setAttribute(NODE_TIMESTAMP, Long
-					.toString(IResource.NULL_STAMP));
+			typeElement.setAttribute(NODE_TIMESTAMP,
+					Long.toString(IResource.NULL_STAMP));
 		} else {
 			typeElement.setAttribute(NODE_TIMESTAMP, timestamp.toString());
 		}
