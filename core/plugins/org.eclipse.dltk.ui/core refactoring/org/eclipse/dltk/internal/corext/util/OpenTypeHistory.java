@@ -57,18 +57,17 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 	// private IDLTKUILanguageToolkit fToolkit = null;
 	TypeFilter fTypeFilter = null;
 
-	private static Map sToolkitHistory = new HashMap();
+	private static Map<IDLTKUILanguageToolkit, OpenTypeHistory> sToolkitHistory = new HashMap<IDLTKUILanguageToolkit, OpenTypeHistory>();
 
 	public static synchronized OpenTypeHistory getInstance(
 			IDLTKUILanguageToolkit toolkit) {
 		if (sToolkitHistory.containsKey(toolkit)) {
-			return (OpenTypeHistory) sToolkitHistory.get(toolkit);
+			return sToolkitHistory.get(toolkit);
 		} else {
 			OpenTypeHistory his = new OpenTypeHistory(toolkit);
 			sToolkitHistory.put(toolkit, his);
 			return his;
 		}
-
 	}
 
 	private class TypeHistoryDeltaListener implements IElementChangedListener {
@@ -181,7 +180,7 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 	// Needs to be volatile since accesses aren't synchronized.
 	private volatile boolean fNeedsConsistencyCheck;
 	// Map of cached time stamps
-	private Map fTimestampMapping;
+	private Map<TypeNameMatch, Long> fTimestampMapping;
 
 	private final IElementChangedListener fDeltaListener;
 	private final UpdateJob fUpdateJob;
@@ -197,7 +196,7 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 		super(FILENAME
 				+ toolkit.getCoreToolkit().getNatureId().replace('.', '_')
 				+ ".xml", NODE_ROOT, NODE_TYPE_INFO); //$NON-NLS-1$
-		fTimestampMapping = new HashMap();
+		fTimestampMapping = new HashMap<TypeNameMatch, Long>();
 		fNeedsConsistencyCheck = true;
 		load();
 		fDeltaListener = new TypeHistoryDeltaListener();
@@ -318,7 +317,7 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 				continue;
 			}
 			long currentTimestamp = getContainerTimestamp(type);
-			Long lastTested = (Long) fTimestampMapping.get(type);
+			Long lastTested = fTimestampMapping.get(type);
 			if (lastTested != null && currentTimestamp != IResource.NULL_STAMP
 					&& currentTimestamp == lastTested.longValue()
 					&& !isContainerDirty(type))
@@ -442,7 +441,7 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 		typeElement.setAttribute(NODE_HANDLE, handleId);
 		typeElement.setAttribute(NODE_MODIFIERS,
 				Integer.toString(type.getModifiers()));
-		Long timestamp = (Long) fTimestampMapping.get(type);
+		Long timestamp = fTimestampMapping.get(type);
 		if (timestamp == null) {
 			typeElement.setAttribute(NODE_TIMESTAMP,
 					Long.toString(IResource.NULL_STAMP));
