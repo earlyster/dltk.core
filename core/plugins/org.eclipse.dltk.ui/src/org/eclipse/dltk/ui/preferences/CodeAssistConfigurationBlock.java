@@ -38,7 +38,7 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		ArrayList overlayKeys = new ArrayList();
+		ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys = new ArrayList<OverlayPreferenceStore.OverlayKey>();
 
 		getOverlayKeys(overlayKeys);
 
@@ -48,7 +48,8 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		return keys;
 	}
 
-	protected void getOverlayKeys(ArrayList overlayKeys) {
+	protected void getOverlayKeys(
+			ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys) {
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.CODEASSIST_AUTOACTIVATION));
@@ -195,8 +196,7 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 				.addSelectionListener(completionSelectionListener);
 
 		Label label = new Label(completionComposite, SWT.NONE);
-		label
-				.setText(PreferencesMessages.DLTKEditorPreferencePage_completionToggleHint);
+		label.setText(PreferencesMessages.DLTKEditorPreferencePage_completionToggleHint);
 		GridData gd = new GridData();
 		gd.horizontalIndent = 20;
 		gd.horizontalSpan = 2;
