@@ -642,9 +642,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		for (IScriptBuilder builder : builders) {
 			if (builder instanceof IScriptBuilderVersionInfo) {
 				final IScriptBuilderVersionInfo vi = (IScriptBuilderVersionInfo) builder;
+				final String builderVersion = vi.getVersion();
+				if (builderVersion == null)
+					continue;
 				final String version = currentProject
 						.getPersistentProperty(getQualifiedName(vi));
-				if (!vi.getVersion().equals(version)) {
+				if (!builderVersion.equals(version)) {
 					return true;
 				}
 			}
@@ -657,8 +660,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		for (IScriptBuilder builder : builders) {
 			if (builder instanceof IScriptBuilderVersionInfo) {
 				final IScriptBuilderVersionInfo vi = (IScriptBuilderVersionInfo) builder;
+				final String builderVersion = vi.getVersion();
+				if (builderVersion == null)
+					continue;
 				currentProject.setPersistentProperty(getQualifiedName(vi),
-						vi.getVersion());
+						builderVersion);
 			}
 		}
 	}
