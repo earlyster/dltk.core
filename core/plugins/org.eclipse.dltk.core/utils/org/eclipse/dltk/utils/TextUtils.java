@@ -572,4 +572,55 @@ public abstract class TextUtils {
 		}
 		return list.toArray(new String[list.size()]);
 	}
+
+	/**
+	 * Creates a new <code>ISourceRange</code> object whose offset and length
+	 * are a subset of the original and do not include any leading or trailing
+	 * whitespace.
+	 * 
+	 * <p>
+	 * This method is most useful when calculating the start and end offsets
+	 * required to create an <code>IProblem</code>,
+	 * <code>IValidatorProblem</code>, etc
+	 * </p>
+	 * 
+	 * @param source
+	 *            source contents
+	 * @param range
+	 *            position in the document whitespace should be stripped from
+	 * 
+	 * @return source range minus leading/trailing whitespace
+	 */
+	public static ISourceRange trimWhitespace(String source, ISourceRange range) {
+		int sOffset = range.getOffset();
+		int eOffset = sOffset + range.getLength();
+
+		String line = source.substring(sOffset, eOffset);
+		char[] bytes = line.toCharArray();
+
+		int start = 0;
+		while (start < bytes.length) {
+			if ((bytes[start] != '\t') && (bytes[start] != ' ')) {
+				break;
+			}
+
+			start++;
+		}
+
+		sOffset += start;
+
+		return createSourceRange(sOffset, sOffset + line.trim().length());
+	}
+
+	private static ISourceRange createSourceRange(final int start, final int end) {
+		return new ISourceRange() {
+			public int getLength() {
+				return end - start;
+			}
+
+			public int getOffset() {
+				return start;
+			}
+		};
+	}
 }

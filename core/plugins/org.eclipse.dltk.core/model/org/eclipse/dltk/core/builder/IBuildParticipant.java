@@ -13,16 +13,24 @@ package org.eclipse.dltk.core.builder;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.core.ISourceModule;
 
 public interface IBuildParticipant {
 
 	/**
-	 * Validates specified ISourceModule or it's AST and reports any problems
-	 * found via {@link IProblemReporter}
+	 * Validates the specified <code>ISourceModule</code> or its AST and reports
+	 * any problems.
 	 * 
-	 * @param module
-	 * @param ast
-	 * @param reporter
+	 * <p>
+	 * The {@link ISourceModule}, {@link IProblemReporter} and
+	 * {@link ISourceLineTracker} are all available via the build context.
+	 * </p>
+	 * 
+	 * @param context
+	 *            build context
+	 * 
+	 * @see org.eclipse.dltk.utils.TextUtils#trimWhitespace(String,
+	 *      org.eclipse.dltk.core.ISourceRange)
 	 */
 	void build(IBuildContext context) throws CoreException;
 
