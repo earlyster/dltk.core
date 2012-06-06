@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * Represents a handler that can be used to read/write data to/from a
- * <code>Process</code> object that has been created to execute an internal 
+ * <code>Process</code> object that has been created to execute an internal
  * script.
  * 
  * @see InternalScriptExecutor
@@ -41,12 +41,12 @@ public interface IScriptProcessHandler {
 		public String stderr;
 
 		/** stderr split into individual lines */
-		public List stderrLines;
+		public List<String> stderrLines;
 
 		/** stdout of script as a single string */
 		public String stdout;
 
 		/** stdout split into individual lines */
-		public List stdoutLines;
+		public List<String> stdoutLines;
 	}
 }
