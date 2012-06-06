@@ -20,7 +20,7 @@ import java.util.Map;
 public class ValidatorReporter implements IValidatorReporter {
 
 	private Map<ISourceModule, ISourceLineTracker> lineTrackers = 
-		new HashMap<ISourceModule, ISourceLineTracker>();
+			new HashMap<ISourceModule, ISourceLineTracker>();
 
 	private String markerId;
 	private boolean underline;
@@ -44,7 +44,12 @@ public class ValidatorReporter implements IValidatorReporter {
 			int lineNo = problem.getLineNumber();
 			ISourceRange range = lineTracker.getLineInformation(lineNo - 1);
 
-			calcStartEndRange(module, range, marker);
+			String source = module.getSource();
+			ISourceRange adjusted = TextUtils.trimWhitespace(source, range);
+
+			marker.setAttribute(IMarker.CHAR_START, adjusted.getOffset());
+			marker.setAttribute(IMarker.CHAR_END, adjusted.getOffset()
+					+ adjusted.getLength());
 		}
 
 		return marker;
@@ -83,54 +88,20 @@ public class ValidatorReporter implements IValidatorReporter {
 		return lineTracker;
 	}
 
-	private void calcStartEndRange(ISourceModule module, ISourceRange range,
-			IMarker marker) throws ModelException, CoreException {
-		String source = module.getSource();
-
-		int lineOffset = range.getOffset();
-		int endOfLine = source.indexOf("\n", lineOffset);
-		String markerLine;
-
-		if (endOfLine != -1) {
-			markerLine = source.substring(lineOffset, endOfLine);
-		} else {
-			markerLine = source.substring(lineOffset);
-		}
-
-		char[] bytes = markerLine.toCharArray();
-
-		int start = 0;
-		while (start < bytes.length) {
-			if ((bytes[start] != '\t') && (bytes[start] != ' ')) {
-				break;
-			}
-
-			start++;
-		}
-
-		start += lineOffset;
-
-		int end = start + markerLine.trim().length();
-
-		marker.setAttribute(IMarker.CHAR_START, start);
-		marker.setAttribute(IMarker.CHAR_END, end);
-	}
-
 	private IMarker createMarker(IResource resource, IValidatorProblem problem)
 			throws CoreException {
 
 		IMarker marker = resource.createMarker(markerId);
-		
+
 		marker.setAttribute(IMarker.MESSAGE, problem.getMessage());
 		marker.setAttribute(IMarker.LINE_NUMBER, problem.getLineNumber());
 		marker.setAttribute(IMarker.SEVERITY, getSeverity(problem));
-	
+
 		Map<String, Object> attributes = problem.getAttributes();
-		for (String key : attributes.keySet())
-		{
+		for (String key : attributes.keySet()) {
 			marker.setAttribute(key, attributes.get(key));
 		}
-		
+
 		return marker;
 	}
 
