@@ -245,7 +245,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		synchronized (locks) {
 			while (locks.contains(this)) {
 				final long now = System.currentTimeMillis();
-				if (now > stop) {
+				if (now >= stop) {
 					return false;
 				}
 				try {
