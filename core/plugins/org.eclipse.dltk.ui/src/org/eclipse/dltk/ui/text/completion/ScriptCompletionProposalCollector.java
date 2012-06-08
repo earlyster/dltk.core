@@ -631,7 +631,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		return null;
 	}
 
-	private IScriptCompletionProposal createFieldProposal(
+	protected IScriptCompletionProposal createFieldProposal(
 			CompletionProposal proposal) {
 		String completion = String.valueOf(proposal.getCompletion());
 		int start = proposal.getReplaceStart();
