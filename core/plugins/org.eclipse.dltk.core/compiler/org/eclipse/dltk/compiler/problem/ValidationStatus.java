@@ -54,4 +54,13 @@ public class ValidationStatus implements IValidationStatus {
 		return end;
 	}
 
+	private static enum ValidationStatusResult implements IValidationStatus {
+		OK
+	}
+
+	/**
+	 * @since 4.1
+	 */
+	public static final IValidationStatus OK = ValidationStatusResult.OK;
+
 }
