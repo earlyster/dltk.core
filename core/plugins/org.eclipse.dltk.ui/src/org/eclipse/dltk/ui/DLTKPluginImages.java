@@ -170,6 +170,13 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB = createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
+
+	/**
+	 * @since 4.1
+	 */
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION = createManagedFromKey(
+			T_OBJ, IMG_OBJS_ANNOTATION);
+
 	/**
 	 * @since 3.0
 	 */
