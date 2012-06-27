@@ -7,10 +7,10 @@
 	<artifactId>rse</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<parent>
-		<artifactId>dltk</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../../org.eclipse.dltk.releng/build/pom.xml</relativePath>
 		<groupId>org.eclipse.dltk</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../../org.eclipse.dltk.releng/build/parent/pom.xml</relativePath>
 	</parent>
 	<packaging>pom</packaging>
 
