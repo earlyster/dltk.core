@@ -203,7 +203,7 @@ public class OpenStorageWithMenu extends ContributionItem {
 			return desc;
 
 		IStorage storage = getStorage();
-		if (storage == null) {
+		if (storage != null) {
 			return registry.getDefaultEditor(storage.getName());
 		}
 
