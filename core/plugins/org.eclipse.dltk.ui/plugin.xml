@@ -35,6 +35,7 @@
 			class="org.eclipse.dltk.internal.ui.search.DLTKSearchResultPage">
 		</viewPage>
    </extension>
+   <extension-point id="scriptElementLabelProviders" name="%extension-point.name.scriptElementLabelProviders" schema="schema/scriptElementLabelProviders.exsd"/>
  
  <extension
        point="org.eclipse.core.runtime.preferences">
