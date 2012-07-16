@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
-import org.eclipse.dltk.ui.templates.ScriptTemplateProposal;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -36,7 +35,8 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * Computes Script completion proposals and context infos.
  */
-public abstract class ScriptCompletionProposalComputer implements
+public abstract class ScriptCompletionProposalComputer extends
+		AbstractScriptCompletionProposalComputer implements
 		IScriptCompletionProposalComputer {
 
 	private static final class ContextInformationWrapper implements
@@ -148,32 +148,6 @@ public abstract class ScriptCompletionProposalComputer implements
 		return Collections.emptyList();
 	}
 
-	/**
-	 * Update relevance of template proposals that match with a keyword give
-	 * those templates slightly more relevance than the keyword to sort them
-	 * first.
-	 */
-	protected void updateTemplateProposalRelevance(
-			ScriptContentAssistInvocationContext context,
-			ICompletionProposal[] proposals) {
-		IScriptCompletionProposal[] keywords = context.getKeywordProposals();
-		if (keywords == null || keywords.length == 0) {
-			return;
-		}
-		for (int i = 0; i < proposals.length; ++i) {
-			ICompletionProposal cp = proposals[i];
-			if (cp instanceof ScriptTemplateProposal) {
-				final ScriptTemplateProposal tp = (ScriptTemplateProposal) cp;
-				final String name = tp.getPattern();
-				for (int j = 0; j < keywords.length; ++j) {
-					if (name.startsWith(keywords[j].getDisplayString())) {
-						tp.setRelevance(keywords[j].getRelevance());
-					}
-				}
-			}
-		}
-	}
-
 	// Script language specific completion proposals like types or keywords
 	protected List<ICompletionProposal> computeScriptCompletionProposals(
 			int offset, ScriptContentAssistInvocationContext context,
@@ -263,12 +237,12 @@ public abstract class ScriptCompletionProposalComputer implements
 			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 			// Language specific proposals (already sorted and etc.)
-			proposals.addAll(computeScriptCompletionProposals(context
-					.getInvocationOffset(), scriptContext, monitor));
+			proposals.addAll(computeScriptCompletionProposals(
+					context.getInvocationOffset(), scriptContext, monitor));
 
 			// Template proposals (already sorted and etc.)
-			proposals.addAll(computeTemplateCompletionProposals(context
-					.getInvocationOffset(), scriptContext, monitor));
+			proposals.addAll(computeTemplateCompletionProposals(
+					context.getInvocationOffset(), scriptContext, monitor));
 
 			return proposals;
 		}
@@ -332,8 +306,10 @@ public abstract class ScriptCompletionProposalComputer implements
 	 * template support.
 	 * </p>
 	 */
-	protected abstract TemplateCompletionProcessor createTemplateProposalComputer(
-			ScriptContentAssistInvocationContext context);
+	protected TemplateCompletionProcessor createTemplateProposalComputer(
+			ScriptContentAssistInvocationContext context) {
+		return null;
+	}
 
 	protected abstract ScriptCompletionProposalCollector createCollector(
 			ScriptContentAssistInvocationContext context);

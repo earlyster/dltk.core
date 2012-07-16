@@ -32,6 +32,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -40,6 +41,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
@@ -67,6 +69,9 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return this.context;
 	}
 
+	private static final String $_LINE_SELECTION = "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String $_WORD_SELECTION = "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
 			int offset) {
@@ -78,31 +83,60 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		if (selection.getOffset() == offset)
 			offset = selection.getOffset() + selection.getLength();
 
-		String prefix = extractPrefix(viewer, offset);
-		if (!isValidPrefix(prefix)) {
-			return new ICompletionProposal[0];
-		}
-		IRegion region = new Region(offset - prefix.length(), prefix.length());
-		TemplateContext context = createContext(viewer, region);
-		if (context == null)
-			return new ICompletionProposal[0];
-
-		// name of the selection variables {line, word}_selection
-		context.setVariable("selection", selection.getText()); //$NON-NLS-1$
-
 		List<TemplateProposal> matches = new ArrayList<TemplateProposal>();
 
-		Template[] templates = getTemplates(context.getContextType().getId());
-		for (int i = 0; i < templates.length; i++) {
-			Template template = templates[i];
-			try {
-				context.getContextType().validate(template.getPattern());
-			} catch (TemplateException e) {
-				continue;
+		if (selection.getLength() == 0) {
+			String prefix = extractPrefix(viewer, offset);
+			if (!isValidPrefix(prefix)) {
+				return new ICompletionProposal[0];
 			}
-			if (isMatchingTemplate(template, prefix, context))
-				matches.add((TemplateProposal) createProposal(template,
-						context, region, getRelevance(template, prefix)));
+			IRegion region = new Region(offset - prefix.length(),
+					prefix.length());
+			TemplateContext context = createContext(viewer, region);
+			if (context == null)
+				return new ICompletionProposal[0];
+			// name of the selection variables {line, word}_selection
+			context.setVariable("selection", selection.getText()); //$NON-NLS-1$
+			Template[] templates = getTemplates(context.getContextType()
+					.getId());
+			for (int i = 0; i != templates.length; i++) {
+				final Template template = templates[i];
+				try {
+					context.getContextType().validate(template.getPattern());
+				} catch (TemplateException e) {
+					continue;
+				}
+				if (isMatchingTemplate(template, prefix, context)) {
+					matches.add((TemplateProposal) createProposal(template,
+							context, region, getRelevance(template, prefix)));
+				}
+			}
+		} else {
+			IRegion region = new Region(offset - selection.getLength(),
+					selection.getLength());
+			TemplateContext context = createContext(viewer, region);
+			if (context == null)
+				return new ICompletionProposal[0];
+			// name of the selection variables {line, word}_selection
+			context.setVariable("selection", selection.getText()); //$NON-NLS-1$
+			Template[] templates = getTemplates(context.getContextType()
+					.getId());
+			final boolean multipleLinesSelected = areMultipleLinesSelected(viewer);
+			for (int i = 0; i != templates.length; i++) {
+				final Template template = templates[i];
+				try {
+					context.getContextType().validate(template.getPattern());
+				} catch (TemplateException e) {
+					continue;
+				}
+				if (!multipleLinesSelected
+						&& template.getPattern().indexOf($_WORD_SELECTION) != -1
+						|| (multipleLinesSelected && template.getPattern()
+								.indexOf($_LINE_SELECTION) != -1)) {
+					matches.add((TemplateProposal) createProposal(template,
+							context, region, getRelevance(template)));
+				}
+			}
 		}
 
 		Collections.sort(matches, comparator);
@@ -113,6 +147,34 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		}
 
 		return matches.toArray(new ICompletionProposal[matches.size()]);
+	}
+
+	/**
+	 * Returns <code>true</code> if one line is completely selected or if
+	 * multiple lines are selected. Being completely selected means that all
+	 * characters except the new line characters are selected.
+	 * 
+	 * @param viewer
+	 *            the text viewer
+	 * @return <code>true</code> if one or multiple lines are selected
+	 * @since 2.1
+	 */
+	private boolean areMultipleLinesSelected(ITextViewer viewer) {
+		if (viewer == null)
+			return false;
+		Point s = viewer.getSelectedRange();
+		if (s.y == 0)
+			return false;
+		try {
+			IDocument document = viewer.getDocument();
+			int startLine = document.getLineOfOffset(s.x);
+			int endLine = document.getLineOfOffset(s.x + s.y);
+			IRegion line = document.getLineInformation(startLine);
+			return startLine != endLine
+					|| (s.x == line.getOffset() && s.y == line.getLength());
+		} catch (BadLocationException x) {
+			return false;
+		}
 	}
 
 	protected boolean isValidPrefix(String prefix) {
@@ -235,5 +297,17 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		} else {
 			return s;
 		}
+	}
+
+	/**
+	 * Returns the relevance of a template. The default implementation returns
+	 * zero.
+	 * 
+	 * @param template
+	 *            the template to compute the relevance for
+	 * @return the relevance of <code>template</code>
+	 */
+	protected int getRelevance(Template template) {
+		return 0;
 	}
 }
