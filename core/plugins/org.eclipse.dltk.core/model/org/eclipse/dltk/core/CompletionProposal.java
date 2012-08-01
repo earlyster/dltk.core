@@ -315,7 +315,7 @@ public class CompletionProposal {
 	/**
 	 * Returns the character index in the source file buffer where source
 	 * completion was requested (the <code>offset</code> parameter to
-	 * <code>ICodeAssist.codeComplete</code> minus one).
+	 * <code>ICodeAssist.codeComplete</code>).
 	 * 
 	 * @return character index in source file buffer
 	 * @see ICodeAssist#codeComplete(int,CompletionRequestor)

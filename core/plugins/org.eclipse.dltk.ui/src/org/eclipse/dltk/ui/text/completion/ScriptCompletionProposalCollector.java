@@ -529,7 +529,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		} else {
 			length = fUserReplacementLength;
 			// extend length to begin at start
-			int behindCompletion = proposal.getCompletionLocation() + 1;
+			int behindCompletion = proposal.getCompletionLocation();
 			if (start < behindCompletion) {
 				length += behindCompletion - start;
 			}
@@ -568,7 +568,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		// int relevance = computeRelevance(proposal);
 		try {
 			IModelElement element = fSourceModule.getElementAt(proposal
-					.getCompletionLocation() + 1);
+					.getCompletionLocation());
 			if (element != null) {
 				IType type = (IType) element.getAncestor(IModelElement.TYPE);
 				if (type != null) {
