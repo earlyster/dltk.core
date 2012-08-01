@@ -50,7 +50,11 @@ public class SqlIndexer extends AbstractIndexer {
 	private IElementDao elementDao;
 
 	public SqlIndexer() {
-		elementDao = DbFactory.getInstance().getElementDao();
+		final DbFactory db = DbFactory.getInstance();
+		if (db == null) {
+			throw new IllegalStateException("DbFactory not available");
+		}
+		elementDao = db.getElementDao();
 	}
 
 	public void addDeclaration(DeclarationInfo info) {

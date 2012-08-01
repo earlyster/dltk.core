@@ -83,6 +83,7 @@ public class IndexerManager {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
+			indexer = null;
 		}
 		return null;
 	}
