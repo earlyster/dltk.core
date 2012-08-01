@@ -156,7 +156,7 @@ public class ScriptMethodCompletionProposal extends
 	 */
 	protected void computeReplacement(ReplacementBuffer buffer) {
 		if (!hasArgumentList()) {
-			buffer.append(super.computeReplacementString());
+			buffer.append(fProposal.getCompletion());
 			return;
 		}
 

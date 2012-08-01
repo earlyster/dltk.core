@@ -262,7 +262,7 @@ public abstract class LazyScriptCompletionProposal extends
 	}
 
 	protected String computeReplacementString() {
-		return String.valueOf(fProposal.getCompletion());
+		return fProposal.getCompletion();
 	}
 
 	/**
