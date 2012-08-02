@@ -21,8 +21,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
 import org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer;
@@ -246,7 +246,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 		if (page == null)
 			return;
 		// get all the view and editor parts
-		List parts = new ArrayList();
+		List<IWorkbenchPart> parts = new ArrayList<IWorkbenchPart>();
 		IWorkbenchPartReference refs[] = page.getViewReferences();
 		for (int i = 0; i < refs.length; i++) {
 			IWorkbenchPart part = refs[i].getPart(false);
@@ -258,9 +258,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 			if (refs[i].getPart(false) != null)
 				parts.add(refs[i].getPart(false));
 		}
-		Iterator itr = parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part = (IWorkbenchPart) itr.next();
+		for (IWorkbenchPart part : parts) {
 			// get the part's ISetSelectionTarget implementation
 			ISetSelectionTarget target = null;
 			if (part instanceof ISetSelectionTarget)

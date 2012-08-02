@@ -50,7 +50,7 @@ public abstract class BuildPathBasePage {
 	}
 
 	public static void fixNestingConflicts(BPListElement[] newEntries,
-			BPListElement[] existing, Set modifiedSourceEntries) {
+			BPListElement[] existing, Set<BPListElement> modifiedSourceEntries) {
 		for (int i = 0; i < newEntries.length; i++) {
 			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
 		}
@@ -66,7 +66,7 @@ public abstract class BuildPathBasePage {
 	}
 
 	private static void addExclusionPatterns(BPListElement newEntry,
-			BPListElement[] existing, Set modifiedEntries) {
+			BPListElement[] existing, Set<BPListElement> modifiedEntries) {
 		IPath entryPath = newEntry.getPath();
 		for (int i = 0; i < existing.length; i++) {
 			BPListElement curr = existing[i];

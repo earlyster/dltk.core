@@ -285,7 +285,7 @@ public class BuildpathModifier {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		IPath[] selected = query.doQuery();
-		List addedEntries = new ArrayList();
+		List<BPListElement> addedEntries = new ArrayList<BPListElement>();
 		try {
 			monitor.beginTask(
 					NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath,
@@ -298,7 +298,7 @@ public class BuildpathModifier {
 				}
 				monitor.worked(1);
 
-				List existingEntries = getExistingEntries(project);
+				List<BPListElement> existingEntries = getExistingEntries(project);
 				setNewEntry(existingEntries, addedEntries, project,
 						new SubProgressMonitor(monitor, 1));
 				updateBuildpath(existingEntries, project,
@@ -340,14 +340,14 @@ public class BuildpathModifier {
 	 * 
 	 * @see IAddArchivesQuery
 	 */
-	protected List addLibraries(IAddLibrariesQuery query,
+	protected List<BuildPathContainer> addLibraries(IAddLibrariesQuery query,
 			IScriptProject project, IProgressMonitor monitor)
 			throws CoreException {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		IBuildpathEntry[] selected = query.doQuery(project,
 				project.getRawBuildpath());
-		List addedEntries = new ArrayList();
+		List<BPListElement> addedEntries = new ArrayList<BPListElement>();
 		try {
 			monitor.beginTask(
 					NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath,
@@ -360,13 +360,14 @@ public class BuildpathModifier {
 				}
 				monitor.worked(1);
 
-				List existingEntries = getExistingEntries(project);
+				List<BPListElement> existingEntries = getExistingEntries(project);
 				setNewEntry(existingEntries, addedEntries, project,
 						new SubProgressMonitor(monitor, 1));
 				updateBuildpath(existingEntries, project,
 						new SubProgressMonitor(monitor, 1));
 
-				List result = new ArrayList(addedEntries.size());
+				List<BuildPathContainer> result = new ArrayList<BuildPathContainer>(
+						addedEntries.size());
 				for (int i = 0; i < addedEntries.size(); i++) {
 					result.add(new BuildPathContainer(project, selected[i]));
 				}
@@ -376,7 +377,7 @@ public class BuildpathModifier {
 		} finally {
 			monitor.done();
 		}
-		return new ArrayList();
+		return new ArrayList<BuildPathContainer>();
 	}
 
 	protected List addLibraryEntries(List resources, IScriptProject project,
@@ -852,10 +853,10 @@ public class BuildpathModifier {
 	 *         path entries of the project
 	 * @throws ModelException
 	 */
-	public static List getExistingEntries(IScriptProject project)
+	public static List<BPListElement> getExistingEntries(IScriptProject project)
 			throws ModelException {
 		IBuildpathEntry[] buildpathEntries = project.getRawBuildpath();
-		ArrayList newBuildPath = new ArrayList();
+		ArrayList<BPListElement> newBuildPath = new ArrayList<BPListElement>();
 		for (int i = 0; i < buildpathEntries.length; i++) {
 			IBuildpathEntry curr = buildpathEntries[i];
 			newBuildPath.add(BPListElement.createFromExisting(curr, project));

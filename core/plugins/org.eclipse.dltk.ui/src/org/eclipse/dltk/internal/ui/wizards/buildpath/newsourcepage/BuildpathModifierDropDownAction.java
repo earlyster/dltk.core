@@ -34,7 +34,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
     private Menu fMenu;
     /** A list of actions that will be used as 
      * drop down items*/
-    protected List fActions;
+	protected List<BuildpathModifierAction> fActions;
     /** Index of the action that can be executed when clicking directly on the dropdown button.*/
     private int fIndex;
     
@@ -50,7 +50,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
     public BuildpathModifierDropDownAction(BuildpathModifierAction action, String text, String toolTipText) {
         super(action.getOperation(), action.getImageDescriptor(), action.getDisabledImageDescriptor(), 
                 text, toolTipText, IAction.AS_DROP_DOWN_MENU);
-        fActions= new ArrayList();
+		fActions = new ArrayList<BuildpathModifierAction>();
         fActions.add(action);
         fIndex= 0;
     }
@@ -59,7 +59,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
      * Runs the first action of the list of managed actions that is valid.
      */
     public void run() {
-        BuildpathModifierAction action= (BuildpathModifierAction)fActions.get(fIndex);
+		BuildpathModifierAction action = fActions.get(fIndex);
         action.run();
     }
 
@@ -117,7 +117,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
      * @return an array of actions
      */
     public BuildpathModifierAction[] getActions() {
-        return (BuildpathModifierAction[])fActions.toArray(new BuildpathModifierAction[fActions.size()]);
+		return fActions.toArray(new BuildpathModifierAction[fActions.size()]);
     }
     
     /**
@@ -138,7 +138,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
      */
     private void createEntries(Menu menu) {
         for(int i= 0; i < fActions.size(); i++) {
-            IAction action= (IAction)fActions.get(i);
+			IAction action = fActions.get(i);
             addActionToMenu(menu, action);
         }
     }
@@ -160,7 +160,7 @@ public class BuildpathModifierDropDownAction extends BuildpathModifierAction imp
      */
     public boolean isValid(List selectedElements, int[] types) throws ModelException {
         for(int i= 0; i < fActions.size(); i++) {
-            BuildpathModifierAction action= (BuildpathModifierAction)fActions.get(i);
+			BuildpathModifierAction action = fActions.get(i);
             if(action.isValid(selectedElements, types)) {
                 fIndex= i;
                 return true;
