@@ -478,6 +478,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		}
 		buffer.append("]["); //$NON-NLS-1$
 		switch (getContentKind()) {
+		case IProjectFragment.K_BINARY:
+			buffer.append("K_BINARY"); //$NON-NLS-1$
+			break;
 		case IProjectFragment.K_SOURCE:
 			buffer.append("K_SOURCE"); //$NON-NLS-1$
 			break;
