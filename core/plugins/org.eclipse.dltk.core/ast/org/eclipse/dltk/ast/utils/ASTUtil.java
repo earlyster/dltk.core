@@ -32,39 +32,40 @@ public class ASTUtil {
 		return null;
 	}
 
-	public static TypeDeclaration[] getTypes(
-			List statements, List types) {
+	public static TypeDeclaration[] getTypes(List statements, List types) {
 		List finalTypes = new ArrayList();
 		finalTypes.addAll(types);
-		
+
 		if (statements != null) {
 			Iterator it = statements.iterator();
 			while (it.hasNext()) {
 				ASTNode node = (ASTNode) it.next();
-				if (node instanceof TypeDeclaration && !finalTypes.contains(node)) {
+				if (node instanceof TypeDeclaration
+						&& !finalTypes.contains(node)) {
 					finalTypes.add(node);
 				}
 			}
 		}
-		return (TypeDeclaration[]) finalTypes.toArray(new TypeDeclaration[finalTypes
-				.size()]);
+		return (TypeDeclaration[]) finalTypes
+				.toArray(new TypeDeclaration[finalTypes.size()]);
 	}
 
 	public static MethodDeclaration[] getMethods(List statements, List functions) {
 		List finalMethods = new ArrayList();
 		finalMethods.addAll(functions);
-		
+
 		if (statements != null) {
 			Iterator it = statements.iterator();
 			while (it.hasNext()) {
 				ASTNode node = (ASTNode) it.next();
-				if (node instanceof MethodDeclaration && !finalMethods.contains(node)) {
+				if (node instanceof MethodDeclaration
+						&& !finalMethods.contains(node)) {
 					finalMethods.add(node);
 				}
 			}
 		}
-		return (MethodDeclaration[]) finalMethods.toArray(new MethodDeclaration[finalMethods
-				.size()]);
+		return (MethodDeclaration[]) finalMethods
+				.toArray(new MethodDeclaration[finalMethods.size()]);
 	}
 
 	public static FieldDeclaration[] getVariables(List statements,
@@ -76,16 +77,22 @@ public class ASTUtil {
 			Iterator it = statements.iterator();
 			while (it.hasNext()) {
 				ASTNode node = (ASTNode) it.next();
-				if (node instanceof FieldDeclaration && !finalVariables.contains(node)) {
+				if (node instanceof FieldDeclaration
+						&& !finalVariables.contains(node)) {
 					finalVariables.add(node);
 				}
 			}
 		}
-		return (FieldDeclaration[]) finalVariables.toArray(new FieldDeclaration[finalVariables
-				.size()]);
+		return (FieldDeclaration[]) finalVariables
+				.toArray(new FieldDeclaration[finalVariables.size()]);
 	}
 
 	public static <E> List<E> select(ASTNode root, final Class<E> type) {
+		return select(root, type, false);
+	}
+
+	public static <E> List<E> select(ASTNode root, final Class<E> type,
+			final boolean visitNested) {
 		final List<E> result = new ArrayList<E>();
 		try {
 			root.traverse(new ASTVisitor() {
@@ -94,7 +101,7 @@ public class ASTUtil {
 				public boolean visitGeneral(ASTNode s) throws Exception {
 					if (type.isInstance(s)) {
 						result.add((E) s);
-						return false;
+						return visitNested;
 					} else {
 						return true;
 					}
@@ -105,5 +112,5 @@ public class ASTUtil {
 		}
 		return result;
 	}
-	
+
 }
