@@ -62,4 +62,20 @@ public class SourceRange implements ISourceRange {
 	public static boolean isAvailable(ISourceRange range) {
 		return range != null && range != UNKNOWN_RANGE;
 	}
+
+	/**
+	 * Create a new range by adding offset to the specified range offset.
+	 * 
+	 * @param range
+	 * @param offset
+	 * @return
+	 */
+	public static ISourceRange offset(ISourceRange range, int offset) {
+		if (isAvailable(range)) {
+			return new SourceRange(range.getOffset() + offset,
+					range.getLength());
+		} else {
+			return range;
+		}
+	}
 }
