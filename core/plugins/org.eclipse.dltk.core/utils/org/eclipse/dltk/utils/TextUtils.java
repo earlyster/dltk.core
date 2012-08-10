@@ -609,18 +609,6 @@ public abstract class TextUtils {
 
 		sOffset += start;
 
-		return createSourceRange(sOffset, sOffset + line.trim().length());
-	}
-
-	private static ISourceRange createSourceRange(final int start, final int end) {
-		return new ISourceRange() {
-			public int getLength() {
-				return end - start;
-			}
-
-			public int getOffset() {
-				return start;
-			}
-		};
+		return new SourceRange(sOffset, line.trim().length());
 	}
 }
