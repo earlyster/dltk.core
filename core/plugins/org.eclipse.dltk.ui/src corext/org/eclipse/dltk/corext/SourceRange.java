@@ -16,7 +16,10 @@ import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.ISourceRange;
 
-
+/**
+ * Use {@link org.eclipse.dltk.core.SourceRange}.
+ */
+@Deprecated
 public class SourceRange implements ISourceRange{
 	
 	private final int fOffset;
