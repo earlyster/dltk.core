@@ -26,8 +26,8 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.index2.search.ModelAccess;
 import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -144,7 +144,7 @@ public class HierarchyResolver {
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				hierarchyBuilder.hierarchy.progressMonitor);
 
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	protected void computeSubtypes(IType focusType) throws CoreException {
@@ -186,16 +186,16 @@ public class HierarchyResolver {
 		while (i.hasNext()) {
 			String typeName = i.next();
 			Set<IType> typeElements = tmpCache.get(typeName);
-			cache.put(typeName, (IType[]) typeElements
-					.toArray(new IType[typeElements.size()]));
+			cache.put(typeName,
+					typeElements.toArray(new IType[typeElements.size()]));
 		}
 
 		// Create file hierarchy resolver for filtering non-included elements
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
-			hierarchyInfo = fileHierarchyResolver.resolveDown(focusType
-					.getSourceModule(),
+			hierarchyInfo = fileHierarchyResolver.resolveDown(
+					focusType.getSourceModule(),
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
@@ -212,9 +212,9 @@ public class HierarchyResolver {
 		List<String> extenders = superTypeToExtender.get(focusType
 				.getTypeQualifiedName(delimiter));
 		if (extenders != null) {
-			IType[] subTypes = searchTypes((String[]) extenders
-					.toArray(new String[extenders.size()]), subTypesCache,
-					hierarchyInfo);
+			IType[] subTypes = searchTypes(
+					extenders.toArray(new String[extenders.size()]),
+					subTypesCache, hierarchyInfo);
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
 				hierarchyBuilder.hierarchy.addSubtype(focusType, subType);
@@ -235,8 +235,8 @@ public class HierarchyResolver {
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
-			hierarchyInfo = fileHierarchyResolver.resolveUp(focusType
-					.getSourceModule(),
+			hierarchyInfo = fileHierarchyResolver.resolveUp(
+					focusType.getSourceModule(),
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
@@ -286,7 +286,7 @@ public class HierarchyResolver {
 			result.addAll(Arrays.asList(searchTypes(typeName, cache,
 					hierarchyInfo)));
 		}
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	protected IType[] searchTypes(String type, IFileHierarchyInfo hierarchyInfo)
@@ -298,7 +298,7 @@ public class HierarchyResolver {
 			Map<String, IType[]> cache, final IFileHierarchyInfo hierarchyInfo)
 			throws CoreException {
 		if (cache != null && cache.containsKey(typeName)) {
-			return (IType[]) cache.get(typeName);
+			return cache.get(typeName);
 		}
 
 		final List<IType> result = new LinkedList<IType>();
@@ -327,7 +327,7 @@ public class HierarchyResolver {
 			result.addAll(filteredTypes);
 		}
 
-		types = (IType[]) result.toArray(new IType[result.size()]);
+		types = result.toArray(new IType[result.size()]);
 		if (cache != null) {
 			cache.put(typeName, types);
 		}
