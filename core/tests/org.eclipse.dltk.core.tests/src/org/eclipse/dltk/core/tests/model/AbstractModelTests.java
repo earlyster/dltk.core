@@ -61,6 +61,7 @@ import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.internal.core.util.Util.Comparer;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 public abstract class AbstractModelTests extends SuiteOfTestCases {
@@ -178,8 +179,13 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	 */
 	protected File getPluginDirectoryPath() {
 		try {
-			URL platformURL = Platform.getBundle(this.fTestProjectName)
-					.getEntry("/");
+			final Bundle bundle = Platform.getBundle(this.fTestProjectName);
+			if (bundle == null) {
+				throw new IllegalStateException(NLS.bind(
+						"Bundle \"{0}\" with test data not found",
+						fTestProjectName));
+			}
+			URL platformURL = bundle.getEntry("/");
 			return new File(FileLocator.toFileURL(platformURL).getFile());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -261,8 +267,12 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		final File targetWorkspacePath = getWorkspaceRoot().getLocation()
 				.toFile();
 
-		copyDirectory(new File(sourceWorkspacePath, fromName), new File(
-				targetWorkspacePath, projectName));
+		final File source = new File(sourceWorkspacePath, fromName);
+		if (!source.isDirectory()) {
+			throw new IllegalArgumentException(NLS.bind(
+					"Source directory \"{0}\" doesn't exist", source));
+		}
+		copyDirectory(source, new File(targetWorkspacePath, projectName));
 
 		return createProject(projectName);
 	}
