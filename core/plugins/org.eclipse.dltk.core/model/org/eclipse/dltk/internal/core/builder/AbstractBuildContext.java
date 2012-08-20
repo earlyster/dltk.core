@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -22,6 +23,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildContextExtension;
+import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
@@ -65,12 +67,10 @@ public abstract class AbstractBuildContext implements IBuildContext,
 			try {
 				contents = module.getSourceAsCharArray();
 			} catch (ModelException e) {
-				DLTKCore
-						.error(
-								NLS
-										.bind(
-												Messages.AbstractBuildContext_errorRetrievingContentsOf,
-												module.getElementName()), e);
+				DLTKCore.error(
+						NLS.bind(
+								Messages.AbstractBuildContext_errorRetrievingContentsOf,
+								module.getElementName()), e);
 				contents = CharOperation.NO_CHAR;
 			}
 		}
@@ -134,6 +134,23 @@ public abstract class AbstractBuildContext implements IBuildContext,
 	 */
 	public String getFileName() {
 		return getSourceModule().getElementName();
+	}
+
+	/**
+	 * Attribute key, value type is
+	 * Map<IBuildParticipant,List<IBuildParticipant>>
+	 */
+	public static final String ATTR_DEPENDENCIES = IBuildContext.class
+			.getName() + ".Dependencies";
+
+	public List<IBuildParticipant> getDependents(IBuildParticipant participant) {
+		@SuppressWarnings("unchecked")
+		final Map<IBuildParticipant, List<IBuildParticipant>> map = (Map<IBuildParticipant, List<IBuildParticipant>>) get(ATTR_DEPENDENCIES);
+		if (map != null) {
+			return map.get(participant);
+		} else {
+			return null;
+		}
 	}
 
 }

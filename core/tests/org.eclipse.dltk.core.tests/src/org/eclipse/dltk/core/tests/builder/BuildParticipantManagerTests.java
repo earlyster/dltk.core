@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.tests.builder;
 
+import junit.framework.TestCase;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildContext;
@@ -19,8 +21,6 @@ import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantFactoryValue;
 import org.eclipse.dltk.utils.TextUtils;
-
-import junit.framework.TestCase;
 
 public class BuildParticipantManagerTests extends TestCase {
 
@@ -71,8 +71,8 @@ public class BuildParticipantManagerTests extends TestCase {
 		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", null), createDescriptor("B", null),
 				createDescriptor("C", null) };
-		IBuildParticipant[] participants = BuildParticipantManager
-				.createParticipants(null, descriptors);
+		final IBuildParticipant[] participants = BuildParticipantManager
+				.createParticipants(null, descriptors).participants;
 		assertEquals(3, participants.length);
 		assertEquals("A", ((TestBuildParticipant) participants[0]).key);
 		assertEquals("B", ((TestBuildParticipant) participants[1]).key);
@@ -83,8 +83,8 @@ public class BuildParticipantManagerTests extends TestCase {
 		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", "B,C"), createDescriptor("B", "C"),
 				createDescriptor("C", null) };
-		IBuildParticipant[] participants = BuildParticipantManager
-				.createParticipants(null, descriptors);
+		final IBuildParticipant[] participants = BuildParticipantManager
+				.createParticipants(null, descriptors).participants;
 		assertEquals(3, participants.length);
 		assertEquals("C", ((TestBuildParticipant) participants[0]).key);
 		assertEquals("B", ((TestBuildParticipant) participants[1]).key);
@@ -95,8 +95,8 @@ public class BuildParticipantManagerTests extends TestCase {
 		BuildParticipantFactoryValue[] descriptors = new BuildParticipantFactoryValue[] {
 				createDescriptor("A", "D"), createDescriptor("B", "C"),
 				createDescriptor("C", null) };
-		IBuildParticipant[] participants = BuildParticipantManager
-				.createParticipants(null, descriptors);
+		final IBuildParticipant[] participants = BuildParticipantManager
+				.createParticipants(null, descriptors).participants;
 		assertEquals(2, participants.length);
 		assertEquals("C", ((TestBuildParticipant) participants[0]).key);
 		assertEquals("B", ((TestBuildParticipant) participants[1]).key);

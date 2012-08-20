@@ -11,7 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -142,6 +146,17 @@ public class BuildParticipantManager extends
 
 	private static final IBuildParticipantFilter[] NO_PREDICATES = new IBuildParticipantFilter[0];
 
+	public static class BuildParticipantResult {
+		public final IBuildParticipant[] participants;
+		public final Map<IBuildParticipant, List<IBuildParticipant>> dependencies;
+
+		public BuildParticipantResult(IBuildParticipant[] participants,
+				Map<IBuildParticipant, List<IBuildParticipant>> dependencies) {
+			this.participants = participants;
+			this.dependencies = dependencies;
+		}
+	}
+
 	/**
 	 * Returns {@link IBuildParticipant} instances of the specified nature. If
 	 * there are no build participants then the empty array is returned.
@@ -150,21 +165,22 @@ public class BuildParticipantManager extends
 	 * @param natureId
 	 * @return
 	 */
-	public static IBuildParticipant[] getBuildParticipants(
+	public static BuildParticipantResult getBuildParticipants(
 			IScriptProject project, String natureId) {
 		final FactoryValue<?>[] factories = getInstance()
 				.getInstances(natureId);
 		if (factories == null || factories.length == 0) {
-			return NO_PARTICIPANTS;
+			return new BuildParticipantResult(NO_PARTICIPANTS, null);
 		}
 		return createParticipants(project, factories);
 	}
 
-	public static IBuildParticipant[] createParticipants(
+	public static BuildParticipantResult createParticipants(
 			IScriptProject project, FactoryValue<?>[] factories) {
 		final IBuildParticipant[] result = new IBuildParticipant[factories.length];
 		final Set<String> processed = new HashSet<String>();
-		final Set<String> created = new HashSet<String>();
+		final Map<String, IBuildParticipant> created = new HashMap<String, IBuildParticipant>();
+		final Map<IBuildParticipant, List<IBuildParticipant>> dependencies = new HashMap<IBuildParticipant, List<IBuildParticipant>>();
 		for (;;) {
 			final int iterationStartCount = created.size();
 			for (int i = 0; i < factories.length; ++i) {
@@ -173,14 +189,28 @@ public class BuildParticipantManager extends
 				}
 				final BuildParticipantFactoryValue factory = (BuildParticipantFactoryValue) factories[i];
 				if (!processed.contains(factory.id)
-						&& created.containsAll(factory.requirements)) {
+						&& created.keySet().containsAll(factory.requirements)) {
 					processed.add(factory.id);
 					try {
 						final IBuildParticipant participant = factory.factory
 								.createBuildParticipant(project);
 						if (participant != null) {
 							result[created.size()] = participant;
-							created.add(factory.id);
+							created.put(factory.id, participant);
+							if (!factory.requirements.isEmpty()) {
+								for (String req : factory.requirements) {
+									final IBuildParticipant reqParticipant = created
+											.get(req);
+									List<IBuildParticipant> depList = dependencies
+											.get(reqParticipant);
+									if (depList == null) {
+										depList = new ArrayList<IBuildParticipant>();
+										dependencies.put(reqParticipant,
+												depList);
+									}
+									depList.add(participant);
+								}
+							}
 						}
 					} catch (CoreException e) {
 						final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
@@ -194,14 +224,14 @@ public class BuildParticipantManager extends
 		}
 		if (created.size() != result.length) {
 			if (created.size() == 0) {
-				return NO_PARTICIPANTS;
+				return new BuildParticipantResult(NO_PARTICIPANTS, null);
 			}
 			final IBuildParticipant[] newResult = new IBuildParticipant[created
 					.size()];
 			System.arraycopy(result, 0, newResult, 0, created.size());
-			return newResult;
+			return new BuildParticipantResult(newResult, dependencies);
 		} else {
-			return result;
+			return new BuildParticipantResult(result, dependencies);
 		}
 	}
 

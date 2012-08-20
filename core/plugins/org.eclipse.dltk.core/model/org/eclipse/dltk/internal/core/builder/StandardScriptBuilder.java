@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core.builder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -41,6 +42,7 @@ import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.builder.IBuildState;
 import org.eclipse.dltk.core.builder.IProjectChange;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantResult;
 import org.eclipse.osgi.util.NLS;
 
 public class StandardScriptBuilder implements IScriptBuilder {
@@ -108,6 +110,10 @@ public class StandardScriptBuilder implements IScriptBuilder {
 						String.valueOf(remainingWork), module.getElementName()));
 				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
 						module, buildType);
+				if (participantDependencies != null) {
+					context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
+							participantDependencies);
+				}
 				try {
 					for (int i = 0; i < extensions.size(); ++i) {
 						if (monitor.isCanceled()) {
@@ -193,6 +199,10 @@ public class StandardScriptBuilder implements IScriptBuilder {
 					module.getElementName()));
 			final SourceModuleBuildContext context = new SourceModuleBuildContext(
 					problemFactory, module, buildType);
+			if (participantDependencies != null) {
+				context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
+						participantDependencies);
+			}
 			if (context.reporter != null) {
 				buildModule(context);
 				reporters.add(context.reporter);
@@ -302,6 +312,7 @@ public class StandardScriptBuilder implements IScriptBuilder {
 	private boolean beginBuildDone = false;
 	private boolean endBuildNeeded = false;
 	private IBuildParticipant[] participants = null;
+	private Map<IBuildParticipant, List<IBuildParticipant>> participantDependencies = null;
 	private IBuildParticipantFilter[] filters = null;
 	private IDLTKLanguageToolkit toolkit = null;
 	private IProblemFactory problemFactory = null;
@@ -313,8 +324,10 @@ public class StandardScriptBuilder implements IScriptBuilder {
 	public boolean initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
-			participants = BuildParticipantManager.getBuildParticipants(
-					project, toolkit.getNatureId());
+			final BuildParticipantResult result = BuildParticipantManager
+					.getBuildParticipants(project, toolkit.getNatureId());
+			participants = result.participants;
+			participantDependencies = result.dependencies;
 		}
 		if (participants == null || participants.length == 0) {
 			return false;
@@ -364,6 +377,7 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			reporters = null;
 		}
 		participants = null;
+		participantDependencies = null;
 		filters = null;
 		toolkit = null;
 		problemFactory = null;

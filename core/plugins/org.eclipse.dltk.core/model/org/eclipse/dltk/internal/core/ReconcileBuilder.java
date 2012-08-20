@@ -25,8 +25,9 @@ import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.builder.AbstractBuildContext;
 import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager.BuildParticipantResult;
 
-class StructureBuilder {
+class ReconcileBuilder {
 
 	private static class ReconcileBuildContext extends AbstractBuildContext {
 
@@ -62,12 +63,13 @@ class StructureBuilder {
 			AccumulatingProblemReporter reporter) {
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 		final IScriptProject project = module.getScriptProject();
-		IBuildParticipant[] participants = beginBuild(natureId, project);
+		final ReconcileBuildContext context = new ReconcileBuildContext(module,
+				reporter);
+		IBuildParticipant[] participants = beginBuild(natureId, project,
+				context);
 		if (participants.length == 0) {
 			return;
 		}
-		final ReconcileBuildContext context = new ReconcileBuildContext(module,
-				reporter);
 		final IBuildParticipantFilter[] filters = BuildParticipantManager
 				.getFilters(project, natureId, reporter);
 		for (IBuildParticipantFilter filter : filters) {
@@ -92,9 +94,14 @@ class StructureBuilder {
 	}
 
 	private static IBuildParticipant[] beginBuild(String natureId,
-			final IScriptProject project) {
-		final IBuildParticipant[] participants = BuildParticipantManager
+			final IScriptProject project, ReconcileBuildContext context) {
+		final BuildParticipantResult result = BuildParticipantManager
 				.getBuildParticipants(project, natureId);
+		if (result.dependencies != null) {
+			context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
+					result.dependencies);
+		}
+		final IBuildParticipant[] participants = result.participants;
 		int count = 0;
 		for (int j = 0; j < participants.length; ++j) {
 			final IBuildParticipant participant = participants[j];
