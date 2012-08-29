@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.corext.util.Messages;
-import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.preferences.ScrolledPageContent;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.dialogs.Dialog;
@@ -99,7 +99,7 @@ public abstract class AbstractConfigurationBlock implements
 		/** The preference setting for keeping no section open. */
 		private static final String __NONE = "__none"; //$NON-NLS-1$
 
-		private Set fSections = new HashSet();
+		private Set<ExpandableComposite> fSections = new HashSet<ExpandableComposite>();
 
 		private boolean fIsBeingManaged = false;
 
@@ -113,10 +113,9 @@ public abstract class AbstractConfigurationBlock implements
 				if (e.getState()) {
 					try {
 						fIsBeingManaged = true;
-						for (Iterator iter = fSections.iterator(); iter
-								.hasNext();) {
-							ExpandableComposite composite = (ExpandableComposite) iter
-									.next();
+						for (Iterator<ExpandableComposite> iter = fSections
+								.iterator(); iter.hasNext();) {
+							ExpandableComposite composite = iter.next();
 							if (composite != source)
 								composite.setExpanded(false);
 						}
@@ -124,8 +123,8 @@ public abstract class AbstractConfigurationBlock implements
 						fIsBeingManaged = false;
 					}
 					if (fLastOpenKey != null && fDialogSettingsStore != null)
-						fDialogSettingsStore.setValue(fLastOpenKey, source
-								.getText());
+						fDialogSettingsStore.setValue(fLastOpenKey,
+								source.getText());
 				} else {
 					if (!fIsBeingManaged && fLastOpenKey != null
 							&& fDialogSettingsStore != null)
@@ -179,8 +178,8 @@ public abstract class AbstractConfigurationBlock implements
 		 * composite within that, to ensure that expanding the sections will
 		 * always have enough space, unless there already is a
 		 * <code>ScrolledComposite</code> along the parent chain of
-		 * <code>parent</code>, in which case a normal <code>Composite</code>
-		 * is created.
+		 * <code>parent</code>, in which case a normal <code>Composite</code> is
+		 * created.
 		 * <p>
 		 * The receiver keeps a reference to the inner body composite, so that
 		 * new sections can be added via <code>createSection</code>.
@@ -254,7 +253,7 @@ public abstract class AbstractConfigurationBlock implements
 
 	private OverlayPreferenceStore fStore;
 
-	private Map fCheckBoxes = new HashMap();
+	private Map<Button, String> fCheckBoxes = new HashMap<Button, String>();
 
 	private ArrayList fRadioButtons = new ArrayList();
 
@@ -266,8 +265,7 @@ public abstract class AbstractConfigurationBlock implements
 
 		public void widgetSelected(SelectionEvent e) {
 			Button button = (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button
-					.getSelection());
+			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
 		}
 	};
 
@@ -300,12 +298,12 @@ public abstract class AbstractConfigurationBlock implements
 		}
 	};
 
-	private Map fTextFields = new HashMap();
+	private Map<Text, String> fTextFields = new HashMap<Text, String>();
 
 	private ModifyListener fTextFieldListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
 			Text text = (Text) e.widget;
-			fStore.setValue((String) fTextFields.get(text), text.getText());
+			fStore.setValue(fTextFields.get(text), text.getText());
 		}
 	};
 
@@ -328,7 +326,7 @@ public abstract class AbstractConfigurationBlock implements
 	private org.eclipse.dltk.ui.dialogs.StatusInfo fStatus;
 
 	private final PreferencePage fMainPage;
-	
+
 	protected Shell getShell() {
 		return fMainPage.getShell();
 	}
@@ -469,10 +467,10 @@ public abstract class AbstractConfigurationBlock implements
 	}
 
 	/**
-	 * Returns an array of size 2: - first element is of type <code>Label</code> -
-	 * second element is of type <code>Text</code> Use
-	 * <code>getLabelControl</code> and <code>getTextControl</code> to get
-	 * the 2 controls.
+	 * Returns an array of size 2: - first element is of type <code>Label</code>
+	 * - second element is of type <code>Text</code> Use
+	 * <code>getLabelControl</code> and <code>getTextControl</code> to get the 2
+	 * controls.
 	 * 
 	 * @param composite
 	 *            the parent composite
@@ -485,8 +483,7 @@ public abstract class AbstractConfigurationBlock implements
 	 * @param indentation
 	 *            the field's indentation
 	 * @param isNumber
-	 *            <code>true</code> iff this text field is used to edit a
-	 *            number
+	 *            <code>true</code> iff this text field is used to edit a number
 	 * @return the controls added
 	 */
 	protected Control[] addLabelledTextField(Composite composite, String label,
@@ -643,23 +640,18 @@ public abstract class AbstractConfigurationBlock implements
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status = new StatusInfo();
 		if (number.length() == 0) {
-			status
-					.setError(PreferencesMessages.DLTKEditorPreferencePage_empty_input);
+			status.setError(PreferencesMessages.DLTKEditorPreferencePage_empty_input);
 		} else {
 			try {
 				int value = Integer.parseInt(number);
 				if (value < 0)
-					status
-							.setError(Messages
-									.format(
-											PreferencesMessages.DLTKEditorPreferencePage_invalid_input,
-											number));
+					status.setError(Messages
+							.format(PreferencesMessages.DLTKEditorPreferencePage_invalid_input,
+									number));
 			} catch (NumberFormatException e) {
-				status
-						.setError(Messages
-								.format(
-										PreferencesMessages.DLTKEditorPreferencePage_invalid_input,
-										number));
+				status.setError(Messages
+						.format(PreferencesMessages.DLTKEditorPreferencePage_invalid_input,
+								number));
 			}
 		}
 		return status;

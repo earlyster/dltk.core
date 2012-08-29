@@ -192,8 +192,8 @@ public abstract class FormatterModifyTabPage implements
 	public void updatePreview() {
 		if (previewViewer != null) {
 			FormatterPreviewUtils.updatePreview(previewViewer,
-					getPreviewContent(), dialog.getFormatterFactory(), dialog
-							.getPreferences());
+					getPreviewContent(), dialog.getFormatterFactory(),
+					dialog.getPreferences());
 		}
 	}
 

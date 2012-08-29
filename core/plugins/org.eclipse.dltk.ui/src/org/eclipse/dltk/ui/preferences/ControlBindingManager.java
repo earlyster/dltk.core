@@ -24,20 +24,20 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  */
-public class ControlBindingManager {
-	private IStatusChangeListener changeListener;
+public class ControlBindingManager<KEY> {
+	final IStatusChangeListener changeListener;
 
-	private Map checkBoxControls;
-	private Map comboControls;
-	private final Map comboValueProviders = new IdentityHashMap();
+	private Map<Button, KEY> checkBoxControls;
+	private Map<Combo, KEY> comboControls;
+	private final Map<Combo, IComboSelectedValueProvider> comboValueProviders = new IdentityHashMap<Combo, IComboSelectedValueProvider>();
 
 	private DependencyManager dependencyManager;
 
-	private IPreferenceDelegate preferenceDelegate;
-	private Map radioControls;
+	final IPreferenceDelegate<KEY> preferenceDelegate;
+	private Map<Button, KEY> radioControls;
 
-	private Map textControls;
-	private final Map textTransformers = new HashMap();
+	private Map<Text, KEY> textControls;
+	private final Map<Text, ITextConverter> textTransformers = new HashMap<Text, ITextConverter>();
 	private ValidatorManager validatorManager;
 
 	public static class DependencyMode {
@@ -51,12 +51,12 @@ public class ControlBindingManager {
 		int indexOf(String value);
 	}
 
-	public ControlBindingManager(IPreferenceDelegate delegate,
+	public ControlBindingManager(IPreferenceDelegate<KEY> delegate,
 			IStatusChangeListener listener) {
-		this.checkBoxControls = new HashMap();
-		this.comboControls = new HashMap();
-		this.textControls = new HashMap();
-		this.radioControls = new HashMap();
+		this.checkBoxControls = new HashMap<Button, KEY>();
+		this.comboControls = new HashMap<Combo, KEY>();
+		this.textControls = new HashMap<Text, KEY>();
+		this.radioControls = new HashMap<Button, KEY>();
 
 		this.validatorManager = new ValidatorManager();
 		this.dependencyManager = new DependencyManager();
@@ -65,7 +65,7 @@ public class ControlBindingManager {
 		this.preferenceDelegate = delegate;
 	}
 
-	public void bindControl(final Combo combo, final Object key) {
+	public void bindControl(final Combo combo, final KEY key) {
 		bindControl(combo, key, new IComboSelectedValueProvider() {
 
 			public String getValueAt(int index) {
@@ -85,7 +85,7 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindControl(Combo combo, Object key, final String[] itemValues) {
+	public void bindControl(Combo combo, KEY key, final String[] itemValues) {
 		bindControl(combo, key, new IComboSelectedValueProvider() {
 			public String getValueAt(int index) {
 				return itemValues[index];
@@ -102,7 +102,7 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindControl(final Combo combo, final Object key,
+	public void bindControl(final Combo combo, final KEY key,
 			final IComboSelectedValueProvider itemValueProvider) {
 		if (key != null) {
 			comboControls.put(combo, key);
@@ -116,16 +116,15 @@ public class ControlBindingManager {
 
 			public void widgetSelected(SelectionEvent e) {
 				int index = combo.getSelectionIndex();
-				preferenceDelegate.setString(key, itemValueProvider
-						.getValueAt(index));
+				preferenceDelegate.setString(key,
+						itemValueProvider.getValueAt(index));
 
 				changeListener.statusChanged(StatusInfo.OK_STATUS);
 			}
 		});
 	}
 
-	public void bindControl(final Button button, final Object key,
-			Control[] slaves) {
+	public void bindControl(final Button button, final KEY key, Control[] slaves) {
 		if (key != null) {
 			checkBoxControls.put(button, key);
 		}
@@ -146,12 +145,12 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindControl(final Text text, final Object key,
+	public void bindControl(final Text text, final KEY key,
 			IFieldValidator validator) {
 		bindControl(text, key, validator, null);
 	}
 
-	public void bindControl(final Text text, final Object key,
+	public void bindControl(final Text text, final KEY key,
 			IFieldValidator validator, final ITextConverter transformer) {
 		if (key != null) {
 			if (textControls.containsKey(key)) {
@@ -193,7 +192,7 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindRadioControl(final Button button, final String key,
+	public void bindRadioControl(final Button button, final KEY key,
 			final Object enable, Control[] dependencies) {
 		if (key != null) {
 			radioControls.put(button, key);
@@ -227,9 +226,9 @@ public class ControlBindingManager {
 
 	public IStatus getStatus() {
 		IStatus status = StatusInfo.OK_STATUS;
-		Iterator iter = textControls.keySet().iterator();
+		Iterator<Text> iter = textControls.keySet().iterator();
 		while (iter.hasNext()) {
-			IStatus s = validateText((Text) iter.next());
+			IStatus s = validateText(iter.next());
 			status = StatusUtil.getMoreSevere(s, status);
 		}
 
@@ -247,9 +246,9 @@ public class ControlBindingManager {
 
 	protected void updateStatus(IStatus status) {
 		if (!status.matches(IStatus.ERROR)) {
-			Iterator iter = textControls.keySet().iterator();
+			Iterator<Text> iter = textControls.keySet().iterator();
 			while (iter.hasNext()) {
-				IStatus s = validateText((Text) iter.next());
+				IStatus s = validateText(iter.next());
 				status = StatusUtil.getMoreSevere(s, status);
 			}
 		}
@@ -258,21 +257,20 @@ public class ControlBindingManager {
 	}
 
 	private void initCheckBoxes() {
-		Iterator it = checkBoxControls.keySet().iterator();
+		Iterator<Button> it = checkBoxControls.keySet().iterator();
 		while (it.hasNext()) {
-			final Button button = (Button) it.next();
-			final Object key = checkBoxControls.get(button);
+			final Button button = it.next();
+			final KEY key = checkBoxControls.get(button);
 			button.setSelection(preferenceDelegate.getBoolean(key));
 		}
 	}
 
 	private void initCombos() {
-		for (Iterator it = comboControls.entrySet().iterator(); it.hasNext();) {
-			final Map.Entry entry = (Map.Entry) it.next();
-			final Combo combo = (Combo) entry.getKey();
-			final Object key = entry.getValue();
+		for (final Map.Entry<Combo, KEY> entry : comboControls.entrySet()) {
+			final Combo combo = entry.getKey();
+			final KEY key = entry.getValue();
 			final String value = preferenceDelegate.getString(key);
-			final IComboSelectedValueProvider valueProvider = (IComboSelectedValueProvider) comboValueProviders
+			final IComboSelectedValueProvider valueProvider = comboValueProviders
 					.get(combo);
 			if (valueProvider != null) {
 				int index = valueProvider.indexOf(value);
@@ -286,10 +284,10 @@ public class ControlBindingManager {
 	}
 
 	private void initRadioControls() {
-		Iterator it = radioControls.keySet().iterator();
+		Iterator<Button> it = radioControls.keySet().iterator();
 		while (it.hasNext()) {
-			Button button = (Button) it.next();
-			Object key = radioControls.get(button);
+			Button button = it.next();
+			KEY key = radioControls.get(button);
 
 			String enable = (String) button.getData();
 			String value = preferenceDelegate.getString(key);
@@ -303,13 +301,12 @@ public class ControlBindingManager {
 	}
 
 	private void initTextControls() {
-		Iterator it = textControls.keySet().iterator();
+		Iterator<Text> it = textControls.keySet().iterator();
 		while (it.hasNext()) {
-			final Text text = (Text) it.next();
-			final Object key = textControls.get(text);
+			final Text text = it.next();
+			final KEY key = textControls.get(text);
 			String value = preferenceDelegate.getString(key);
-			final ITextConverter textTransformer = (ITextConverter) textTransformers
-					.get(text);
+			final ITextConverter textTransformer = textTransformers.get(text);
 			if (textTransformer != null) {
 				value = textTransformer.convertPreference(value);
 			}
@@ -330,7 +327,7 @@ public class ControlBindingManager {
 	/**
      */
 	class DependencyManager {
-		private List masterSlaveListeners = new ArrayList();
+		private List<SelectionListener> masterSlaveListeners = new ArrayList<SelectionListener>();
 
 		public void createDependency(final Button master,
 				final Control[] slaves, final DependencyMode mode) {
@@ -359,29 +356,26 @@ public class ControlBindingManager {
 		}
 
 		public void initialize() {
-			Iterator it = masterSlaveListeners.iterator();
+			Iterator<SelectionListener> it = masterSlaveListeners.iterator();
 			while (it.hasNext()) {
-				((SelectionListener) it.next()).widgetSelected(null);
+				it.next().widgetSelected(null);
 			}
 		}
 	}
 
-	/**
-     */
-	class ValidatorManager {
-
-		private Map map = new HashMap();
+	@SuppressWarnings("serial")
+	static class ValidatorManager extends HashMap<Control, IFieldValidator> {
 
 		public IFieldValidator getValidator(Control control) {
-			return (IFieldValidator) map.get(control);
+			return get(control);
 		}
 
 		public void registerValidator(Text text, IFieldValidator validator) {
-			map.put(text, validator);
+			put(text, validator);
 		}
 
 		public void unregisterValidator(Text text) {
-			map.remove(text);
+			remove(text);
 		}
 
 	}

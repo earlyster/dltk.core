@@ -34,22 +34,22 @@ import org.eclipse.swt.widgets.Text;
 public class FormatterControlManager implements IFormatterControlManager,
 		IStatusChangeListener {
 
-	private final IPreferenceDelegate delegate;
-	private final ControlBindingManager bindingManager;
+	private final IPreferenceDelegate<String> delegate;
+	private final ControlBindingManager<String> bindingManager;
 	private final IStatusChangeListener listener;
 
-	public FormatterControlManager(IPreferenceDelegate delegate,
+	public FormatterControlManager(IPreferenceDelegate<String> delegate,
 			IStatusChangeListener listener) {
 		this.delegate = delegate;
-		this.bindingManager = new ControlBindingManager(delegate, this);
+		this.bindingManager = new ControlBindingManager<String>(delegate, this);
 		this.listener = listener;
 	}
 
-	public Button createCheckbox(Composite parent, Object key, String text) {
+	public Button createCheckbox(Composite parent, String key, String text) {
 		return createCheckbox(parent, key, text, 1);
 	}
 
-	public Button createCheckbox(Composite parent, Object key, String text,
+	public Button createCheckbox(Composite parent, String key, String text,
 			int hspan) {
 		Button button = SWTFactory.createCheckButton(parent, text, null, false,
 				hspan);
@@ -57,7 +57,7 @@ public class FormatterControlManager implements IFormatterControlManager,
 		return button;
 	}
 
-	public Combo createCombo(Composite parent, Object key, String label,
+	public Combo createCombo(Composite parent, String key, String label,
 			String[] items) {
 		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Combo combo = SWTFactory.createCombo(parent,
@@ -67,7 +67,7 @@ public class FormatterControlManager implements IFormatterControlManager,
 		return combo;
 	}
 
-	public Combo createCombo(Composite parent, Object key, String label,
+	public Combo createCombo(Composite parent, String key, String label,
 			String[] itemValues, String[] itemLabels) {
 		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Combo combo = SWTFactory.createCombo(parent,
@@ -77,7 +77,7 @@ public class FormatterControlManager implements IFormatterControlManager,
 		return combo;
 	}
 
-	public Text createNumber(Composite parent, Object key, String label) {
+	public Text createNumber(Composite parent, String key, String label) {
 		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Text text = SWTFactory.createText(parent, SWT.BORDER, 1,
 				Util.EMPTY_STRING);
@@ -137,19 +137,19 @@ public class FormatterControlManager implements IFormatterControlManager,
 		}
 	}
 
-	public boolean getBoolean(Object key) {
+	public boolean getBoolean(String key) {
 		return delegate.getBoolean(key);
 	}
 
-	public String getString(Object key) {
+	public String getString(String key) {
 		return delegate.getString(key);
 	}
 
-	public void setBoolean(Object key, boolean value) {
+	public void setBoolean(String key, boolean value) {
 		delegate.setBoolean(key, value);
 	}
 
-	public void setString(Object key, String value) {
+	public void setString(String key, String value) {
 		delegate.setString(key, value);
 	}
 

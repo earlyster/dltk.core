@@ -16,25 +16,25 @@ import org.eclipse.jface.preference.IPreferenceStore;
  * @see AbstractOptionsBlock
  * @see ImprovedAbstractConfigurationBlock
  */
-public interface IPreferenceDelegate {
+public interface IPreferenceDelegate<KEY> {
 
 	/**
 	 * Returns the string value for the given preference key
 	 */
-	String getString(Object key);
+	String getString(KEY key);
 
 	/**
 	 * Returns the boolean value for the given preference key
 	 */
-	boolean getBoolean(Object key);
+	boolean getBoolean(KEY key);
 
 	/**
 	 * Set a boolean preference value
 	 */
-	void setBoolean(Object key, boolean value);
+	void setBoolean(KEY key, boolean value);
 
 	/**
 	 * Set a string preference value
 	 */
-	void setString(Object key, String value);
+	void setString(KEY key, String value);
 }

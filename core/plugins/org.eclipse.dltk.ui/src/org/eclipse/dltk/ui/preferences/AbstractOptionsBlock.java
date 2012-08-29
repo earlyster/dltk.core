@@ -21,18 +21,19 @@ import org.eclipse.ui.dialogs.PreferenceLinkArea;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
-		implements IPreferenceDelegate {
+		implements IPreferenceDelegate<PreferenceKey> {
 
 	private final List<PreferenceKey> keys = new ArrayList<PreferenceKey>();
 
-	private ControlBindingManager bindManager;
+	private ControlBindingManager<PreferenceKey> bindManager;
 
 	public AbstractOptionsBlock(IStatusChangeListener context,
 			IProject project, PreferenceKey[] allKeys,
 			IWorkbenchPreferenceContainer container) {
 		super(context, project, allKeys, container);
 
-		this.bindManager = new ControlBindingManager(this, context);
+		this.bindManager = new ControlBindingManager<PreferenceKey>(this,
+				context);
 	}
 
 	public Control createContents(Composite parent) {
@@ -189,8 +190,8 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getBoolean(java.lang
 	 * .Object)
 	 */
-	public final boolean getBoolean(Object key) {
-		return getBooleanValue((PreferenceKey) key);
+	public final boolean getBoolean(PreferenceKey key) {
+		return getBooleanValue(key);
 	}
 
 	/*
@@ -198,8 +199,8 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getString(java.lang
 	 * .Object)
 	 */
-	public final String getString(Object key) {
-		return getValue((PreferenceKey) key);
+	public final String getString(PreferenceKey key) {
+		return getValue(key);
 	}
 
 	/*
@@ -207,8 +208,8 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setBoolean(java.lang
 	 * .Object, boolean)
 	 */
-	public final void setBoolean(Object key, boolean value) {
-		super.setValue((PreferenceKey) key, value);
+	public final void setBoolean(PreferenceKey key, boolean value) {
+		super.setValue(key, value);
 	}
 
 	/*
@@ -216,8 +217,8 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setString(java.lang
 	 * .Object, java.lang.String)
 	 */
-	public final void setString(Object key, String value) {
-		setValue((PreferenceKey) key, value);
+	public final void setString(PreferenceKey key, String value) {
+		setValue(key, value);
 	}
 
 	protected final IProject getProject() {

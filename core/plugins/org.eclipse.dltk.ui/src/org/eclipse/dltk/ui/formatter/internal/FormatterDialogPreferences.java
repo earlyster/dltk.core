@@ -18,24 +18,24 @@ import java.util.Map;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.ui.preferences.IPreferenceDelegate;
 
-public class FormatterDialogPreferences implements IPreferenceDelegate {
+public class FormatterDialogPreferences implements IPreferenceDelegate<String> {
 
 	private final Map<String, String> preferences = new HashMap<String, String>();
 
-	public String getString(Object key) {
+	public String getString(String key) {
 		final String value = preferences.get(key);
 		return value != null ? value : Util.EMPTY_STRING;
 	}
 
-	public boolean getBoolean(Object key) {
+	public boolean getBoolean(String key) {
 		return Boolean.valueOf(getString(key)).booleanValue();
 	}
 
-	public void setString(Object key, String value) {
-		preferences.put((String) key, value);
+	public void setString(String key, String value) {
+		preferences.put(key, value);
 	}
 
-	public void setBoolean(Object key, boolean value) {
+	public void setBoolean(String key, boolean value) {
 		setString(key, String.valueOf(value));
 	}
 

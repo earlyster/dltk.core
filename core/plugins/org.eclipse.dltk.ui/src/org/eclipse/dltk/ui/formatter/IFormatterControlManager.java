@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
-public interface IFormatterControlManager extends IPreferenceDelegate {
+public interface IFormatterControlManager extends IPreferenceDelegate<String> {
 
 	public interface IInitializeListener {
 		void initialize();
@@ -28,9 +28,9 @@ public interface IFormatterControlManager extends IPreferenceDelegate {
 
 	void removeInitializeListener(IInitializeListener listener);
 
-	Button createCheckbox(Composite parent, Object key, String text);
+	Button createCheckbox(Composite parent, String key, String text);
 
-	Button createCheckbox(Composite parent, Object key, String text, int hspan);
+	Button createCheckbox(Composite parent, String key, String text, int hspan);
 
 	/**
 	 * @param parent
@@ -40,12 +40,12 @@ public interface IFormatterControlManager extends IPreferenceDelegate {
 	 * @return
 	 * @deprecated
 	 */
-	Combo createCombo(Composite parent, Object key, String label, String[] items);
+	Combo createCombo(Composite parent, String key, String label, String[] items);
 
-	Combo createCombo(Composite parent, Object key, String label,
+	Combo createCombo(Composite parent, String key, String label,
 			String[] itemValues, String[] itemLabels);
 
-	Text createNumber(Composite parent, Object key, String label);
+	Text createNumber(Composite parent, String key, String label);
 
 	void enableControl(Control control, boolean enabled);
 
