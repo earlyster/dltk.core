@@ -27,6 +27,7 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchy;
+import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchyBuilders;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.utils.CorePrinter;
 
@@ -298,6 +299,11 @@ public class BinaryType extends BinaryMember implements IType, IParent {
 	 */
 	public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
 			throws ModelException {
+		final ITypeHierarchy hierarchy = TypeHierarchyBuilders
+				.getTypeHierarchy(this, ITypeHierarchy.Mode.HIERARCHY, monitor);
+		if (hierarchy != null) {
+			return hierarchy;
+		}
 		CreateTypeHierarchyOperation op;
 		op = new CreateTypeHierarchyOperation(this, null,
 				createReferencingProjectsScope(), true);
