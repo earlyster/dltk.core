@@ -212,10 +212,20 @@ public class DLTKCore extends Plugin {
 	public static final String CORE_INCOMPLETE_BUILDPATH = PLUGIN_ID
 			+ ".incompleteBuildpath"; //$NON-NLS-1$
 
-	/*
-	 * Possible configurable option ID.
-	 * 
-	 * @see #getDefaultOptions()
+	/**
+	 * Code assist option ID: Activate Visibility Sensitive Completion.
+	 * <p>
+	 * When active, completion doesn't show that you can not see (for example,
+	 * you can not see private methods of a super class). This option is
+	 * language specific.
+	 * <dl>
+	 * <dt>Option id:</dt>
+	 * <dd><code>{@value #CODEASSIST_VISIBILITY_CHECK}</code></dd>
+	 * <dt>Possible values:</dt>
+	 * <dd><code>{ {@value #ENABLED}, {@value #DISABLED} }</code></dd>
+	 * <dt>Default:</dt>
+	 * <dd><code>{@value #DISABLED}</code></dd>
+	 * </dl>
 	 */
 	public static final String CODEASSIST_VISIBILITY_CHECK = PLUGIN_ID
 			+ ".codeComplete.visibilityCheck"; //$NON-NLS-1$

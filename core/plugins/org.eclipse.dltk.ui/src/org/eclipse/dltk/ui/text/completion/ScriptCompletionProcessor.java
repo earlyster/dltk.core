@@ -9,11 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.completion;
 
-import java.util.Hashtable;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
@@ -26,17 +29,12 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.ui.IEditorPart;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Script completion processor.
  */
 public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
-
-	private final static String VISIBILITY = DLTKCore.CODEASSIST_VISIBILITY_CHECK;
-
-	private final static String ENABLED = "enabled"; //$NON-NLS-1$
-
-	private final static String DISABLED = "disabled"; //$NON-NLS-1$
 
 	private IContextInformationValidator fValidator;
 
@@ -56,13 +54,29 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 	 *            <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToVisibility(boolean restrict) {
-		Hashtable options = DLTKCore.getOptions();
-		Object value = options.get(VISIBILITY);
-		if (value instanceof String) {
-			String newValue = restrict ? ENABLED : DISABLED;
-			if (!newValue.equals(value)) {
-				options.put(VISIBILITY, newValue);
-				DLTKCore.setOptions(options);
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(getNatureId());
+		if (toolkit == null) {
+			return;
+		}
+		final String preferenceQualifier = toolkit.getPreferenceQualifier();
+		if (preferenceQualifier == null) {
+			return;
+		}
+		final IEclipsePreferences node = new InstanceScope()
+				.getNode(preferenceQualifier);
+		if (node == null) {
+			return;
+		}
+		final String value = node.get(DLTKCore.CODEASSIST_VISIBILITY_CHECK,
+				null);
+		final String newValue = restrict ? DLTKCore.ENABLED : DLTKCore.DISABLED;
+		if (!newValue.equals(value)) {
+			node.put(DLTKCore.CODEASSIST_VISIBILITY_CHECK, newValue);
+			try {
+				node.flush();
+			} catch (BackingStoreException e) {
+				DLTKUIPlugin.log(e);
 			}
 		}
 	}

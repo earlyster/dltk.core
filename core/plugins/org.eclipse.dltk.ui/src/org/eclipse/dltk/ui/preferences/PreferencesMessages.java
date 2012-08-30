@@ -258,6 +258,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
+	public static String CodeAssistConfigurationBlock_filteringSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
 	public static String CodeAssistConfigurationBlock_insertionSection_title;
 	public static String DLTKEditorPreferencePage_coloring_category_DLTK;

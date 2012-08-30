@@ -13,8 +13,12 @@
 package org.eclipse.dltk.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.dltk.ui.PreferenceConstants;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -28,12 +32,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
+	private final Set<String> optionalPreferences;
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
 
 	public CodeAssistConfigurationBlock(PreferencePage mainPreferencePage,
-			OverlayPreferenceStore store) {
+			OverlayPreferenceStore store, String... optionalPreferences) {
 		super(store, mainPreferencePage);
+		this.optionalPreferences = new HashSet<String>();
+		Collections.addAll(this.optionalPreferences, optionalPreferences);
 		getPreferenceStore().addKeys(createOverlayStoreKeys());
 	}
 
@@ -66,6 +73,12 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.CODEASSIST_SORTER));
+		if (optionalPreferences
+				.contains(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS)) {
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS));
+		}
 	}
 
 	/**
@@ -87,12 +100,20 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 				control,
 				null,
 				PreferencesMessages.CodeAssistConfigurationBlock_insertionSection_title);
-
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
+		final GridLayout layout = GridLayoutFactory.swtDefaults().numColumns(2)
+				.create();
 		composite.setLayout(layout);
-
 		addInsertionSection(composite);
+
+		if (optionalPreferences
+				.contains(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS)) {
+			composite = createSubsection(
+					control,
+					null,
+					PreferencesMessages.CodeAssistConfigurationBlock_filteringSection_title);
+			composite.setLayout(layout);
+			addFilteringSection(composite);
+		}
 
 		composite = createSubsection(
 				control,
@@ -105,30 +126,32 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 
 		return control;
 	}
-	
-//	protected void addSortingSection(Composite composite) {
-//		String label;
-//
-//		label= PreferencesMessages.DLTKEditorPreferencePage_presentProposalsInAlphabeticalOrder;
-//		ProposalSorterHandle[] sorters= ProposalSorterRegistry.getDefault().getSorters();
-//		String[] labels= new String[sorters.length];
-//		String[] values= new String[sorters.length];
-//		for (int i= 0; i < sorters.length; i++) {
-//			ProposalSorterHandle handle= sorters[i];
-//			labels[i]= handle.getName();
-//			values[i]= handle.getId();
-//		}
-//		
-//		addComboBox(composite, label, PreferenceConstants.CODEASSIST_SORTER, values, labels);
-//	}
 
+	// protected void addSortingSection(Composite composite) {
+	// String label;
+	//
+	// label=
+	// PreferencesMessages.DLTKEditorPreferencePage_presentProposalsInAlphabeticalOrder;
+	// ProposalSorterHandle[] sorters=
+	// ProposalSorterRegistry.getDefault().getSorters();
+	// String[] labels= new String[sorters.length];
+	// String[] values= new String[sorters.length];
+	// for (int i= 0; i < sorters.length; i++) {
+	// ProposalSorterHandle handle= sorters[i];
+	// labels[i]= handle.getName();
+	// values[i]= handle.getId();
+	// }
+	//
+	// addComboBox(composite, label, PreferenceConstants.CODEASSIST_SORTER,
+	// values, labels);
+	// }
 
-	Control autoActivation;
+	private Control autoActivation;
 
 	protected void addAutoActivationSection(Composite composite) {
-		String label;
-		label = PreferencesMessages.DLTKEditorPreferencePage_enableAutoActivation;
-		final Button autoactivation = addCheckBox(composite, label,
+		final Button autoactivation = addCheckBox(
+				composite,
+				PreferencesMessages.DLTKEditorPreferencePage_enableAutoActivation,
 				PreferenceConstants.CODEASSIST_AUTOACTIVATION, 2);
 		autoactivation.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -136,8 +159,9 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 			}
 		});
 
-		label = PreferencesMessages.DLTKEditorPreferencePage_autoActivationDelay;
-		Control[] ctrl = addLabelledTextField(composite, label,
+		Control[] ctrl = addLabelledTextField(
+				composite,
+				PreferencesMessages.DLTKEditorPreferencePage_autoActivationDelay,
 				PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 2, true);
 		autoActivation = ctrl[1];
 	}
@@ -153,9 +177,9 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	protected void addInsertionSection(Composite composite) {
 		addCompletionRadioButtons(composite);
 
-		String label;
-		label = PreferencesMessages.DLTKEditorPreferencePage_insertSingleProposalsAutomatically;
-		addCheckBox(composite, label,
+		addCheckBox(
+				composite,
+				PreferencesMessages.DLTKEditorPreferencePage_insertSingleProposalsAutomatically,
 				PreferenceConstants.CODEASSIST_AUTOINSERT, 2);
 	}
 
@@ -201,6 +225,13 @@ public class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalIndent = 20;
 		gd.horizontalSpan = 2;
 		label.setLayoutData(gd);
+	}
+
+	protected void addFilteringSection(Composite composite) {
+		addCheckBox(
+				composite,
+				PreferencesMessages.DLTKEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext,
+				PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 2);
 	}
 
 	protected void initializeFields() {
