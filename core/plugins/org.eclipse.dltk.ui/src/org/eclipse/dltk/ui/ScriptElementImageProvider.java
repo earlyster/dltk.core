@@ -400,9 +400,7 @@ public class ScriptElementImageProvider {
 		if (Flags.isPublic(flags)) {
 			return DLTKPluginImages.DESC_METHOD_PUBLIC;
 		}
-		// TODO (alex) it has been public by default for years
-		// switch to DESC_METHOD_DEFAULT eventually
-		return DLTKPluginImages.DESC_METHOD_PUBLIC;
+		return DLTKPluginImages.DESC_METHOD_DEFAULT;
 	}
 
 	// ---- Methods to compute the adornments flags ----------------------------
