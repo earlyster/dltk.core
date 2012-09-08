@@ -19,7 +19,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rse.efs,
  org.eclipse.rse.services,
  org.eclipse.rse.connectorservice.ssh;resolution:=optional,
- org.eclipse.rse.services.ssh;bundle-version="4.0.0";resolution:=optional
+ org.eclipse.rse.services.ssh;bundle-version="[3.1.0,4.0.0)";resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.dltk.core.internal.rse;x-friends:=org.eclipse.dltk.rse.ui,
  org.eclipse.dltk.core.internal.rse.perfomance;x-internal:=true
