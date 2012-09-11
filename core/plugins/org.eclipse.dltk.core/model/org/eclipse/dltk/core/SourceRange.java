@@ -24,6 +24,11 @@ public class SourceRange implements ISourceRange {
 		this(range.getOffset(), range.getLength());
 	}
 
+	public SourceRange(ISourceNode node) {
+		this.offset = node.start();
+		this.length = node.end() - this.offset;
+	}
+
 	public int getLength() {
 		return length;
 	}
