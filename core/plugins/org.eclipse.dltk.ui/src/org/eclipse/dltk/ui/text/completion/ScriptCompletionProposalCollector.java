@@ -556,6 +556,15 @@ public abstract class ScriptCompletionProposalCollector extends
 		if (isIgnored(proposal.getKind())) {
 			return true;
 		}
+		int value = evaluateFilters(proposal);
+		if (value == CompletionProposalFilter.IGNORE) {
+			return true;
+		} else if (value == CompletionProposalFilter.DISCOURAGED) {
+			// TODO (alex) implement proper support
+			return true;
+		} else if (value != CompletionProposalFilter.DEFAULT) {
+			proposal.setRelevance(proposal.getRelevance() + value);
+		}
 		return false;
 	}
 

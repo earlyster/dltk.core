@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.codeassist.RelevanceConstants;
 import org.eclipse.dltk.compiler.problem.IProblem;
 
 /**
@@ -208,5 +210,81 @@ public abstract class CompletionRequestor {
 	 */
 	public boolean isContextInformationMode() {
 		return false;
+	}
+
+	/**
+	 * Interface for the filtering out or changing the relevance of the
+	 * completion proposals.
+	 * 
+	 * @since 4.1
+	 */
+	public static interface CompletionProposalFilter {
+		int DEFAULT = 0;
+		int IGNORE = -1000;
+		int DISCOURAGED = -50;
+
+		/**
+		 * Evaluates the relevance of specified proposal. Possible return values
+		 * are:
+		 * <ul>
+		 * <li>{@link #DEFAULT} to continue without any changes
+		 * <li>{@link #IGNORE} to skip the proposal
+		 * <li>{@link #DISCOURAGED} to mark the proposal as
+		 * <em>not recommended</em>
+		 * <li>constants from {@link RelevanceConstants} to increase the
+		 * relevance of the proposal
+		 * </ul>
+		 */
+		int evaluate(CompletionProposal proposal);
+	}
+
+	private CompletionProposalFilter[] filters;
+
+	/**
+	 * Adds the given filter to this requestor.
+	 * 
+	 * @since 4.1
+	 */
+	public void addFilter(CompletionProposalFilter filter) {
+		Assert.isNotNull(filter);
+		if (filters == null) {
+			filters = new CompletionProposalFilter[] { filter };
+		} else {
+			final CompletionProposalFilter[] newFilters = new CompletionProposalFilter[filters.length + 1];
+			System.arraycopy(filters, 0, newFilters, 0, filters.length);
+			newFilters[filters.length] = filter;
+			filters = newFilters;
+		}
+	}
+
+	/**
+	 * Returns the result of filtering for the given completion proposal.
+	 * 
+	 * @see #addFilter(CompletionProposalFilter)
+	 * @since 4.1
+	 */
+	protected int evaluateFilters(CompletionProposal completionProposal) {
+		int result = CompletionProposalFilter.DEFAULT;
+		if (filters != null) {
+			try {
+				for (CompletionProposalFilter filter : filters) {
+					int value = filter.evaluate(completionProposal);
+					if (value == CompletionProposalFilter.IGNORE) {
+						return value;
+					}
+					if (value > 0 && value > result || value < 0
+							&& value < result) {
+						result = value;
+					}
+				}
+			} catch (RuntimeException e) {
+				DLTKCore.error(
+						"Error while evaluating CompletionProposalFilter, continue without filters",
+						e);
+				filters = null;
+				result = CompletionProposalFilter.DEFAULT;
+			}
+		}
+		return result;
 	}
 }
