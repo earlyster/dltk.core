@@ -212,6 +212,25 @@ public class PreferenceConstants {
 	public static final String SHOW_SOURCE_MODULE_CHILDREN = "org.eclipse.dltk.ui.packages.cuchildren"; //$NON-NLS-1$
 
 	public static final String APPEARANCE_METHOD_RETURNTYPE = "org.eclipse.dltk.ui.methodreturntype";//$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if method parameter names are rendered
+	 * in the UI.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String APPEARANCE_METHOD_PARAMETER_NAMES = "org.eclipse.dltk.ui.methodParameterNames";//$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if method parameter types are rendered
+	 * in the UI.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String APPEARANCE_METHOD_PARAMETER_TYPES = "org.eclipse.dltk.ui.methodParameterTypes";//$NON-NLS-1$
+
 	public static final String APPEARANCE_METHOD_TYPEPARAMETERS = "org.eclipse.dltk.ui.methodtypeparametesr";//$NON-NLS-1$
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES = "org.eclipse.dltk.ui.compresspackagenames";//$NON-NLS-1$
 	public static final String APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW = "org.eclipse.dltk.ui.PackagesView.pkgNamePatternForPackagesView";//$NON-NLS-1$
@@ -483,6 +502,7 @@ public class PreferenceConstants {
 		// Fix bug 252155 - contributed by Eden Klein
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER,
 				"F,T,C,M"); //$NON-NLS-1$
+		store.setDefault(APPEARANCE_METHOD_PARAMETER_NAMES, true);
 
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
