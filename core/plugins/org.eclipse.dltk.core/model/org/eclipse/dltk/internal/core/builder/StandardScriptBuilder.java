@@ -38,6 +38,7 @@ import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension3;
+import org.eclipse.dltk.core.builder.IBuildParticipantExtension4;
 import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.builder.IBuildState;
 import org.eclipse.dltk.core.builder.IProjectChange;
@@ -110,10 +111,6 @@ public class StandardScriptBuilder implements IScriptBuilder {
 						String.valueOf(remainingWork), module.getElementName()));
 				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
 						module, buildType);
-				if (participantDependencies != null) {
-					context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
-							participantDependencies);
-				}
 				try {
 					for (int i = 0; i < extensions.size(); ++i) {
 						if (monitor.isCanceled()) {
@@ -199,10 +196,6 @@ public class StandardScriptBuilder implements IScriptBuilder {
 					module.getElementName()));
 			final SourceModuleBuildContext context = new SourceModuleBuildContext(
 					problemFactory, module, buildType);
-			if (participantDependencies != null) {
-				context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
-						participantDependencies);
-			}
 			if (context.reporter != null) {
 				buildModule(context);
 				reporters.add(context.reporter);
@@ -248,6 +241,8 @@ public class StandardScriptBuilder implements IScriptBuilder {
 			}
 			participants = BuildParticipantManager.copyFirst(participants,
 					count);
+			BuildParticipantManager.notifyDependents(participants,
+					participantDependencies);
 			beginBuildDone = true;
 		}
 	}
@@ -267,6 +262,13 @@ public class StandardScriptBuilder implements IScriptBuilder {
 		} catch (CoreException e) {
 			DLTKCore.error(Messages.StandardScriptBuilder_errorBuildingModule,
 					e);
+		} finally {
+			for (IBuildParticipant participant : participants) {
+				if (participant instanceof IBuildParticipantExtension4) {
+					((IBuildParticipantExtension4) participant)
+							.afterBuild(context);
+				}
+			}
 		}
 	}
 

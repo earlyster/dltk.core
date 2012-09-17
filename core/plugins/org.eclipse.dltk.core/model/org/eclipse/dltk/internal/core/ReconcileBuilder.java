@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
+import org.eclipse.dltk.core.builder.IBuildParticipantExtension4;
 import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.builder.AbstractBuildContext;
@@ -65,8 +66,7 @@ class ReconcileBuilder {
 		final IScriptProject project = module.getScriptProject();
 		final ReconcileBuildContext context = new ReconcileBuildContext(module,
 				reporter);
-		IBuildParticipant[] participants = beginBuild(natureId, project,
-				context);
+		IBuildParticipant[] participants = beginBuild(natureId, project);
 		if (participants.length == 0) {
 			return;
 		}
@@ -79,29 +79,32 @@ class ReconcileBuilder {
 			}
 		}
 		try {
-			for (int k = 0; k < participants.length; ++k) {
-				participants[k].build(context);
+			for (IBuildParticipant participant : participants) {
+				participant.build(context);
 			}
 		} catch (CoreException e) {
 			DLTKCore.error("error", e); //$NON-NLS-1$
-		}
-		for (int j = 0; j < participants.length; ++j) {
-			final IBuildParticipant participant = participants[j];
-			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant).endBuild(monitor);
+		} finally {
+			for (final IBuildParticipant participant : participants) {
+				if (participant instanceof IBuildParticipantExtension4) {
+					((IBuildParticipantExtension4) participant)
+							.afterBuild(context);
+				}
+			}
+			for (final IBuildParticipant participant : participants) {
+				if (participant instanceof IBuildParticipantExtension) {
+					((IBuildParticipantExtension) participant)
+							.endBuild(monitor);
+				}
 			}
 		}
 	}
 
 	private static IBuildParticipant[] beginBuild(String natureId,
-			final IScriptProject project, ReconcileBuildContext context) {
+			final IScriptProject project) {
 		final BuildParticipantResult result = BuildParticipantManager
 				.getBuildParticipants(project, natureId);
-		if (result.dependencies != null) {
-			context.set(AbstractBuildContext.ATTR_DEPENDENCIES,
-					result.dependencies);
-		}
-		final IBuildParticipant[] participants = result.participants;
+		IBuildParticipant[] participants = result.participants;
 		int count = 0;
 		for (int j = 0; j < participants.length; ++j) {
 			final IBuildParticipant participant = participants[j];
@@ -119,7 +122,10 @@ class ReconcileBuilder {
 				++count;
 			}
 		}
-		return BuildParticipantManager.copyFirst(participants, count);
+		participants = BuildParticipantManager.copyFirst(participants, count);
+		BuildParticipantManager.notifyDependents(participants,
+				result.dependencies);
+		return participants;
 	}
 
 }

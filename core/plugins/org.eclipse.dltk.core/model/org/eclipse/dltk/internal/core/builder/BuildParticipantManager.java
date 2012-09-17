@@ -12,10 +12,13 @@
 package org.eclipse.dltk.internal.core.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +26,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
+import org.eclipse.dltk.core.builder.IBuildParticipantExtension4;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.core.builder.IBuildParticipantFilter;
 import org.eclipse.dltk.core.builder.IBuildParticipantFilterFactory;
@@ -147,7 +151,9 @@ public class BuildParticipantManager extends
 	private static final IBuildParticipantFilter[] NO_PREDICATES = new IBuildParticipantFilter[0];
 
 	public static class BuildParticipantResult {
+		// not-null
 		public final IBuildParticipant[] participants;
+		// nullable
 		public final Map<IBuildParticipant, List<IBuildParticipant>> dependencies;
 
 		public BuildParticipantResult(IBuildParticipant[] participants,
@@ -289,6 +295,45 @@ public class BuildParticipantManager extends
 			IBuildParticipant[] temp = new IBuildParticipant[length];
 			System.arraycopy(array, 0, temp, 0, length);
 			return temp;
+		}
+	}
+
+	/**
+	 * First removes dangling {@link IBuildParticipant}s from
+	 * {@link #dependencies} then notifies participants about their
+	 * dependencies.
+	 * 
+	 * @param dependencies
+	 * @param participants
+	 */
+	public static void notifyDependents(IBuildParticipant[] participants,
+			Map<IBuildParticipant, List<IBuildParticipant>> dependencies) {
+		if (dependencies == null) {
+			return;
+		}
+		final List<IBuildParticipant> list = Arrays.asList(participants);
+		dependencies.keySet().retainAll(list);
+		for (Iterator<Map.Entry<IBuildParticipant, List<IBuildParticipant>>> i = dependencies
+				.entrySet().iterator(); i.hasNext();) {
+			final Entry<IBuildParticipant, List<IBuildParticipant>> entry = i
+					.next();
+			entry.getValue().retainAll(list);
+			if (entry.getValue().isEmpty()) {
+				i.remove();
+			}
+		}
+		if (dependencies.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<IBuildParticipant, List<IBuildParticipant>> entry : dependencies
+				.entrySet()) {
+			if (entry.getKey() instanceof IBuildParticipantExtension4) {
+				final List<IBuildParticipant> dependents = entry.getValue();
+				((IBuildParticipantExtension4) entry.getKey())
+						.notifyDependents(dependents
+								.toArray(new IBuildParticipant[dependents
+										.size()]));
+			}
 		}
 	}
 

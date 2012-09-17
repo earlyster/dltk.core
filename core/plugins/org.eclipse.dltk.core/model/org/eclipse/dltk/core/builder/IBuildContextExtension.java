@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
-import java.util.List;
-
 public interface IBuildContextExtension extends IBuildContext {
 
 	void setLineTracker(ISourceLineTracker tracker);
@@ -24,14 +22,5 @@ public interface IBuildContextExtension extends IBuildContext {
 	 * @return
 	 */
 	boolean isLineTrackerCreated();
-
-	/**
-	 * Returns dependents of the specified {@link IBuildParticipant} or
-	 * <code>null</code> if none.
-	 * 
-	 * @param participant
-	 * @return
-	 */
-	List<IBuildParticipant> getDependents(IBuildParticipant participant);
 
 }
