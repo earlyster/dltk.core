@@ -77,10 +77,11 @@ public class SourceModuleInfoCache extends OverflowingLRUCache implements
 		}
 		// this.cache.printStats();
 		if (DLTKCore.PERFOMANCE) {
-			System.out.println("SourceModuleInfoCache: access:" + allAccess //$NON-NLS-1$
-					+ " ok:" + (100.0f * (allAccess - miss) / allAccess) //$NON-NLS-1$
-					+ "% closes:" + closes); //$NON-NLS-1$
-			System.out.println("Filling ratio:" + fillingRatio()); //$NON-NLS-1$
+			System.out
+					.println(String
+							.format("SourceModuleInfoCache: access: %d success: %.1f%% close: %d fillingRatio: %.1f%%", //$NON-NLS-1$
+									allAccess, 100.0f * (allAccess - miss)
+											/ allAccess, closes, fillingRatio()));
 		}
 		return info;
 	}
