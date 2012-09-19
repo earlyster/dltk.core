@@ -155,7 +155,8 @@ public class ScriptExplorerPart extends ViewPart implements
 	public static final int PROJECTS_AS_ROOTS = 1;
 	public static final int WORKING_SETS_AS_ROOTS = 2;
 
-	public final static String VIEW_ID = "org.eclipse.dltk.ui.view.scriptExplorer"; //$NON-NLS-1$
+	@Deprecated
+	public final static String VIEW_ID = DLTKUIPlugin.ID_SCRIPT_EXPLORER;
 
 	// Persistence tags.
 	private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
@@ -549,7 +550,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		if (activePage == null) {
 			return null;
 		}
-		IViewPart view = activePage.findView(ScriptExplorerPart.VIEW_ID);
+		IViewPart view = activePage.findView(DLTKUIPlugin.ID_SCRIPT_EXPLORER);
 		if (view instanceof ScriptExplorerPart) {
 			return (ScriptExplorerPart) view;
 		}
@@ -564,7 +565,7 @@ public class ScriptExplorerPart extends ViewPart implements
 	public static ScriptExplorerPart openInActivePerspective() {
 		try {
 			return (ScriptExplorerPart) DLTKUIPlugin.getActivePage().showView(
-					ScriptExplorerPart.VIEW_ID);
+					DLTKUIPlugin.ID_SCRIPT_EXPLORER);
 		} catch (PartInitException pe) {
 			return null;
 		}
