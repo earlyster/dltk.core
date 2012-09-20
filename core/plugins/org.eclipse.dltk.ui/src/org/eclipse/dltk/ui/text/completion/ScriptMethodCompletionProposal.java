@@ -175,8 +175,13 @@ public class ScriptMethodCompletionProposal extends
 			// if (prefs.afterOpeningParen)
 			// buffer.append(SPACE);
 
+			final Integer paramLimit = (Integer) fProposal
+					.getAttribute(ScriptCompletionProposalCollector.ATTR_PARAM_LIMIT);
 			String[] parameterNames = fProposal.findParameterNames(null);
 			for (int i = 0; i < parameterNames.length; ++i) {
+				if (paramLimit != null && i >= paramLimit.intValue()) {
+					break;
+				}
 				if (i != 0) {
 					buffer.append(COMMA);
 				}

@@ -71,6 +71,15 @@ import org.eclipse.swt.graphics.Image;
  */
 public abstract class ScriptCompletionProposalCollector extends
 		CompletionRequestor implements ICompletionRequestorExtension {
+	/**
+	 * Intermediate attribute of {@link CompletionProposal} used to limit the
+	 * number of displayed method parameters.
+	 * 
+	 * @since 5.0
+	 */
+	public static final String ATTR_PARAM_LIMIT = DLTKUIPlugin.PLUGIN_ID
+			+ "CompletionProposal#ParameterLimit";
+
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG = "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.dltk.ui/debug/ResultCollector")); //$NON-NLS-1$//$NON-NLS-2$
 
@@ -312,6 +321,23 @@ public abstract class ScriptCompletionProposalCollector extends
 		if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 			acceptPotentialMethodDeclaration(proposal);
 		} else {
+			if (proposal.getKind() == CompletionProposal.METHOD_REF) {
+				final String[] params = proposal.findParameterNames(null);
+				final Integer requiredParamCount = (Integer) proposal
+						.getAttribute(CompletionProposal.ATTR_REQUIRED_PARAM_COUNT);
+				if (params != null && requiredParamCount != null
+						&& params.length > requiredParamCount.intValue()) {
+					for (int i = requiredParamCount.intValue(); i <= params.length; ++i) {
+						final CompletionProposal copy = proposal.clone();
+						copy.setAttribute(ATTR_PARAM_LIMIT, i);
+						final IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(copy);
+						if (scriptProposal != null) {
+							addProposal(scriptProposal, copy);
+						}
+					}
+					return;
+				}
+			}
 			final IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(proposal);
 			if (scriptProposal != null) {
 				addProposal(scriptProposal, proposal);

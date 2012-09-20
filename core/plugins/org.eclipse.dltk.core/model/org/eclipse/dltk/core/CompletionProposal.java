@@ -48,7 +48,7 @@ import org.eclipse.dltk.internal.codeassist.InternalCompletionProposal;
  * @see ICodeAssist#codeComplete(int, CompletionRequestor)
  * 
  */
-public class CompletionProposal {
+public class CompletionProposal implements Cloneable {
 	/**
 	 * Completion is a reference to a field. This kind of completion might occur
 	 * in a context like <code>"this.ref^ = 0;"</code> and complete it to
@@ -154,6 +154,20 @@ public class CompletionProposal {
 	 * Last valid completion kind.
 	 */
 	protected static final int LAST_KIND = 22;
+
+	/**
+	 * The key of the attribute for
+	 * {@link CompletionProposal#setAttribute(String, Object)}, which can be
+	 * used to specify the number of required parameters, treating all the
+	 * remaining parameters as optional. By default all parameters are treated
+	 * as required. This attribute allows completion framework to do it's best
+	 * to represent the optional parameters with minimal efforts from the IDE
+	 * developer. The value should be of the {@link Integer} type.
+	 * 
+	 * @since 5.0
+	 */
+	public static final String ATTR_REQUIRED_PARAM_COUNT = DLTKCore.PLUGIN_ID
+			+ ".MethodCompletionProposal#ParameterLimit";
 
 	private boolean updateCompletion = false;
 
@@ -955,5 +969,19 @@ public class CompletionProposal {
 
 	public void setCompletionLocation(int i) {
 		this.completionLocation = i;
+	}
+
+	@Override
+	public CompletionProposal clone() {
+		try {
+			final CompletionProposal copy = (CompletionProposal) super.clone();
+			// parameterNames array is shared, don't want to copy it.
+			if (attributes != null) {
+				copy.attributes = new HashMap<String, Object>(attributes);
+			}
+			return copy;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError(e);
+		}
 	}
 }

@@ -81,6 +81,23 @@ public class CompletionProposalLabelProvider {
 			CompletionProposal methodProposal) {
 		String[] parameterNames = methodProposal.findParameterNames(null);
 		String[] parameterTypes = null;
+		if (parameterNames != null) {
+			final Integer paramLimit = (Integer) methodProposal
+					.getAttribute(ScriptCompletionProposalCollector.ATTR_PARAM_LIMIT);
+			if (paramLimit != null) {
+				for (int i = 0; i < parameterNames.length; i++) {
+					if (i >= paramLimit.intValue()) {
+						break;
+					}
+					if (i > 0) {
+						buffer.append(',');
+						buffer.append(' ');
+					}
+					buffer.append(parameterNames[i]);
+				}
+				return buffer;
+			}
+		}
 		return appendParameterSignature(buffer, parameterTypes, parameterNames);
 	}
 
