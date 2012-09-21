@@ -482,7 +482,10 @@ public abstract class ScriptCompletionProposalCollector extends
 			// return createJavadocInlineTagProposal(proposal);
 		case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 		default:
-			return null;
+			return new ScriptCompletionProposal(proposal.getCompletion(),
+					proposal.getReplaceStart(), proposal.getReplaceEnd()
+							- proposal.getReplaceStart(), null,
+					proposal.getName(), proposal.getRelevance());
 		}
 	}
 
