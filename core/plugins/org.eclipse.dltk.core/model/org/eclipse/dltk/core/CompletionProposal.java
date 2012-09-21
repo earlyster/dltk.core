@@ -791,6 +791,21 @@ public class CompletionProposal implements Cloneable {
 	}
 
 	/**
+	 * Returns the method parameter names. This information is relevant to
+	 * method reference (and method declaration proposals). Returns
+	 * <code>null</code> if not available or not relevant.
+	 * <p>
+	 * The client must not modify the array returned.
+	 * </p>
+	 * 
+	 * @return the parameter names, or <code>null</code> if none or not
+	 *         available or not relevant
+	 */
+	public String[] getParameterNames() {
+		return this.parameterNames;
+	}
+
+	/**
 	 * Sets the method parameter names. This information is relevant to method
 	 * reference (and method declaration proposals).
 	 * <p>

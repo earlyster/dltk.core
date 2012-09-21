@@ -9,19 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.completion;
 
-
-
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 import org.eclipse.swt.graphics.Image;
 
-
-
 /**
  * Implementation of the <code>IContextInformation</code> interface.
  */
-public class ProposalContextInformation implements IContextInformation, IContextInformationExtension {
+public class ProposalContextInformation implements IContextInformation,
+		IContextInformationExtension {
 
 	private final String fContextDisplayString;
 	private final String fInformationDisplayString;
@@ -34,30 +31,33 @@ public class ProposalContextInformation implements IContextInformation, IContext
 	public ProposalContextInformation(CompletionProposal proposal) {
 		// don't cache the core proposal because the ContentAssistant might
 		// hang on to the context info.
-		//TODO REVIEW THIS
-		String res = createParametersList(proposal);		
-		fInformationDisplayString= res;//labelProvider.createParameterList(proposal);
-		//ImageDescriptor descriptor= labelProvider.createImageDescriptor(proposal);
-		//if (descriptor != null)
-		//	fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
-		//else
-			fImage= null;
+		// TODO REVIEW THIS
+		String res = createParametersList(proposal);
+		fInformationDisplayString = res;// labelProvider.createParameterList(proposal);
+		// ImageDescriptor descriptor=
+		// labelProvider.createImageDescriptor(proposal);
+		// if (descriptor != null)
+		// fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+		// else
+		fImage = null;
 		if (proposal.getCompletion().length() == 0)
 			fPosition = proposal.getCompletionLocation();
 		else
-			fPosition= -1;
-		fContextDisplayString= res;//labelProvider.createLabel(proposal);
+			fPosition = -1;
+		fContextDisplayString = res;// labelProvider.createLabel(proposal);
 	}
 
 	private String createParametersList(CompletionProposal proposal) {
-		StringBuffer bf=new StringBuffer();
-		String[] pNames = proposal.findParameterNames(null);
-		for (int a=0;a<pNames.length;a++){
-			bf.append(pNames[a]);
-			if (a!=pNames.length-1)bf.append(',');
+		StringBuffer bf = new StringBuffer();
+		String[] pNames = proposal.getParameterNames();
+		if (pNames != null) {
+			for (int a = 0; a < pNames.length; a++) {
+				bf.append(pNames[a]);
+				if (a != pNames.length - 1)
+					bf.append(',');
+			}
 		}
-		String res=bf.toString();
-		return res;
+		return bf.toString();
 	}
 
 	/*
@@ -65,10 +65,13 @@ public class ProposalContextInformation implements IContextInformation, IContext
 	 */
 	public boolean equals(Object object) {
 		if (object instanceof IContextInformation) {
-			IContextInformation contextInformation= (IContextInformation) object;
-			boolean equals= getInformationDisplayString().equalsIgnoreCase(contextInformation.getInformationDisplayString());
+			IContextInformation contextInformation = (IContextInformation) object;
+			boolean equals = getInformationDisplayString().equalsIgnoreCase(
+					contextInformation.getInformationDisplayString());
 			if (getContextDisplayString() != null)
-				equals= equals && getContextDisplayString().equalsIgnoreCase(contextInformation.getContextDisplayString());
+				equals = equals
+						&& getContextDisplayString().equalsIgnoreCase(
+								contextInformation.getContextDisplayString());
 			return equals;
 		}
 		return false;
@@ -101,14 +104,14 @@ public class ProposalContextInformation implements IContextInformation, IContext
 	public int getContextInformationPosition() {
 		return fPosition;
 	}
-	
+
 	/**
 	 * Sets the context information position.
 	 * 
-	 * @param position the new position, or -1 for unknown.
-	 *
+	 * @param position
+	 *            the new position, or -1 for unknown.
 	 */
 	public void setContextInformationPosition(int position) {
-		fPosition= position;
+		fPosition = position;
 	}
 }

@@ -13,21 +13,11 @@ package org.eclipse.dltk.internal.codeassist;
  * Internal completion context
  */
 public class InternalCompletionContext {
-	protected int doc;
 
-	protected int offset = -1;
 	protected int tokenStart = -1;
 	protected int tokenEnd = -1;
 	protected char[] token = null;
 	protected int tokenKind;
-
-	protected void setDoc(int doc) {
-		this.doc = doc;
-	}
-
-	public void setOffset(int offset) {
-		this.offset = offset;
-	}
 
 	public void setTokenRange(int start, int end) {
 		this.setTokenRange(start, end, -1);
