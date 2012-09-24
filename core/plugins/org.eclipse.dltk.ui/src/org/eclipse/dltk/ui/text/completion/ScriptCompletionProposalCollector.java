@@ -321,7 +321,8 @@ public abstract class ScriptCompletionProposalCollector extends
 		if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 			acceptPotentialMethodDeclaration(proposal);
 		} else {
-			if (proposal.getKind() == CompletionProposal.METHOD_REF) {
+			if (proposal.getKind() == CompletionProposal.METHOD_REF
+					&& !isContextInformationMode()) {
 				final String[] params = proposal.findParameterNames(null);
 				final Integer requiredParamCount = (Integer) proposal
 						.getAttribute(CompletionProposal.ATTR_REQUIRED_PARAM_COUNT);
