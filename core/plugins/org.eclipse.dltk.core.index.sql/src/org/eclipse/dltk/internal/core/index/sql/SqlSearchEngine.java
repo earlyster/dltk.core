@@ -279,12 +279,13 @@ public class SqlSearchEngine implements ISearchEngine {
 					sourceModuleCache.put(resourcePath, sourceModule);
 				}
 
-				match(element.getType(), element.getFlags(), element
-						.getOffset(), element.getLength(), element
-						.getNameOffset(), element.getNameLength(), element
-						.getName(), element.getMetadata(), element.getDoc(),
-						element.getQualifier(), element.getParent(),
-						sourceModule, element.isReference());
+				match(element.getType(), element.getFlags(),
+						element.getOffset(), element.getLength(),
+						element.getNameOffset(), element.getNameLength(),
+						element.getName(), element.getMetadata(),
+						element.getDoc(), element.getQualifier(),
+						element.getParent(), sourceModule,
+						element.isReference());
 
 			} catch (SQLException e) {
 				SqlIndex.error(
