@@ -171,31 +171,39 @@ public class ScriptReconciler extends MonoReconciler {
 			if (isRunningInReconcilerThread())
 				return;
 
+			if (canIgnore(event.getDelta().getAffectedChildren()))
+				return;
+
 			setModelChanged(true);
-			if (isEditorActive()
-					&& !isSaveDelta(event.getDelta().getAffectedChildren()))
+			if (isEditorActive())
 				ScriptReconciler.this.forceReconciling();
 		}
-	}
 
-	/**
-	 * Check whether the given delta has been sent when saving this reconciler's
-	 * editor.
-	 * 
-	 * @param delta
-	 *            the deltas
-	 * @return <code>true</code> if the given delta
-	 * @since 3.4
-	 */
-	private boolean isSaveDelta(IModelElementDelta[] delta) {
-		if (delta.length != 1)
-			return false;
+		/**
+		 * Check whether the given delta has been sent when saving this
+		 * reconciler's editor.
+		 * 
+		 * @param delta
+		 *            the deltas
+		 * @return <code>true</code> if the given delta
+		 * @since 5.0
+		 */
+		private boolean canIgnore(IModelElementDelta[] delta) {
+			if (delta.length != 1)
+				return false;
 
-		if (delta[0].getFlags() == IModelElementDelta.F_PRIMARY_RESOURCE
-				&& delta[0].getElement().equals(fReconciledElement))
-			return true;
+			// become working copy
+			if (delta[0].getFlags() == IModelElementDelta.F_PRIMARY_WORKING_COPY)
+				return true;
 
-		return isSaveDelta(delta[0].getAffectedChildren());
+			// save
+			if (delta[0].getFlags() == IModelElementDelta.F_PRIMARY_RESOURCE
+					&& delta[0].getElement().equals(fReconciledElement))
+				return true;
+
+			return canIgnore(delta[0].getAffectedChildren());
+		}
+
 	}
 
 	/**
