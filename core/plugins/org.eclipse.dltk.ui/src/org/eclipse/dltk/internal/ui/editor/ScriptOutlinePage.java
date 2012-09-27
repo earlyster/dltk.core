@@ -483,11 +483,8 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		 *            the Java outline page
 		 */
 		public ToggleLinkingAction(ScriptOutlinePage outlinePage) {
-			boolean isLinkingEnabled = DLTKUIPlugin
-					.getDefault()
-					.getPreferenceStore()
-					.getBoolean(
-							PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
+			boolean isLinkingEnabled = fStore
+					.getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
 			setChecked(isLinkingEnabled);
 			fJavaOutlinePage = outlinePage;
 		}
@@ -497,7 +494,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		 */
 		@Override
 		public void run() {
-			DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
+			fStore.setValue(
 					PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE,
 					isChecked());
 			if (isChecked() && fEditor != null) {

@@ -410,12 +410,13 @@ public class PreferenceConstants {
 
 	/**
 	 * @param store
-	 * @param commonPreferences
+	 * @param isDLTKUI
 	 *            should be <code>true</code> for the DLTKUI preferences and
 	 *            <code>false</code> for the language specific preferences
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public static void initializeDefaultValues(IPreferenceStore store,
-			boolean commonPreferences) {
+			boolean isDLTKUI) {
 		store.setDefault(PreferenceConstants.SHOW_SOURCE_MODULE_CHILDREN, true);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);
 
@@ -486,7 +487,7 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store,
 				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(
 						192, 192, 192));
-		if (commonPreferences) {
+		if (isDLTKUI) {
 			store.setDefault(
 					PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, true);
 			store.setDefault(RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME, false);
@@ -507,6 +508,11 @@ public class PreferenceConstants {
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
+		if (!isDLTKUI) {
+			store.setDefault(
+					PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE,
+					true);
+		}
 	}
 
 	private static void initializeEditorHoverBackgroundColor(
