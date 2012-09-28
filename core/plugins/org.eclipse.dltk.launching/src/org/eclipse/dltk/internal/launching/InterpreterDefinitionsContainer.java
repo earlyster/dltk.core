@@ -515,13 +515,9 @@ public class InterpreterDefinitionsContainer {
 			element.appendChild(environmentVariableElement);
 		}
 
-		String[] InterpreterArgs = interpreter.getInterpreterArguments();
-		if (InterpreterArgs != null && InterpreterArgs.length > 0) {
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0; i < InterpreterArgs.length; i++) {
-				buffer.append(InterpreterArgs[i] + " "); //$NON-NLS-1$
-			}
-			element.setAttribute(IARGS_ATTR, buffer.toString());
+		final String InterpreterArgs = interpreter.getInterpreterArgs();
+		if (InterpreterArgs != null && InterpreterArgs.length() > 0) {
+			element.setAttribute(IARGS_ATTR, InterpreterArgs);
 		}
 
 		if (interpreter instanceof IInterpreterInstallExtensionContainer) {
