@@ -21,6 +21,7 @@
 		<module>features/org.eclipse.dltk.core.index-feature</module>
 		<module>features/org.eclipse.dltk.core.index.sdk</module>
 		<module>plugins/org.eclipse.dltk</module>
+		<module>plugins/org.eclipse.dltk.annotations</module>
 		<module>plugins/org.eclipse.dltk.console</module>
 		<module>plugins/org.eclipse.dltk.console.ui</module>
 		<module>plugins/org.eclipse.dltk.core</module>
