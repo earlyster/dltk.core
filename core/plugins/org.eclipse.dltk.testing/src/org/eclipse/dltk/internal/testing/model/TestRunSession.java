@@ -769,7 +769,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			if (testName.startsWith(MessageIds.IGNORED_TEST_PREFIX)) {
 				testCaseElement.setIgnored(true);
 				fIgnoredCount++;
-			} else if (!testName.equals(testCaseElement.getTestName())) {
+			} else if (testName.length() != 0
+					&& !testName.equals(testCaseElement.getTestName())) {
 				testCaseElement.setTestName(testName);
 			}
 
