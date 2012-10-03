@@ -154,7 +154,7 @@ public final class DLTKTestingModel implements ITestingModel {
 
 		private void connectTestRunner(ILaunch launch,
 				IScriptProject javaProject) {
-			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+			showTestRunnerViewPartInActivePage();
 			limitSessionHistory();
 			addTestRunSession(new TestRunSession(launch, javaProject,
 					new RemoteTestRunnerClient()));
@@ -162,7 +162,7 @@ public final class DLTKTestingModel implements ITestingModel {
 
 		private void connectTestRunner(ILaunch launch,
 				IScriptProject javaProject, int port) {
-			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+			showTestRunnerViewPartInActivePage();
 			limitSessionHistory();
 			addTestRunSession(new TestRunSession(launch, javaProject,
 					new SocketTestRunnerClient(port)));
@@ -183,39 +183,6 @@ public final class DLTKTestingModel implements ITestingModel {
 			}
 		}
 
-		private TestRunnerViewPart showTestRunnerViewPartInActivePage(
-				TestRunnerViewPart testRunner) {
-			IWorkbenchPart activePart = null;
-			IWorkbenchPage page = null;
-			try {
-				// TODO: have to force the creation of view part contents
-				// otherwise the UI will not be updated
-				if (testRunner != null && testRunner.isCreated())
-					return testRunner;
-				page = DLTKTestingPlugin.getActivePage();
-				if (page == null)
-					return null;
-				activePart = page.getActivePart();
-				// show the result view if it isn't shown yet
-				return (TestRunnerViewPart) page
-						.showView(TestRunnerViewPart.NAME);
-			} catch (PartInitException pie) {
-				DLTKTestingPlugin.log(pie);
-				return null;
-			} finally {
-				// restore focus stolen by the creation of the result view
-				if (page != null && activePart != null)
-					page.activate(activePart);
-			}
-		}
-
-		private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
-			IWorkbenchPage page = DLTKTestingPlugin.getActivePage();
-			if (page == null)
-				return null;
-			return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-		}
-
 		private Display getDisplay() {
 			// Shell shell= getActiveWorkbenchShell();
 			// if (shell != null) {
@@ -227,6 +194,42 @@ public final class DLTKTestingModel implements ITestingModel {
 			}
 			return display;
 		}
+	}
+
+	public TestRunnerViewPart showTestRunnerViewPartInActivePage() {
+		return showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+	}
+
+	private TestRunnerViewPart showTestRunnerViewPartInActivePage(
+			TestRunnerViewPart testRunner) {
+		IWorkbenchPart activePart = null;
+		IWorkbenchPage page = null;
+		try {
+			// TODO: have to force the creation of view part contents
+			// otherwise the UI will not be updated
+			if (testRunner != null && testRunner.isCreated())
+				return testRunner;
+			page = DLTKTestingPlugin.getActivePage();
+			if (page == null)
+				return null;
+			activePart = page.getActivePart();
+			// show the result view if it isn't shown yet
+			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+		} catch (PartInitException pie) {
+			DLTKTestingPlugin.log(pie);
+			return null;
+		} finally {
+			// restore focus stolen by the creation of the result view
+			if (page != null && activePart != null)
+				page.activate(activePart);
+		}
+	}
+
+	private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
+		IWorkbenchPage page = DLTKTestingPlugin.getActivePage();
+		if (page == null)
+			return null;
+		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
 	}
 
 	public static IScriptProject getScriptProject(
@@ -491,17 +494,17 @@ public final class DLTKTestingModel implements ITestingModel {
 	private static void throwExportError(File file, Exception e)
 			throws CoreException {
 		throw new CoreException(new org.eclipse.core.runtime.Status(
-				IStatus.ERROR, DLTKTestingPlugin.getPluginId(), Messages
-						.format(ModelMessages.JUnitModel_could_not_write, file
-								.getAbsolutePath()), e));
+				IStatus.ERROR, DLTKTestingPlugin.getPluginId(),
+				Messages.format(ModelMessages.JUnitModel_could_not_write,
+						file.getAbsolutePath()), e));
 	}
 
 	private static void throwImportError(File file, Exception e)
 			throws CoreException {
 		throw new CoreException(new org.eclipse.core.runtime.Status(
-				IStatus.ERROR, DLTKTestingPlugin.getPluginId(), Messages
-						.format(ModelMessages.JUnitModel_could_not_read, file
-								.getAbsolutePath()), e));
+				IStatus.ERROR, DLTKTestingPlugin.getPluginId(),
+				Messages.format(ModelMessages.JUnitModel_could_not_read,
+						file.getAbsolutePath()), e));
 	}
 
 	/**

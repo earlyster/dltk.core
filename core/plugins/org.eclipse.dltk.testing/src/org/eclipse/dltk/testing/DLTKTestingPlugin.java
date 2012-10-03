@@ -32,6 +32,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -278,5 +279,9 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 
 	public static ITestRunSession getTestRunSession(ILaunch launch) {
 		return getModel().getTestRunSession(launch);
+	}
+
+	public static IViewPart showTestRunnerViewPartInActivePage() {
+		return getDefault().fTestingModel.showTestRunnerViewPartInActivePage();
 	}
 }
