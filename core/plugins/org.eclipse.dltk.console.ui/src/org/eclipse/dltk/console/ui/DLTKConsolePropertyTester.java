@@ -24,32 +24,35 @@ public class DLTKConsolePropertyTester extends PropertyTester {
 			if (receiver instanceof ScriptConsole) {
 				return true;
 			} else if (receiver instanceof TextConsole) {
-				TextConsole textConsole = (TextConsole) receiver;
-				Object obj = textConsole
+				final TextConsole textConsole = (TextConsole) receiver;
+				final Object process = textConsole
 						.getAttribute(IDebugUIConstants.ATTR_CONSOLE_PROCESS);
-				if (obj != null && obj instanceof IProcess) {
-					IProcess process = (IProcess) obj;
-					ILaunch launch = process.getLaunch();
-					ILaunchConfiguration configuration = launch
-							.getLaunchConfiguration();
-					try {
-						String nature = configuration
-								.getAttribute(
-										ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE,
-										(String) null);
-						if (nature != null) {
-							if (DLTKLanguageManager.getLanguageToolkit(nature) != null) {
-								return true;
-							}
-						}
-					} catch (CoreException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					}
+				if (process != null && process instanceof IProcess) {
+					final String nature = getProcessNature((IProcess) process);
+					return nature != null
+							&& DLTKLanguageManager.getLanguageToolkit(nature) != null;
 				}
 			}
 		}
 		return false;
 	}
+
+	private static String getProcessNature(IProcess process) {
+		final ILaunch launch = process.getLaunch();
+		final ILaunchConfiguration configuration = launch
+				.getLaunchConfiguration();
+		if (configuration != null) {
+			try {
+				return configuration.getAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE,
+						(String) null);
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
 }
