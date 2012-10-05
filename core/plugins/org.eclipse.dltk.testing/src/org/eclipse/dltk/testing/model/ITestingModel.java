@@ -20,9 +20,12 @@ import org.eclipse.dltk.internal.testing.model.TestRunSession;
 public interface ITestingModel {
 
 	/**
-	 * @return
+	 * @return a list of active {@link TestRunSession}s. The list is a copy of
+	 *         the internal data structure and modifications do not affect the
+	 *         global list of active sessions. The list is sorted by age,
+	 *         youngest first.
 	 */
-	List getTestRunSessions();
+	List<TestRunSession> getTestRunSessions();
 
 	/**
 	 * @param launch
@@ -31,12 +34,26 @@ public interface ITestingModel {
 	ITestRunSession getTestRunSession(ILaunch launch);
 
 	/**
-	 * @param session
+	 * Adds the given {@link TestRunSession} and notifies all registered
+	 * {@link ITestRunSessionListener}s.
+	 * <p>
+	 * <b>To be called in the UI thread only!</b>
+	 * </p>
+	 * 
+	 * @param testRunSession
+	 *            the session to add
 	 */
 	void addTestRunSession(TestRunSession session);
 
 	/**
-	 * @param next
+	 * Removes the given {@link TestRunSession} and notifies all registered
+	 * {@link ITestRunSessionListener}s.
+	 * <p>
+	 * <b>To be called in the UI thread only!</b>
+	 * </p>
+	 * 
+	 * @param testRunSession
+	 *            the session to remove
 	 */
 	void removeTestRunSession(TestRunSession session);
 

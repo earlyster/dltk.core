@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -177,8 +176,7 @@ public final class DLTKTestingModel implements ITestingModel {
 			int toDelete = fTestRunSessions.size() - maxCount;
 			while (toDelete > 0) {
 				toDelete--;
-				TestRunSession session = (TestRunSession) fTestRunSessions
-						.removeLast();
+				TestRunSession session = fTestRunSessions.removeLast();
 				notifyTestRunSessionRemoved(session);
 			}
 		}
@@ -251,7 +249,7 @@ public final class DLTKTestingModel implements ITestingModel {
 	/**
 	 * Active test run sessions, youngest first.
 	 */
-	private final LinkedList/* <TestRunSession> */fTestRunSessions = new LinkedList();
+	private final LinkedList<TestRunSession> fTestRunSessions = new LinkedList<TestRunSession>();
 	private final DLTKTestingLaunchListener fLaunchListener = new DLTKTestingLaunchListener();
 
 	private boolean started = false;
@@ -341,23 +339,15 @@ public final class DLTKTestingModel implements ITestingModel {
 	 *         global list of active sessions. The list is sorted by age,
 	 *         youngest first.
 	 */
-	public List getTestRunSessions() {
-		return new ArrayList(fTestRunSessions);
+	public List<TestRunSession> getTestRunSessions() {
+		return new ArrayList<TestRunSession>(fTestRunSessions);
 	}
 
 	public ITestRunSession getTestRunSession(ILaunch launch) {
-		final String inputLaunchKey = launch
-				.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY);
-		if (inputLaunchKey != null) {
-			for (Iterator it = fTestRunSessions.iterator(); it.hasNext();) {
-				final TestRunSession session = (TestRunSession) it.next();
-				final ILaunch sessionLaunch = session.getLaunch();
-				if (sessionLaunch != null
-						&& inputLaunchKey
-								.equals(sessionLaunch
-										.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY))) {
-					return session;
-				}
+		for (final TestRunSession session : fTestRunSessions) {
+			final ILaunch sessionLaunch = session.getLaunch();
+			if (sessionLaunch != null && sessionLaunch.equals(launch)) {
+				return session;
 			}
 		}
 		return null;

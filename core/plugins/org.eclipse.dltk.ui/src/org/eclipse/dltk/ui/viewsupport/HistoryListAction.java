@@ -1,7 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
+ *          (report 36180: Callers/Callees view)
+ *******************************************************************************/
 package org.eclipse.dltk.ui.viewsupport;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -29,7 +39,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-/*package*/ class HistoryListAction extends Action {
+/*package*/class HistoryListAction<E> extends Action {
 	
 	private class HistoryListDialog extends StatusDialog {
 		private static final int MAX_MAX_ENTRIES= 100;
@@ -37,7 +47,7 @@ import org.eclipse.swt.widgets.Control;
 		private StringDialogField fMaxEntriesField;
 		private int fMaxEntries;
 		
-		private Object fResult;
+		private E fResult;
 		
 		private HistoryListDialog() {
 			super(fHistory.getShell());
@@ -66,10 +76,10 @@ import org.eclipse.swt.widgets.Control;
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
 			
-			List historyEntries= fHistory.getHistoryEntries();
+			List<E> historyEntries = fHistory.getHistoryEntries();
 			fHistoryList.setElements(historyEntries);
 			
-			Object currentEntry= fHistory.getCurrentEntry();
+			E currentEntry = fHistory.getCurrentEntry();
 			ISelection sel;
 			if (currentEntry != null) {
 				sel= new StructuredSelection(currentEntry);
@@ -146,7 +156,7 @@ import org.eclipse.swt.widgets.Control;
 		}
 		
 		private void doSelectionChanged() {
-			List selected= fHistoryList.getSelectedElements();
+			List<E> selected = fHistoryList.getSelectedElements();
 			if (selected.size() >= 1) {
 				fResult= selected.get(0);
 			} else {
@@ -155,11 +165,11 @@ import org.eclipse.swt.widgets.Control;
 			fHistoryList.enableButton(0, selected.size() != 0);
 		}
 				
-		public Object getResult() {
+		public E getResult() {
 			return fResult;
 		}
 		
-		public List getRemaining() {
+		public List<E> getRemaining() {
 			return fHistoryList.getElements();
 		}
 		
@@ -178,36 +188,36 @@ import org.eclipse.swt.widgets.Control;
 	}
 	
 	private final class TestRunLabelProvider extends LabelProvider {
-		private final HashMap fImages= new HashMap();
+		private final HashMap<ImageDescriptor, Image> fImages = new HashMap<ImageDescriptor, Image>();
 
 		public String getText(Object element) {
-			return fHistory.getText(element);
+			return fHistory.getText((E) element);
 		}
 
 		public Image getImage(Object element) {
-			ImageDescriptor imageDescriptor= fHistory.getImageDescriptor(element);
+			ImageDescriptor imageDescriptor = fHistory
+					.getImageDescriptor((E) element);
 			return getCachedImage(imageDescriptor);
 		}
 
 		private Image getCachedImage(ImageDescriptor imageDescriptor) {
-			Object cached= fImages.get(imageDescriptor);
+			Image cached = fImages.get(imageDescriptor);
 			if (cached != null)
-				return (Image) cached;
+				return cached;
 			Image image= imageDescriptor.createImage(fHistory.getShell().getDisplay());
 			fImages.put(imageDescriptor, image);
 			return image;
 		}
 
 		public void dispose() {
-			for (Iterator iter= fImages.values().iterator(); iter.hasNext();) {
-				Image image= (Image) iter.next();
+			for (Image image : fImages.values()) {
 				image.dispose();
 			}
 			fImages.clear();
 		}
 	}
 	
-	private ViewHistory fHistory;
+	private ViewHistory<E> fHistory;
 	
 	public HistoryListAction(ViewHistory history) {
 		super(null, IAction.AS_RADIO_BUTTON);

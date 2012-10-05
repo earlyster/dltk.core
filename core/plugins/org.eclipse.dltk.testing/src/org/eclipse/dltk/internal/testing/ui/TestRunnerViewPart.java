@@ -350,7 +350,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 	protected boolean fPartIsVisible = false;
 
-	private class RunnerViewHistory extends ViewHistory {
+	private class RunnerViewHistory extends ViewHistory<TestRunSession> {
 
 		public void configureHistoryListAction(IAction action) {
 			action.setText(DLTKTestingMessages.TestRunnerViewPart_history);
@@ -379,22 +379,22 @@ public class TestRunnerViewPart extends ViewPart {
 			return fParent.getShell();
 		}
 
-		public List getHistoryEntries() {
+		public List<TestRunSession> getHistoryEntries() {
 			return DLTKTestingPlugin.getModel().getTestRunSessions();
 		}
 
-		public Object getCurrentEntry() {
+		public TestRunSession getCurrentEntry() {
 			return fTestRunSession;
 		}
 
-		public void setActiveEntry(Object entry) {
-			TestRunSession deactivatedSession = setActiveTestRunSession((TestRunSession) entry);
+		public void setActiveEntry(TestRunSession entry) {
+			TestRunSession deactivatedSession = setActiveTestRunSession(entry);
 			if (deactivatedSession != null)
 				deactivatedSession.swapOut();
 		}
 
-		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
-			setActiveTestRunSession((TestRunSession) activeEntry);
+		public void setHistoryEntries(List<TestRunSession> remainingEntries, TestRunSession activeEntry) {
+			setActiveTestRunSession(activeEntry);
 
 			List testRunSessions = DLTKTestingPlugin.getModel()
 					.getTestRunSessions();
@@ -409,8 +409,7 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		}
 
-		public ImageDescriptor getImageDescriptor(Object element) {
-			TestRunSession session = (TestRunSession) element;
+		public ImageDescriptor getImageDescriptor(TestRunSession session) {
 			if (session.isStopped())
 				return fSuiteIconDescriptor;
 
@@ -428,8 +427,7 @@ public class TestRunnerViewPart extends ViewPart {
 				return fSuiteIconDescriptor;
 		}
 
-		public String getText(Object element) {
-			TestRunSession session = (TestRunSession) element;
+		public String getText(TestRunSession session) {
 			if (session.getStartTime() == 0) {
 				return session.getTestRunName();
 			} else {
@@ -761,9 +759,9 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void run() {
-			List testRunSessions = getRunningSessions();
-			Object first = testRunSessions.isEmpty() ? null : testRunSessions
-					.get(0);
+			List<TestRunSession> testRunSessions = getRunningSessions();
+			TestRunSession first = testRunSessions.isEmpty() ? null
+					: testRunSessions.get(0);
 			fViewHistory.setHistoryEntries(testRunSessions, first);
 		}
 

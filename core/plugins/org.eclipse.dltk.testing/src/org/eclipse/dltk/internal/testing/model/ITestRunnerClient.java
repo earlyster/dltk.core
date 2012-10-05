@@ -14,7 +14,7 @@ package org.eclipse.dltk.internal.testing.model;
 public interface ITestRunnerClient {
 
 	/**
-	 * @return
+	 * Answers if this client is still running.
 	 */
 	boolean isRunning();
 
@@ -24,7 +24,9 @@ public interface ITestRunnerClient {
 	void stopTest();
 
 	/**
-	 * 
+	 * Advises this client to stop waiting for additional events after the test
+	 * run was completed. Is called by the {@link TestRunSession} when the
+	 * corresponding ILaunch is terminated.
 	 */
 	void stopWaiting();
 

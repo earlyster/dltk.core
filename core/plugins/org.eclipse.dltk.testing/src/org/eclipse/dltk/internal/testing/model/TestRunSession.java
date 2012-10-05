@@ -89,17 +89,17 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	/**
 	 * Map from testId to testElement.
 	 */
-	private HashMap/*<String, TestElement>*/ fIdToTest;
+	private Map<String, TestElement> fIdToTest;
 	
 	/**
 	 * test categories
 	 */
-	private Map fCategoryMap;
+	private Map<String, TestCategoryElement> fCategoryMap;
 
 	/**
 	 * The TestSuites for which additional children are expected. 
 	 */
-	private List/*<IncompleteTestSuite>*/ fIncompleteTestSuites;
+	private List<IncompleteTestSuite> fIncompleteTestSuites;
 	
 	/**
 	 * Suite for unrooted test case elements, or <code>null</code>.
@@ -152,8 +152,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		categoryEngines = null;
 		
 		fTestRoot= new TestRoot(this);
-		fIdToTest= new HashMap();
-		fCategoryMap = new HashMap();
+		fIdToTest = new HashMap<String, TestElement>();
+		fCategoryMap = new HashMap<String, TestCategoryElement>();
 		
 		fTestRunnerClient= null;
 
@@ -184,8 +184,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		}
 		
 		fTestRoot= new TestRoot(this);
-		fIdToTest= new HashMap();
-		fCategoryMap = new HashMap();
+		fIdToTest = new HashMap<String, TestElement>();
+		fCategoryMap = new HashMap<String, TestCategoryElement>();
 		
 		fTestRunnerClient= runnerClient;
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() } );
@@ -227,8 +227,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		fTestRoot= new TestRoot(this);
 		fTestResult= null;
-		fIdToTest= new HashMap();
-		fCategoryMap = new HashMap();
+		fIdToTest = new HashMap<String, TestElement>();
+		fCategoryMap = new HashMap<String, TestCategoryElement>();
 	}
 
 	/*
@@ -412,8 +412,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			fTestResult= fTestRoot.getTestResult(true);
 			fTestRoot= null;
 			fTestRunnerClient= null;
-			fIdToTest= new HashMap();
-			fCategoryMap = new HashMap();
+			fIdToTest = new HashMap<String, TestElement>();
+			fCategoryMap = new HashMap<String, TestCategoryElement>();
 			fIncompleteTestSuites= null;
 			fUnrootedSuite= null;
 			
@@ -545,7 +545,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	}
 	
 	public TestElement getTestElement(String id) {
-		return (TestElement) fIdToTest.get(id);
+		return fIdToTest.get(id);
 	}
 
 	private TestCategoryElement selectCategory(String id, String testName,
@@ -555,7 +555,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 				final TestCategoryDescriptor descriptor = categoryEngines[i]
 						.getCategory(id, testName, isSuite);
 				if (descriptor != null) {
-					TestCategoryElement categoryElement = (TestCategoryElement) fCategoryMap
+					TestCategoryElement categoryElement = fCategoryMap
 							.get(descriptor.getId());
 					if (categoryElement == null) {
 						categoryElement = new TestCategoryElement(fTestRoot,
@@ -595,7 +595,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			return createTestElement(category, id, testName, isSuite, testCount);
 		} else {
 			int suiteIndex= fIncompleteTestSuites.size() - 1;
-			IncompleteTestSuite openSuite= (IncompleteTestSuite) fIncompleteTestSuites.get(suiteIndex);
+			IncompleteTestSuite openSuite= fIncompleteTestSuites.get(suiteIndex);
 			openSuite.fOutstandingChildren--;
 			if (openSuite.fOutstandingChildren <= 0)
 				fIncompleteTestSuites.remove(suiteIndex);
@@ -654,7 +654,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	private class TestSessionNotifier implements ITestRunListener2 {
 		
 		public void testRunStarted(int testCount) {
-			fIncompleteTestSuites= new ArrayList();
+			fIncompleteTestSuites= new ArrayList<IncompleteTestSuite>();
 			
 			fStartedCount= 0;
 			fIgnoredCount= 0;
@@ -888,13 +888,12 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	}
 	
 	public ITestElement[] getFailedTestElements(ITestElementPredicate predicate) {
-		List failures = new ArrayList();
+		List<ITestElement> failures = new ArrayList<ITestElement>();
 		addFailures(failures, getTestRoot(), predicate);
-		return (TestElement[]) failures
-				.toArray(new TestElement[failures.size()]);
+		return failures.toArray(new TestElement[failures.size()]);
 	}
 
-	private void addFailures(List failures, ITestElement testElement,
+	private void addFailures(List<ITestElement> failures, ITestElement testElement,
 			ITestElementPredicate predicate) {
 		Result testResult = testElement.getTestResult(true);
 		if ((testResult == Result.ERROR || testResult == Result.FAILURE)
