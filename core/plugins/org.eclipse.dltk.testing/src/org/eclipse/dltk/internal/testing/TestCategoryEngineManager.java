@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.dltk.annotations.Nullable;
 import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.util.NumberUtils;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
@@ -25,7 +26,8 @@ import org.eclipse.dltk.testing.ITestCategoryEngine;
 import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.utils.NatureExtensionManager;
 
-public class TestCategoryEngineManager extends NatureExtensionManager {
+public class TestCategoryEngineManager extends
+		NatureExtensionManager<TestCategoryEngineManager.Descriptor> {
 
 	private static final String EXTENSION_POINT = DLTKTestingPlugin.PLUGIN_ID
 			+ ".categoryEngine"; //$NON-NLS-1$
@@ -34,7 +36,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 		return "testingEngineId"; //$NON-NLS-1$
 	}
 
-	private static class Descriptor {
+	static class Descriptor {
 
 		final IConfigurationElement element;
 		final int priority;
@@ -62,7 +64,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 		return new Descriptor(confElement, priority);
 	}
 
-	private final Comparator descriptorComparator = new Comparator() {
+	private final Comparator<Object> descriptorComparator = new Comparator<Object>() {
 
 		public int compare(Object o1, Object o2) {
 			Descriptor descriptor1 = (Descriptor) o1;
@@ -72,7 +74,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 
 	};
 
-	protected void initializeDescriptors(List descriptors) {
+	protected void initializeDescriptors(List<Object> descriptors) {
 		Collections.sort(descriptors, descriptorComparator);
 	}
 
@@ -81,7 +83,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 		return descriptor;
 	}
 
-	protected Object[] createEmptyResult() {
+	protected Descriptor[] createEmptyResult() {
 		return new Descriptor[0];
 	}
 
@@ -101,17 +103,19 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 	 * @param runnerUI
 	 * @return
 	 */
+	@Nullable
 	public static ITestCategoryEngine[] getCategoryEngines(
 			ITestRunnerUI runnerUI) {
 		if (runnerUI instanceof NullTestRunnerUI) {
 			return null;
 		}
-		final Descriptor[] descriptors = (Descriptor[]) getInstance()
-				.getInstances(runnerUI.getTestingEngine().getId());
+		final Descriptor[] descriptors = getInstance().getInstances(
+				runnerUI.getTestingEngine().getId());
 		if (descriptors == null) {
 			return null;
 		}
-		final List result = new ArrayList(descriptors.length);
+		final List<ITestCategoryEngine> result = new ArrayList<ITestCategoryEngine>(
+				descriptors.length);
 		for (int i = 0; i < descriptors.length; ++i) {
 			final Descriptor descriptor = descriptors[i];
 			ITestCategoryEngine categoryEngine;
@@ -130,8 +134,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 		if (result.isEmpty()) {
 			return null;
 		} else {
-			return (ITestCategoryEngine[]) result
-					.toArray(new ITestCategoryEngine[result.size()]);
+			return result.toArray(new ITestCategoryEngine[result.size()]);
 		}
 	}
 }
