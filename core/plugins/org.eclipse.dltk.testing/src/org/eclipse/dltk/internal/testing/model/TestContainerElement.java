@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.dltk.internal.testing.model;
 
 import java.util.ArrayList;
@@ -20,9 +19,9 @@ import org.eclipse.dltk.testing.model.ITestElementContainer;
 public abstract class TestContainerElement extends TestElement implements
 		ITestElementContainer {
 
-	private List/* <TestElement> */fChildren;
+	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
-	
+
 	public TestContainerElement(TestContainerElement parent, String id,
 			String testName) {
 		this(parent, id, testName, 8);
@@ -31,7 +30,7 @@ public abstract class TestContainerElement extends TestElement implements
 	public TestContainerElement(TestContainerElement parent, String id,
 			String testName, int childrenCount) {
 		super(parent, id, testName);
-		fChildren = new ArrayList(childrenCount);
+		fChildren = new ArrayList<TestElement>(childrenCount);
 	}
 
 	/*
@@ -56,8 +55,7 @@ public abstract class TestContainerElement extends TestElement implements
 	 * @see org.eclipse.jdt.junit.model.ITestSuiteElement#getChildren()
 	 */
 	public ITestElement[] getChildren() {
-		return (ITestElement[]) fChildren.toArray(new ITestElement[fChildren
-				.size()]);
+		return fChildren.toArray(new ITestElement[fChildren.size()]);
 	}
 
 	public void addChild(TestElement child) {
@@ -76,8 +74,8 @@ public abstract class TestContainerElement extends TestElement implements
 	}
 
 	private Status getCumulatedStatus() {
-		TestElement[] children = (TestElement[]) fChildren
-				.toArray(new TestElement[fChildren.size()]);
+		TestElement[] children = fChildren.toArray(new TestElement[fChildren
+				.size()]);
 		// copy list to avoid concurreny problems
 		if (children.length == 0)
 			return getSuiteStatus();
@@ -106,7 +104,7 @@ public abstract class TestContainerElement extends TestElement implements
 			internalSetChildrenStatus(childStatus);
 			return;
 		}
-		TestElement lastChild = (TestElement) fChildren.get(childCount - 1);
+		TestElement lastChild = fChildren.get(childCount - 1);
 		if (child == lastChild) {
 			if (childStatus.isDone()) {
 				// all children done, collect cumulative status
@@ -153,7 +151,8 @@ public abstract class TestContainerElement extends TestElement implements
 		if (index > 0) {
 			className = className.substring(index + 1);
 		}
-		return className + ": " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return className
+				+ ": " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 }

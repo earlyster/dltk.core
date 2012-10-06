@@ -72,7 +72,7 @@ public final class DLTKTestingModel implements ITestingModel {
 		 * a TestRunner once to a launch. Once a test runner is connected, it is
 		 * removed from the set.
 		 */
-		private final HashSet fTrackedLaunches = new HashSet(20);
+		private final HashSet<ILaunch> fTrackedLaunches = new HashSet<ILaunch>(20);
 
 		protected void initialize(ILaunchManager launchManager) {
 			fTrackedLaunches.clear();

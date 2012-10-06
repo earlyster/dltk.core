@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.dltk.internal.testing.model;
 
 import java.util.Stack;
@@ -36,7 +35,7 @@ public class TestRunHandler extends DefaultHandler {
 	private TestRunSession fTestRunSession;
 	private TestContainerElement fTestSuite;
 	private TestCaseElement fTestCase;
-	private Stack/*<Boolean>*/ fNotRun= new Stack();
+	private Stack<Boolean> fNotRun= new Stack<Boolean>();
 
 	private StringBuffer fFailureBuffer;
 	private boolean fInExpected;
