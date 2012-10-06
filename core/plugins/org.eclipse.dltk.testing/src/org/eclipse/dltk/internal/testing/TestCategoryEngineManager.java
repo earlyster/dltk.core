@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.dltk.annotations.Nullable;
 import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.util.NumberUtils;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
@@ -103,7 +102,6 @@ public class TestCategoryEngineManager extends
 	 * @param runnerUI
 	 * @return
 	 */
-	@Nullable
 	public static ITestCategoryEngine[] getCategoryEngines(
 			ITestRunnerUI runnerUI) {
 		if (runnerUI instanceof NullTestRunnerUI) {
