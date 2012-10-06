@@ -26,6 +26,21 @@ public class ValidationMultiStatus implements IValidationStatus {
 		return children;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (ValidationStatus status : children) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append("; ");
+			}
+			sb.append(status);
+		}
+		return sb.toString();
+	}
+
 	public static IValidationStatus of(Collection<ValidationStatus> children) {
 		if (children == null || children.isEmpty()) {
 			return null;
