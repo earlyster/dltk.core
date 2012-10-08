@@ -12,6 +12,9 @@ package org.eclipse.dltk.internal.testing.model;
 
 import org.eclipse.dltk.testing.MessageIds;
 
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ */
 public interface ITestRunListener2 {
 
 	/**

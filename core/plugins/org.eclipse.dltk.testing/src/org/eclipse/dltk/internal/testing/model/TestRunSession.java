@@ -188,7 +188,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		fCategoryMap = new HashMap<String, TestCategoryElement>();
 		
 		fTestRunnerClient= runnerClient;
-		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() } );
+		fTestRunnerClient.startListening(new TestSessionNotifier());
 		
 		final ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(new ILaunchesListener2() {

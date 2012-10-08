@@ -40,6 +40,6 @@ public interface ITestRunnerClient {
 	/**
 	 * @param listeners
 	 */
-	void startListening(ITestRunListener2[] listeners);
+	void startListening(ITestRunListener2 listener);
 
 }

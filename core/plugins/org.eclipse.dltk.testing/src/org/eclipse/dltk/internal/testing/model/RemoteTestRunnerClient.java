@@ -246,8 +246,8 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 	 * @param listeners 
 	 * @param port 
 	 */
-	public synchronized void startListening(ITestRunListener2[] listeners) {
-		fListeners= listeners;
+	public synchronized void startListening(ITestRunListener2 listener) {
+		fListeners = new ITestRunListener2[] { listener };
 //		fPort= port;
 //		ServerConnection connection= new ServerConnection(port);
 //		connection.start();

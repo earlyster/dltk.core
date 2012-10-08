@@ -299,8 +299,8 @@ public class SocketTestRunnerClient implements ITestRunnerClient {
 	 * 
 	 * @param listeners
 	 */
-	public synchronized void startListening(ITestRunListener2[] listeners) {
-		fListeners = listeners;
+	public synchronized void startListening(ITestRunListener2 listener) {
+		fListeners = new ITestRunListener2[] { listener };
 		ServerConnection connection = new ServerConnection(fPort);
 		connection.start();
 	}
