@@ -583,6 +583,11 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		int testCount= Integer.parseInt(treeEntry.substring(index2 + 1));
 		
+		return addTreeEntry(id, testName, isSuite, testCount);
+	}
+
+	private TestElement addTreeEntry(String id, String testName,
+			boolean isSuite, int testCount) {
 		if (isSuite && testCount > 1) {
 			adjustTotalCount(fStartedCount + testCount);
 		}
@@ -711,6 +716,17 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 				((ITestSessionListener) listeners[i]).testAdded(testElement);
 			}
 		}
+
+		public void testTreeEntry(String testId, String testName,
+				boolean isSuite, int testCount) {
+			TestElement testElement = addTreeEntry(testId, testName, isSuite,
+					testCount);
+
+			Object[] listeners = fSessionListeners.getListeners();
+			for (int i = 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).testAdded(testElement);
+			}
+		}
 	
 		private TestElement createUnrootedTestElement(String testId, String testName) {
 			TestSuiteElement unrootedSuite= getUnrootedSuite();
@@ -808,13 +824,14 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		}
 
 		private String nullifyEmpty(String string) {
-			int length= string.length();
-			if (length == 0)
-				return null;
-			else if (string.charAt(length - 1) == '\n')
-				return string.substring(0, length - 1);
-			else
-				return string;
+			if (string != null) {
+				int length = string.length();
+				if (length == 0)
+					return null;
+				else if (string.charAt(length - 1) == '\n')
+					return string.substring(0, length - 1);
+			}
+			return string;
 		}
 	
 		public void testReran(String testId, String testClass, String testName, int status, String trace) {

@@ -71,8 +71,9 @@ public interface ITestRunListener2 {
 	public void testRunTerminated();
 		
 	/**
-	 * Information about a member of the test suite that is about to be run. The
-	 * format of the string is:
+	 * Information about a member of the test suite that is about to be run.
+	 * This method is part of the JUnit runner socket protocol. 
+	 * The format of the string is:
 	 * 
 	 * <pre>
 	 *  testId,testName,isSuite,testcount
@@ -92,6 +93,21 @@ public interface ITestRunListener2 {
 	public void testTreeEntry(String description);
 
 	/**
+	 * Information about a member of the test suite that is about to be run
+	 * (this method is not related to the JUnit runner socket protocol).
+	 * 
+	 * @param testId
+	 *            a unique id for the test
+	 * @param testName
+	 *            the name of the test
+	 * @param isSuite
+	 *            if the test is suite
+	 * @param testCount
+	 *            an integer indicating the number of tests
+	 */
+	public void testTreeEntry(String testId, String testName, boolean isSuite, int testCount);
+
+	/**
 	 * An individual test has failed with a stack trace.
 	 * 
 	 * @param status the outcome of the test; one of
@@ -100,8 +116,8 @@ public interface ITestRunListener2 {
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that failed
 	 * @param trace the stack trace
-	 * @param expected the expected value
-	 * @param actual the actual value
+	 * @param expected the expected value or empty string/null if none
+	 * @param actual the actual value or empty string/null if none
 	 */
 	public void testFailed(int status, String testId, String testName, String trace, String expected, String actual, int failedCode);
 
@@ -117,9 +133,9 @@ public interface ITestRunListener2 {
 	 * @param trace the stack trace in the case of abnormal termination, or the
 	 *        empty string if none
 	 * @param expected the expected value in case of abnormal termination, or
-	 *        the empty string if none
+	 *        the empty string/null if none
 	 * @param actual the actual value in case of abnormal termination, or the
-	 *        empty string if none
+	 *        empty string/null if none
 	 */
 	public void testReran(String testId, String testClass, String testName, int status, String trace, String expected, String actual);
 	
