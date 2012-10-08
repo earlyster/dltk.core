@@ -127,6 +127,10 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	 */
 	volatile int fTotalCount;
 	/**
+	 * Number of created test cases.
+	 */
+	volatile int fCreatedTestCaseCount;
+	/**
 	 * Start time in millis.
 	 */
 	volatile long fStartTime;
@@ -588,9 +592,6 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 
 	private TestElement addTreeEntry(String id, String testName,
 			boolean isSuite, int testCount) {
-		if (isSuite && testCount > 1) {
-			adjustTotalCount(fStartedCount + testCount);
-		}
 		if (fIncompleteTestSuites.isEmpty()) {
 			TestContainerElement category = selectCategory(id, testName,
 					isSuite);
@@ -617,6 +618,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 				fIncompleteTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
 		} else {
 			testElement= new TestCaseElement(parent, id, testName);
+			++fCreatedTestCaseCount;
+			adjustTotalCount(fCreatedTestCaseCount);
 		}
 		fIdToTest.put(id, testElement);
 		return testElement;
@@ -666,6 +669,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			fFailureCount= 0;
 			fErrorCount= 0;
 			fTotalCount= testCount;
+			fCreatedTestCaseCount = 0;
 			
 			fStartTime= System.currentTimeMillis();
 			fIsRunning= true;
@@ -765,7 +769,6 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			setStatus(testCaseElement, Status.RUNNING);
 			
 			fStartedCount++;
-			adjustTotalCount(fStartedCount);
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
