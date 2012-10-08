@@ -14,6 +14,9 @@ package org.eclipse.dltk.testing;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.testing.model.ITestElement;
 
+/**
+ * This interface is obtained as adapter from {@link ITestRunnerUI}.
+ */
 public interface ITestElementResolver extends IAdaptable {
 
 	TestElementResolution resolveElement(ITestElement element);

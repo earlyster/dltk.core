@@ -6,6 +6,10 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 
+/**
+ * @see ITestElementResolver
+ */
+@Deprecated
 public interface ITestingElementResolver {
 	ISourceRange resolveRange(IScriptProject project,
 			ILaunchConfiguration config, String name, ISourceModule module, IModelElement element, String method);
