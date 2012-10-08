@@ -31,6 +31,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
@@ -1142,6 +1143,14 @@ public class TestRunnerViewPart extends ViewPart {
 				.getLaunchConfiguration();
 		if (launchConfiguration == null)
 			return;
+		try {
+			if (launchConfiguration.getAttribute(
+					IDebugUIConstants.ATTR_PRIVATE, false)) {
+				return;
+			}
+		} catch (CoreException e) {
+			DLTKTestingPlugin.log(e);
+		}
 
 		ILaunchConfiguration configuration = prepareLaunchConfigForRelaunch(launchConfiguration);
 		relaunch(configuration, launch.getLaunchMode());
